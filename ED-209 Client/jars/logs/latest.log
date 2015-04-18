@@ -1,0 +1,8 @@
+[19:29:44] [main/INFO]: Setting user: Player100
+[19:29:44] [main/INFO]: (Session ID is token:0:Player100)
+[19:29:45] [Client thread/INFO]: LWJGL Version: 2.9.1
+[19:29:45] [Client thread/INFO]: Reloading ResourceManager: Default
+[19:29:46] [Sound Library Loader/INFO]: Sound engine started
+[19:29:46] [Client thread/INFO]: Created: 512x256 textures/blocks-atlas
+[19:29:47] [Client thread/INFO]: Created: 256x256 textures/items-atlas
+[19:29:50] [Client thread/INFO]: Stopping!

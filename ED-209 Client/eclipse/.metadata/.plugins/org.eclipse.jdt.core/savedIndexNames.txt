@@ -1,0 +1,1 @@
+INDEX VERSION 1.126+/Users/Rowan/Documents/Programming/GitHub/ED-209/ED-209 Client/eclipse/.metadata/.plugins/org.eclipse.jdt.core
