@@ -2,7 +2,12 @@ package net.minecraft.client.resources;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import java.awt.image.BufferedImage;
 import java.io.Closeable;
 import java.io.File;
@@ -11,9 +16,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreenWorking;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -24,11 +30,15 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.HttpUtil;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ResourcePackRepository
 {
-    protected static final FileFilter resourcePackFilter = new FileFilter()
+    private static final Logger field_177320_c = LogManager.getLogger();
+    private static final FileFilter resourcePackFilter = new FileFilter()
     {
         private static final String __OBFID = "CL_00001088";
         public boolean accept(File p_accept_1_)
@@ -43,7 +53,8 @@ public class ResourcePackRepository
     private final File field_148534_e;
     public final IMetadataSerializer rprMetadataSerializer;
     private IResourcePack field_148532_f;
-    private boolean field_148533_g;
+    private final ReentrantLock field_177321_h = new ReentrantLock();
+    private ListenableFuture field_177322_i;
     private List repositoryEntriesAll = Lists.newArrayList();
     private List repositoryEntries = Lists.newArrayList();
     private static final String __OBFID = "CL_00001087";
@@ -78,10 +89,9 @@ public class ResourcePackRepository
 
     private void fixDirResourcepacks()
     {
-        if (!this.dirResourcepacks.isDirectory())
+        if (!this.dirResourcepacks.isDirectory() && (!this.dirResourcepacks.delete() || !this.dirResourcepacks.mkdirs()))
         {
-            this.dirResourcepacks.delete();
-            this.dirResourcepacks.mkdirs();
+            field_177320_c.debug("Unable to create resourcepack folder: " + this.dirResourcepacks);
         }
     }
 
@@ -156,56 +166,129 @@ public class ResourcePackRepository
         return this.dirResourcepacks;
     }
 
-    public void func_148526_a(String p_148526_1_)
+    public ListenableFuture func_180601_a(String p_180601_1_, String p_180601_2_)
     {
-        String var2 = p_148526_1_.substring(p_148526_1_.lastIndexOf("/") + 1);
+        String var3;
 
-        if (var2.contains("?"))
+        if (p_180601_2_.matches("^[a-f0-9]{40}$"))
         {
-            var2 = var2.substring(0, var2.indexOf("?"));
+            var3 = p_180601_2_;
         }
-
-        if (var2.endsWith(".zip"))
+        else
         {
-            File var3 = new File(this.field_148534_e, var2.replaceAll("\\W", ""));
-            this.func_148529_f();
-            this.func_148528_a(p_148526_1_, var3);
-        }
-    }
+            var3 = p_180601_1_.substring(p_180601_1_.lastIndexOf("/") + 1);
 
-    private void func_148528_a(String p_148528_1_, File p_148528_2_)
-    {
-        HashMap var3 = Maps.newHashMap();
-        GuiScreenWorking var4 = new GuiScreenWorking();
-        var3.put("X-Minecraft-Username", Minecraft.getMinecraft().getSession().getUsername());
-        var3.put("X-Minecraft-UUID", Minecraft.getMinecraft().getSession().getPlayerID());
-        var3.put("X-Minecraft-Version", "1.7.10");
-        this.field_148533_g = true;
-        Minecraft.getMinecraft().displayGuiScreen(var4);
-        HttpUtil.func_151223_a(p_148528_2_, p_148528_1_, new HttpUtil.DownloadListener()
-        {
-            private static final String __OBFID = "CL_00001089";
-            public void func_148522_a(File p_148522_1_)
+            if (var3.contains("?"))
             {
-                if (ResourcePackRepository.this.field_148533_g)
+                var3 = var3.substring(0, var3.indexOf("?"));
+            }
+
+            if (!var3.endsWith(".zip"))
+            {
+                return Futures.immediateFailedFuture(new IllegalArgumentException("Invalid filename; must end in .zip"));
+            }
+
+            var3 = "legacy_" + var3.replaceAll("\\W", "");
+        }
+
+        final File var4 = new File(this.field_148534_e, var3);
+        this.field_177321_h.lock();
+        ListenableFuture var9;
+
+        try
+        {
+            this.func_148529_f();
+
+            if (var4.exists() && p_180601_2_.length() == 40)
+            {
+                try
                 {
-                    ResourcePackRepository.this.field_148533_g = false;
-                    ResourcePackRepository.this.field_148532_f = new FileResourcePack(p_148522_1_);
-                    Minecraft.getMinecraft().scheduleResourcesRefresh();
+                    String var5 = Hashing.sha1().hashBytes(Files.toByteArray(var4)).toString();
+
+                    if (var5.equals(p_180601_2_))
+                    {
+                        ListenableFuture var16 = this.func_177319_a(var4);
+                        return var16;
+                    }
+
+                    field_177320_c.warn("File " + var4 + " had wrong hash (expected " + p_180601_2_ + ", found " + var5 + "). Deleting it.");
+                    FileUtils.deleteQuietly(var4);
+                }
+                catch (IOException var13)
+                {
+                    field_177320_c.warn("File " + var4 + " couldn\'t be hashed. Deleting it.", var13);
+                    FileUtils.deleteQuietly(var4);
                 }
             }
-        }, var3, 52428800, var4, Minecraft.getMinecraft().getProxy());
+
+            final GuiScreenWorking var15 = new GuiScreenWorking();
+            Map var6 = Minecraft.func_175596_ai();
+            final Minecraft var7 = Minecraft.getMinecraft();
+            Futures.getUnchecked(var7.addScheduledTask(new Runnable()
+            {
+                private static final String __OBFID = "CL_00001089";
+                public void run()
+                {
+                    var7.displayGuiScreen(var15);
+                }
+            }));
+            final SettableFuture var8 = SettableFuture.create();
+            this.field_177322_i = HttpUtil.func_180192_a(var4, p_180601_1_, var6, 52428800, var15, var7.getProxy());
+            Futures.addCallback(this.field_177322_i, new FutureCallback()
+            {
+                private static final String __OBFID = "CL_00002394";
+                public void onSuccess(Object p_onSuccess_1_)
+                {
+                    ResourcePackRepository.this.func_177319_a(var4);
+                    var8.set((Object)null);
+                }
+                public void onFailure(Throwable p_onFailure_1_)
+                {
+                    var8.setException(p_onFailure_1_);
+                }
+            });
+            var9 = this.field_177322_i;
+        }
+        finally
+        {
+            this.field_177321_h.unlock();
+        }
+
+        return var9;
     }
 
-    public IResourcePack func_148530_e()
+    public ListenableFuture func_177319_a(File p_177319_1_)
+    {
+        this.field_148532_f = new FileResourcePack(p_177319_1_);
+        return Minecraft.getMinecraft().func_175603_A();
+    }
+
+    /**
+     * Getter for the IResourcePack instance associated with this ResourcePackRepository
+     */
+    public IResourcePack getResourcePackInstance()
     {
         return this.field_148532_f;
     }
 
     public void func_148529_f()
     {
-        this.field_148532_f = null;
-        this.field_148533_g = false;
+        this.field_177321_h.lock();
+
+        try
+        {
+            if (this.field_177322_i != null)
+            {
+                this.field_177322_i.cancel(true);
+            }
+
+            this.field_177322_i = null;
+            this.field_148532_f = null;
+        }
+        finally
+        {
+            this.field_177321_h.unlock();
+        }
     }
 
     public class Entry

@@ -1,10 +1,10 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.util.MathHelper;
-import org.lwjgl.opengl.GL11;
 
 public class ModelOcelot extends ModelBase
 {
@@ -80,14 +80,14 @@ public class ModelOcelot extends ModelBase
         if (this.isChild)
         {
             float var8 = 2.0F;
-            GL11.glPushMatrix();
-            GL11.glScalef(1.5F / var8, 1.5F / var8, 1.5F / var8);
-            GL11.glTranslatef(0.0F, 10.0F * p_78088_7_, 4.0F * p_78088_7_);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(1.5F / var8, 1.5F / var8, 1.5F / var8);
+            GlStateManager.translate(0.0F, 10.0F * p_78088_7_, 4.0F * p_78088_7_);
             this.ocelotHead.render(p_78088_7_);
-            GL11.glPopMatrix();
-            GL11.glPushMatrix();
-            GL11.glScalef(1.0F / var8, 1.0F / var8, 1.0F / var8);
-            GL11.glTranslatef(0.0F, 24.0F * p_78088_7_, 0.0F);
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(1.0F / var8, 1.0F / var8, 1.0F / var8);
+            GlStateManager.translate(0.0F, 24.0F * p_78088_7_, 0.0F);
             this.ocelotBody.render(p_78088_7_);
             this.ocelotBackLeftLeg.render(p_78088_7_);
             this.ocelotBackRightLeg.render(p_78088_7_);
@@ -95,7 +95,7 @@ public class ModelOcelot extends ModelBase
             this.ocelotFrontRightLeg.render(p_78088_7_);
             this.ocelotTail.render(p_78088_7_);
             this.ocelotTail2.render(p_78088_7_);
-            GL11.glPopMatrix();
+            GlStateManager.popMatrix();
         }
         else
         {

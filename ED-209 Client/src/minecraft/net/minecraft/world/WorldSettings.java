@@ -25,22 +25,22 @@ public final class WorldSettings
 
     /** True if the Bonus Chest is enabled. */
     private boolean bonusChestEnabled;
-    private String field_82751_h;
+    private String worldName;
     private static final String __OBFID = "CL_00000147";
 
-    public WorldSettings(long p_i1957_1_, WorldSettings.GameType p_i1957_3_, boolean p_i1957_4_, boolean p_i1957_5_, WorldType p_i1957_6_)
+    public WorldSettings(long seedIn, WorldSettings.GameType gameType, boolean enableMapFeatures, boolean hardcoreMode, WorldType worldTypeIn)
     {
-        this.field_82751_h = "";
-        this.seed = p_i1957_1_;
-        this.theGameType = p_i1957_3_;
-        this.mapFeaturesEnabled = p_i1957_4_;
-        this.hardcoreEnabled = p_i1957_5_;
-        this.terrainType = p_i1957_6_;
+        this.worldName = "";
+        this.seed = seedIn;
+        this.theGameType = gameType;
+        this.mapFeaturesEnabled = enableMapFeatures;
+        this.hardcoreEnabled = hardcoreMode;
+        this.terrainType = worldTypeIn;
     }
 
-    public WorldSettings(WorldInfo p_i1958_1_)
+    public WorldSettings(WorldInfo info)
     {
-        this(p_i1958_1_.getSeed(), p_i1958_1_.getGameType(), p_i1958_1_.isMapFeaturesEnabled(), p_i1958_1_.isHardcoreModeEnabled(), p_i1958_1_.getTerrainType());
+        this(info.getSeed(), info.getGameType(), info.isMapFeaturesEnabled(), info.isHardcoreModeEnabled(), info.getTerrainType());
     }
 
     /**
@@ -61,9 +61,9 @@ public final class WorldSettings
         return this;
     }
 
-    public WorldSettings func_82750_a(String p_82750_1_)
+    public WorldSettings setWorldName(String name)
     {
-        this.field_82751_h = p_82750_1_;
+        this.worldName = name;
         return this;
     }
 
@@ -123,14 +123,14 @@ public final class WorldSettings
     /**
      * Gets the GameType by ID
      */
-    public static WorldSettings.GameType getGameTypeById(int p_77161_0_)
+    public static WorldSettings.GameType getGameTypeById(int id)
     {
-        return WorldSettings.GameType.getByID(p_77161_0_);
+        return WorldSettings.GameType.getByID(id);
     }
 
-    public String func_82749_j()
+    public String getWorldName()
     {
-        return this.field_82751_h;
+        return this.worldName;
     }
 
     public static enum GameType
@@ -138,17 +138,18 @@ public final class WorldSettings
         NOT_SET("NOT_SET", 0, -1, ""),
         SURVIVAL("SURVIVAL", 1, 0, "survival"),
         CREATIVE("CREATIVE", 2, 1, "creative"),
-        ADVENTURE("ADVENTURE", 3, 2, "adventure");
+        ADVENTURE("ADVENTURE", 3, 2, "adventure"),
+        SPECTATOR("SPECTATOR", 4, 3, "spectator");
         int id;
         String name;
 
-        private static final WorldSettings.GameType[] $VALUES = new WorldSettings.GameType[]{NOT_SET, SURVIVAL, CREATIVE, ADVENTURE};
+        private static final WorldSettings.GameType[] $VALUES = new WorldSettings.GameType[]{NOT_SET, SURVIVAL, CREATIVE, ADVENTURE, SPECTATOR};
         private static final String __OBFID = "CL_00000148";
 
-        private GameType(String p_i1956_1_, int p_i1956_2_, int p_i1956_3_, String p_i1956_4_)
+        private GameType(String p_i1956_1_, int p_i1956_2_, int typeId, String nameIn)
         {
-            this.id = p_i1956_3_;
-            this.name = p_i1956_4_;
+            this.id = typeId;
+            this.name = nameIn;
         }
 
         public int getID()
@@ -161,28 +162,35 @@ public final class WorldSettings
             return this.name;
         }
 
-        public void configurePlayerCapabilities(PlayerCapabilities p_77147_1_)
+        public void configurePlayerCapabilities(PlayerCapabilities capabilities)
         {
             if (this == CREATIVE)
             {
-                p_77147_1_.allowFlying = true;
-                p_77147_1_.isCreativeMode = true;
-                p_77147_1_.disableDamage = true;
+                capabilities.allowFlying = true;
+                capabilities.isCreativeMode = true;
+                capabilities.disableDamage = true;
+            }
+            else if (this == SPECTATOR)
+            {
+                capabilities.allowFlying = true;
+                capabilities.isCreativeMode = false;
+                capabilities.disableDamage = true;
+                capabilities.isFlying = true;
             }
             else
             {
-                p_77147_1_.allowFlying = false;
-                p_77147_1_.isCreativeMode = false;
-                p_77147_1_.disableDamage = false;
-                p_77147_1_.isFlying = false;
+                capabilities.allowFlying = false;
+                capabilities.isCreativeMode = false;
+                capabilities.disableDamage = false;
+                capabilities.isFlying = false;
             }
 
-            p_77147_1_.allowEdit = !this.isAdventure();
+            capabilities.allowEdit = !this.isAdventure();
         }
 
         public boolean isAdventure()
         {
-            return this == ADVENTURE;
+            return this == ADVENTURE || this == SPECTATOR;
         }
 
         public boolean isCreative()
@@ -195,7 +203,7 @@ public final class WorldSettings
             return this == SURVIVAL || this == ADVENTURE;
         }
 
-        public static WorldSettings.GameType getByID(int p_77146_0_)
+        public static WorldSettings.GameType getByID(int idIn)
         {
             WorldSettings.GameType[] var1 = values();
             int var2 = var1.length;
@@ -204,7 +212,7 @@ public final class WorldSettings
             {
                 WorldSettings.GameType var4 = var1[var3];
 
-                if (var4.id == p_77146_0_)
+                if (var4.id == idIn)
                 {
                     return var4;
                 }

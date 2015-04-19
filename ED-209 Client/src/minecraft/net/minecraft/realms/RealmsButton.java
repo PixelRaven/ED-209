@@ -3,9 +3,11 @@ package net.minecraft.realms;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiButtonRealmsProxy;
+import net.minecraft.util.ResourceLocation;
 
 public class RealmsButton
 {
+    protected static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private GuiButtonRealmsProxy proxy;
     private static final String __OBFID = "CL_00001890";
 
@@ -26,37 +28,37 @@ public class RealmsButton
 
     public int id()
     {
-        return this.proxy.func_154314_d();
+        return this.proxy.getId();
     }
 
     public boolean active()
     {
-        return this.proxy.func_154315_e();
+        return this.proxy.getEnabled();
     }
 
     public void active(boolean p_active_1_)
     {
-        this.proxy.func_154313_b(p_active_1_);
+        this.proxy.setEnabled(p_active_1_);
     }
 
     public void msg(String p_msg_1_)
     {
-        this.proxy.func_154311_a(p_msg_1_);
+        this.proxy.setText(p_msg_1_);
     }
 
     public int getWidth()
     {
-        return this.proxy.func_146117_b();
+        return this.proxy.getButtonWidth();
     }
 
     public int getHeight()
     {
-        return this.proxy.func_154310_c();
+        return this.proxy.func_175232_g();
     }
 
     public int y()
     {
-        return this.proxy.func_154316_f();
+        return this.proxy.getPositionY();
     }
 
     public void render(int p_render_1_, int p_render_2_)

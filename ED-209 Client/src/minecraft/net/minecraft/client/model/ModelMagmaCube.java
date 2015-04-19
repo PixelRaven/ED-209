@@ -6,13 +6,13 @@ import net.minecraft.entity.monster.EntityMagmaCube;
 
 public class ModelMagmaCube extends ModelBase
 {
-    ModelRenderer[] field_78109_a = new ModelRenderer[8];
-    ModelRenderer field_78108_b;
+    ModelRenderer[] segments = new ModelRenderer[8];
+    ModelRenderer core;
     private static final String __OBFID = "CL_00000842";
 
     public ModelMagmaCube()
     {
-        for (int var1 = 0; var1 < this.field_78109_a.length; ++var1)
+        for (int var1 = 0; var1 < this.segments.length; ++var1)
         {
             byte var2 = 0;
             int var3 = var1;
@@ -28,12 +28,12 @@ public class ModelMagmaCube extends ModelBase
                 var3 = 19;
             }
 
-            this.field_78109_a[var1] = new ModelRenderer(this, var2, var3);
-            this.field_78109_a[var1].addBox(-4.0F, (float)(16 + var1), -4.0F, 8, 1, 8);
+            this.segments[var1] = new ModelRenderer(this, var2, var3);
+            this.segments[var1].addBox(-4.0F, (float)(16 + var1), -4.0F, 8, 1, 8);
         }
 
-        this.field_78108_b = new ModelRenderer(this, 0, 16);
-        this.field_78108_b.addBox(-2.0F, 18.0F, -2.0F, 4, 4, 4);
+        this.core = new ModelRenderer(this, 0, 16);
+        this.core.addBox(-2.0F, 18.0F, -2.0F, 4, 4, 4);
     }
 
     /**
@@ -50,9 +50,9 @@ public class ModelMagmaCube extends ModelBase
             var6 = 0.0F;
         }
 
-        for (int var7 = 0; var7 < this.field_78109_a.length; ++var7)
+        for (int var7 = 0; var7 < this.segments.length; ++var7)
         {
-            this.field_78109_a[var7].rotationPointY = (float)(-(4 - var7)) * var6 * 1.7F;
+            this.segments[var7].rotationPointY = (float)(-(4 - var7)) * var6 * 1.7F;
         }
     }
 
@@ -62,11 +62,11 @@ public class ModelMagmaCube extends ModelBase
     public void render(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_)
     {
         this.setRotationAngles(p_78088_2_, p_78088_3_, p_78088_4_, p_78088_5_, p_78088_6_, p_78088_7_, p_78088_1_);
-        this.field_78108_b.render(p_78088_7_);
+        this.core.render(p_78088_7_);
 
-        for (int var8 = 0; var8 < this.field_78109_a.length; ++var8)
+        for (int var8 = 0; var8 < this.segments.length; ++var8)
         {
-            this.field_78109_a[var8].render(p_78088_7_);
+            this.segments[var8].render(p_78088_7_);
         }
     }
 }

@@ -1,6 +1,7 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.pathfinding.PathNavigateGround;
 
 public class EntityAISwimming extends EntityAIBase
 {
@@ -11,7 +12,7 @@ public class EntityAISwimming extends EntityAIBase
     {
         this.theEntity = p_i1624_1_;
         this.setMutexBits(4);
-        p_i1624_1_.getNavigator().setCanSwim(true);
+        ((PathNavigateGround)p_i1624_1_.getNavigator()).func_179693_d(true);
     }
 
     /**
@@ -19,7 +20,7 @@ public class EntityAISwimming extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        return this.theEntity.isInWater() || this.theEntity.handleLavaMovement();
+        return this.theEntity.isInWater() || this.theEntity.func_180799_ab();
     }
 
     /**

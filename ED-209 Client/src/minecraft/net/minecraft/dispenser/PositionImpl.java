@@ -7,11 +7,11 @@ public class PositionImpl implements IPosition
     protected final double z;
     private static final String __OBFID = "CL_00001208";
 
-    public PositionImpl(double p_i1368_1_, double p_i1368_3_, double p_i1368_5_)
+    public PositionImpl(double xCoord, double yCoord, double zCoord)
     {
-        this.x = p_i1368_1_;
-        this.y = p_i1368_3_;
-        this.z = p_i1368_5_;
+        this.x = xCoord;
+        this.y = yCoord;
+        this.z = zCoord;
     }
 
     public double getX()

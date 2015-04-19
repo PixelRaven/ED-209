@@ -25,12 +25,12 @@ public class EntityDragonPart extends Entity
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_) {}
+    protected void readEntityFromNBT(NBTTagCompound tagCompund) {}
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_) {}
+    protected void writeEntityToNBT(NBTTagCompound tagCompound) {}
 
     /**
      * Returns true if other Entities should be prevented from moving through this Entity.
@@ -43,16 +43,16 @@ public class EntityDragonPart extends Entity
     /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource p_70097_1_, float p_70097_2_)
+    public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        return this.isEntityInvulnerable() ? false : this.entityDragonObj.attackEntityFromPart(this, p_70097_1_, p_70097_2_);
+        return this.func_180431_b(source) ? false : this.entityDragonObj.attackEntityFromPart(this, source, amount);
     }
 
     /**
      * Returns true if Entity argument is equal to this Entity
      */
-    public boolean isEntityEqual(Entity p_70028_1_)
+    public boolean isEntityEqual(Entity entityIn)
     {
-        return this == p_70028_1_ || this.entityDragonObj == p_70028_1_;
+        return this == entityIn || this.entityDragonObj == entityIn;
     }
 }

@@ -4,44 +4,43 @@ import org.apache.commons.lang3.Validate;
 
 public class ResourceLocation
 {
-    private final String resourceDomain;
-    private final String resourcePath;
+    protected final String resourceDomain;
+    protected final String resourcePath;
     private static final String __OBFID = "CL_00001082";
 
-    public ResourceLocation(String p_i1292_1_, String p_i1292_2_)
+    protected ResourceLocation(int p_i45928_1_, String ... p_i45928_2_)
     {
-        Validate.notNull(p_i1292_2_);
-
-        if (p_i1292_1_ != null && p_i1292_1_.length() != 0)
-        {
-            this.resourceDomain = p_i1292_1_;
-        }
-        else
-        {
-            this.resourceDomain = "minecraft";
-        }
-
-        this.resourcePath = p_i1292_2_;
+        this.resourceDomain = org.apache.commons.lang3.StringUtils.isEmpty(p_i45928_2_[0]) ? "minecraft" : p_i45928_2_[0].toLowerCase();
+        this.resourcePath = p_i45928_2_[1];
+        Validate.notNull(this.resourcePath);
     }
 
     public ResourceLocation(String p_i1293_1_)
     {
-        String var2 = "minecraft";
-        String var3 = p_i1293_1_;
-        int var4 = p_i1293_1_.indexOf(58);
+        this(0, func_177516_a(p_i1293_1_));
+    }
 
-        if (var4 >= 0)
+    public ResourceLocation(String p_i1292_1_, String p_i1292_2_)
+    {
+        this(0, new String[] {p_i1292_1_, p_i1292_2_});
+    }
+
+    protected static String[] func_177516_a(String p_177516_0_)
+    {
+        String[] var1 = new String[] {null, p_177516_0_};
+        int var2 = p_177516_0_.indexOf(58);
+
+        if (var2 >= 0)
         {
-            var3 = p_i1293_1_.substring(var4 + 1, p_i1293_1_.length());
+            var1[1] = p_177516_0_.substring(var2 + 1, p_177516_0_.length());
 
-            if (var4 > 1)
+            if (var2 > 1)
             {
-                var2 = p_i1293_1_.substring(0, var4);
+                var1[0] = p_177516_0_.substring(0, var2);
             }
         }
 
-        this.resourceDomain = var2.toLowerCase();
-        this.resourcePath = var3;
+        return var1;
     }
 
     public String getResourcePath()
@@ -56,7 +55,7 @@ public class ResourceLocation
 
     public String toString()
     {
-        return this.resourceDomain + ":" + this.resourcePath;
+        return this.resourceDomain + ':' + this.resourcePath;
     }
 
     public boolean equals(Object p_equals_1_)

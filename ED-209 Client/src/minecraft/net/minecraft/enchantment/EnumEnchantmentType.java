@@ -9,17 +9,17 @@ import net.minecraft.item.ItemTool;
 
 public enum EnumEnchantmentType
 {
-    all,
-    armor,
-    armor_feet,
-    armor_legs,
-    armor_torso,
-    armor_head,
-    weapon,
-    digger,
-    fishing_rod,
-    breakable,
-    bow;
+    ALL,
+    ARMOR,
+    ARMOR_FEET,
+    ARMOR_LEGS,
+    ARMOR_TORSO,
+    ARMOR_HEAD,
+    WEAPON,
+    DIGGER,
+    FISHING_ROD,
+    BREAKABLE,
+    BOW;
     private static final String __OBFID = "CL_00000106";
 
     /**
@@ -27,29 +27,29 @@ public enum EnumEnchantmentType
      */
     public boolean canEnchantItem(Item p_77557_1_)
     {
-        if (this == all)
+        if (this == ALL)
         {
             return true;
         }
-        else if (this == breakable && p_77557_1_.isDamageable())
+        else if (this == BREAKABLE && p_77557_1_.isDamageable())
         {
             return true;
         }
         else if (p_77557_1_ instanceof ItemArmor)
         {
-            if (this == armor)
+            if (this == ARMOR)
             {
                 return true;
             }
             else
             {
                 ItemArmor var2 = (ItemArmor)p_77557_1_;
-                return var2.armorType == 0 ? this == armor_head : (var2.armorType == 2 ? this == armor_legs : (var2.armorType == 1 ? this == armor_torso : (var2.armorType == 3 ? this == armor_feet : false)));
+                return var2.armorType == 0 ? this == ARMOR_HEAD : (var2.armorType == 2 ? this == ARMOR_LEGS : (var2.armorType == 1 ? this == ARMOR_TORSO : (var2.armorType == 3 ? this == ARMOR_FEET : false)));
             }
         }
         else
         {
-            return p_77557_1_ instanceof ItemSword ? this == weapon : (p_77557_1_ instanceof ItemTool ? this == digger : (p_77557_1_ instanceof ItemBow ? this == bow : (p_77557_1_ instanceof ItemFishingRod ? this == fishing_rod : false)));
+            return p_77557_1_ instanceof ItemSword ? this == WEAPON : (p_77557_1_ instanceof ItemTool ? this == DIGGER : (p_77557_1_ instanceof ItemBow ? this == BOW : (p_77557_1_ instanceof ItemFishingRod ? this == FISHING_ROD : false)));
         }
     }
 }

@@ -2,74 +2,72 @@ package net.minecraft.block;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.world.World;
 
 public class BlockStainedGlass extends BlockBreakable
 {
-    private static final IIcon[] field_149998_a = new IIcon[16];
+    public static final PropertyEnum field_176547_a = PropertyEnum.create("color", EnumDyeColor.class);
     private static final String __OBFID = "CL_00000312";
 
     public BlockStainedGlass(Material p_i45427_1_)
     {
-        super("glass", p_i45427_1_, false);
+        super(p_i45427_1_, false);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176547_a, EnumDyeColor.WHITE));
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Get the damage value that this Block should drop
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public int damageDropped(IBlockState state)
     {
-        return field_149998_a[p_149691_2_ % field_149998_a.length];
+        return ((EnumDyeColor)state.getValue(field_176547_a)).func_176765_a();
     }
 
     /**
-     * Determines the damage on the item the block drops. Used in cloth and wood.
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public int damageDropped(int p_149692_1_)
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
     {
-        return p_149692_1_;
-    }
+        EnumDyeColor[] var4 = EnumDyeColor.values();
+        int var5 = var4.length;
 
-    public static int func_149997_b(int p_149997_0_)
-    {
-        return ~p_149997_0_ & 15;
-    }
-
-    public void getSubBlocks(Item p_149666_1_, CreativeTabs p_149666_2_, List p_149666_3_)
-    {
-        for (int var4 = 0; var4 < field_149998_a.length; ++var4)
+        for (int var6 = 0; var6 < var5; ++var6)
         {
-            p_149666_3_.add(new ItemStack(p_149666_1_, 1, var4));
+            EnumDyeColor var7 = var4[var6];
+            list.add(new ItemStack(itemIn, 1, var7.func_176765_a()));
         }
     }
 
     /**
-     * Returns which pass should this block be rendered on. 0 for solids and 1 for alpha
+     * Get the MapColor for this Block and the given BlockState
      */
-    public int getRenderBlockPass()
+    public MapColor getMapColor(IBlockState state)
     {
-        return 1;
+        return ((EnumDyeColor)state.getValue(field_176547_a)).func_176768_e();
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    public EnumWorldBlockLayer getBlockLayer()
     {
-        for (int var2 = 0; var2 < field_149998_a.length; ++var2)
-        {
-            field_149998_a[var2] = p_149651_1_.registerIcon(this.getTextureName() + "_" + ItemDye.field_150921_b[func_149997_b(var2)]);
-        }
+        return EnumWorldBlockLayer.TRANSLUCENT;
     }
 
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }
@@ -79,8 +77,45 @@ public class BlockStainedGlass extends BlockBreakable
         return true;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(field_176547_a, EnumDyeColor.func_176764_b(meta));
+    }
+
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            BlockBeacon.func_176450_d(worldIn, pos);
+        }
+    }
+
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (!worldIn.isRemote)
+        {
+            BlockBeacon.func_176450_d(worldIn, pos);
+        }
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((EnumDyeColor)state.getValue(field_176547_a)).func_176765_a();
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {field_176547_a});
     }
 }

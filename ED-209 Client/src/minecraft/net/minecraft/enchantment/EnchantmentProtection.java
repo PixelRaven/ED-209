@@ -3,6 +3,7 @@ package net.minecraft.enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentProtection extends Enchantment
 {
@@ -32,14 +33,14 @@ public class EnchantmentProtection extends Enchantment
     public final int protectionType;
     private static final String __OBFID = "CL_00000121";
 
-    public EnchantmentProtection(int p_i1936_1_, int p_i1936_2_, int p_i1936_3_)
+    public EnchantmentProtection(int p_i45765_1_, ResourceLocation p_i45765_2_, int p_i45765_3_, int p_i45765_4_)
     {
-        super(p_i1936_1_, p_i1936_2_, EnumEnchantmentType.armor);
-        this.protectionType = p_i1936_3_;
+        super(p_i45765_1_, p_i45765_2_, p_i45765_3_, EnumEnchantmentType.ARMOR);
+        this.protectionType = p_i45765_4_;
 
-        if (p_i1936_3_ == 2)
+        if (p_i45765_4_ == 2)
         {
-            this.type = EnumEnchantmentType.armor_feet;
+            this.type = EnumEnchantmentType.ARMOR_FEET;
         }
     }
 
@@ -112,7 +113,7 @@ public class EnchantmentProtection extends Enchantment
      */
     public static int getFireTimeForEntity(Entity p_92093_0_, int p_92093_1_)
     {
-        int var2 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantment.fireProtection.effectId, p_92093_0_.getLastActiveItems());
+        int var2 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantment.fireProtection.effectId, p_92093_0_.getInventory());
 
         if (var2 > 0)
         {
@@ -124,7 +125,7 @@ public class EnchantmentProtection extends Enchantment
 
     public static double func_92092_a(Entity p_92092_0_, double p_92092_1_)
     {
-        int var3 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantment.blastProtection.effectId, p_92092_0_.getLastActiveItems());
+        int var3 = EnchantmentHelper.getMaxEnchantmentLevel(Enchantment.blastProtection.effectId, p_92092_0_.getInventory());
 
         if (var3 > 0)
         {

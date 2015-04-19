@@ -21,9 +21,12 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CryptManager
 {
+    private static final Logger field_180198_a = LogManager.getLogger();
     private static final String __OBFID = "CL_00001483";
 
     /**
@@ -43,7 +46,10 @@ public class CryptManager
         }
     }
 
-    public static KeyPair createNewKeyPair()
+    /**
+     * Generates RSA KeyPair
+     */
+    public static KeyPair generateKeyPair()
     {
         try
         {
@@ -54,7 +60,7 @@ public class CryptManager
         catch (NoSuchAlgorithmException var1)
         {
             var1.printStackTrace();
-            System.err.println("Key pair generation failed!");
+            field_180198_a.error("Key pair generation failed!");
             return null;
         }
     }
@@ -121,7 +127,7 @@ public class CryptManager
             ;
         }
 
-        System.err.println("Public key reconstitute failed!");
+        field_180198_a.error("Public key reconstitute failed!");
         return null;
     }
 
@@ -167,7 +173,7 @@ public class CryptManager
             var5.printStackTrace();
         }
 
-        System.err.println("Cipher data failed!");
+        field_180198_a.error("Cipher data failed!");
         return null;
     }
 
@@ -195,7 +201,7 @@ public class CryptManager
             var6.printStackTrace();
         }
 
-        System.err.println("Cipher creation failed!");
+        field_180198_a.error("Cipher creation failed!");
         return null;
     }
 

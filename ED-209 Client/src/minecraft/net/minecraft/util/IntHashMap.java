@@ -1,8 +1,5 @@
 package net.minecraft.util;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class IntHashMap
 {
     /** An array of HashEntries representing the heads of hash slot lists */
@@ -16,12 +13,6 @@ public class IntHashMap
 
     /** The scale factor used to determine when to grow the table */
     private final float growFactor = 0.75F;
-
-    /** A serial stamp used to mark changes */
-    private transient volatile int versionStamp;
-
-    /** The set of all the keys stored in this MCHash object */
-    private Set keySet = new HashSet();
     private static final String __OBFID = "CL_00001490";
 
     /**
@@ -60,7 +51,7 @@ public class IntHashMap
     }
 
     /**
-     * Return true if an object is associated with the given key
+     * Returns true if this hash table contains the specified item.
      */
     public boolean containsItem(int p_76037_1_)
     {
@@ -68,7 +59,7 @@ public class IntHashMap
     }
 
     /**
-     * Returns the key/object mapping for a given key as a MCHashEntry
+     * Returns the internal entry for a key
      */
     final IntHashMap.Entry lookupEntry(int p_76045_1_)
     {
@@ -90,7 +81,6 @@ public class IntHashMap
      */
     public void addKey(int p_76038_1_, Object p_76038_2_)
     {
-        this.keySet.add(Integer.valueOf(p_76038_1_));
         int var3 = computeHash(p_76038_1_);
         int var4 = getSlotIndex(var3, this.slots.length);
 
@@ -103,7 +93,6 @@ public class IntHashMap
             }
         }
 
-        ++this.versionStamp;
         this.insert(var3, p_76038_1_, p_76038_2_, var4);
     }
 
@@ -163,7 +152,6 @@ public class IntHashMap
      */
     public Object removeObject(int p_76049_1_)
     {
-        this.keySet.remove(Integer.valueOf(p_76049_1_));
         IntHashMap.Entry var2 = this.removeEntry(p_76049_1_);
         return var2 == null ? null : var2.valueEntry;
     }
@@ -185,7 +173,6 @@ public class IntHashMap
 
             if (var5.hashEntry == p_76036_1_)
             {
-                ++this.versionStamp;
                 --this.count;
 
                 if (var4 == var5)
@@ -211,7 +198,6 @@ public class IntHashMap
      */
     public void clearMap()
     {
-        ++this.versionStamp;
         IntHashMap.Entry[] var1 = this.slots;
 
         for (int var2 = 0; var2 < var1.length; ++var2)

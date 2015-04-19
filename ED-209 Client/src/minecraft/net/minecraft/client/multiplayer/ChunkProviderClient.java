@@ -1,13 +1,13 @@
 package net.minecraft.client.multiplayer;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -34,16 +34,16 @@ public class ChunkProviderClient implements IChunkProvider
      * This may have been intended to be an iterable version of all currently loaded chunks (MultiplayerChunkCache),
      * with identical contents to chunkMapping's values. However it is never actually added to.
      */
-    private List chunkListing = new ArrayList();
+    private List chunkListing = Lists.newArrayList();
 
     /** Reference to the World object. */
     private World worldObj;
     private static final String __OBFID = "CL_00000880";
 
-    public ChunkProviderClient(World p_i1184_1_)
+    public ChunkProviderClient(World worldIn)
     {
-        this.blankChunk = new EmptyChunk(p_i1184_1_, 0, 0);
-        this.worldObj = p_i1184_1_;
+        this.blankChunk = new EmptyChunk(worldIn, 0, 0);
+        this.worldObj = worldIn;
     }
 
     /**
@@ -79,7 +79,7 @@ public class ChunkProviderClient implements IChunkProvider
         Chunk var3 = new Chunk(this.worldObj, p_73158_1_, p_73158_2_);
         this.chunkMapping.add(ChunkCoordIntPair.chunkXZ2Int(p_73158_1_, p_73158_2_), var3);
         this.chunkListing.add(var3);
-        var3.isChunkLoaded = true;
+        var3.func_177417_c(true);
         return var3;
     }
 
@@ -143,6 +143,11 @@ public class ChunkProviderClient implements IChunkProvider
      */
     public void populate(IChunkProvider p_73153_1_, int p_73153_2_, int p_73153_3_) {}
 
+    public boolean func_177460_a(IChunkProvider p_177460_1_, Chunk p_177460_2_, int p_177460_3_, int p_177460_4_)
+    {
+        return false;
+    }
+
     /**
      * Converts the instance data to a readable string.
      */
@@ -151,15 +156,12 @@ public class ChunkProviderClient implements IChunkProvider
         return "MultiplayerChunkCache: " + this.chunkMapping.getNumHashElements() + ", " + this.chunkListing.size();
     }
 
-    /**
-     * Returns a list of creatures of the specified type that can spawn at the given location.
-     */
-    public List getPossibleCreatures(EnumCreatureType p_73155_1_, int p_73155_2_, int p_73155_3_, int p_73155_4_)
+    public List func_177458_a(EnumCreatureType p_177458_1_, BlockPos p_177458_2_)
     {
         return null;
     }
 
-    public ChunkPosition func_147416_a(World p_147416_1_, String p_147416_2_, int p_147416_3_, int p_147416_4_, int p_147416_5_)
+    public BlockPos func_180513_a(World worldIn, String p_180513_2_, BlockPos p_180513_3_)
     {
         return null;
     }
@@ -169,5 +171,10 @@ public class ChunkProviderClient implements IChunkProvider
         return this.chunkListing.size();
     }
 
-    public void recreateStructures(int p_82695_1_, int p_82695_2_) {}
+    public void func_180514_a(Chunk p_180514_1_, int p_180514_2_, int p_180514_3_) {}
+
+    public Chunk func_177459_a(BlockPos p_177459_1_)
+    {
+        return this.provideChunk(p_177459_1_.getX() >> 4, p_177459_1_.getZ() >> 4);
+    }
 }

@@ -2,16 +2,15 @@ package net.minecraft.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntityDispenser;
 
 public class ContainerDispenser extends Container
 {
-    private TileEntityDispenser tileEntityDispenser;
+    private IInventory field_178146_a;
     private static final String __OBFID = "CL_00001763";
 
-    public ContainerDispenser(IInventory p_i1825_1_, TileEntityDispenser p_i1825_2_)
+    public ContainerDispenser(IInventory p_i45799_1_, IInventory p_i45799_2_)
     {
-        this.tileEntityDispenser = p_i1825_2_;
+        this.field_178146_a = p_i45799_2_;
         int var3;
         int var4;
 
@@ -19,7 +18,7 @@ public class ContainerDispenser extends Container
         {
             for (var4 = 0; var4 < 3; ++var4)
             {
-                this.addSlotToContainer(new Slot(p_i1825_2_, var4 + var3 * 3, 62 + var4 * 18, 17 + var3 * 18));
+                this.addSlotToContainer(new Slot(p_i45799_2_, var4 + var3 * 3, 62 + var4 * 18, 17 + var3 * 18));
             }
         }
 
@@ -27,35 +26,35 @@ public class ContainerDispenser extends Container
         {
             for (var4 = 0; var4 < 9; ++var4)
             {
-                this.addSlotToContainer(new Slot(p_i1825_1_, var4 + var3 * 9 + 9, 8 + var4 * 18, 84 + var3 * 18));
+                this.addSlotToContainer(new Slot(p_i45799_1_, var4 + var3 * 9 + 9, 8 + var4 * 18, 84 + var3 * 18));
             }
         }
 
         for (var3 = 0; var3 < 9; ++var3)
         {
-            this.addSlotToContainer(new Slot(p_i1825_1_, var3, 8 + var3 * 18, 142));
+            this.addSlotToContainer(new Slot(p_i45799_1_, var3, 8 + var3 * 18, 142));
         }
     }
 
-    public boolean canInteractWith(EntityPlayer p_75145_1_)
+    public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.tileEntityDispenser.isUseableByPlayer(p_75145_1_);
+        return this.field_178146_a.isUseableByPlayer(playerIn);
     }
 
     /**
-     * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
+     * Take a stack from the specified inventory slot.
      */
-    public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_)
+    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack var3 = null;
-        Slot var4 = (Slot)this.inventorySlots.get(p_82846_2_);
+        Slot var4 = (Slot)this.inventorySlots.get(index);
 
         if (var4 != null && var4.getHasStack())
         {
             ItemStack var5 = var4.getStack();
             var3 = var5.copy();
 
-            if (p_82846_2_ < 9)
+            if (index < 9)
             {
                 if (!this.mergeItemStack(var5, 9, 45, true))
                 {
@@ -81,7 +80,7 @@ public class ContainerDispenser extends Container
                 return null;
             }
 
-            var4.onPickupFromSlot(p_82846_1_, var5);
+            var4.onPickupFromSlot(playerIn, var5);
         }
 
         return var3;

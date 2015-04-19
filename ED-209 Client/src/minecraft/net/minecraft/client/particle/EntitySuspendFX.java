@@ -1,16 +1,16 @@
 package net.minecraft.client.particle;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class EntitySuspendFX extends EntityFX
 {
     private static final String __OBFID = "CL_00000928";
 
-    public EntitySuspendFX(World p_i1231_1_, double p_i1231_2_, double p_i1231_4_, double p_i1231_6_, double p_i1231_8_, double p_i1231_10_, double p_i1231_12_)
+    protected EntitySuspendFX(World worldIn, double p_i1231_2_, double p_i1231_4_, double p_i1231_6_, double p_i1231_8_, double p_i1231_10_, double p_i1231_12_)
     {
-        super(p_i1231_1_, p_i1231_2_, p_i1231_4_ - 0.125D, p_i1231_6_, p_i1231_8_, p_i1231_10_, p_i1231_12_);
+        super(worldIn, p_i1231_2_, p_i1231_4_ - 0.125D, p_i1231_6_, p_i1231_8_, p_i1231_10_, p_i1231_12_);
         this.particleRed = 0.4F;
         this.particleGreen = 0.4F;
         this.particleBlue = 0.7F;
@@ -33,7 +33,7 @@ public class EntitySuspendFX extends EntityFX
         this.prevPosZ = this.posZ;
         this.moveEntity(this.motionX, this.motionY, this.motionZ);
 
-        if (this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() != Material.water)
+        if (this.worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() != Material.water)
         {
             this.setDead();
         }
@@ -41,6 +41,16 @@ public class EntitySuspendFX extends EntityFX
         if (this.particleMaxAge-- <= 0)
         {
             this.setDead();
+        }
+    }
+
+    public static class Factory implements IParticleFactory
+    {
+        private static final String __OBFID = "CL_00002579";
+
+        public EntityFX func_178902_a(int p_178902_1_, World worldIn, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int ... p_178902_15_)
+        {
+            return new EntitySuspendFX(worldIn, p_178902_3_, p_178902_5_, p_178902_7_, p_178902_9_, p_178902_11_, p_178902_13_);
         }
     }
 }

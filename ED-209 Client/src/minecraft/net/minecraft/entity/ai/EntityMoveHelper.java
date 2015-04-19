@@ -7,14 +7,14 @@ import net.minecraft.util.MathHelper;
 public class EntityMoveHelper
 {
     /** The EntityLiving that is being moved */
-    private EntityLiving entity;
-    private double posX;
-    private double posY;
-    private double posZ;
+    protected EntityLiving entity;
+    protected double posX;
+    protected double posY;
+    protected double posZ;
 
     /** The speed at which the entity should move */
-    private double speed;
-    private boolean update;
+    protected double speed;
+    protected boolean update;
     private static final String __OBFID = "CL_00001573";
 
     public EntityMoveHelper(EntityLiving p_i1614_1_)
@@ -54,7 +54,7 @@ public class EntityMoveHelper
         if (this.update)
         {
             this.update = false;
-            int var1 = MathHelper.floor_double(this.entity.boundingBox.minY + 0.5D);
+            int var1 = MathHelper.floor_double(this.entity.getEntityBoundingBox().minY + 0.5D);
             double var2 = this.posX - this.entity.posX;
             double var4 = this.posZ - this.entity.posZ;
             double var6 = this.posY - (double)var1;
@@ -77,7 +77,7 @@ public class EntityMoveHelper
     /**
      * Limits the given angle to a upper and lower limit.
      */
-    private float limitAngle(float p_75639_1_, float p_75639_2_, float p_75639_3_)
+    protected float limitAngle(float p_75639_1_, float p_75639_2_, float p_75639_3_)
     {
         float var4 = MathHelper.wrapAngleTo180_float(p_75639_2_ - p_75639_1_);
 
@@ -91,6 +91,32 @@ public class EntityMoveHelper
             var4 = -p_75639_3_;
         }
 
-        return p_75639_1_ + var4;
+        float var5 = p_75639_1_ + var4;
+
+        if (var5 < 0.0F)
+        {
+            var5 += 360.0F;
+        }
+        else if (var5 > 360.0F)
+        {
+            var5 -= 360.0F;
+        }
+
+        return var5;
+    }
+
+    public double func_179917_d()
+    {
+        return this.posX;
+    }
+
+    public double func_179919_e()
+    {
+        return this.posY;
+    }
+
+    public double func_179918_f()
+    {
+        return this.posZ;
     }
 }

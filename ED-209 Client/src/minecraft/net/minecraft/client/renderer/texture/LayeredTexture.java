@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
-import javax.imageio.ImageIO;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +25,7 @@ public class LayeredTexture extends AbstractTexture
 
     public void loadTexture(IResourceManager p_110551_1_) throws IOException
     {
-        this.func_147631_c();
+        this.deleteGlTexture();
         BufferedImage var2 = null;
 
         try
@@ -40,7 +39,7 @@ public class LayeredTexture extends AbstractTexture
                 if (var4 != null)
                 {
                     InputStream var5 = p_110551_1_.getResource(new ResourceLocation(var4)).getInputStream();
-                    BufferedImage var6 = ImageIO.read(var5);
+                    BufferedImage var6 = TextureUtil.func_177053_a(var5);
 
                     if (var2 == null)
                     {

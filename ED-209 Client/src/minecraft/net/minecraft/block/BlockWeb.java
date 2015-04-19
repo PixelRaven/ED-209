@@ -2,11 +2,14 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
 
 public class BlockWeb extends Block
@@ -15,13 +18,16 @@ public class BlockWeb extends Block
 
     public BlockWeb()
     {
-        super(Material.field_151569_G);
+        super(Material.web);
         this.setCreativeTab(CreativeTabs.tabDecorations);
     }
 
-    public void onEntityCollidedWithBlock(World p_149670_1_, int p_149670_2_, int p_149670_3_, int p_149670_4_, Entity p_149670_5_)
+    /**
+     * Called When an Entity Collided with the Block
+     */
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        p_149670_5_.setInWeb();
+        entityIn.setInWeb();
     }
 
     public boolean isOpaqueCube()
@@ -29,29 +35,22 @@ public class BlockWeb extends Block
         return false;
     }
 
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
         return null;
     }
 
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
-    {
-        return 1;
-    }
-
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.string;
     }
@@ -59,5 +58,10 @@ public class BlockWeb extends Block
     protected boolean canSilkHarvest()
     {
         return true;
+    }
+
+    public EnumWorldBlockLayer getBlockLayer()
+    {
+        return EnumWorldBlockLayer.CUTOUT;
     }
 }

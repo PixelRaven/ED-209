@@ -1,5 +1,6 @@
 package net.minecraft.client.gui.stream;
 
+import java.io.IOException;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiOptionButton;
 import net.minecraft.client.gui.GuiOptionSlider;
@@ -83,47 +84,47 @@ public class GuiStreamOptions extends GuiScreen
 
         this.buttonList.add(new GuiButton(200, this.width / 2 - 155, this.height / 6 + 168, 150, 20, I18n.format("gui.done", new Object[0])));
         GuiButton var6 = new GuiButton(201, this.width / 2 + 5, this.height / 6 + 168, 150, 20, I18n.format("options.stream.ingestSelection", new Object[0]));
-        var6.enabled = this.mc.func_152346_Z().func_152924_m() && this.mc.func_152346_Z().func_152925_v().length > 0 || this.mc.func_152346_Z().func_152908_z();
+        var6.enabled = this.mc.getTwitchStream().func_152924_m() && this.mc.getTwitchStream().func_152925_v().length > 0 || this.mc.getTwitchStream().func_152908_z();
         this.buttonList.add(var6);
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.enabled)
+        if (button.enabled)
         {
-            if (p_146284_1_.id < 100 && p_146284_1_ instanceof GuiOptionButton)
+            if (button.id < 100 && button instanceof GuiOptionButton)
             {
-                GameSettings.Options var2 = ((GuiOptionButton)p_146284_1_).func_146136_c();
+                GameSettings.Options var2 = ((GuiOptionButton)button).returnEnumOptions();
                 this.field_152318_h.setOptionValue(var2, 1);
-                p_146284_1_.displayString = this.field_152318_h.getKeyBinding(GameSettings.Options.getEnumOptions(p_146284_1_.id));
+                button.displayString = this.field_152318_h.getKeyBinding(GameSettings.Options.getEnumOptions(button.id));
 
-                if (this.mc.func_152346_Z().func_152934_n() && var2 != GameSettings.Options.STREAM_CHAT_ENABLED && var2 != GameSettings.Options.STREAM_CHAT_USER_FILTER)
+                if (this.mc.getTwitchStream().func_152934_n() && var2 != GameSettings.Options.STREAM_CHAT_ENABLED && var2 != GameSettings.Options.STREAM_CHAT_USER_FILTER)
                 {
                     this.field_152315_t = true;
                 }
             }
-            else if (p_146284_1_ instanceof GuiOptionSlider)
+            else if (button instanceof GuiOptionSlider)
             {
-                if (p_146284_1_.id == GameSettings.Options.STREAM_VOLUME_MIC.returnEnumOrdinal())
+                if (button.id == GameSettings.Options.STREAM_VOLUME_MIC.returnEnumOrdinal())
                 {
-                    this.mc.func_152346_Z().func_152915_s();
+                    this.mc.getTwitchStream().func_152915_s();
                 }
-                else if (p_146284_1_.id == GameSettings.Options.STREAM_VOLUME_SYSTEM.returnEnumOrdinal())
+                else if (button.id == GameSettings.Options.STREAM_VOLUME_SYSTEM.returnEnumOrdinal())
                 {
-                    this.mc.func_152346_Z().func_152915_s();
+                    this.mc.getTwitchStream().func_152915_s();
                 }
-                else if (this.mc.func_152346_Z().func_152934_n())
+                else if (this.mc.getTwitchStream().func_152934_n())
                 {
                     this.field_152315_t = true;
                 }
             }
 
-            if (p_146284_1_.id == 200)
+            if (button.id == 200)
             {
                 this.mc.gameSettings.saveOptions();
                 this.mc.displayGuiScreen(this.field_152317_g);
             }
-            else if (p_146284_1_.id == 201)
+            else if (button.id == 201)
             {
                 this.mc.gameSettings.saveOptions();
                 this.mc.displayGuiScreen(new GuiIngestServers(this));
@@ -132,9 +133,9 @@ public class GuiStreamOptions extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, this.field_152319_i, this.width / 2, 20, 16777215);
@@ -145,6 +146,6 @@ public class GuiStreamOptions extends GuiScreen
             this.drawCenteredString(this.fontRendererObj, EnumChatFormatting.RED + I18n.format("options.stream.changes", new Object[0]), this.width / 2, 20 + this.fontRendererObj.FONT_HEIGHT, 16777215);
         }
 
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

@@ -10,6 +10,7 @@ import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public class EntityAIMate extends EntityAIBase
@@ -90,7 +91,7 @@ public class EntityAIMate extends EntityAIBase
     private EntityAnimal getNearbyMate()
     {
         float var1 = 8.0F;
-        List var2 = this.theWorld.getEntitiesWithinAABB(this.theAnimal.getClass(), this.theAnimal.boundingBox.expand((double)var1, (double)var1, (double)var1));
+        List var2 = this.theWorld.getEntitiesWithinAABB(this.theAnimal.getClass(), this.theAnimal.getEntityBoundingBox().expand((double)var1, (double)var1, (double)var1));
         double var3 = Double.MAX_VALUE;
         EntityAnimal var5 = null;
         Iterator var6 = var2.iterator();
@@ -127,11 +128,11 @@ public class EntityAIMate extends EntityAIBase
 
             if (var2 != null)
             {
-                var2.triggerAchievement(StatList.field_151186_x);
+                var2.triggerAchievement(StatList.animalsBredStat);
 
                 if (this.theAnimal instanceof EntityCow)
                 {
-                    var2.triggerAchievement(AchievementList.field_150962_H);
+                    var2.triggerAchievement(AchievementList.breedCow);
                 }
             }
 
@@ -149,7 +150,7 @@ public class EntityAIMate extends EntityAIBase
                 double var5 = var3.nextGaussian() * 0.02D;
                 double var7 = var3.nextGaussian() * 0.02D;
                 double var9 = var3.nextGaussian() * 0.02D;
-                this.theWorld.spawnParticle("heart", this.theAnimal.posX + (double)(var3.nextFloat() * this.theAnimal.width * 2.0F) - (double)this.theAnimal.width, this.theAnimal.posY + 0.5D + (double)(var3.nextFloat() * this.theAnimal.height), this.theAnimal.posZ + (double)(var3.nextFloat() * this.theAnimal.width * 2.0F) - (double)this.theAnimal.width, var5, var7, var9);
+                this.theWorld.spawnParticle(EnumParticleTypes.HEART, this.theAnimal.posX + (double)(var3.nextFloat() * this.theAnimal.width * 2.0F) - (double)this.theAnimal.width, this.theAnimal.posY + 0.5D + (double)(var3.nextFloat() * this.theAnimal.height), this.theAnimal.posZ + (double)(var3.nextFloat() * this.theAnimal.width * 2.0F) - (double)this.theAnimal.width, var5, var7, var9, new int[0]);
             }
 
             if (this.theWorld.getGameRules().getGameRuleBooleanValue("doMobLoot"))

@@ -1,5 +1,6 @@
 package net.minecraft.world.chunk.storage;
 
+import com.google.common.collect.Lists;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -14,7 +15,6 @@ import net.minecraft.client.AnvilConverterException;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IProgressUpdate;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
@@ -23,6 +23,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveFormatComparator;
 import net.minecraft.world.storage.SaveFormatOld;
 import net.minecraft.world.storage.WorldInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,7 +46,7 @@ public class AnvilSaveConverter extends SaveFormatOld
     {
         if (this.savesDirectory != null && this.savesDirectory.exists() && this.savesDirectory.isDirectory())
         {
-            ArrayList var1 = new ArrayList();
+            ArrayList var1 = Lists.newArrayList();
             File[] var2 = this.savesDirectory.listFiles();
             File[] var3 = var2;
             int var4 = var2.length;
@@ -64,7 +65,7 @@ public class AnvilSaveConverter extends SaveFormatOld
                         boolean var9 = var8.getSaveVersion() != this.getSaveVersion();
                         String var10 = var8.getWorldName();
 
-                        if (var10 == null || MathHelper.stringNullOrLengthZero(var10))
+                        if (StringUtils.isEmpty(var10))
                         {
                             var10 = var7;
                         }
@@ -108,7 +109,7 @@ public class AnvilSaveConverter extends SaveFormatOld
     }
 
     /**
-     * Checks if the save directory uses the old map format
+     * gets if the map is old chunk saving (true) or McRegion (false)
      */
     public boolean isOldMapFormat(String p_75801_1_)
     {
@@ -117,14 +118,14 @@ public class AnvilSaveConverter extends SaveFormatOld
     }
 
     /**
-     * Converts the specified map to the new map format. Args: worldName, loadingScreen
+     * converts the map to mcRegion
      */
     public boolean convertMapFormat(String p_75805_1_, IProgressUpdate p_75805_2_)
     {
         p_75805_2_.setLoadingProgress(0);
-        ArrayList var3 = new ArrayList();
-        ArrayList var4 = new ArrayList();
-        ArrayList var5 = new ArrayList();
+        ArrayList var3 = Lists.newArrayList();
+        ArrayList var4 = Lists.newArrayList();
+        ArrayList var5 = Lists.newArrayList();
         File var6 = new File(this.savesDirectory, p_75805_1_);
         File var7 = new File(var6, "DIM-1");
         File var8 = new File(var6, "DIM1");
@@ -152,7 +153,7 @@ public class AnvilSaveConverter extends SaveFormatOld
         }
         else
         {
-            var11 = new WorldChunkManager(var10.getSeed(), var10.getTerrainType());
+            var11 = new WorldChunkManager(var10.getSeed(), var10.getTerrainType(), var10.getGeneratorOptions());
         }
 
         this.convertFile(new File(var6, "region"), var3, (WorldChunkManager)var11, 0, var9, p_75805_2_);

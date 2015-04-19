@@ -1,55 +1,55 @@
 package net.minecraft.item;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.block.BlockJukebox;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 public class ItemRecord extends Item
 {
-    private static final Map field_150928_b = new HashMap();
-    public final String field_150929_a;
+    private static final Map field_150928_b = Maps.newHashMap();
+
+    /** The name of the record. */
+    public final String recordName;
     private static final String __OBFID = "CL_00000057";
 
     protected ItemRecord(String p_i45350_1_)
     {
-        this.field_150929_a = p_i45350_1_;
+        this.recordName = p_i45350_1_;
         this.maxStackSize = 1;
         this.setCreativeTab(CreativeTabs.tabMisc);
-        field_150928_b.put(p_i45350_1_, this);
+        field_150928_b.put("records." + p_i45350_1_, this);
     }
 
     /**
-     * Gets an icon index based on an item's damage value
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public IIcon getIconFromDamage(int p_77617_1_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        return this.itemIcon;
-    }
+        IBlockState var9 = worldIn.getBlockState(pos);
 
-    /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-     */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
-    {
-        if (p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_) == Blocks.jukebox && p_77648_3_.getBlockMetadata(p_77648_4_, p_77648_5_, p_77648_6_) == 0)
+        if (var9.getBlock() == Blocks.jukebox && !((Boolean)var9.getValue(BlockJukebox.HAS_RECORD)).booleanValue())
         {
-            if (p_77648_3_.isClient)
+            if (worldIn.isRemote)
             {
                 return true;
             }
             else
             {
-                ((BlockJukebox)Blocks.jukebox).func_149926_b(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, p_77648_1_);
-                p_77648_3_.playAuxSFXAtEntity((EntityPlayer)null, 1005, p_77648_4_, p_77648_5_, p_77648_6_, Item.getIdFromItem(this));
-                --p_77648_1_.stackSize;
+                ((BlockJukebox)Blocks.jukebox).insertRecord(worldIn, pos, var9, stack);
+                worldIn.playAuxSFXAtEntity((EntityPlayer)null, 1005, pos, Item.getIdFromItem(this));
+                --stack.stackSize;
                 return true;
             }
         }
@@ -61,26 +61,32 @@ public class ItemRecord extends Item
 
     /**
      * allows items to add custom lines of information to the mouseover description
+     *  
+     * @param tooltip All lines to display in the Item's tooltip. This is a List of Strings.
+     * @param advanced Whether the setting "Advanced tooltips" is enabled
      */
-    public void addInformation(ItemStack p_77624_1_, EntityPlayer p_77624_2_, List p_77624_3_, boolean p_77624_4_)
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced)
     {
-        p_77624_3_.add(this.func_150927_i());
+        tooltip.add(this.getRecordNameLocal());
     }
 
-    public String func_150927_i()
+    public String getRecordNameLocal()
     {
-        return StatCollector.translateToLocal("item.record." + this.field_150929_a + ".desc");
+        return StatCollector.translateToLocal("item.record." + this.recordName + ".desc");
     }
 
     /**
      * Return an item rarity from EnumRarity
      */
-    public EnumRarity getRarity(ItemStack p_77613_1_)
+    public EnumRarity getRarity(ItemStack stack)
     {
-        return EnumRarity.rare;
+        return EnumRarity.RARE;
     }
 
-    public static ItemRecord func_150926_b(String p_150926_0_)
+    /**
+     * Return the record item corresponding to the given name.
+     */
+    public static ItemRecord getRecord(String p_150926_0_)
     {
         return (ItemRecord)field_150928_b.get(p_150926_0_);
     }

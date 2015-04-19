@@ -6,60 +6,77 @@ public class NibbleArray
      * Byte array of data stored in this holder. Possibly a light map or some chunk data. Data is accessed in 4-bit
      * pieces.
      */
-    public final byte[] data;
-
-    /**
-     * Log base 2 of the chunk height (128); applied as a shift on Z coordinate
-     */
-    private final int depthBits;
-
-    /**
-     * Log base 2 of the chunk height (128) * width (16); applied as a shift on X coordinate
-     */
-    private final int depthBitsPlusFour;
+    private final byte[] data;
     private static final String __OBFID = "CL_00000371";
 
-    public NibbleArray(int p_i1992_1_, int p_i1992_2_)
+    public NibbleArray()
     {
-        this.data = new byte[p_i1992_1_ >> 1];
-        this.depthBits = p_i1992_2_;
-        this.depthBitsPlusFour = p_i1992_2_ + 4;
+        this.data = new byte[2048];
     }
 
-    public NibbleArray(byte[] p_i1993_1_, int p_i1993_2_)
+    public NibbleArray(byte[] storageArray)
     {
-        this.data = p_i1993_1_;
-        this.depthBits = p_i1993_2_;
-        this.depthBitsPlusFour = p_i1993_2_ + 4;
+        this.data = storageArray;
+
+        if (storageArray.length != 2048)
+        {
+            throw new IllegalArgumentException("ChunkNibbleArrays should be 2048 bytes not: " + storageArray.length);
+        }
     }
 
     /**
      * Returns the nibble of data corresponding to the passed in x, y, z. y is at most 6 bits, z is at most 4.
      */
-    public int get(int p_76582_1_, int p_76582_2_, int p_76582_3_)
+    public int get(int x, int y, int z)
     {
-        int var4 = p_76582_2_ << this.depthBitsPlusFour | p_76582_3_ << this.depthBits | p_76582_1_;
-        int var5 = var4 >> 1;
-        int var6 = var4 & 1;
-        return var6 == 0 ? this.data[var5] & 15 : this.data[var5] >> 4 & 15;
+        return this.getFromIndex(this.getCoordinateIndex(x, y, z));
     }
 
     /**
      * Arguments are x, y, z, val. Sets the nibble of data at x << 11 | z << 7 | y to val.
      */
-    public void set(int p_76581_1_, int p_76581_2_, int p_76581_3_, int p_76581_4_)
+    public void set(int x, int y, int z, int value)
     {
-        int var5 = p_76581_2_ << this.depthBitsPlusFour | p_76581_3_ << this.depthBits | p_76581_1_;
-        int var6 = var5 >> 1;
-        int var7 = var5 & 1;
+        this.setIndex(this.getCoordinateIndex(x, y, z), value);
+    }
 
-        if (var7 == 0)
+    private int getCoordinateIndex(int x, int y, int z)
+    {
+        return y << 8 | z << 4 | x;
+    }
+
+    public int getFromIndex(int index)
+    {
+        int var2 = this.func_177478_c(index);
+        return this.func_177479_b(index) ? this.data[var2] & 15 : this.data[var2] >> 4 & 15;
+    }
+
+    public void setIndex(int index, int value)
+    {
+        int var3 = this.func_177478_c(index);
+
+        if (this.func_177479_b(index))
         {
-            this.data[var6] = (byte)(this.data[var6] & 240 | p_76581_4_ & 15);
+            this.data[var3] = (byte)(this.data[var3] & 240 | value & 15);
         }
         else
         {
-            this.data[var6] = (byte)(this.data[var6] & 15 | (p_76581_4_ & 15) << 4);
+            this.data[var3] = (byte)(this.data[var3] & 15 | (value & 15) << 4);
         }
+    }
+
+    private boolean func_177479_b(int p_177479_1_)
+    {
+        return (p_177479_1_ & 1) == 0;
+    }
+
+    private int func_177478_c(int p_177478_1_)
+    {
+        return p_177478_1_ >> 1;
+    }
+
+    public byte[] getData()
+    {
+        return this.data;
     }
 }

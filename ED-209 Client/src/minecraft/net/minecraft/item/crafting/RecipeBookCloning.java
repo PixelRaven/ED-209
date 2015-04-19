@@ -2,6 +2,7 @@ package net.minecraft.item.crafting;
 
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.ItemEditableBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -13,7 +14,7 @@ public class RecipeBookCloning implements IRecipe
     /**
      * Used to check if a recipe matches current crafting inventory
      */
-    public boolean matches(InventoryCrafting p_77569_1_, World p_77569_2_)
+    public boolean matches(InventoryCrafting p_77569_1_, World worldIn)
     {
         int var3 = 0;
         ItemStack var4 = null;
@@ -83,10 +84,11 @@ public class RecipeBookCloning implements IRecipe
             }
         }
 
-        if (var3 != null && var2 >= 1)
+        if (var3 != null && var2 >= 1 && ItemEditableBook.func_179230_h(var3) < 2)
         {
-            ItemStack var6 = new ItemStack(Items.written_book, var2 + 1);
+            ItemStack var6 = new ItemStack(Items.written_book, var2);
             var6.setTagCompound((NBTTagCompound)var3.getTagCompound().copy());
+            var6.getTagCompound().setInteger("generation", ItemEditableBook.func_179230_h(var3) + 1);
 
             if (var3.hasDisplayName())
             {
@@ -112,5 +114,23 @@ public class RecipeBookCloning implements IRecipe
     public ItemStack getRecipeOutput()
     {
         return null;
+    }
+
+    public ItemStack[] func_179532_b(InventoryCrafting p_179532_1_)
+    {
+        ItemStack[] var2 = new ItemStack[p_179532_1_.getSizeInventory()];
+
+        for (int var3 = 0; var3 < var2.length; ++var3)
+        {
+            ItemStack var4 = p_179532_1_.getStackInSlot(var3);
+
+            if (var4 != null && var4.getItem() instanceof ItemEditableBook)
+            {
+                var2[var3] = var4;
+                break;
+            }
+        }
+
+        return var2;
     }
 }

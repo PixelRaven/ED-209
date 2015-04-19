@@ -86,12 +86,13 @@ public class HoverEvent
     {
         SHOW_TEXT("SHOW_TEXT", 0, "show_text", true),
         SHOW_ACHIEVEMENT("SHOW_ACHIEVEMENT", 1, "show_achievement", true),
-        SHOW_ITEM("SHOW_ITEM", 2, "show_item", true);
+        SHOW_ITEM("SHOW_ITEM", 2, "show_item", true),
+        SHOW_ENTITY("SHOW_ENTITY", 3, "show_entity", true);
         private static final Map nameMapping = Maps.newHashMap();
         private final boolean allowedInChat;
         private final String canonicalName;
 
-        private static final HoverEvent.Action[] $VALUES = new HoverEvent.Action[]{SHOW_TEXT, SHOW_ACHIEVEMENT, SHOW_ITEM};
+        private static final HoverEvent.Action[] $VALUES = new HoverEvent.Action[]{SHOW_TEXT, SHOW_ACHIEVEMENT, SHOW_ITEM, SHOW_ENTITY};
         private static final String __OBFID = "CL_00001265";
 
         private Action(String p_i45157_1_, int p_i45157_2_, String p_i45157_3_, boolean p_i45157_4_)

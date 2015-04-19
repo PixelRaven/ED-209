@@ -14,7 +14,11 @@ public interface IAttributeInstance
 
     void setBaseValue(double p_111128_1_);
 
+    Collection getModifiersByOperation(int p_111130_1_);
+
     Collection func_111122_c();
+
+    boolean func_180374_a(AttributeModifier p_180374_1_);
 
     /**
      * Returns attribute modifier, if any, by the given UUID

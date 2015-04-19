@@ -1,7 +1,8 @@
 package net.minecraft.realms;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.MathHelper;
-import org.lwjgl.opengl.GL11;
 
 public class RealmsSliderButton extends RealmsButton
 {
@@ -65,48 +66,29 @@ public class RealmsSliderButton extends RealmsButton
 
     public void renderBg(int p_renderBg_1_, int p_renderBg_2_)
     {
-        if (this.getProxy().field_146125_m)
+        if (this.getProxy().visible)
         {
             if (this.sliding)
             {
-                this.value = (float)(p_renderBg_1_ - (this.getProxy().field_146128_h + 4)) / (float)(this.getProxy().func_146117_b() - 8);
-
-                if (this.value < 0.0F)
-                {
-                    this.value = 0.0F;
-                }
-
-                if (this.value > 1.0F)
-                {
-                    this.value = 1.0F;
-                }
-
+                this.value = (float)(p_renderBg_1_ - (this.getProxy().xPosition + 4)) / (float)(this.getProxy().getButtonWidth() - 8);
+                this.value = MathHelper.clamp_float(this.value, 0.0F, 1.0F);
                 float var3 = this.toValue(this.value);
                 this.clicked(var3);
                 this.value = this.toPct(var3);
                 this.getProxy().displayString = this.getMessage();
             }
 
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            this.blit(this.getProxy().field_146128_h + (int)(this.value * (float)(this.getProxy().func_146117_b() - 8)), this.getProxy().field_146129_i, 0, 66, 4, 20);
-            this.blit(this.getProxy().field_146128_h + (int)(this.value * (float)(this.getProxy().func_146117_b() - 8)) + 4, this.getProxy().field_146129_i, 196, 66, 4, 20);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(WIDGETS_LOCATION);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            this.blit(this.getProxy().xPosition + (int)(this.value * (float)(this.getProxy().getButtonWidth() - 8)), this.getProxy().yPosition, 0, 66, 4, 20);
+            this.blit(this.getProxy().xPosition + (int)(this.value * (float)(this.getProxy().getButtonWidth() - 8)) + 4, this.getProxy().yPosition, 196, 66, 4, 20);
         }
     }
 
     public void clicked(int p_clicked_1_, int p_clicked_2_)
     {
-        this.value = (float)(p_clicked_1_ - (this.getProxy().field_146128_h + 4)) / (float)(this.getProxy().func_146117_b() - 8);
-
-        if (this.value < 0.0F)
-        {
-            this.value = 0.0F;
-        }
-
-        if (this.value > 1.0F)
-        {
-            this.value = 1.0F;
-        }
-
+        this.value = (float)(p_clicked_1_ - (this.getProxy().xPosition + 4)) / (float)(this.getProxy().getButtonWidth() - 8);
+        this.value = MathHelper.clamp_float(this.value, 0.0F, 1.0F);
         this.clicked(this.toValue(this.value));
         this.getProxy().displayString = this.getMessage();
         this.sliding = true;

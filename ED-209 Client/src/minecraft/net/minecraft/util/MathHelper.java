@@ -1,13 +1,16 @@
 package net.minecraft.util;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class MathHelper
 {
+    public static final float field_180189_a = sqrt_float(2.0F);
+
     /**
      * A table of sin values computed from 0 (inclusive) to 2*pi (exclusive), with steps of 2*PI / 65536.
      */
-    private static float[] SIN_TABLE = new float[65536];
+    private static final float[] SIN_TABLE = new float[65536];
 
     /**
      * Though it looks like an array, this is really more like a mapping.  Key (index of this array) is the upper 5 bits
@@ -22,7 +25,7 @@ public class MathHelper
     /**
      * sin looked up in a table
      */
-    public static final float sin(float p_76126_0_)
+    public static float sin(float p_76126_0_)
     {
         return SIN_TABLE[(int)(p_76126_0_ * 10430.378F) & 65535];
     }
@@ -30,17 +33,17 @@ public class MathHelper
     /**
      * cos looked up in the sin table with the appropriate offset
      */
-    public static final float cos(float p_76134_0_)
+    public static float cos(float p_76134_0_)
     {
         return SIN_TABLE[(int)(p_76134_0_ * 10430.378F + 16384.0F) & 65535];
     }
 
-    public static final float sqrt_float(float p_76129_0_)
+    public static float sqrt_float(float p_76129_0_)
     {
         return (float)Math.sqrt((double)p_76129_0_);
     }
 
-    public static final float sqrt_double(double p_76133_0_)
+    public static float sqrt_double(double p_76133_0_)
     {
         return (float)Math.sqrt(p_76133_0_);
     }
@@ -164,14 +167,6 @@ public class MathHelper
         return p_76137_0_ < 0 ? -((-p_76137_0_ - 1) / p_76137_1_) - 1 : p_76137_0_ / p_76137_1_;
     }
 
-    /**
-     * Tests if a string is null or of length zero
-     */
-    public static boolean stringNullOrLengthZero(String p_76139_0_)
-    {
-        return p_76139_0_ == null || p_76139_0_.length() == 0;
-    }
-
     public static int getRandomIntegerInRange(Random p_76136_0_, int p_76136_1_, int p_76136_2_)
     {
         return p_76136_1_ >= p_76136_2_ ? p_76136_1_ : p_76136_0_.nextInt(p_76136_2_ - p_76136_1_ + 1) + p_76136_1_;
@@ -200,6 +195,16 @@ public class MathHelper
         }
 
         return (double)var1 / (double)p_76127_0_.length;
+    }
+
+    public static boolean func_180185_a(float p_180185_0_, float p_180185_1_)
+    {
+        return abs(p_180185_1_ - p_180185_0_) < 1.0E-5F;
+    }
+
+    public static int func_180184_b(int p_180184_0_, int p_180184_1_)
+    {
+        return (p_180184_0_ % p_180184_1_ + p_180184_1_) % p_180184_1_;
     }
 
     /**
@@ -247,18 +252,14 @@ public class MathHelper
      */
     public static int parseIntWithDefault(String p_82715_0_, int p_82715_1_)
     {
-        int var2 = p_82715_1_;
-
         try
         {
-            var2 = Integer.parseInt(p_82715_0_);
+            return Integer.parseInt(p_82715_0_);
         }
-        catch (Throwable var4)
+        catch (Throwable var3)
         {
-            ;
+            return p_82715_1_;
         }
-
-        return var2;
     }
 
     /**
@@ -266,23 +267,7 @@ public class MathHelper
      */
     public static int parseIntWithDefaultAndMax(String p_82714_0_, int p_82714_1_, int p_82714_2_)
     {
-        int var3 = p_82714_1_;
-
-        try
-        {
-            var3 = Integer.parseInt(p_82714_0_);
-        }
-        catch (Throwable var5)
-        {
-            ;
-        }
-
-        if (var3 < p_82714_2_)
-        {
-            var3 = p_82714_2_;
-        }
-
-        return var3;
+        return Math.max(p_82714_2_, parseIntWithDefault(p_82714_0_, p_82714_1_));
     }
 
     /**
@@ -290,39 +275,19 @@ public class MathHelper
      */
     public static double parseDoubleWithDefault(String p_82712_0_, double p_82712_1_)
     {
-        double var3 = p_82712_1_;
-
         try
         {
-            var3 = Double.parseDouble(p_82712_0_);
+            return Double.parseDouble(p_82712_0_);
         }
-        catch (Throwable var6)
+        catch (Throwable var4)
         {
-            ;
+            return p_82712_1_;
         }
-
-        return var3;
     }
 
     public static double parseDoubleWithDefaultAndMax(String p_82713_0_, double p_82713_1_, double p_82713_3_)
     {
-        double var5 = p_82713_1_;
-
-        try
-        {
-            var5 = Double.parseDouble(p_82713_0_);
-        }
-        catch (Throwable var8)
-        {
-            ;
-        }
-
-        if (var5 < p_82713_3_)
-        {
-            var5 = p_82713_3_;
-        }
-
-        return var5;
+        return Math.max(p_82713_3_, parseDoubleWithDefault(p_82713_0_, p_82713_1_));
     }
 
     /**
@@ -373,6 +338,10 @@ public class MathHelper
         {
             return 0;
         }
+        else if (p_154354_0_ == 0)
+        {
+            return p_154354_1_;
+        }
         else
         {
             if (p_154354_0_ < 0)
@@ -383,6 +352,51 @@ public class MathHelper
             int var2 = p_154354_0_ % p_154354_1_;
             return var2 == 0 ? p_154354_0_ : p_154354_0_ + p_154354_1_ - var2;
         }
+    }
+
+    public static int func_180183_b(float p_180183_0_, float p_180183_1_, float p_180183_2_)
+    {
+        return func_180181_b(floor_float(p_180183_0_ * 255.0F), floor_float(p_180183_1_ * 255.0F), floor_float(p_180183_2_ * 255.0F));
+    }
+
+    public static int func_180181_b(int p_180181_0_, int p_180181_1_, int p_180181_2_)
+    {
+        int var3 = (p_180181_0_ << 8) + p_180181_1_;
+        var3 = (var3 << 8) + p_180181_2_;
+        return var3;
+    }
+
+    public static int func_180188_d(int p_180188_0_, int p_180188_1_)
+    {
+        int var2 = (p_180188_0_ & 16711680) >> 16;
+        int var3 = (p_180188_1_ & 16711680) >> 16;
+        int var4 = (p_180188_0_ & 65280) >> 8;
+        int var5 = (p_180188_1_ & 65280) >> 8;
+        int var6 = (p_180188_0_ & 255) >> 0;
+        int var7 = (p_180188_1_ & 255) >> 0;
+        int var8 = (int)((float)var2 * (float)var3 / 255.0F);
+        int var9 = (int)((float)var4 * (float)var5 / 255.0F);
+        int var10 = (int)((float)var6 * (float)var7 / 255.0F);
+        return p_180188_0_ & -16777216 | var8 << 16 | var9 << 8 | var10;
+    }
+
+    public static long func_180186_a(Vec3i p_180186_0_)
+    {
+        return func_180187_c(p_180186_0_.getX(), p_180186_0_.getY(), p_180186_0_.getZ());
+    }
+
+    public static long func_180187_c(int p_180187_0_, int p_180187_1_, int p_180187_2_)
+    {
+        long var3 = (long)(p_180187_0_ * 3129871) ^ (long)p_180187_2_ * 116129781L ^ (long)p_180187_1_;
+        var3 = var3 * var3 * 42317861L + var3 * 11L;
+        return var3;
+    }
+
+    public static UUID func_180182_a(Random p_180182_0_)
+    {
+        long var1 = p_180182_0_.nextLong() & -61441L | 16384L;
+        long var3 = p_180182_0_.nextLong() & 4611686018427387903L | Long.MIN_VALUE;
+        return new UUID(var1, var3);
     }
 
     static

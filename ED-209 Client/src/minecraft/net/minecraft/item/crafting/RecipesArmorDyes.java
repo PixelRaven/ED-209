@@ -1,10 +1,11 @@
 package net.minecraft.item.crafting;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import net.minecraft.block.BlockColored;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -16,10 +17,10 @@ public class RecipesArmorDyes implements IRecipe
     /**
      * Used to check if a recipe matches current crafting inventory
      */
-    public boolean matches(InventoryCrafting p_77569_1_, World p_77569_2_)
+    public boolean matches(InventoryCrafting p_77569_1_, World worldIn)
     {
         ItemStack var3 = null;
-        ArrayList var4 = new ArrayList();
+        ArrayList var4 = Lists.newArrayList();
 
         for (int var5 = 0; var5 < p_77569_1_.getSizeInventory(); ++var5)
         {
@@ -31,7 +32,7 @@ public class RecipesArmorDyes implements IRecipe
                 {
                     ItemArmor var7 = (ItemArmor)var6.getItem();
 
-                    if (var7.getArmorMaterial() != ItemArmor.ArmorMaterial.CLOTH || var3 != null)
+                    if (var7.getArmorMaterial() != ItemArmor.ArmorMaterial.LEATHER || var3 != null)
                     {
                         return false;
                     }
@@ -79,7 +80,7 @@ public class RecipesArmorDyes implements IRecipe
                 {
                     var6 = (ItemArmor)var8.getItem();
 
-                    if (var6.getArmorMaterial() != ItemArmor.ArmorMaterial.CLOTH || var2 != null)
+                    if (var6.getArmorMaterial() != ItemArmor.ArmorMaterial.LEATHER || var2 != null)
                     {
                         return null;
                     }
@@ -107,7 +108,7 @@ public class RecipesArmorDyes implements IRecipe
                         return null;
                     }
 
-                    float[] var14 = EntitySheep.fleeceColorTable[BlockColored.func_150032_b(var8.getItemDamage())];
+                    float[] var14 = EntitySheep.func_175513_a(EnumDyeColor.func_176766_a(var8.getMetadata()));
                     int var15 = (int)(var14[0] * 255.0F);
                     int var16 = (int)(var14[1] * 255.0F);
                     var17 = (int)(var14[2] * 255.0F);
@@ -152,5 +153,22 @@ public class RecipesArmorDyes implements IRecipe
     public ItemStack getRecipeOutput()
     {
         return null;
+    }
+
+    public ItemStack[] func_179532_b(InventoryCrafting p_179532_1_)
+    {
+        ItemStack[] var2 = new ItemStack[p_179532_1_.getSizeInventory()];
+
+        for (int var3 = 0; var3 < var2.length; ++var3)
+        {
+            ItemStack var4 = p_179532_1_.getStackInSlot(var3);
+
+            if (var4 != null && var4.getItem().hasContainerItem())
+            {
+                var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+            }
+        }
+
+        return var2;
     }
 }

@@ -4,7 +4,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.server.management.ItemInWorldManager;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class DemoWorldManager extends ItemInWorldManager
@@ -15,9 +17,9 @@ public class DemoWorldManager extends ItemInWorldManager
     private int field_73102_f;
     private static final String __OBFID = "CL_00001429";
 
-    public DemoWorldManager(World p_i1513_1_)
+    public DemoWorldManager(World worldIn)
     {
-        super(p_i1513_1_);
+        super(worldIn);
     }
 
     public void updateBlockRemoving()
@@ -80,11 +82,7 @@ public class DemoWorldManager extends ItemInWorldManager
         }
     }
 
-    /**
-     * if not creative, it calls destroyBlockInWorldPartially untill the block is broken first. par4 is the specific
-     * side. tryHarvestBlock can also be the result of this call
-     */
-    public void onBlockClicked(int p_73074_1_, int p_73074_2_, int p_73074_3_, int p_73074_4_)
+    public void func_180784_a(BlockPos p_180784_1_, EnumFacing p_180784_2_)
     {
         if (this.demoTimeExpired)
         {
@@ -92,30 +90,27 @@ public class DemoWorldManager extends ItemInWorldManager
         }
         else
         {
-            super.onBlockClicked(p_73074_1_, p_73074_2_, p_73074_3_, p_73074_4_);
+            super.func_180784_a(p_180784_1_, p_180784_2_);
         }
     }
 
-    public void uncheckedTryHarvestBlock(int p_73082_1_, int p_73082_2_, int p_73082_3_)
+    public void func_180785_a(BlockPos p_180785_1_)
     {
         if (!this.demoTimeExpired)
         {
-            super.uncheckedTryHarvestBlock(p_73082_1_, p_73082_2_, p_73082_3_);
+            super.func_180785_a(p_180785_1_);
         }
     }
 
-    /**
-     * Attempts to harvest a block at the given coordinate
-     */
-    public boolean tryHarvestBlock(int p_73084_1_, int p_73084_2_, int p_73084_3_)
+    public boolean func_180237_b(BlockPos p_180237_1_)
     {
-        return this.demoTimeExpired ? false : super.tryHarvestBlock(p_73084_1_, p_73084_2_, p_73084_3_);
+        return this.demoTimeExpired ? false : super.func_180237_b(p_180237_1_);
     }
 
     /**
      * Attempts to right-click use an item by the given EntityPlayer in the given World
      */
-    public boolean tryUseItem(EntityPlayer p_73085_1_, World p_73085_2_, ItemStack p_73085_3_)
+    public boolean tryUseItem(EntityPlayer p_73085_1_, World worldIn, ItemStack p_73085_3_)
     {
         if (this.demoTimeExpired)
         {
@@ -124,15 +119,11 @@ public class DemoWorldManager extends ItemInWorldManager
         }
         else
         {
-            return super.tryUseItem(p_73085_1_, p_73085_2_, p_73085_3_);
+            return super.tryUseItem(p_73085_1_, worldIn, p_73085_3_);
         }
     }
 
-    /**
-     * Activate the clicked on block, otherwise use the held item. Args: player, world, itemStack, x, y, z, side,
-     * xOffset, yOffset, zOffset
-     */
-    public boolean activateBlockOrUseItem(EntityPlayer p_73078_1_, World p_73078_2_, ItemStack p_73078_3_, int p_73078_4_, int p_73078_5_, int p_73078_6_, int p_73078_7_, float p_73078_8_, float p_73078_9_, float p_73078_10_)
+    public boolean func_180236_a(EntityPlayer p_180236_1_, World worldIn, ItemStack p_180236_3_, BlockPos p_180236_4_, EnumFacing p_180236_5_, float p_180236_6_, float p_180236_7_, float p_180236_8_)
     {
         if (this.demoTimeExpired)
         {
@@ -141,7 +132,7 @@ public class DemoWorldManager extends ItemInWorldManager
         }
         else
         {
-            return super.activateBlockOrUseItem(p_73078_1_, p_73078_2_, p_73078_3_, p_73078_4_, p_73078_5_, p_73078_6_, p_73078_7_, p_73078_8_, p_73078_9_, p_73078_10_);
+            return super.func_180236_a(p_180236_1_, worldIn, p_180236_3_, p_180236_4_, p_180236_5_, p_180236_6_, p_180236_7_, p_180236_8_);
         }
     }
 }

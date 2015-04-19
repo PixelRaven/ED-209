@@ -1,147 +1,150 @@
 package net.minecraft.block;
 
 import java.util.Random;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockRedstoneRepeater extends BlockRedstoneDiode
 {
-    public static final double[] field_149973_b = new double[] { -0.0625D, 0.0625D, 0.1875D, 0.3125D};
-    private static final int[] field_149974_M = new int[] {1, 2, 3, 4};
+    public static final PropertyBool field_176411_a = PropertyBool.create("locked");
+    public static final PropertyInteger field_176410_b = PropertyInteger.create("delay", 1, 4);
     private static final String __OBFID = "CL_00000301";
 
     protected BlockRedstoneRepeater(boolean p_i45424_1_)
     {
         super(p_i45424_1_);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE, EnumFacing.NORTH).withProperty(field_176410_b, Integer.valueOf(1)).withProperty(field_176411_a, Boolean.valueOf(false)));
     }
 
     /**
-     * Called upon block activation (right click on the block.)
+     * Get the actual Block state of this Block at the given position. This applies properties not visible in the
+     * metadata, such as fence connections.
      */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        int var10 = p_149727_1_.getBlockMetadata(p_149727_2_, p_149727_3_, p_149727_4_);
-        int var11 = (var10 & 12) >> 2;
-        var11 = var11 + 1 << 2 & 12;
-        p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, var11 | var10 & 3, 3);
-        return true;
+        return state.withProperty(field_176411_a, Boolean.valueOf(this.func_176405_b(worldIn, pos, state)));
     }
 
-    protected int func_149901_b(int p_149901_1_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        return field_149974_M[(p_149901_1_ & 12) >> 2] * 2;
+        if (!playerIn.capabilities.allowEdit)
+        {
+            return false;
+        }
+        else
+        {
+            worldIn.setBlockState(pos, state.cycleProperty(field_176410_b), 3);
+            return true;
+        }
     }
 
-    protected BlockRedstoneDiode func_149906_e()
+    protected int func_176403_d(IBlockState p_176403_1_)
     {
-        return Blocks.powered_repeater;
+        return ((Integer)p_176403_1_.getValue(field_176410_b)).intValue() * 2;
     }
 
-    protected BlockRedstoneDiode func_149898_i()
+    protected IBlockState func_180674_e(IBlockState p_180674_1_)
     {
-        return Blocks.unpowered_repeater;
+        Integer var2 = (Integer)p_180674_1_.getValue(field_176410_b);
+        Boolean var3 = (Boolean)p_180674_1_.getValue(field_176411_a);
+        EnumFacing var4 = (EnumFacing)p_180674_1_.getValue(AGE);
+        return Blocks.powered_repeater.getDefaultState().withProperty(AGE, var4).withProperty(field_176410_b, var2).withProperty(field_176411_a, var3);
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    protected IBlockState func_180675_k(IBlockState p_180675_1_)
+    {
+        Integer var2 = (Integer)p_180675_1_.getValue(field_176410_b);
+        Boolean var3 = (Boolean)p_180675_1_.getValue(field_176411_a);
+        EnumFacing var4 = (EnumFacing)p_180675_1_.getValue(AGE);
+        return Blocks.unpowered_repeater.getDefaultState().withProperty(AGE, var4).withProperty(field_176410_b, var2).withProperty(field_176411_a, var3);
+    }
+
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.repeater;
     }
 
-    /**
-     * Gets an item for the block being called on. Args: world, x, y, z
-     */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public Item getItem(World worldIn, BlockPos pos)
     {
         return Items.repeater;
     }
 
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
+    public boolean func_176405_b(IBlockAccess p_176405_1_, BlockPos p_176405_2_, IBlockState p_176405_3_)
     {
-        return 15;
-    }
-
-    public boolean func_149910_g(IBlockAccess p_149910_1_, int p_149910_2_, int p_149910_3_, int p_149910_4_, int p_149910_5_)
-    {
-        return this.func_149902_h(p_149910_1_, p_149910_2_, p_149910_3_, p_149910_4_, p_149910_5_) > 0;
+        return this.func_176407_c(p_176405_1_, p_176405_2_, p_176405_3_) > 0;
     }
 
     protected boolean func_149908_a(Block p_149908_1_)
     {
-        return func_149909_d(p_149908_1_);
+        return isRedstoneRepeaterBlockID(p_149908_1_);
     }
 
-    /**
-     * A randomly called display update to be able to add particles or other items for display
-     */
-    public void randomDisplayTick(World p_149734_1_, int p_149734_2_, int p_149734_3_, int p_149734_4_, Random p_149734_5_)
+    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        if (this.field_149914_a)
+        if (this.isRepeaterPowered)
         {
-            int var6 = p_149734_1_.getBlockMetadata(p_149734_2_, p_149734_3_, p_149734_4_);
-            int var7 = func_149895_l(var6);
-            double var8 = (double)((float)p_149734_2_ + 0.5F) + (double)(p_149734_5_.nextFloat() - 0.5F) * 0.2D;
-            double var10 = (double)((float)p_149734_3_ + 0.4F) + (double)(p_149734_5_.nextFloat() - 0.5F) * 0.2D;
-            double var12 = (double)((float)p_149734_4_ + 0.5F) + (double)(p_149734_5_.nextFloat() - 0.5F) * 0.2D;
-            double var14 = 0.0D;
-            double var16 = 0.0D;
+            EnumFacing var5 = (EnumFacing)state.getValue(AGE);
+            double var6 = (double)((float)pos.getX() + 0.5F) + (double)(rand.nextFloat() - 0.5F) * 0.2D;
+            double var8 = (double)((float)pos.getY() + 0.4F) + (double)(rand.nextFloat() - 0.5F) * 0.2D;
+            double var10 = (double)((float)pos.getZ() + 0.5F) + (double)(rand.nextFloat() - 0.5F) * 0.2D;
+            float var12 = -5.0F;
 
-            if (p_149734_5_.nextInt(2) == 0)
+            if (rand.nextBoolean())
             {
-                switch (var7)
-                {
-                    case 0:
-                        var16 = -0.3125D;
-                        break;
-
-                    case 1:
-                        var14 = 0.3125D;
-                        break;
-
-                    case 2:
-                        var16 = 0.3125D;
-                        break;
-
-                    case 3:
-                        var14 = -0.3125D;
-                }
-            }
-            else
-            {
-                int var18 = (var6 & 12) >> 2;
-
-                switch (var7)
-                {
-                    case 0:
-                        var16 = field_149973_b[var18];
-                        break;
-
-                    case 1:
-                        var14 = -field_149973_b[var18];
-                        break;
-
-                    case 2:
-                        var16 = -field_149973_b[var18];
-                        break;
-
-                    case 3:
-                        var14 = field_149973_b[var18];
-                }
+                var12 = (float)(((Integer)state.getValue(field_176410_b)).intValue() * 2 - 1);
             }
 
-            p_149734_1_.spawnParticle("reddust", var8 + var14, var10, var12 + var16, 0.0D, 0.0D, 0.0D);
+            var12 /= 16.0F;
+            double var13 = (double)(var12 * (float)var5.getFrontOffsetX());
+            double var15 = (double)(var12 * (float)var5.getFrontOffsetZ());
+            worldIn.spawnParticle(EnumParticleTypes.REDSTONE, var6 + var13, var8, var10 + var15, 0.0D, 0.0D, 0.0D, new int[0]);
         }
     }
 
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
-        this.func_149911_e(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_);
+        super.breakBlock(worldIn, pos, state);
+        this.func_176400_h(worldIn, pos, state);
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(AGE, EnumFacing.getHorizontal(meta)).withProperty(field_176411_a, Boolean.valueOf(false)).withProperty(field_176410_b, Integer.valueOf(1 + (meta >> 2)));
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        byte var2 = 0;
+        int var3 = var2 | ((EnumFacing)state.getValue(AGE)).getHorizontalIndex();
+        var3 |= ((Integer)state.getValue(field_176410_b)).intValue() - 1 << 2;
+        return var3;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {AGE, field_176410_b, field_176411_a});
     }
 }

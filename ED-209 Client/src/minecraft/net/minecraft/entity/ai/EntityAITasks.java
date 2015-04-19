@@ -1,6 +1,6 @@
 package net.minecraft.entity.ai;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.profiler.Profiler;
@@ -12,10 +12,10 @@ public class EntityAITasks
     private static final Logger logger = LogManager.getLogger();
 
     /** A list of EntityAITaskEntrys in EntityAITasks. */
-    private List taskEntries = new ArrayList();
+    private List taskEntries = Lists.newArrayList();
 
     /** A list of EntityAITaskEntrys that are currently being executed. */
-    private List executingTaskEntries = new ArrayList();
+    private List executingTaskEntries = Lists.newArrayList();
 
     /** Instance of Profiler. */
     private final Profiler theProfiler;
@@ -28,6 +28,9 @@ public class EntityAITasks
         this.theProfiler = p_i1628_1_;
     }
 
+    /**
+     * Add a now AITask. Args : priority, task
+     */
     public void addTask(int p_75776_1_, EntityAIBase p_75776_2_)
     {
         this.taskEntries.add(new EntityAITasks.EntityAITaskEntry(p_75776_1_, p_75776_2_));
@@ -60,72 +63,61 @@ public class EntityAITasks
 
     public void onUpdateTasks()
     {
-        ArrayList var1 = new ArrayList();
-        Iterator var2;
-        EntityAITasks.EntityAITaskEntry var3;
+        this.theProfiler.startSection("goalSetup");
+        Iterator var1;
+        EntityAITasks.EntityAITaskEntry var2;
 
         if (this.tickCount++ % this.tickRate == 0)
         {
-            var2 = this.taskEntries.iterator();
+            var1 = this.taskEntries.iterator();
 
-            while (var2.hasNext())
+            while (var1.hasNext())
             {
-                var3 = (EntityAITasks.EntityAITaskEntry)var2.next();
-                boolean var4 = this.executingTaskEntries.contains(var3);
+                var2 = (EntityAITasks.EntityAITaskEntry)var1.next();
+                boolean var3 = this.executingTaskEntries.contains(var2);
 
-                if (var4)
+                if (var3)
                 {
-                    if (this.canUse(var3) && this.canContinue(var3))
+                    if (this.canUse(var2) && this.canContinue(var2))
                     {
                         continue;
                     }
 
-                    var3.action.resetTask();
-                    this.executingTaskEntries.remove(var3);
+                    var2.action.resetTask();
+                    this.executingTaskEntries.remove(var2);
                 }
 
-                if (this.canUse(var3) && var3.action.shouldExecute())
+                if (this.canUse(var2) && var2.action.shouldExecute())
                 {
-                    var1.add(var3);
-                    this.executingTaskEntries.add(var3);
+                    var2.action.startExecuting();
+                    this.executingTaskEntries.add(var2);
                 }
             }
         }
         else
         {
-            var2 = this.executingTaskEntries.iterator();
+            var1 = this.executingTaskEntries.iterator();
 
-            while (var2.hasNext())
+            while (var1.hasNext())
             {
-                var3 = (EntityAITasks.EntityAITaskEntry)var2.next();
+                var2 = (EntityAITasks.EntityAITaskEntry)var1.next();
 
-                if (!var3.action.continueExecuting())
+                if (!this.canContinue(var2))
                 {
-                    var3.action.resetTask();
-                    var2.remove();
+                    var2.action.resetTask();
+                    var1.remove();
                 }
             }
         }
 
-        this.theProfiler.startSection("goalStart");
-        var2 = var1.iterator();
-
-        while (var2.hasNext())
-        {
-            var3 = (EntityAITasks.EntityAITaskEntry)var2.next();
-            this.theProfiler.startSection(var3.action.getClass().getSimpleName());
-            var3.action.startExecuting();
-            this.theProfiler.endSection();
-        }
-
         this.theProfiler.endSection();
         this.theProfiler.startSection("goalTick");
-        var2 = this.executingTaskEntries.iterator();
+        var1 = this.executingTaskEntries.iterator();
 
-        while (var2.hasNext())
+        while (var1.hasNext())
         {
-            var3 = (EntityAITasks.EntityAITaskEntry)var2.next();
-            var3.action.updateTask();
+            var2 = (EntityAITasks.EntityAITaskEntry)var1.next();
+            var2.action.updateTask();
         }
 
         this.theProfiler.endSection();
@@ -136,9 +128,7 @@ public class EntityAITasks
      */
     private boolean canContinue(EntityAITasks.EntityAITaskEntry p_75773_1_)
     {
-        this.theProfiler.startSection("canContinue");
         boolean var2 = p_75773_1_.action.continueExecuting();
-        this.theProfiler.endSection();
         return var2;
     }
 
@@ -148,7 +138,6 @@ public class EntityAITasks
      */
     private boolean canUse(EntityAITasks.EntityAITaskEntry p_75775_1_)
     {
-        this.theProfiler.startSection("canUse");
         Iterator var2 = this.taskEntries.iterator();
 
         while (var2.hasNext())
@@ -159,21 +148,18 @@ public class EntityAITasks
             {
                 if (p_75775_1_.priority >= var3.priority)
                 {
-                    if (this.executingTaskEntries.contains(var3) && !this.areTasksCompatible(p_75775_1_, var3))
+                    if (!this.areTasksCompatible(p_75775_1_, var3) && this.executingTaskEntries.contains(var3))
                     {
-                        this.theProfiler.endSection();
                         return false;
                     }
                 }
-                else if (this.executingTaskEntries.contains(var3) && !var3.action.isInterruptible())
+                else if (!var3.action.isInterruptible() && this.executingTaskEntries.contains(var3))
                 {
-                    this.theProfiler.endSection();
                     return false;
                 }
             }
         }
 
-        this.theProfiler.endSection();
         return true;
     }
 

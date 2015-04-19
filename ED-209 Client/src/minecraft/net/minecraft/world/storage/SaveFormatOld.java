@@ -1,5 +1,6 @@
 package net.minecraft.world.storage;
 
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +40,7 @@ public class SaveFormatOld implements ISaveFormat
 
     public List getSaveList() throws AnvilConverterException
     {
-        ArrayList var1 = new ArrayList();
+        ArrayList var1 = Lists.newArrayList();
 
         for (int var2 = 0; var2 < 5; ++var2)
         {
@@ -247,7 +248,7 @@ public class SaveFormatOld implements ISaveFormat
     }
 
     /**
-     * Checks if the save directory uses the old map format
+     * gets if the map is old chunk saving (true) or McRegion (false)
      */
     public boolean isOldMapFormat(String p_75801_1_)
     {
@@ -255,7 +256,7 @@ public class SaveFormatOld implements ISaveFormat
     }
 
     /**
-     * Converts the specified map to the new map format. Args: worldName, loadingScreen
+     * converts the map to mcRegion
      */
     public boolean convertMapFormat(String p_75805_1_, IProgressUpdate p_75805_2_)
     {

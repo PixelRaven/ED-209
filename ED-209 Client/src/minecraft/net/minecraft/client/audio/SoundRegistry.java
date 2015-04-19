@@ -18,12 +18,15 @@ public class SoundRegistry extends RegistrySimple
         return this.field_148764_a;
     }
 
-    public void func_148762_a(SoundEventAccessorComposite p_148762_1_)
+    public void registerSound(SoundEventAccessorComposite p_148762_1_)
     {
-        this.putObject(p_148762_1_.func_148729_c(), p_148762_1_);
+        this.putObject(p_148762_1_.getSoundEventLocation(), p_148762_1_);
     }
 
-    public void func_148763_c()
+    /**
+     * Reset the underlying sound map (Called on resource manager reload)
+     */
+    public void clearMap()
     {
         this.field_148764_a.clear();
     }

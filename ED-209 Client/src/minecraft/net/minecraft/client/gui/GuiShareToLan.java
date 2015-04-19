@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
@@ -48,15 +49,15 @@ public class GuiShareToLan extends GuiScreen
         }
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.id == 102)
+        if (button.id == 102)
         {
             this.mc.displayGuiScreen(this.field_146598_a);
         }
-        else if (p_146284_1_.id == 104)
+        else if (button.id == 104)
         {
-            if (this.field_146599_h.equals("survival"))
+            if (this.field_146599_h.equals("spectator"))
             {
                 this.field_146599_h = "creative";
             }
@@ -64,19 +65,23 @@ public class GuiShareToLan extends GuiScreen
             {
                 this.field_146599_h = "adventure";
             }
-            else
+            else if (this.field_146599_h.equals("adventure"))
             {
                 this.field_146599_h = "survival";
+            }
+            else
+            {
+                this.field_146599_h = "spectator";
             }
 
             this.func_146595_g();
         }
-        else if (p_146284_1_.id == 103)
+        else if (button.id == 103)
         {
             this.field_146600_i = !this.field_146600_i;
             this.func_146595_g();
         }
-        else if (p_146284_1_.id == 101)
+        else if (button.id == 101)
         {
             this.mc.displayGuiScreen((GuiScreen)null);
             String var2 = this.mc.getIntegratedServer().shareToLAN(WorldSettings.GameType.getByName(this.field_146599_h), this.field_146600_i);
@@ -91,18 +96,18 @@ public class GuiShareToLan extends GuiScreen
                 var3 = new ChatComponentText("commands.publish.failed");
             }
 
-            this.mc.ingameGUI.getChatGUI().func_146227_a((IChatComponent)var3);
+            this.mc.ingameGUI.getChatGUI().printChatMessage((IChatComponent)var3);
         }
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, I18n.format("lanServer.title", new Object[0]), this.width / 2, 50, 16777215);
         this.drawCenteredString(this.fontRendererObj, I18n.format("lanServer.otherPlayers", new Object[0]), this.width / 2, 82, 16777215);
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

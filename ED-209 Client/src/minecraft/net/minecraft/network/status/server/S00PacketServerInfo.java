@@ -12,56 +12,53 @@ import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumTypeAdapterFactory;
 import net.minecraft.util.IChatComponent;
 
-public class S00PacketServerInfo extends Packet
+public class S00PacketServerInfo implements Packet
 {
-    private static final Gson field_149297_a = (new GsonBuilder()).registerTypeAdapter(ServerStatusResponse.MinecraftProtocolVersionIdentifier.class, new ServerStatusResponse.MinecraftProtocolVersionIdentifier.Serializer()).registerTypeAdapter(ServerStatusResponse.PlayerCountData.class, new ServerStatusResponse.PlayerCountData.Serializer()).registerTypeAdapter(ServerStatusResponse.class, new ServerStatusResponse.Serializer()).registerTypeHierarchyAdapter(IChatComponent.class, new IChatComponent.Serializer()).registerTypeHierarchyAdapter(ChatStyle.class, new ChatStyle.Serializer()).registerTypeAdapterFactory(new EnumTypeAdapterFactory()).create();
-    private ServerStatusResponse field_149296_b;
+    private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(ServerStatusResponse.MinecraftProtocolVersionIdentifier.class, new ServerStatusResponse.MinecraftProtocolVersionIdentifier.Serializer()).registerTypeAdapter(ServerStatusResponse.PlayerCountData.class, new ServerStatusResponse.PlayerCountData.Serializer()).registerTypeAdapter(ServerStatusResponse.class, new ServerStatusResponse.Serializer()).registerTypeHierarchyAdapter(IChatComponent.class, new IChatComponent.Serializer()).registerTypeHierarchyAdapter(ChatStyle.class, new ChatStyle.Serializer()).registerTypeAdapterFactory(new EnumTypeAdapterFactory()).create();
+    private ServerStatusResponse response;
     private static final String __OBFID = "CL_00001384";
 
     public S00PacketServerInfo() {}
 
-    public S00PacketServerInfo(ServerStatusResponse p_i45273_1_)
+    public S00PacketServerInfo(ServerStatusResponse responseIn)
     {
-        this.field_149296_b = p_i45273_1_;
+        this.response = responseIn;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149296_b = (ServerStatusResponse)field_149297_a.fromJson(p_148837_1_.readStringFromBuffer(32767), ServerStatusResponse.class);
+        this.response = (ServerStatusResponse)GSON.fromJson(data.readStringFromBuffer(32767), ServerStatusResponse.class);
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(field_149297_a.toJson(this.field_149296_b));
+        data.writeString(GSON.toJson(this.response));
     }
 
-    public void processPacket(INetHandlerStatusClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerStatusClient handler)
     {
-        p_148833_1_.handleServerInfo(this);
+        handler.handleServerInfo(this);
     }
 
     public ServerStatusResponse func_149294_c()
     {
-        return this.field_149296_b;
+        return this.response;
     }
 
     /**
-     * If true, the network manager will process the packet immediately when received, otherwise it will queue it for
-     * processing. Currently true for: Disconnect, LoginSuccess, KeepAlive, ServerQuery/Info, Ping/Pong
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public boolean hasPriority()
+    public void processPacket(INetHandler handler)
     {
-        return true;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerStatusClient)p_148833_1_);
+        this.processPacket((INetHandlerStatusClient)handler);
     }
 }

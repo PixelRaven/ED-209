@@ -1,7 +1,7 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
@@ -25,11 +25,9 @@ public class EntityAIMoveIndoors extends EntityAIBase
      */
     public boolean shouldExecute()
     {
-        int var1 = MathHelper.floor_double(this.entityObj.posX);
-        int var2 = MathHelper.floor_double(this.entityObj.posY);
-        int var3 = MathHelper.floor_double(this.entityObj.posZ);
+        BlockPos var1 = new BlockPos(this.entityObj);
 
-        if ((!this.entityObj.worldObj.isDaytime() || this.entityObj.worldObj.isRaining() || !this.entityObj.worldObj.getBiomeGenForCoords(var1, var3).canSpawnLightningBolt()) && !this.entityObj.worldObj.provider.hasNoSky)
+        if ((!this.entityObj.worldObj.isDaytime() || this.entityObj.worldObj.isRaining() && !this.entityObj.worldObj.getBiomeGenForCoords(var1).canSpawnLightningBolt()) && !this.entityObj.worldObj.provider.getHasNoSky())
         {
             if (this.entityObj.getRNG().nextInt(50) != 0)
             {
@@ -41,15 +39,15 @@ public class EntityAIMoveIndoors extends EntityAIBase
             }
             else
             {
-                Village var4 = this.entityObj.worldObj.villageCollectionObj.findNearestVillage(var1, var2, var3, 14);
+                Village var2 = this.entityObj.worldObj.getVillageCollection().func_176056_a(var1, 14);
 
-                if (var4 == null)
+                if (var2 == null)
                 {
                     return false;
                 }
                 else
                 {
-                    this.doorInfo = var4.findNearestDoorUnrestricted(var1, var2, var3);
+                    this.doorInfo = var2.func_179863_c(var1);
                     return this.doorInfo != null;
                 }
             }
@@ -74,19 +72,23 @@ public class EntityAIMoveIndoors extends EntityAIBase
     public void startExecuting()
     {
         this.insidePosX = -1;
+        BlockPos var1 = this.doorInfo.func_179856_e();
+        int var2 = var1.getX();
+        int var3 = var1.getY();
+        int var4 = var1.getZ();
 
-        if (this.entityObj.getDistanceSq((double)this.doorInfo.getInsidePosX(), (double)this.doorInfo.posY, (double)this.doorInfo.getInsidePosZ()) > 256.0D)
+        if (this.entityObj.getDistanceSq(var1) > 256.0D)
         {
-            Vec3 var1 = RandomPositionGenerator.findRandomTargetBlockTowards(this.entityObj, 14, 3, Vec3.createVectorHelper((double)this.doorInfo.getInsidePosX() + 0.5D, (double)this.doorInfo.getInsidePosY(), (double)this.doorInfo.getInsidePosZ() + 0.5D));
+            Vec3 var5 = RandomPositionGenerator.findRandomTargetBlockTowards(this.entityObj, 14, 3, new Vec3((double)var2 + 0.5D, (double)var3, (double)var4 + 0.5D));
 
-            if (var1 != null)
+            if (var5 != null)
             {
-                this.entityObj.getNavigator().tryMoveToXYZ(var1.xCoord, var1.yCoord, var1.zCoord, 1.0D);
+                this.entityObj.getNavigator().tryMoveToXYZ(var5.xCoord, var5.yCoord, var5.zCoord, 1.0D);
             }
         }
         else
         {
-            this.entityObj.getNavigator().tryMoveToXYZ((double)this.doorInfo.getInsidePosX() + 0.5D, (double)this.doorInfo.getInsidePosY(), (double)this.doorInfo.getInsidePosZ() + 0.5D, 1.0D);
+            this.entityObj.getNavigator().tryMoveToXYZ((double)var2 + 0.5D, (double)var3, (double)var4 + 0.5D, 1.0D);
         }
     }
 
@@ -95,8 +97,8 @@ public class EntityAIMoveIndoors extends EntityAIBase
      */
     public void resetTask()
     {
-        this.insidePosX = this.doorInfo.getInsidePosX();
-        this.insidePosZ = this.doorInfo.getInsidePosZ();
+        this.insidePosX = this.doorInfo.func_179856_e().getX();
+        this.insidePosZ = this.doorInfo.func_179856_e().getZ();
         this.doorInfo = null;
     }
 }

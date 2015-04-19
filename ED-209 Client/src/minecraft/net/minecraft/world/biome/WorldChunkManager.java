@@ -1,12 +1,12 @@
 package net.minecraft.world.biome;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ReportedException;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -19,17 +19,19 @@ public class WorldChunkManager
     /** A GenLayer containing the indices into BiomeGenBase.biomeList[] */
     private GenLayer biomeIndexLayer;
 
-    /** The BiomeCache object for this world. */
+    /** The biome list. */
     private BiomeCache biomeCache;
 
     /** A list of biomes that the player can spawn in. */
     private List biomesToSpawnIn;
+    private String field_180301_f;
     private static final String __OBFID = "CL_00000166";
 
     protected WorldChunkManager()
     {
         this.biomeCache = new BiomeCache(this);
-        this.biomesToSpawnIn = new ArrayList();
+        this.field_180301_f = "";
+        this.biomesToSpawnIn = Lists.newArrayList();
         this.biomesToSpawnIn.add(BiomeGenBase.forest);
         this.biomesToSpawnIn.add(BiomeGenBase.plains);
         this.biomesToSpawnIn.add(BiomeGenBase.taiga);
@@ -39,17 +41,18 @@ public class WorldChunkManager
         this.biomesToSpawnIn.add(BiomeGenBase.jungleHills);
     }
 
-    public WorldChunkManager(long p_i1975_1_, WorldType p_i1975_3_)
+    public WorldChunkManager(long p_i45744_1_, WorldType p_i45744_3_, String p_i45744_4_)
     {
         this();
-        GenLayer[] var4 = GenLayer.initializeAllBiomeGenerators(p_i1975_1_, p_i1975_3_);
-        this.genBiomes = var4[0];
-        this.biomeIndexLayer = var4[1];
+        this.field_180301_f = p_i45744_4_;
+        GenLayer[] var5 = GenLayer.func_180781_a(p_i45744_1_, p_i45744_3_, p_i45744_4_);
+        this.genBiomes = var5[0];
+        this.biomeIndexLayer = var5[1];
     }
 
-    public WorldChunkManager(World p_i1976_1_)
+    public WorldChunkManager(World worldIn)
     {
-        this(p_i1976_1_.getSeed(), p_i1976_1_.getWorldInfo().getTerrainType());
+        this(worldIn.getSeed(), worldIn.getWorldInfo().getTerrainType(), worldIn.getWorldInfo().getGeneratorOptions());
     }
 
     /**
@@ -60,12 +63,14 @@ public class WorldChunkManager
         return this.biomesToSpawnIn;
     }
 
-    /**
-     * Returns the BiomeGenBase related to the x, z position on the world.
-     */
-    public BiomeGenBase getBiomeGenAt(int p_76935_1_, int p_76935_2_)
+    public BiomeGenBase func_180631_a(BlockPos p_180631_1_)
     {
-        return this.biomeCache.getBiomeGenAt(p_76935_1_, p_76935_2_);
+        return this.func_180300_a(p_180631_1_, (BiomeGenBase)null);
+    }
+
+    public BiomeGenBase func_180300_a(BlockPos p_180300_1_, BiomeGenBase p_180300_2_)
+    {
+        return this.biomeCache.func_180284_a(p_180300_1_.getX(), p_180300_1_.getZ(), p_180300_2_);
     }
 
     /**
@@ -86,7 +91,7 @@ public class WorldChunkManager
         {
             try
             {
-                float var8 = (float)BiomeGenBase.func_150568_d(var6[var7]).getIntRainfall() / 65536.0F;
+                float var8 = (float)BiomeGenBase.getBiomeFromBiomeList(var6[var7], BiomeGenBase.field_180279_ad).getIntRainfall() / 65536.0F;
 
                 if (var8 > 1.0F)
                 {
@@ -138,7 +143,7 @@ public class WorldChunkManager
         {
             for (int var7 = 0; var7 < p_76937_4_ * p_76937_5_; ++var7)
             {
-                p_76937_1_[var7] = BiomeGenBase.func_150568_d(var6[var7]);
+                p_76937_1_[var7] = BiomeGenBase.getBiomeFromBiomeList(var6[var7], BiomeGenBase.field_180279_ad);
             }
 
             return p_76937_1_;
@@ -190,7 +195,7 @@ public class WorldChunkManager
 
             for (int var8 = 0; var8 < p_76931_4_ * p_76931_5_; ++var8)
             {
-                p_76931_1_[var8] = BiomeGenBase.func_150568_d(var7[var8]);
+                p_76931_1_[var8] = BiomeGenBase.getBiomeFromBiomeList(var7[var8], BiomeGenBase.field_180279_ad);
             }
 
             return p_76931_1_;
@@ -215,7 +220,7 @@ public class WorldChunkManager
         {
             for (int var12 = 0; var12 < var9 * var10; ++var12)
             {
-                BiomeGenBase var16 = BiomeGenBase.func_150568_d(var11[var12]);
+                BiomeGenBase var16 = BiomeGenBase.getBiome(var11[var12]);
 
                 if (!p_76940_4_.contains(var16))
                 {
@@ -238,28 +243,28 @@ public class WorldChunkManager
         }
     }
 
-    public ChunkPosition func_150795_a(int p_150795_1_, int p_150795_2_, int p_150795_3_, List p_150795_4_, Random p_150795_5_)
+    public BlockPos findBiomePosition(int x, int z, int range, List biomes, Random random)
     {
         IntCache.resetIntCache();
-        int var6 = p_150795_1_ - p_150795_3_ >> 2;
-        int var7 = p_150795_2_ - p_150795_3_ >> 2;
-        int var8 = p_150795_1_ + p_150795_3_ >> 2;
-        int var9 = p_150795_2_ + p_150795_3_ >> 2;
+        int var6 = x - range >> 2;
+        int var7 = z - range >> 2;
+        int var8 = x + range >> 2;
+        int var9 = z + range >> 2;
         int var10 = var8 - var6 + 1;
         int var11 = var9 - var7 + 1;
         int[] var12 = this.genBiomes.getInts(var6, var7, var10, var11);
-        ChunkPosition var13 = null;
+        BlockPos var13 = null;
         int var14 = 0;
 
         for (int var15 = 0; var15 < var10 * var11; ++var15)
         {
             int var16 = var6 + var15 % var10 << 2;
             int var17 = var7 + var15 / var10 << 2;
-            BiomeGenBase var18 = BiomeGenBase.func_150568_d(var12[var15]);
+            BiomeGenBase var18 = BiomeGenBase.getBiome(var12[var15]);
 
-            if (p_150795_4_.contains(var18) && (var13 == null || p_150795_5_.nextInt(var14 + 1) == 0))
+            if (biomes.contains(var18) && (var13 == null || random.nextInt(var14 + 1) == 0))
             {
-                var13 = new ChunkPosition(var16, 0, var17);
+                var13 = new BlockPos(var16, 0, var17);
                 ++var14;
             }
         }

@@ -1,60 +1,40 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelCreeper;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.layers.LayerCreeperCharge;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class RenderCreeper extends RenderLiving
 {
-    private static final ResourceLocation armoredCreeperTextures = new ResourceLocation("textures/entity/creeper/creeper_armor.png");
     private static final ResourceLocation creeperTextures = new ResourceLocation("textures/entity/creeper/creeper.png");
-
-    /** The creeper model. */
-    private ModelBase creeperModel = new ModelCreeper(2.0F);
     private static final String __OBFID = "CL_00000985";
 
-    public RenderCreeper()
+    public RenderCreeper(RenderManager p_i46186_1_)
     {
-        super(new ModelCreeper(), 0.5F);
+        super(p_i46186_1_, new ModelCreeper(), 0.5F);
+        this.addLayer(new LayerCreeperCharge(this));
     }
 
-    /**
-     * Allows the render to do any OpenGL state modifications necessary before the model is rendered. Args:
-     * entityLiving, partialTickTime
-     */
-    protected void preRenderCallback(EntityCreeper p_77041_1_, float p_77041_2_)
+    protected void func_180570_a(EntityCreeper p_180570_1_, float p_180570_2_)
     {
-        float var3 = p_77041_1_.getCreeperFlashIntensity(p_77041_2_);
+        float var3 = p_180570_1_.getCreeperFlashIntensity(p_180570_2_);
         float var4 = 1.0F + MathHelper.sin(var3 * 100.0F) * var3 * 0.01F;
-
-        if (var3 < 0.0F)
-        {
-            var3 = 0.0F;
-        }
-
-        if (var3 > 1.0F)
-        {
-            var3 = 1.0F;
-        }
-
+        var3 = MathHelper.clamp_float(var3, 0.0F, 1.0F);
         var3 *= var3;
         var3 *= var3;
         float var5 = (1.0F + var3 * 0.4F) * var4;
         float var6 = (1.0F + var3 * 0.1F) / var4;
-        GL11.glScalef(var5, var6, var5);
+        GlStateManager.scale(var5, var6, var5);
     }
 
-    /**
-     * Returns an ARGB int color back. Args: entityLiving, lightBrightness, partialTickTime
-     */
-    protected int getColorMultiplier(EntityCreeper p_77030_1_, float p_77030_2_, float p_77030_3_)
+    protected int func_180571_a(EntityCreeper p_180571_1_, float p_180571_2_, float p_180571_3_)
     {
-        float var4 = p_77030_1_.getCreeperFlashIntensity(p_77030_3_);
+        float var4 = p_180571_1_.getCreeperFlashIntensity(p_180571_3_);
 
         if ((int)(var4 * 10.0F) % 2 == 0)
         {
@@ -63,75 +43,9 @@ public class RenderCreeper extends RenderLiving
         else
         {
             int var5 = (int)(var4 * 0.2F * 255.0F);
-
-            if (var5 < 0)
-            {
-                var5 = 0;
-            }
-
-            if (var5 > 255)
-            {
-                var5 = 255;
-            }
-
-            short var6 = 255;
-            short var7 = 255;
-            short var8 = 255;
-            return var5 << 24 | var6 << 16 | var7 << 8 | var8;
+            var5 = MathHelper.clamp_int(var5, 0, 255);
+            return var5 << 24 | 16777215;
         }
-    }
-
-    /**
-     * Queries whether should render the specified pass or not.
-     */
-    protected int shouldRenderPass(EntityCreeper p_77032_1_, int p_77032_2_, float p_77032_3_)
-    {
-        if (p_77032_1_.getPowered())
-        {
-            if (p_77032_1_.isInvisible())
-            {
-                GL11.glDepthMask(false);
-            }
-            else
-            {
-                GL11.glDepthMask(true);
-            }
-
-            if (p_77032_2_ == 1)
-            {
-                float var4 = (float)p_77032_1_.ticksExisted + p_77032_3_;
-                this.bindTexture(armoredCreeperTextures);
-                GL11.glMatrixMode(GL11.GL_TEXTURE);
-                GL11.glLoadIdentity();
-                float var5 = var4 * 0.01F;
-                float var6 = var4 * 0.01F;
-                GL11.glTranslatef(var5, var6, 0.0F);
-                this.setRenderPassModel(this.creeperModel);
-                GL11.glMatrixMode(GL11.GL_MODELVIEW);
-                GL11.glEnable(GL11.GL_BLEND);
-                float var7 = 0.5F;
-                GL11.glColor4f(var7, var7, var7, 1.0F);
-                GL11.glDisable(GL11.GL_LIGHTING);
-                GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
-                return 1;
-            }
-
-            if (p_77032_2_ == 2)
-            {
-                GL11.glMatrixMode(GL11.GL_TEXTURE);
-                GL11.glLoadIdentity();
-                GL11.glMatrixMode(GL11.GL_MODELVIEW);
-                GL11.glEnable(GL11.GL_LIGHTING);
-                GL11.glDisable(GL11.GL_BLEND);
-            }
-        }
-
-        return -1;
-    }
-
-    protected int inheritRenderPass(EntityCreeper p_77035_1_, int p_77035_2_, float p_77035_3_)
-    {
-        return -1;
     }
 
     /**
@@ -148,7 +62,7 @@ public class RenderCreeper extends RenderLiving
      */
     protected void preRenderCallback(EntityLivingBase p_77041_1_, float p_77041_2_)
     {
-        this.preRenderCallback((EntityCreeper)p_77041_1_, p_77041_2_);
+        this.func_180570_a((EntityCreeper)p_77041_1_, p_77041_2_);
     }
 
     /**
@@ -156,20 +70,7 @@ public class RenderCreeper extends RenderLiving
      */
     protected int getColorMultiplier(EntityLivingBase p_77030_1_, float p_77030_2_, float p_77030_3_)
     {
-        return this.getColorMultiplier((EntityCreeper)p_77030_1_, p_77030_2_, p_77030_3_);
-    }
-
-    /**
-     * Queries whether should render the specified pass or not.
-     */
-    protected int shouldRenderPass(EntityLivingBase p_77032_1_, int p_77032_2_, float p_77032_3_)
-    {
-        return this.shouldRenderPass((EntityCreeper)p_77032_1_, p_77032_2_, p_77032_3_);
-    }
-
-    protected int inheritRenderPass(EntityLivingBase p_77035_1_, int p_77035_2_, float p_77035_3_)
-    {
-        return this.inheritRenderPass((EntityCreeper)p_77035_1_, p_77035_2_, p_77035_3_);
+        return this.func_180571_a((EntityCreeper)p_77030_1_, p_77030_2_, p_77030_3_);
     }
 
     /**

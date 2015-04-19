@@ -1,7 +1,6 @@
 package net.minecraft.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.IIcon;
 
 public class ItemColored extends ItemBlock
 {
@@ -21,25 +20,18 @@ public class ItemColored extends ItemBlock
         }
     }
 
-    public int getColorFromItemStack(ItemStack p_82790_1_, int p_82790_2_)
+    public int getColorFromItemStack(ItemStack stack, int renderPass)
     {
-        return this.field_150944_b.getRenderColor(p_82790_1_.getItemDamage());
+        return this.field_150944_b.getRenderColor(this.field_150944_b.getStateFromMeta(stack.getMetadata()));
     }
 
     /**
-     * Gets an icon index based on an item's damage value
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
      */
-    public IIcon getIconFromDamage(int p_77617_1_)
+    public int getMetadata(int damage)
     {
-        return this.field_150944_b.getIcon(0, p_77617_1_);
-    }
-
-    /**
-     * Returns the metadata of the block which this Item (ItemBlock) can place
-     */
-    public int getMetadata(int p_77647_1_)
-    {
-        return p_77647_1_;
+        return damage;
     }
 
     public ItemColored func_150943_a(String[] p_150943_1_)
@@ -52,16 +44,16 @@ public class ItemColored extends ItemBlock
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
         if (this.field_150945_c == null)
         {
-            return super.getUnlocalizedName(p_77667_1_);
+            return super.getUnlocalizedName(stack);
         }
         else
         {
-            int var2 = p_77667_1_.getItemDamage();
-            return var2 >= 0 && var2 < this.field_150945_c.length ? super.getUnlocalizedName(p_77667_1_) + "." + this.field_150945_c[var2] : super.getUnlocalizedName(p_77667_1_);
+            int var2 = stack.getMetadata();
+            return var2 >= 0 && var2 < this.field_150945_c.length ? super.getUnlocalizedName(stack) + "." + this.field_150945_c[var2] : super.getUnlocalizedName(stack);
         }
     }
 }

@@ -1,160 +1,177 @@
 package net.minecraft.world.gen.feature;
 
+import com.google.common.collect.Lists;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityMobSpawner;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class WorldGenDungeons extends WorldGenerator
 {
-    private static final WeightedRandomChestContent[] field_111189_a = new WeightedRandomChestContent[] {new WeightedRandomChestContent(Items.saddle, 0, 1, 1, 10), new WeightedRandomChestContent(Items.iron_ingot, 0, 1, 4, 10), new WeightedRandomChestContent(Items.bread, 0, 1, 1, 10), new WeightedRandomChestContent(Items.wheat, 0, 1, 4, 10), new WeightedRandomChestContent(Items.gunpowder, 0, 1, 4, 10), new WeightedRandomChestContent(Items.string, 0, 1, 4, 10), new WeightedRandomChestContent(Items.bucket, 0, 1, 1, 10), new WeightedRandomChestContent(Items.golden_apple, 0, 1, 1, 1), new WeightedRandomChestContent(Items.redstone, 0, 1, 4, 10), new WeightedRandomChestContent(Items.record_13, 0, 1, 1, 10), new WeightedRandomChestContent(Items.record_cat, 0, 1, 1, 10), new WeightedRandomChestContent(Items.name_tag, 0, 1, 1, 10), new WeightedRandomChestContent(Items.golden_horse_armor, 0, 1, 1, 2), new WeightedRandomChestContent(Items.iron_horse_armor, 0, 1, 1, 5), new WeightedRandomChestContent(Items.diamond_horse_armor, 0, 1, 1, 1)};
+    private static final Logger field_175918_a = LogManager.getLogger();
+    private static final String[] SPAWNERTYPES = new String[] {"Skeleton", "Zombie", "Zombie", "Spider"};
+    private static final List CHESTCONTENT = Lists.newArrayList(new WeightedRandomChestContent[] {new WeightedRandomChestContent(Items.saddle, 0, 1, 1, 10), new WeightedRandomChestContent(Items.iron_ingot, 0, 1, 4, 10), new WeightedRandomChestContent(Items.bread, 0, 1, 1, 10), new WeightedRandomChestContent(Items.wheat, 0, 1, 4, 10), new WeightedRandomChestContent(Items.gunpowder, 0, 1, 4, 10), new WeightedRandomChestContent(Items.string, 0, 1, 4, 10), new WeightedRandomChestContent(Items.bucket, 0, 1, 1, 10), new WeightedRandomChestContent(Items.golden_apple, 0, 1, 1, 1), new WeightedRandomChestContent(Items.redstone, 0, 1, 4, 10), new WeightedRandomChestContent(Items.record_13, 0, 1, 1, 4), new WeightedRandomChestContent(Items.record_cat, 0, 1, 1, 4), new WeightedRandomChestContent(Items.name_tag, 0, 1, 1, 10), new WeightedRandomChestContent(Items.golden_horse_armor, 0, 1, 1, 2), new WeightedRandomChestContent(Items.iron_horse_armor, 0, 1, 1, 5), new WeightedRandomChestContent(Items.diamond_horse_armor, 0, 1, 1, 1)});
     private static final String __OBFID = "CL_00000425";
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        byte var6 = 3;
-        int var7 = p_76484_2_.nextInt(2) + 2;
-        int var8 = p_76484_2_.nextInt(2) + 2;
-        int var9 = 0;
-        int var10;
-        int var11;
-        int var12;
+        boolean var4 = true;
+        int var5 = p_180709_2_.nextInt(2) + 2;
+        int var6 = -var5 - 1;
+        int var7 = var5 + 1;
+        boolean var8 = true;
+        boolean var9 = true;
+        int var10 = p_180709_2_.nextInt(2) + 2;
+        int var11 = -var10 - 1;
+        int var12 = var10 + 1;
+        int var13 = 0;
+        int var14;
+        int var15;
+        int var16;
+        BlockPos var17;
 
-        for (var10 = p_76484_3_ - var7 - 1; var10 <= p_76484_3_ + var7 + 1; ++var10)
+        for (var14 = var6; var14 <= var7; ++var14)
         {
-            for (var11 = p_76484_4_ - 1; var11 <= p_76484_4_ + var6 + 1; ++var11)
+            for (var15 = -1; var15 <= 4; ++var15)
             {
-                for (var12 = p_76484_5_ - var8 - 1; var12 <= p_76484_5_ + var8 + 1; ++var12)
+                for (var16 = var11; var16 <= var12; ++var16)
                 {
-                    Material var13 = p_76484_1_.getBlock(var10, var11, var12).getMaterial();
+                    var17 = p_180709_3_.add(var14, var15, var16);
+                    Material var18 = worldIn.getBlockState(var17).getBlock().getMaterial();
+                    boolean var19 = var18.isSolid();
 
-                    if (var11 == p_76484_4_ - 1 && !var13.isSolid())
+                    if (var15 == -1 && !var19)
                     {
                         return false;
                     }
 
-                    if (var11 == p_76484_4_ + var6 + 1 && !var13.isSolid())
+                    if (var15 == 4 && !var19)
                     {
                         return false;
                     }
 
-                    if ((var10 == p_76484_3_ - var7 - 1 || var10 == p_76484_3_ + var7 + 1 || var12 == p_76484_5_ - var8 - 1 || var12 == p_76484_5_ + var8 + 1) && var11 == p_76484_4_ && p_76484_1_.isAirBlock(var10, var11, var12) && p_76484_1_.isAirBlock(var10, var11 + 1, var12))
+                    if ((var14 == var6 || var14 == var7 || var16 == var11 || var16 == var12) && var15 == 0 && worldIn.isAirBlock(var17) && worldIn.isAirBlock(var17.offsetUp()))
                     {
-                        ++var9;
+                        ++var13;
                     }
                 }
             }
         }
 
-        if (var9 >= 1 && var9 <= 5)
+        if (var13 >= 1 && var13 <= 5)
         {
-            for (var10 = p_76484_3_ - var7 - 1; var10 <= p_76484_3_ + var7 + 1; ++var10)
+            for (var14 = var6; var14 <= var7; ++var14)
             {
-                for (var11 = p_76484_4_ + var6; var11 >= p_76484_4_ - 1; --var11)
+                for (var15 = 3; var15 >= -1; --var15)
                 {
-                    for (var12 = p_76484_5_ - var8 - 1; var12 <= p_76484_5_ + var8 + 1; ++var12)
+                    for (var16 = var11; var16 <= var12; ++var16)
                     {
-                        if (var10 != p_76484_3_ - var7 - 1 && var11 != p_76484_4_ - 1 && var12 != p_76484_5_ - var8 - 1 && var10 != p_76484_3_ + var7 + 1 && var11 != p_76484_4_ + var6 + 1 && var12 != p_76484_5_ + var8 + 1)
+                        var17 = p_180709_3_.add(var14, var15, var16);
+
+                        if (var14 != var6 && var15 != -1 && var16 != var11 && var14 != var7 && var15 != 4 && var16 != var12)
                         {
-                            p_76484_1_.setBlockToAir(var10, var11, var12);
-                        }
-                        else if (var11 >= 0 && !p_76484_1_.getBlock(var10, var11 - 1, var12).getMaterial().isSolid())
-                        {
-                            p_76484_1_.setBlockToAir(var10, var11, var12);
-                        }
-                        else if (p_76484_1_.getBlock(var10, var11, var12).getMaterial().isSolid())
-                        {
-                            if (var11 == p_76484_4_ - 1 && p_76484_2_.nextInt(4) != 0)
+                            if (worldIn.getBlockState(var17).getBlock() != Blocks.chest)
                             {
-                                p_76484_1_.setBlock(var10, var11, var12, Blocks.mossy_cobblestone, 0, 2);
+                                worldIn.setBlockToAir(var17);
+                            }
+                        }
+                        else if (var17.getY() >= 0 && !worldIn.getBlockState(var17.offsetDown()).getBlock().getMaterial().isSolid())
+                        {
+                            worldIn.setBlockToAir(var17);
+                        }
+                        else if (worldIn.getBlockState(var17).getBlock().getMaterial().isSolid() && worldIn.getBlockState(var17).getBlock() != Blocks.chest)
+                        {
+                            if (var15 == -1 && p_180709_2_.nextInt(4) != 0)
+                            {
+                                worldIn.setBlockState(var17, Blocks.mossy_cobblestone.getDefaultState(), 2);
                             }
                             else
                             {
-                                p_76484_1_.setBlock(var10, var11, var12, Blocks.cobblestone, 0, 2);
+                                worldIn.setBlockState(var17, Blocks.cobblestone.getDefaultState(), 2);
                             }
                         }
                     }
                 }
             }
 
-            var10 = 0;
+            var14 = 0;
 
-            while (var10 < 2)
+            while (var14 < 2)
             {
-                var11 = 0;
+                var15 = 0;
 
                 while (true)
                 {
-                    if (var11 < 3)
+                    if (var15 < 3)
                     {
-                        label101:
+                        label100:
                         {
-                            var12 = p_76484_3_ + p_76484_2_.nextInt(var7 * 2 + 1) - var7;
-                            int var14 = p_76484_5_ + p_76484_2_.nextInt(var8 * 2 + 1) - var8;
+                            var16 = p_180709_3_.getX() + p_180709_2_.nextInt(var5 * 2 + 1) - var5;
+                            int var24 = p_180709_3_.getY();
+                            int var25 = p_180709_3_.getZ() + p_180709_2_.nextInt(var10 * 2 + 1) - var10;
+                            BlockPos var26 = new BlockPos(var16, var24, var25);
 
-                            if (p_76484_1_.isAirBlock(var12, p_76484_4_, var14))
+                            if (worldIn.isAirBlock(var26))
                             {
-                                int var15 = 0;
+                                int var20 = 0;
+                                Iterator var21 = EnumFacing.Plane.HORIZONTAL.iterator();
 
-                                if (p_76484_1_.getBlock(var12 - 1, p_76484_4_, var14).getMaterial().isSolid())
+                                while (var21.hasNext())
                                 {
-                                    ++var15;
-                                }
+                                    EnumFacing var22 = (EnumFacing)var21.next();
 
-                                if (p_76484_1_.getBlock(var12 + 1, p_76484_4_, var14).getMaterial().isSolid())
-                                {
-                                    ++var15;
-                                }
-
-                                if (p_76484_1_.getBlock(var12, p_76484_4_, var14 - 1).getMaterial().isSolid())
-                                {
-                                    ++var15;
-                                }
-
-                                if (p_76484_1_.getBlock(var12, p_76484_4_, var14 + 1).getMaterial().isSolid())
-                                {
-                                    ++var15;
-                                }
-
-                                if (var15 == 1)
-                                {
-                                    p_76484_1_.setBlock(var12, p_76484_4_, var14, Blocks.chest, 0, 2);
-                                    WeightedRandomChestContent[] var16 = WeightedRandomChestContent.func_92080_a(field_111189_a, new WeightedRandomChestContent[] {Items.enchanted_book.func_92114_b(p_76484_2_)});
-                                    TileEntityChest var17 = (TileEntityChest)p_76484_1_.getTileEntity(var12, p_76484_4_, var14);
-
-                                    if (var17 != null)
+                                    if (worldIn.getBlockState(var26.offset(var22)).getBlock().getMaterial().isSolid())
                                     {
-                                        WeightedRandomChestContent.generateChestContents(p_76484_2_, var16, var17, 8);
+                                        ++var20;
+                                    }
+                                }
+
+                                if (var20 == 1)
+                                {
+                                    worldIn.setBlockState(var26, Blocks.chest.func_176458_f(worldIn, var26, Blocks.chest.getDefaultState()), 2);
+                                    List var27 = WeightedRandomChestContent.func_177629_a(CHESTCONTENT, new WeightedRandomChestContent[] {Items.enchanted_book.getRandomEnchantedBook(p_180709_2_)});
+                                    TileEntity var28 = worldIn.getTileEntity(var26);
+
+                                    if (var28 instanceof TileEntityChest)
+                                    {
+                                        WeightedRandomChestContent.generateChestContents(p_180709_2_, var27, (TileEntityChest)var28, 8);
                                     }
 
-                                    break label101;
+                                    break label100;
                                 }
                             }
 
-                            ++var11;
+                            ++var15;
                             continue;
                         }
                     }
 
-                    ++var10;
+                    ++var14;
                     break;
                 }
             }
 
-            p_76484_1_.setBlock(p_76484_3_, p_76484_4_, p_76484_5_, Blocks.mob_spawner, 0, 2);
-            TileEntityMobSpawner var18 = (TileEntityMobSpawner)p_76484_1_.getTileEntity(p_76484_3_, p_76484_4_, p_76484_5_);
+            worldIn.setBlockState(p_180709_3_, Blocks.mob_spawner.getDefaultState(), 2);
+            TileEntity var23 = worldIn.getTileEntity(p_180709_3_);
 
-            if (var18 != null)
+            if (var23 instanceof TileEntityMobSpawner)
             {
-                var18.func_145881_a().setMobID(this.pickMobSpawner(p_76484_2_));
+                ((TileEntityMobSpawner)var23).getSpawnerBaseLogic().setEntityName(this.pickMobSpawner(p_180709_2_));
             }
             else
             {
-                System.err.println("Failed to fetch mob spawner entity at (" + p_76484_3_ + ", " + p_76484_4_ + ", " + p_76484_5_ + ")");
+                field_175918_a.error("Failed to fetch mob spawner entity at (" + p_180709_3_.getX() + ", " + p_180709_3_.getY() + ", " + p_180709_3_.getZ() + ")");
             }
 
             return true;
@@ -170,7 +187,6 @@ public class WorldGenDungeons extends WorldGenerator
      */
     private String pickMobSpawner(Random p_76543_1_)
     {
-        int var2 = p_76543_1_.nextInt(4);
-        return var2 == 0 ? "Skeleton" : (var2 == 1 ? "Zombie" : (var2 == 2 ? "Zombie" : (var2 == 3 ? "Spider" : "")));
+        return SPAWNERTYPES[p_76543_1_.nextInt(SPAWNERTYPES.length)];
     }
 }

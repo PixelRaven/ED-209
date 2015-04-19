@@ -1,30 +1,36 @@
 package net.minecraft.block;
 
+import java.util.Iterator;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockLever extends Block
 {
+    public static final PropertyEnum FACING = PropertyEnum.create("facing", BlockLever.EnumOrientation.class);
+    public static final PropertyBool POWERED = PropertyBool.create("powered");
     private static final String __OBFID = "CL_00000264";
 
     protected BlockLever()
     {
         super(Material.circuits);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, BlockLever.EnumOrientation.NORTH).withProperty(POWERED, Boolean.valueOf(false)));
         this.setCreativeTab(CreativeTabs.tabRedstone);
     }
 
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
         return null;
     }
@@ -34,124 +40,82 @@ public class BlockLever extends Block
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
     /**
-     * The type of render function that is called for this block
+     * Check whether this Block can be placed on the given side
      */
-    public int getRenderType()
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
-        return 12;
+        return side == EnumFacing.UP && World.doesBlockHaveSolidTopSurface(worldIn, pos.offsetDown()) ? true : this.func_176358_d(worldIn, pos.offset(side.getOpposite()));
     }
 
-    /**
-     * checks to see if you can place this block can be placed on that side of a block: BlockLever overrides
-     */
-    public boolean canPlaceBlockOnSide(World p_149707_1_, int p_149707_2_, int p_149707_3_, int p_149707_4_, int p_149707_5_)
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        return p_149707_5_ == 0 && p_149707_1_.getBlock(p_149707_2_, p_149707_3_ + 1, p_149707_4_).isNormalCube() ? true : (p_149707_5_ == 1 && World.doesBlockHaveSolidTopSurface(p_149707_1_, p_149707_2_, p_149707_3_ - 1, p_149707_4_) ? true : (p_149707_5_ == 2 && p_149707_1_.getBlock(p_149707_2_, p_149707_3_, p_149707_4_ + 1).isNormalCube() ? true : (p_149707_5_ == 3 && p_149707_1_.getBlock(p_149707_2_, p_149707_3_, p_149707_4_ - 1).isNormalCube() ? true : (p_149707_5_ == 4 && p_149707_1_.getBlock(p_149707_2_ + 1, p_149707_3_, p_149707_4_).isNormalCube() ? true : p_149707_5_ == 5 && p_149707_1_.getBlock(p_149707_2_ - 1, p_149707_3_, p_149707_4_).isNormalCube()))));
+        return this.func_176358_d(worldIn, pos.offsetWest()) ? true : (this.func_176358_d(worldIn, pos.offsetEast()) ? true : (this.func_176358_d(worldIn, pos.offsetNorth()) ? true : (this.func_176358_d(worldIn, pos.offsetSouth()) ? true : (World.doesBlockHaveSolidTopSurface(worldIn, pos.offsetDown()) ? true : this.func_176358_d(worldIn, pos.offsetUp())))));
     }
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
+    protected boolean func_176358_d(World worldIn, BlockPos p_176358_2_)
     {
-        return p_149742_1_.getBlock(p_149742_2_ - 1, p_149742_3_, p_149742_4_).isNormalCube() ? true : (p_149742_1_.getBlock(p_149742_2_ + 1, p_149742_3_, p_149742_4_).isNormalCube() ? true : (p_149742_1_.getBlock(p_149742_2_, p_149742_3_, p_149742_4_ - 1).isNormalCube() ? true : (p_149742_1_.getBlock(p_149742_2_, p_149742_3_, p_149742_4_ + 1).isNormalCube() ? true : (World.doesBlockHaveSolidTopSurface(p_149742_1_, p_149742_2_, p_149742_3_ - 1, p_149742_4_) ? true : p_149742_1_.getBlock(p_149742_2_, p_149742_3_ + 1, p_149742_4_).isNormalCube()))));
+        return worldIn.getBlockState(p_176358_2_).getBlock().isNormalCube();
     }
 
-    public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_)
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        int var11 = p_149660_9_ & 8;
-        int var10 = p_149660_9_ & 7;
-        byte var12 = -1;
+        IBlockState var9 = this.getDefaultState().withProperty(POWERED, Boolean.valueOf(false));
 
-        if (p_149660_5_ == 0 && p_149660_1_.getBlock(p_149660_2_, p_149660_3_ + 1, p_149660_4_).isNormalCube())
+        if (this.func_176358_d(worldIn, pos.offset(facing.getOpposite())))
         {
-            var12 = 0;
+            return var9.withProperty(FACING, BlockLever.EnumOrientation.func_176856_a(facing, placer.func_174811_aO()));
         }
-
-        if (p_149660_5_ == 1 && World.doesBlockHaveSolidTopSurface(p_149660_1_, p_149660_2_, p_149660_3_ - 1, p_149660_4_))
+        else
         {
-            var12 = 5;
-        }
+            Iterator var10 = EnumFacing.Plane.HORIZONTAL.iterator();
+            EnumFacing var11;
 
-        if (p_149660_5_ == 2 && p_149660_1_.getBlock(p_149660_2_, p_149660_3_, p_149660_4_ + 1).isNormalCube())
-        {
-            var12 = 4;
-        }
-
-        if (p_149660_5_ == 3 && p_149660_1_.getBlock(p_149660_2_, p_149660_3_, p_149660_4_ - 1).isNormalCube())
-        {
-            var12 = 3;
-        }
-
-        if (p_149660_5_ == 4 && p_149660_1_.getBlock(p_149660_2_ + 1, p_149660_3_, p_149660_4_).isNormalCube())
-        {
-            var12 = 2;
-        }
-
-        if (p_149660_5_ == 5 && p_149660_1_.getBlock(p_149660_2_ - 1, p_149660_3_, p_149660_4_).isNormalCube())
-        {
-            var12 = 1;
-        }
-
-        return var12 + var11;
-    }
-
-    /**
-     * Called when the block is placed in the world.
-     */
-    public void onBlockPlacedBy(World p_149689_1_, int p_149689_2_, int p_149689_3_, int p_149689_4_, EntityLivingBase p_149689_5_, ItemStack p_149689_6_)
-    {
-        int var7 = p_149689_1_.getBlockMetadata(p_149689_2_, p_149689_3_, p_149689_4_);
-        int var8 = var7 & 7;
-        int var9 = var7 & 8;
-
-        if (var8 == func_149819_b(1))
-        {
-            if ((MathHelper.floor_double((double)(p_149689_5_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 1) == 0)
+            do
             {
-                p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 5 | var9, 2);
+                if (!var10.hasNext())
+                {
+                    if (World.doesBlockHaveSolidTopSurface(worldIn, pos.offsetDown()))
+                    {
+                        return var9.withProperty(FACING, BlockLever.EnumOrientation.func_176856_a(EnumFacing.UP, placer.func_174811_aO()));
+                    }
+
+                    return var9;
+                }
+
+                var11 = (EnumFacing)var10.next();
             }
-            else
-            {
-                p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 6 | var9, 2);
-            }
-        }
-        else if (var8 == func_149819_b(0))
-        {
-            if ((MathHelper.floor_double((double)(p_149689_5_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 1) == 0)
-            {
-                p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 7 | var9, 2);
-            }
-            else
-            {
-                p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 0 | var9, 2);
-            }
+            while (var11 == facing || !this.func_176358_d(worldIn, pos.offset(var11.getOpposite())));
+
+            return var9.withProperty(FACING, BlockLever.EnumOrientation.func_176856_a(var11, placer.func_174811_aO()));
         }
     }
 
-    public static int func_149819_b(int p_149819_0_)
+    public static int func_176357_a(EnumFacing p_176357_0_)
     {
-        switch (p_149819_0_)
+        switch (BlockLever.SwitchEnumFacing.FACING_LOOKUP[p_176357_0_.ordinal()])
         {
-            case 0:
+            case 1:
                 return 0;
 
-            case 1:
+            case 2:
                 return 5;
 
-            case 2:
+            case 3:
                 return 4;
 
-            case 3:
+            case 4:
                 return 3;
 
-            case 4:
+            case 5:
                 return 2;
 
-            case 5:
+            case 6:
                 return 1;
 
             default:
@@ -159,218 +123,102 @@ public class BlockLever extends Block
         }
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
-        if (this.func_149820_e(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_))
+        if (this.func_176356_e(worldIn, pos) && !this.func_176358_d(worldIn, pos.offset(((BlockLever.EnumOrientation)state.getValue(FACING)).func_176852_c().getOpposite())))
         {
-            int var6 = p_149695_1_.getBlockMetadata(p_149695_2_, p_149695_3_, p_149695_4_) & 7;
-            boolean var7 = false;
-
-            if (!p_149695_1_.getBlock(p_149695_2_ - 1, p_149695_3_, p_149695_4_).isNormalCube() && var6 == 1)
-            {
-                var7 = true;
-            }
-
-            if (!p_149695_1_.getBlock(p_149695_2_ + 1, p_149695_3_, p_149695_4_).isNormalCube() && var6 == 2)
-            {
-                var7 = true;
-            }
-
-            if (!p_149695_1_.getBlock(p_149695_2_, p_149695_3_, p_149695_4_ - 1).isNormalCube() && var6 == 3)
-            {
-                var7 = true;
-            }
-
-            if (!p_149695_1_.getBlock(p_149695_2_, p_149695_3_, p_149695_4_ + 1).isNormalCube() && var6 == 4)
-            {
-                var7 = true;
-            }
-
-            if (!World.doesBlockHaveSolidTopSurface(p_149695_1_, p_149695_2_, p_149695_3_ - 1, p_149695_4_) && var6 == 5)
-            {
-                var7 = true;
-            }
-
-            if (!World.doesBlockHaveSolidTopSurface(p_149695_1_, p_149695_2_, p_149695_3_ - 1, p_149695_4_) && var6 == 6)
-            {
-                var7 = true;
-            }
-
-            if (!p_149695_1_.getBlock(p_149695_2_, p_149695_3_ + 1, p_149695_4_).isNormalCube() && var6 == 0)
-            {
-                var7 = true;
-            }
-
-            if (!p_149695_1_.getBlock(p_149695_2_, p_149695_3_ + 1, p_149695_4_).isNormalCube() && var6 == 7)
-            {
-                var7 = true;
-            }
-
-            if (var7)
-            {
-                this.dropBlockAsItem(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, p_149695_1_.getBlockMetadata(p_149695_2_, p_149695_3_, p_149695_4_), 0);
-                p_149695_1_.setBlockToAir(p_149695_2_, p_149695_3_, p_149695_4_);
-            }
+            this.dropBlockAsItem(worldIn, pos, state, 0);
+            worldIn.setBlockToAir(pos);
         }
     }
 
-    private boolean func_149820_e(World p_149820_1_, int p_149820_2_, int p_149820_3_, int p_149820_4_)
+    private boolean func_176356_e(World worldIn, BlockPos p_176356_2_)
     {
-        if (!this.canPlaceBlockAt(p_149820_1_, p_149820_2_, p_149820_3_, p_149820_4_))
+        if (this.canPlaceBlockAt(worldIn, p_176356_2_))
         {
-            this.dropBlockAsItem(p_149820_1_, p_149820_2_, p_149820_3_, p_149820_4_, p_149820_1_.getBlockMetadata(p_149820_2_, p_149820_3_, p_149820_4_), 0);
-            p_149820_1_.setBlockToAir(p_149820_2_, p_149820_3_, p_149820_4_);
+            return true;
+        }
+        else
+        {
+            this.dropBlockAsItem(worldIn, p_176356_2_, worldIn.getBlockState(p_176356_2_), 0);
+            worldIn.setBlockToAir(p_176356_2_);
             return false;
         }
-        else
+    }
+
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
+    {
+        float var3 = 0.1875F;
+
+        switch (BlockLever.SwitchEnumFacing.ORIENTATION_LOOKUP[((BlockLever.EnumOrientation)access.getBlockState(pos).getValue(FACING)).ordinal()])
         {
-            return true;
+            case 1:
+                this.setBlockBounds(0.0F, 0.2F, 0.5F - var3, var3 * 2.0F, 0.8F, 0.5F + var3);
+                break;
+
+            case 2:
+                this.setBlockBounds(1.0F - var3 * 2.0F, 0.2F, 0.5F - var3, 1.0F, 0.8F, 0.5F + var3);
+                break;
+
+            case 3:
+                this.setBlockBounds(0.5F - var3, 0.2F, 0.0F, 0.5F + var3, 0.8F, var3 * 2.0F);
+                break;
+
+            case 4:
+                this.setBlockBounds(0.5F - var3, 0.2F, 1.0F - var3 * 2.0F, 0.5F + var3, 0.8F, 1.0F);
+                break;
+
+            case 5:
+            case 6:
+                var3 = 0.25F;
+                this.setBlockBounds(0.5F - var3, 0.0F, 0.5F - var3, 0.5F + var3, 0.6F, 0.5F + var3);
+                break;
+
+            case 7:
+            case 8:
+                var3 = 0.25F;
+                this.setBlockBounds(0.5F - var3, 0.4F, 0.5F - var3, 0.5F + var3, 1.0F, 0.5F + var3);
         }
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        int var5 = p_149719_1_.getBlockMetadata(p_149719_2_, p_149719_3_, p_149719_4_) & 7;
-        float var6 = 0.1875F;
-
-        if (var5 == 1)
-        {
-            this.setBlockBounds(0.0F, 0.2F, 0.5F - var6, var6 * 2.0F, 0.8F, 0.5F + var6);
-        }
-        else if (var5 == 2)
-        {
-            this.setBlockBounds(1.0F - var6 * 2.0F, 0.2F, 0.5F - var6, 1.0F, 0.8F, 0.5F + var6);
-        }
-        else if (var5 == 3)
-        {
-            this.setBlockBounds(0.5F - var6, 0.2F, 0.0F, 0.5F + var6, 0.8F, var6 * 2.0F);
-        }
-        else if (var5 == 4)
-        {
-            this.setBlockBounds(0.5F - var6, 0.2F, 1.0F - var6 * 2.0F, 0.5F + var6, 0.8F, 1.0F);
-        }
-        else if (var5 != 5 && var5 != 6)
-        {
-            if (var5 == 0 || var5 == 7)
-            {
-                var6 = 0.25F;
-                this.setBlockBounds(0.5F - var6, 0.4F, 0.5F - var6, 0.5F + var6, 1.0F, 0.5F + var6);
-            }
-        }
-        else
-        {
-            var6 = 0.25F;
-            this.setBlockBounds(0.5F - var6, 0.0F, 0.5F - var6, 0.5F + var6, 0.6F, 0.5F + var6);
-        }
-    }
-
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
-    {
-        if (p_149727_1_.isClient)
+        if (worldIn.isRemote)
         {
             return true;
         }
         else
         {
-            int var10 = p_149727_1_.getBlockMetadata(p_149727_2_, p_149727_3_, p_149727_4_);
-            int var11 = var10 & 7;
-            int var12 = 8 - (var10 & 8);
-            p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, var11 + var12, 3);
-            p_149727_1_.playSoundEffect((double)p_149727_2_ + 0.5D, (double)p_149727_3_ + 0.5D, (double)p_149727_4_ + 0.5D, "random.click", 0.3F, var12 > 0 ? 0.6F : 0.5F);
-            p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_, p_149727_3_, p_149727_4_, this);
-
-            if (var11 == 1)
-            {
-                p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_ - 1, p_149727_3_, p_149727_4_, this);
-            }
-            else if (var11 == 2)
-            {
-                p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_ + 1, p_149727_3_, p_149727_4_, this);
-            }
-            else if (var11 == 3)
-            {
-                p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_, p_149727_3_, p_149727_4_ - 1, this);
-            }
-            else if (var11 == 4)
-            {
-                p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_, p_149727_3_, p_149727_4_ + 1, this);
-            }
-            else if (var11 != 5 && var11 != 6)
-            {
-                if (var11 == 0 || var11 == 7)
-                {
-                    p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_, p_149727_3_ + 1, p_149727_4_, this);
-                }
-            }
-            else
-            {
-                p_149727_1_.notifyBlocksOfNeighborChange(p_149727_2_, p_149727_3_ - 1, p_149727_4_, this);
-            }
-
+            state = state.cycleProperty(POWERED);
+            worldIn.setBlockState(pos, state, 3);
+            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, ((Boolean)state.getValue(POWERED)).booleanValue() ? 0.6F : 0.5F);
+            worldIn.notifyNeighborsOfStateChange(pos, this);
+            EnumFacing var9 = ((BlockLever.EnumOrientation)state.getValue(FACING)).func_176852_c();
+            worldIn.notifyNeighborsOfStateChange(pos.offset(var9.getOpposite()), this);
             return true;
         }
     }
 
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
-        if ((p_149749_6_ & 8) > 0)
+        if (((Boolean)state.getValue(POWERED)).booleanValue())
         {
-            p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_, p_149749_3_, p_149749_4_, this);
-            int var7 = p_149749_6_ & 7;
-
-            if (var7 == 1)
-            {
-                p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_ - 1, p_149749_3_, p_149749_4_, this);
-            }
-            else if (var7 == 2)
-            {
-                p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_ + 1, p_149749_3_, p_149749_4_, this);
-            }
-            else if (var7 == 3)
-            {
-                p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_, p_149749_3_, p_149749_4_ - 1, this);
-            }
-            else if (var7 == 4)
-            {
-                p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_, p_149749_3_, p_149749_4_ + 1, this);
-            }
-            else if (var7 != 5 && var7 != 6)
-            {
-                if (var7 == 0 || var7 == 7)
-                {
-                    p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_, p_149749_3_ + 1, p_149749_4_, this);
-                }
-            }
-            else
-            {
-                p_149749_1_.notifyBlocksOfNeighborChange(p_149749_2_, p_149749_3_ - 1, p_149749_4_, this);
-            }
+            worldIn.notifyNeighborsOfStateChange(pos, this);
+            EnumFacing var4 = ((BlockLever.EnumOrientation)state.getValue(FACING)).func_176852_c();
+            worldIn.notifyNeighborsOfStateChange(pos.offset(var4.getOpposite()), this);
         }
 
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
+        super.breakBlock(worldIn, pos, state);
     }
 
-    public int isProvidingWeakPower(IBlockAccess p_149709_1_, int p_149709_2_, int p_149709_3_, int p_149709_4_, int p_149709_5_)
+    public int isProvidingWeakPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
     {
-        return (p_149709_1_.getBlockMetadata(p_149709_2_, p_149709_3_, p_149709_4_) & 8) > 0 ? 15 : 0;
+        return ((Boolean)state.getValue(POWERED)).booleanValue() ? 15 : 0;
     }
 
-    public int isProvidingStrongPower(IBlockAccess p_149748_1_, int p_149748_2_, int p_149748_3_, int p_149748_4_, int p_149748_5_)
+    public int isProvidingStrongPower(IBlockAccess worldIn, BlockPos pos, IBlockState state, EnumFacing side)
     {
-        int var6 = p_149748_1_.getBlockMetadata(p_149748_2_, p_149748_3_, p_149748_4_);
-
-        if ((var6 & 8) == 0)
-        {
-            return 0;
-        }
-        else
-        {
-            int var7 = var6 & 7;
-            return var7 == 0 && p_149748_5_ == 0 ? 15 : (var7 == 7 && p_149748_5_ == 0 ? 15 : (var7 == 6 && p_149748_5_ == 1 ? 15 : (var7 == 5 && p_149748_5_ == 1 ? 15 : (var7 == 4 && p_149748_5_ == 2 ? 15 : (var7 == 3 && p_149748_5_ == 3 ? 15 : (var7 == 2 && p_149748_5_ == 4 ? 15 : (var7 == 1 && p_149748_5_ == 5 ? 15 : 0)))))));
-        }
+        return !((Boolean)state.getValue(POWERED)).booleanValue() ? 0 : (((BlockLever.EnumOrientation)state.getValue(FACING)).func_176852_c() == side ? 15 : 0);
     }
 
     /**
@@ -379,5 +227,309 @@ public class BlockLever extends Block
     public boolean canProvidePower()
     {
         return true;
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(FACING, BlockLever.EnumOrientation.func_176853_a(meta & 7)).withProperty(POWERED, Boolean.valueOf((meta & 8) > 0));
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        byte var2 = 0;
+        int var3 = var2 | ((BlockLever.EnumOrientation)state.getValue(FACING)).func_176855_a();
+
+        if (((Boolean)state.getValue(POWERED)).booleanValue())
+        {
+            var3 |= 8;
+        }
+
+        return var3;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {FACING, POWERED});
+    }
+
+    public static enum EnumOrientation implements IStringSerializable
+    {
+        DOWN_X("DOWN_X", 0, 0, "down_x", EnumFacing.DOWN),
+        EAST("EAST", 1, 1, "east", EnumFacing.EAST),
+        WEST("WEST", 2, 2, "west", EnumFacing.WEST),
+        SOUTH("SOUTH", 3, 3, "south", EnumFacing.SOUTH),
+        NORTH("NORTH", 4, 4, "north", EnumFacing.NORTH),
+        UP_Z("UP_Z", 5, 5, "up_z", EnumFacing.UP),
+        UP_X("UP_X", 6, 6, "up_x", EnumFacing.UP),
+        DOWN_Z("DOWN_Z", 7, 7, "down_z", EnumFacing.DOWN);
+        private static final BlockLever.EnumOrientation[] field_176869_i = new BlockLever.EnumOrientation[values().length];
+        private final int field_176866_j;
+        private final String field_176867_k;
+        private final EnumFacing field_176864_l;
+
+        private static final BlockLever.EnumOrientation[] $VALUES = new BlockLever.EnumOrientation[]{DOWN_X, EAST, WEST, SOUTH, NORTH, UP_Z, UP_X, DOWN_Z};
+        private static final String __OBFID = "CL_00002102";
+
+        private EnumOrientation(String p_i45709_1_, int p_i45709_2_, int p_i45709_3_, String p_i45709_4_, EnumFacing p_i45709_5_)
+        {
+            this.field_176866_j = p_i45709_3_;
+            this.field_176867_k = p_i45709_4_;
+            this.field_176864_l = p_i45709_5_;
+        }
+
+        public int func_176855_a()
+        {
+            return this.field_176866_j;
+        }
+
+        public EnumFacing func_176852_c()
+        {
+            return this.field_176864_l;
+        }
+
+        public String toString()
+        {
+            return this.field_176867_k;
+        }
+
+        public static BlockLever.EnumOrientation func_176853_a(int p_176853_0_)
+        {
+            if (p_176853_0_ < 0 || p_176853_0_ >= field_176869_i.length)
+            {
+                p_176853_0_ = 0;
+            }
+
+            return field_176869_i[p_176853_0_];
+        }
+
+        public static BlockLever.EnumOrientation func_176856_a(EnumFacing p_176856_0_, EnumFacing p_176856_1_)
+        {
+            switch (BlockLever.SwitchEnumFacing.FACING_LOOKUP[p_176856_0_.ordinal()])
+            {
+                case 1:
+                    switch (BlockLever.SwitchEnumFacing.AXIS_LOOKUP[p_176856_1_.getAxis().ordinal()])
+                    {
+                        case 1:
+                            return DOWN_X;
+
+                        case 2:
+                            return DOWN_Z;
+
+                        default:
+                            throw new IllegalArgumentException("Invalid entityFacing " + p_176856_1_ + " for facing " + p_176856_0_);
+                    }
+
+                case 2:
+                    switch (BlockLever.SwitchEnumFacing.AXIS_LOOKUP[p_176856_1_.getAxis().ordinal()])
+                    {
+                        case 1:
+                            return UP_X;
+
+                        case 2:
+                            return UP_Z;
+
+                        default:
+                            throw new IllegalArgumentException("Invalid entityFacing " + p_176856_1_ + " for facing " + p_176856_0_);
+                    }
+
+                case 3:
+                    return NORTH;
+
+                case 4:
+                    return SOUTH;
+
+                case 5:
+                    return WEST;
+
+                case 6:
+                    return EAST;
+
+                default:
+                    throw new IllegalArgumentException("Invalid facing: " + p_176856_0_);
+            }
+        }
+
+        public String getName()
+        {
+            return this.field_176867_k;
+        }
+
+        static {
+            BlockLever.EnumOrientation[] var0 = values();
+            int var1 = var0.length;
+
+            for (int var2 = 0; var2 < var1; ++var2)
+            {
+                BlockLever.EnumOrientation var3 = var0[var2];
+                field_176869_i[var3.func_176855_a()] = var3;
+            }
+        }
+    }
+
+    static final class SwitchEnumFacing
+    {
+        static final int[] FACING_LOOKUP;
+
+        static final int[] ORIENTATION_LOOKUP;
+
+        static final int[] AXIS_LOOKUP = new int[EnumFacing.Axis.values().length];
+        private static final String __OBFID = "CL_00002103";
+
+        static
+        {
+            try
+            {
+                AXIS_LOOKUP[EnumFacing.Axis.X.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var16)
+            {
+                ;
+            }
+
+            try
+            {
+                AXIS_LOOKUP[EnumFacing.Axis.Z.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var15)
+            {
+                ;
+            }
+
+            ORIENTATION_LOOKUP = new int[BlockLever.EnumOrientation.values().length];
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.EAST.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var14)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.WEST.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var13)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.SOUTH.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var12)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.NORTH.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var11)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.UP_Z.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError var10)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.UP_X.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError var9)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.DOWN_X.ordinal()] = 7;
+            }
+            catch (NoSuchFieldError var8)
+            {
+                ;
+            }
+
+            try
+            {
+                ORIENTATION_LOOKUP[BlockLever.EnumOrientation.DOWN_Z.ordinal()] = 8;
+            }
+            catch (NoSuchFieldError var7)
+            {
+                ;
+            }
+
+            FACING_LOOKUP = new int[EnumFacing.values().length];
+
+            try
+            {
+                FACING_LOOKUP[EnumFacing.DOWN.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var6)
+            {
+                ;
+            }
+
+            try
+            {
+                FACING_LOOKUP[EnumFacing.UP.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var5)
+            {
+                ;
+            }
+
+            try
+            {
+                FACING_LOOKUP[EnumFacing.NORTH.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
+            }
+
+            try
+            {
+                FACING_LOOKUP[EnumFacing.SOUTH.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                FACING_LOOKUP[EnumFacing.WEST.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                FACING_LOOKUP[EnumFacing.EAST.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
+        }
     }
 }

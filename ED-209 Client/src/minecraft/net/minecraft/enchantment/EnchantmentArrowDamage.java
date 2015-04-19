@@ -1,12 +1,14 @@
 package net.minecraft.enchantment;
 
+import net.minecraft.util.ResourceLocation;
+
 public class EnchantmentArrowDamage extends Enchantment
 {
     private static final String __OBFID = "CL_00000098";
 
-    public EnchantmentArrowDamage(int p_i1919_1_, int p_i1919_2_)
+    public EnchantmentArrowDamage(int p_i45778_1_, ResourceLocation p_i45778_2_, int p_i45778_3_)
     {
-        super(p_i1919_1_, p_i1919_2_, EnumEnchantmentType.bow);
+        super(p_i45778_1_, p_i45778_2_, p_i45778_3_, EnumEnchantmentType.BOW);
         this.setName("arrowDamage");
     }
 

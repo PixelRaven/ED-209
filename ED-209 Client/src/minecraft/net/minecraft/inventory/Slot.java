@@ -2,7 +2,6 @@ package net.minecraft.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 
 public class Slot
 {
@@ -60,7 +59,7 @@ public class Slot
      */
     protected void onCrafting(ItemStack p_75208_1_) {}
 
-    public void onPickupFromSlot(EntityPlayer p_82870_1_, ItemStack p_82870_2_)
+    public void onPickupFromSlot(EntityPlayer playerIn, ItemStack stack)
     {
         this.onSlotChanged();
     }
@@ -68,7 +67,7 @@ public class Slot
     /**
      * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
      */
-    public boolean isItemValid(ItemStack p_75214_1_)
+    public boolean isItemValid(ItemStack stack)
     {
         return true;
     }
@@ -103,7 +102,7 @@ public class Slot
      */
     public void onSlotChanged()
     {
-        this.inventory.onInventoryChanged();
+        this.inventory.markDirty();
     }
 
     /**
@@ -115,10 +114,12 @@ public class Slot
         return this.inventory.getInventoryStackLimit();
     }
 
-    /**
-     * Returns the icon index on items.png that is used as background image of the slot.
-     */
-    public IIcon getBackgroundIconIndex()
+    public int func_178170_b(ItemStack p_178170_1_)
+    {
+        return this.getSlotStackLimit();
+    }
+
+    public String func_178171_c()
     {
         return null;
     }
@@ -133,9 +134,9 @@ public class Slot
     }
 
     /**
-     * returns true if this slot is in par2 of par1
+     * returns true if the slot exists in the given inventory and location
      */
-    public boolean isSlotInInventory(IInventory p_75217_1_, int p_75217_2_)
+    public boolean isHere(IInventory p_75217_1_, int p_75217_2_)
     {
         return p_75217_1_ == this.inventory && p_75217_2_ == this.slotIndex;
     }
@@ -148,7 +149,11 @@ public class Slot
         return true;
     }
 
-    public boolean func_111238_b()
+    /**
+     * Actualy only call when we want to render the white square effect over the slots. Return always True, except for
+     * the armor slot of the Donkey/Mule (we can't interact with the Undead and Skeleton horses)
+     */
+    public boolean canBeHovered()
     {
         return true;
     }

@@ -87,12 +87,13 @@ public class ClickEvent
         OPEN_FILE("OPEN_FILE", 1, "open_file", false),
         RUN_COMMAND("RUN_COMMAND", 2, "run_command", true),
         TWITCH_USER_INFO("TWITCH_USER_INFO", 3, "twitch_user_info", false),
-        SUGGEST_COMMAND("SUGGEST_COMMAND", 4, "suggest_command", true);
+        SUGGEST_COMMAND("SUGGEST_COMMAND", 4, "suggest_command", true),
+        CHANGE_PAGE("CHANGE_PAGE", 5, "change_page", true);
         private static final Map nameMapping = Maps.newHashMap();
         private final boolean allowedInChat;
         private final String canonicalName;
 
-        private static final ClickEvent.Action[] $VALUES = new ClickEvent.Action[]{OPEN_URL, OPEN_FILE, RUN_COMMAND, TWITCH_USER_INFO, SUGGEST_COMMAND};
+        private static final ClickEvent.Action[] $VALUES = new ClickEvent.Action[]{OPEN_URL, OPEN_FILE, RUN_COMMAND, TWITCH_USER_INFO, SUGGEST_COMMAND, CHANGE_PAGE};
         private static final String __OBFID = "CL_00001261";
 
         private Action(String p_i45155_1_, int p_i45155_2_, String p_i45155_3_, boolean p_i45155_4_)

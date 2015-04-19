@@ -4,56 +4,42 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
 public class ActiveRenderInfo
 {
-    /** The calculated view object X coordinate */
-    public static float objectX;
-
-    /** The calculated view object Y coordinate */
-    public static float objectY;
-
-    /** The calculated view object Z coordinate */
-    public static float objectZ;
-
-    /** The current GL viewport */
-    private static IntBuffer viewport = GLAllocation.createDirectIntBuffer(16);
-
-    /** The current GL modelview matrix */
-    private static FloatBuffer modelview = GLAllocation.createDirectFloatBuffer(16);
-
-    /** The current GL projection matrix */
-    private static FloatBuffer projection = GLAllocation.createDirectFloatBuffer(16);
-
-    /** The computed view object coordinates */
-    private static FloatBuffer objectCoords = GLAllocation.createDirectFloatBuffer(3);
+    private static final IntBuffer field_178814_a = GLAllocation.createDirectIntBuffer(16);
+    private static final FloatBuffer field_178812_b = GLAllocation.createDirectFloatBuffer(16);
+    private static final FloatBuffer field_178813_c = GLAllocation.createDirectFloatBuffer(16);
+    private static final FloatBuffer field_178810_d = GLAllocation.createDirectFloatBuffer(3);
+    private static Vec3 field_178811_e = new Vec3(0.0D, 0.0D, 0.0D);
 
     /** The X component of the entity's yaw rotation */
-    public static float rotationX;
+    private static float rotationX;
 
     /** The combined X and Z components of the entity's pitch rotation */
-    public static float rotationXZ;
+    private static float rotationXZ;
 
     /** The Z component of the entity's yaw rotation */
-    public static float rotationZ;
+    private static float rotationZ;
 
     /**
      * The Y component (scaled along the Z axis) of the entity's pitch rotation
      */
-    public static float rotationYZ;
+    private static float rotationYZ;
 
     /**
      * The Y component (scaled along the X axis) of the entity's pitch rotation
      */
-    public static float rotationXY;
+    private static float rotationXY;
     private static final String __OBFID = "CL_00000626";
 
     /**
@@ -61,15 +47,13 @@ public class ActiveRenderInfo
      */
     public static void updateRenderInfo(EntityPlayer p_74583_0_, boolean p_74583_1_)
     {
-        GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
-        GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
-        GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
-        float var2 = (float)((viewport.get(0) + viewport.get(2)) / 2);
-        float var3 = (float)((viewport.get(1) + viewport.get(3)) / 2);
-        GLU.gluUnProject(var2, var3, 0.0F, modelview, projection, viewport, objectCoords);
-        objectX = objectCoords.get(0);
-        objectY = objectCoords.get(1);
-        objectZ = objectCoords.get(2);
+        GlStateManager.getFloat(2982, field_178812_b);
+        GlStateManager.getFloat(2983, field_178813_c);
+        GL11.glGetInteger(GL11.GL_VIEWPORT, field_178814_a);
+        float var2 = (float)((field_178814_a.get(0) + field_178814_a.get(2)) / 2);
+        float var3 = (float)((field_178814_a.get(1) + field_178814_a.get(3)) / 2);
+        GLU.gluUnProject(var2, var3, 0.0F, field_178812_b, field_178813_c, field_178814_a, field_178810_d);
+        field_178811_e = new Vec3((double)field_178810_d.get(0), (double)field_178810_d.get(1), (double)field_178810_d.get(2));
         int var4 = p_74583_1_ ? 1 : 0;
         float var5 = p_74583_0_.rotationPitch;
         float var6 = p_74583_0_.rotationYaw;
@@ -80,37 +64,71 @@ public class ActiveRenderInfo
         rotationXZ = MathHelper.cos(var5 * (float)Math.PI / 180.0F);
     }
 
-    /**
-     * Returns a vector representing the projection along the given entity's view for the given distance
-     */
-    public static Vec3 projectViewFromEntity(EntityLivingBase p_74585_0_, double p_74585_1_)
+    public static Vec3 func_178806_a(Entity p_178806_0_, double p_178806_1_)
     {
-        double var3 = p_74585_0_.prevPosX + (p_74585_0_.posX - p_74585_0_.prevPosX) * p_74585_1_;
-        double var5 = p_74585_0_.prevPosY + (p_74585_0_.posY - p_74585_0_.prevPosY) * p_74585_1_ + (double)p_74585_0_.getEyeHeight();
-        double var7 = p_74585_0_.prevPosZ + (p_74585_0_.posZ - p_74585_0_.prevPosZ) * p_74585_1_;
-        double var9 = var3 + (double)(objectX * 1.0F);
-        double var11 = var5 + (double)(objectY * 1.0F);
-        double var13 = var7 + (double)(objectZ * 1.0F);
-        return Vec3.createVectorHelper(var9, var11, var13);
+        double var3 = p_178806_0_.prevPosX + (p_178806_0_.posX - p_178806_0_.prevPosX) * p_178806_1_;
+        double var5 = p_178806_0_.prevPosY + (p_178806_0_.posY - p_178806_0_.prevPosY) * p_178806_1_;
+        double var7 = p_178806_0_.prevPosZ + (p_178806_0_.posZ - p_178806_0_.prevPosZ) * p_178806_1_;
+        double var9 = var3 + field_178811_e.xCoord;
+        double var11 = var5 + field_178811_e.yCoord;
+        double var13 = var7 + field_178811_e.zCoord;
+        return new Vec3(var9, var11, var13);
     }
 
-    public static Block getBlockAtEntityViewpoint(World p_151460_0_, EntityLivingBase p_151460_1_, float p_151460_2_)
+    public static Block func_180786_a(World worldIn, Entity p_180786_1_, float p_180786_2_)
     {
-        Vec3 var3 = projectViewFromEntity(p_151460_1_, (double)p_151460_2_);
-        ChunkPosition var4 = new ChunkPosition(var3);
-        Block var5 = p_151460_0_.getBlock(var4.field_151329_a, var4.field_151327_b, var4.field_151328_c);
+        Vec3 var3 = func_178806_a(p_180786_1_, (double)p_180786_2_);
+        BlockPos var4 = new BlockPos(var3);
+        IBlockState var5 = worldIn.getBlockState(var4);
+        Block var6 = var5.getBlock();
 
-        if (var5.getMaterial().isLiquid())
+        if (var6.getMaterial().isLiquid())
         {
-            float var6 = BlockLiquid.func_149801_b(p_151460_0_.getBlockMetadata(var4.field_151329_a, var4.field_151327_b, var4.field_151328_c)) - 0.11111111F;
-            float var7 = (float)(var4.field_151327_b + 1) - var6;
+            float var7 = 0.0F;
 
-            if (var3.yCoord >= (double)var7)
+            if (var5.getBlock() instanceof BlockLiquid)
             {
-                var5 = p_151460_0_.getBlock(var4.field_151329_a, var4.field_151327_b + 1, var4.field_151328_c);
+                var7 = BlockLiquid.getLiquidHeightPercent(((Integer)var5.getValue(BlockLiquid.LEVEL)).intValue()) - 0.11111111F;
+            }
+
+            float var8 = (float)(var4.getY() + 1) - var7;
+
+            if (var3.yCoord >= (double)var8)
+            {
+                var6 = worldIn.getBlockState(var4.offsetUp()).getBlock();
             }
         }
 
-        return var5;
+        return var6;
+    }
+
+    public static Vec3 func_178804_a()
+    {
+        return field_178811_e;
+    }
+
+    public static float func_178808_b()
+    {
+        return rotationX;
+    }
+
+    public static float func_178809_c()
+    {
+        return rotationXZ;
+    }
+
+    public static float func_178803_d()
+    {
+        return rotationZ;
+    }
+
+    public static float func_178805_e()
+    {
+        return rotationYZ;
+    }
+
+    public static float func_178807_f()
+    {
+        return rotationXY;
     }
 }

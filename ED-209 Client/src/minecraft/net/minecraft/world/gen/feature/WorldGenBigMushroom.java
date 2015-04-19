@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenBigMushroom extends WorldGenerator
@@ -23,182 +24,187 @@ public class WorldGenBigMushroom extends WorldGenerator
         super(false);
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        int var6 = p_76484_2_.nextInt(2);
+        int var4 = p_180709_2_.nextInt(2);
 
         if (this.mushroomType >= 0)
         {
-            var6 = this.mushroomType;
+            var4 = this.mushroomType;
         }
 
-        int var7 = p_76484_2_.nextInt(3) + 4;
-        boolean var8 = true;
+        int var5 = p_180709_2_.nextInt(3) + 4;
+        boolean var6 = true;
 
-        if (p_76484_4_ >= 1 && p_76484_4_ + var7 + 1 < 256)
+        if (p_180709_3_.getY() >= 1 && p_180709_3_.getY() + var5 + 1 < 256)
         {
-            int var11;
-            int var12;
+            int var9;
+            int var10;
 
-            for (int var9 = p_76484_4_; var9 <= p_76484_4_ + 1 + var7; ++var9)
+            for (int var7 = p_180709_3_.getY(); var7 <= p_180709_3_.getY() + 1 + var5; ++var7)
             {
-                byte var10 = 3;
+                byte var8 = 3;
 
-                if (var9 <= p_76484_4_ + 3)
+                if (var7 <= p_180709_3_.getY() + 3)
                 {
-                    var10 = 0;
+                    var8 = 0;
                 }
 
-                for (var11 = p_76484_3_ - var10; var11 <= p_76484_3_ + var10 && var8; ++var11)
+                for (var9 = p_180709_3_.getX() - var8; var9 <= p_180709_3_.getX() + var8 && var6; ++var9)
                 {
-                    for (var12 = p_76484_5_ - var10; var12 <= p_76484_5_ + var10 && var8; ++var12)
+                    for (var10 = p_180709_3_.getZ() - var8; var10 <= p_180709_3_.getZ() + var8 && var6; ++var10)
                     {
-                        if (var9 >= 0 && var9 < 256)
+                        if (var7 >= 0 && var7 < 256)
                         {
-                            Block var13 = p_76484_1_.getBlock(var11, var9, var12);
+                            Block var11 = worldIn.getBlockState(new BlockPos(var9, var7, var10)).getBlock();
 
-                            if (var13.getMaterial() != Material.air && var13.getMaterial() != Material.leaves)
+                            if (var11.getMaterial() != Material.air && var11.getMaterial() != Material.leaves)
                             {
-                                var8 = false;
+                                var6 = false;
                             }
                         }
                         else
                         {
-                            var8 = false;
+                            var6 = false;
                         }
                     }
                 }
             }
 
-            if (!var8)
+            if (!var6)
             {
                 return false;
             }
             else
             {
-                Block var16 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_ - 1, p_76484_5_);
+                Block var15 = worldIn.getBlockState(p_180709_3_.offsetDown()).getBlock();
 
-                if (var16 != Blocks.dirt && var16 != Blocks.grass && var16 != Blocks.mycelium)
+                if (var15 != Blocks.dirt && var15 != Blocks.grass && var15 != Blocks.mycelium)
                 {
                     return false;
                 }
                 else
                 {
-                    int var17 = p_76484_4_ + var7;
+                    int var16 = p_180709_3_.getY() + var5;
 
-                    if (var6 == 1)
+                    if (var4 == 1)
                     {
-                        var17 = p_76484_4_ + var7 - 3;
+                        var16 = p_180709_3_.getY() + var5 - 3;
                     }
 
-                    for (var11 = var17; var11 <= p_76484_4_ + var7; ++var11)
+                    for (var9 = var16; var9 <= p_180709_3_.getY() + var5; ++var9)
                     {
-                        var12 = 1;
+                        var10 = 1;
 
-                        if (var11 < p_76484_4_ + var7)
+                        if (var9 < p_180709_3_.getY() + var5)
                         {
-                            ++var12;
+                            ++var10;
                         }
 
-                        if (var6 == 0)
+                        if (var4 == 0)
                         {
-                            var12 = 3;
+                            var10 = 3;
                         }
 
-                        for (int var19 = p_76484_3_ - var12; var19 <= p_76484_3_ + var12; ++var19)
+                        for (int var18 = p_180709_3_.getX() - var10; var18 <= p_180709_3_.getX() + var10; ++var18)
                         {
-                            for (int var14 = p_76484_5_ - var12; var14 <= p_76484_5_ + var12; ++var14)
+                            for (int var12 = p_180709_3_.getZ() - var10; var12 <= p_180709_3_.getZ() + var10; ++var12)
                             {
-                                int var15 = 5;
+                                int var13 = 5;
 
-                                if (var19 == p_76484_3_ - var12)
+                                if (var18 == p_180709_3_.getX() - var10)
                                 {
-                                    --var15;
+                                    --var13;
                                 }
 
-                                if (var19 == p_76484_3_ + var12)
+                                if (var18 == p_180709_3_.getX() + var10)
                                 {
-                                    ++var15;
+                                    ++var13;
                                 }
 
-                                if (var14 == p_76484_5_ - var12)
+                                if (var12 == p_180709_3_.getZ() - var10)
                                 {
-                                    var15 -= 3;
+                                    var13 -= 3;
                                 }
 
-                                if (var14 == p_76484_5_ + var12)
+                                if (var12 == p_180709_3_.getZ() + var10)
                                 {
-                                    var15 += 3;
+                                    var13 += 3;
                                 }
 
-                                if (var6 == 0 || var11 < p_76484_4_ + var7)
+                                if (var4 == 0 || var9 < p_180709_3_.getY() + var5)
                                 {
-                                    if ((var19 == p_76484_3_ - var12 || var19 == p_76484_3_ + var12) && (var14 == p_76484_5_ - var12 || var14 == p_76484_5_ + var12))
+                                    if ((var18 == p_180709_3_.getX() - var10 || var18 == p_180709_3_.getX() + var10) && (var12 == p_180709_3_.getZ() - var10 || var12 == p_180709_3_.getZ() + var10))
                                     {
                                         continue;
                                     }
 
-                                    if (var19 == p_76484_3_ - (var12 - 1) && var14 == p_76484_5_ - var12)
+                                    if (var18 == p_180709_3_.getX() - (var10 - 1) && var12 == p_180709_3_.getZ() - var10)
                                     {
-                                        var15 = 1;
+                                        var13 = 1;
                                     }
 
-                                    if (var19 == p_76484_3_ - var12 && var14 == p_76484_5_ - (var12 - 1))
+                                    if (var18 == p_180709_3_.getX() - var10 && var12 == p_180709_3_.getZ() - (var10 - 1))
                                     {
-                                        var15 = 1;
+                                        var13 = 1;
                                     }
 
-                                    if (var19 == p_76484_3_ + (var12 - 1) && var14 == p_76484_5_ - var12)
+                                    if (var18 == p_180709_3_.getX() + (var10 - 1) && var12 == p_180709_3_.getZ() - var10)
                                     {
-                                        var15 = 3;
+                                        var13 = 3;
                                     }
 
-                                    if (var19 == p_76484_3_ + var12 && var14 == p_76484_5_ - (var12 - 1))
+                                    if (var18 == p_180709_3_.getX() + var10 && var12 == p_180709_3_.getZ() - (var10 - 1))
                                     {
-                                        var15 = 3;
+                                        var13 = 3;
                                     }
 
-                                    if (var19 == p_76484_3_ - (var12 - 1) && var14 == p_76484_5_ + var12)
+                                    if (var18 == p_180709_3_.getX() - (var10 - 1) && var12 == p_180709_3_.getZ() + var10)
                                     {
-                                        var15 = 7;
+                                        var13 = 7;
                                     }
 
-                                    if (var19 == p_76484_3_ - var12 && var14 == p_76484_5_ + (var12 - 1))
+                                    if (var18 == p_180709_3_.getX() - var10 && var12 == p_180709_3_.getZ() + (var10 - 1))
                                     {
-                                        var15 = 7;
+                                        var13 = 7;
                                     }
 
-                                    if (var19 == p_76484_3_ + (var12 - 1) && var14 == p_76484_5_ + var12)
+                                    if (var18 == p_180709_3_.getX() + (var10 - 1) && var12 == p_180709_3_.getZ() + var10)
                                     {
-                                        var15 = 9;
+                                        var13 = 9;
                                     }
 
-                                    if (var19 == p_76484_3_ + var12 && var14 == p_76484_5_ + (var12 - 1))
+                                    if (var18 == p_180709_3_.getX() + var10 && var12 == p_180709_3_.getZ() + (var10 - 1))
                                     {
-                                        var15 = 9;
+                                        var13 = 9;
                                     }
                                 }
 
-                                if (var15 == 5 && var11 < p_76484_4_ + var7)
+                                if (var13 == 5 && var9 < p_180709_3_.getY() + var5)
                                 {
-                                    var15 = 0;
+                                    var13 = 0;
                                 }
 
-                                if ((var15 != 0 || p_76484_4_ >= p_76484_4_ + var7 - 1) && !p_76484_1_.getBlock(var19, var11, var14).func_149730_j())
+                                if (var13 != 0 || p_180709_3_.getY() >= p_180709_3_.getY() + var5 - 1)
                                 {
-                                    this.func_150516_a(p_76484_1_, var19, var11, var14, Block.getBlockById(Block.getIdFromBlock(Blocks.brown_mushroom_block) + var6), var15);
+                                    BlockPos var14 = new BlockPos(var18, var9, var12);
+
+                                    if (!worldIn.getBlockState(var14).getBlock().isFullBlock())
+                                    {
+                                        this.func_175905_a(worldIn, var14, Block.getBlockById(Block.getIdFromBlock(Blocks.brown_mushroom_block) + var4), var13);
+                                    }
                                 }
                             }
                         }
                     }
 
-                    for (var11 = 0; var11 < var7; ++var11)
+                    for (var9 = 0; var9 < var5; ++var9)
                     {
-                        Block var18 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_ + var11, p_76484_5_);
+                        Block var17 = worldIn.getBlockState(p_180709_3_.offsetUp(var9)).getBlock();
 
-                        if (!var18.func_149730_j())
+                        if (!var17.isFullBlock())
                         {
-                            this.func_150516_a(p_76484_1_, p_76484_3_, p_76484_4_ + var11, p_76484_5_, Block.getBlockById(Block.getIdFromBlock(Blocks.brown_mushroom_block) + var6), 10);
+                            this.func_175905_a(worldIn, p_180709_3_.offsetUp(var9), Block.getBlockById(Block.getIdFromBlock(Blocks.brown_mushroom_block) + var4), 10);
                         }
                     }
 

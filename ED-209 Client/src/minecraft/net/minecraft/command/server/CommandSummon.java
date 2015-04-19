@@ -2,17 +2,20 @@ package net.minecraft.command.server;
 
 import java.util.List;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class CommandSummon extends CommandBase
@@ -32,115 +35,115 @@ public class CommandSummon extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.summon.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length < 1)
+        if (args.length < 1)
         {
             throw new WrongUsageException("commands.summon.usage", new Object[0]);
         }
         else
         {
-            String var3 = p_71515_2_[0];
-            double var4 = (double)p_71515_1_.getPlayerCoordinates().posX + 0.5D;
-            double var6 = (double)p_71515_1_.getPlayerCoordinates().posY;
-            double var8 = (double)p_71515_1_.getPlayerCoordinates().posZ + 0.5D;
+            String var3 = args[0];
+            BlockPos var4 = sender.getPosition();
+            Vec3 var5 = sender.getPositionVector();
+            double var6 = var5.xCoord;
+            double var8 = var5.yCoord;
+            double var10 = var5.zCoord;
 
-            if (p_71515_2_.length >= 4)
+            if (args.length >= 4)
             {
-                var4 = func_110666_a(p_71515_1_, var4, p_71515_2_[1]);
-                var6 = func_110666_a(p_71515_1_, var6, p_71515_2_[2]);
-                var8 = func_110666_a(p_71515_1_, var8, p_71515_2_[3]);
+                var6 = func_175761_b(var6, args[1], true);
+                var8 = func_175761_b(var8, args[2], false);
+                var10 = func_175761_b(var10, args[3], true);
+                var4 = new BlockPos(var6, var8, var10);
             }
 
-            World var10 = p_71515_1_.getEntityWorld();
+            World var12 = sender.getEntityWorld();
 
-            if (!var10.blockExists((int)var4, (int)var6, (int)var8))
+            if (!var12.isBlockLoaded(var4))
             {
-                func_152373_a(p_71515_1_, this, "commands.summon.outOfWorld", new Object[0]);
+                throw new CommandException("commands.summon.outOfWorld", new Object[0]);
+            }
+            else if ("LightningBolt".equals(var3))
+            {
+                var12.addWeatherEffect(new EntityLightningBolt(var12, var6, var8, var10));
+                notifyOperators(sender, this, "commands.summon.success", new Object[0]);
             }
             else
             {
-                NBTTagCompound var11 = new NBTTagCompound();
-                boolean var12 = false;
+                NBTTagCompound var13 = new NBTTagCompound();
+                boolean var14 = false;
 
-                if (p_71515_2_.length >= 5)
+                if (args.length >= 5)
                 {
-                    IChatComponent var13 = func_147178_a(p_71515_1_, p_71515_2_, 4);
+                    IChatComponent var15 = getChatComponentFromNthArg(sender, args, 4);
 
                     try
                     {
-                        NBTBase var14 = JsonToNBT.func_150315_a(var13.getUnformattedText());
-
-                        if (!(var14 instanceof NBTTagCompound))
-                        {
-                            func_152373_a(p_71515_1_, this, "commands.summon.tagError", new Object[] {"Not a valid tag"});
-                            return;
-                        }
-
-                        var11 = (NBTTagCompound)var14;
-                        var12 = true;
+                        var13 = JsonToNBT.func_180713_a(var15.getUnformattedText());
+                        var14 = true;
                     }
-                    catch (NBTException var17)
+                    catch (NBTException var20)
                     {
-                        func_152373_a(p_71515_1_, this, "commands.summon.tagError", new Object[] {var17.getMessage()});
-                        return;
+                        throw new CommandException("commands.summon.tagError", new Object[] {var20.getMessage()});
                     }
                 }
 
-                var11.setString("id", var3);
-                Entity var18 = EntityList.createEntityFromNBT(var11, var10);
+                var13.setString("id", var3);
+                Entity var21;
 
-                if (var18 == null)
+                try
                 {
-                    func_152373_a(p_71515_1_, this, "commands.summon.failed", new Object[0]);
+                    var21 = EntityList.createEntityFromNBT(var13, var12);
+                }
+                catch (RuntimeException var19)
+                {
+                    throw new CommandException("commands.summon.failed", new Object[0]);
+                }
+
+                if (var21 == null)
+                {
+                    throw new CommandException("commands.summon.failed", new Object[0]);
                 }
                 else
                 {
-                    var18.setLocationAndAngles(var4, var6, var8, var18.rotationYaw, var18.rotationPitch);
+                    var21.setLocationAndAngles(var6, var8, var10, var21.rotationYaw, var21.rotationPitch);
 
-                    if (!var12 && var18 instanceof EntityLiving)
+                    if (!var14 && var21 instanceof EntityLiving)
                     {
-                        ((EntityLiving)var18).onSpawnWithEgg((IEntityLivingData)null);
+                        ((EntityLiving)var21).func_180482_a(var12.getDifficultyForLocation(new BlockPos(var21)), (IEntityLivingData)null);
                     }
 
-                    var10.spawnEntityInWorld(var18);
-                    Entity var19 = var18;
+                    var12.spawnEntityInWorld(var21);
+                    Entity var16 = var21;
 
-                    for (NBTTagCompound var15 = var11; var19 != null && var15.func_150297_b("Riding", 10); var15 = var15.getCompoundTag("Riding"))
+                    for (NBTTagCompound var17 = var13; var16 != null && var17.hasKey("Riding", 10); var17 = var17.getCompoundTag("Riding"))
                     {
-                        Entity var16 = EntityList.createEntityFromNBT(var15.getCompoundTag("Riding"), var10);
+                        Entity var18 = EntityList.createEntityFromNBT(var17.getCompoundTag("Riding"), var12);
 
-                        if (var16 != null)
+                        if (var18 != null)
                         {
-                            var16.setLocationAndAngles(var4, var6, var8, var16.rotationYaw, var16.rotationPitch);
-                            var10.spawnEntityInWorld(var16);
-                            var19.mountEntity(var16);
+                            var18.setLocationAndAngles(var6, var8, var10, var18.rotationYaw, var18.rotationPitch);
+                            var12.spawnEntityInWorld(var18);
+                            var16.mountEntity(var18);
                         }
 
-                        var19 = var16;
+                        var16 = var18;
                     }
 
-                    func_152373_a(p_71515_1_, this, "commands.summon.success", new Object[0]);
+                    notifyOperators(sender, this, "commands.summon.success", new Object[0]);
                 }
             }
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, this.func_147182_d()) : null;
-    }
-
-    protected String[] func_147182_d()
-    {
-        return (String[])EntityList.func_151515_b().toArray(new String[0]);
+        return args.length == 1 ? func_175762_a(args, EntityList.func_180124_b()) : (args.length > 1 && args.length <= 4 ? func_175771_a(args, 1, pos) : null);
     }
 }

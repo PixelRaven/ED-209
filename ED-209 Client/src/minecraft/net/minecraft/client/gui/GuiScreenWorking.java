@@ -11,11 +11,11 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
     private static final String __OBFID = "CL_00000707";
 
     /**
-     * "Saving level", or the loading,or downloading equivelent
+     * Shows the 'Saving level' string.
      */
-    public void displayProgressMessage(String p_73720_1_)
+    public void displaySavingString(String message)
     {
-        this.resetProgressAndMessage(p_73720_1_);
+        this.resetProgressAndMessage(message);
     }
 
     /**
@@ -25,35 +25,35 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
     public void resetProgressAndMessage(String p_73721_1_)
     {
         this.field_146591_a = p_73721_1_;
-        this.resetProgresAndWorkingMessage("Working...");
+        this.displayLoadingString("Working...");
     }
 
     /**
-     * This is called with "Working..." by resetProgressAndMessage
+     * Displays a string on the loading screen supposed to indicate what is being done currently.
      */
-    public void resetProgresAndWorkingMessage(String p_73719_1_)
+    public void displayLoadingString(String message)
     {
-        this.field_146589_f = p_73719_1_;
+        this.field_146589_f = message;
         this.setLoadingProgress(0);
     }
 
     /**
      * Updates the progress bar on the loading screen to the specified amount. Args: loadProgress
      */
-    public void setLoadingProgress(int p_73718_1_)
+    public void setLoadingProgress(int progress)
     {
-        this.field_146590_g = p_73718_1_;
+        this.field_146590_g = progress;
     }
 
-    public void func_146586_a()
+    public void setDoneWorking()
     {
         this.field_146592_h = true;
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         if (this.field_146592_h)
         {
@@ -64,7 +64,7 @@ public class GuiScreenWorking extends GuiScreen implements IProgressUpdate
             this.drawDefaultBackground();
             this.drawCenteredString(this.fontRendererObj, this.field_146591_a, this.width / 2, 70, 16777215);
             this.drawCenteredString(this.fontRendererObj, this.field_146589_f + " " + this.field_146590_g + "%", this.width / 2, 90, 16777215);
-            super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+            super.drawScreen(mouseX, mouseY, partialTicks);
         }
     }
 }

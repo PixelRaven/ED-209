@@ -3,6 +3,7 @@ package net.minecraft.world;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManagerHell;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderHell;
 
@@ -26,7 +27,7 @@ public class WorldProviderHell extends WorldProvider
      */
     public Vec3 getFogColor(float p_76562_1_, float p_76562_2_)
     {
-        return Vec3.createVectorHelper(0.20000000298023224D, 0.029999999329447746D, 0.029999999329447746D);
+        return new Vec3(0.20000000298023224D, 0.029999999329447746D, 0.029999999329447746D);
     }
 
     /**
@@ -48,7 +49,7 @@ public class WorldProviderHell extends WorldProvider
      */
     public IChunkProvider createChunkGenerator()
     {
-        return new ChunkProviderHell(this.worldObj, this.worldObj.getSeed());
+        return new ChunkProviderHell(this.worldObj, this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.worldObj.getSeed());
     }
 
     /**
@@ -62,7 +63,7 @@ public class WorldProviderHell extends WorldProvider
     /**
      * Will check if the x, z position specified is alright to be set as the map spawn point
      */
-    public boolean canCoordinateBeSpawn(int p_76566_1_, int p_76566_2_)
+    public boolean canCoordinateBeSpawn(int x, int z)
     {
         return false;
     }
@@ -97,5 +98,26 @@ public class WorldProviderHell extends WorldProvider
     public String getDimensionName()
     {
         return "Nether";
+    }
+
+    public String getInternalNameSuffix()
+    {
+        return "_nether";
+    }
+
+    public WorldBorder getWorldBorder()
+    {
+        return new WorldBorder()
+        {
+            private static final String __OBFID = "CL_00002008";
+            public double getCenterX()
+            {
+                return super.getCenterX() / 8.0D;
+            }
+            public double getCenterZ()
+            {
+                return super.getCenterZ() / 8.0D;
+            }
+        };
     }
 }

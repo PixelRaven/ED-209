@@ -21,7 +21,6 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
 {
     private static final Logger logger = LogManager.getLogger();
     private final Map mapTextureObjects = Maps.newHashMap();
-    private final Map mapResourceLocations = Maps.newHashMap();
     private final List listTickables = Lists.newArrayList();
     private final Map mapTextureCounters = Maps.newHashMap();
     private IResourceManager theResourceManager;
@@ -32,35 +31,17 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
         this.theResourceManager = p_i1284_1_;
     }
 
-    public void bindTexture(ResourceLocation p_110577_1_)
+    public void bindTexture(ResourceLocation resource)
     {
-        Object var2 = (ITextureObject)this.mapTextureObjects.get(p_110577_1_);
+        Object var2 = (ITextureObject)this.mapTextureObjects.get(resource);
 
         if (var2 == null)
         {
-            var2 = new SimpleTexture(p_110577_1_);
-            this.loadTexture(p_110577_1_, (ITextureObject)var2);
+            var2 = new SimpleTexture(resource);
+            this.loadTexture(resource, (ITextureObject)var2);
         }
 
         TextureUtil.bindTexture(((ITextureObject)var2).getGlTextureId());
-    }
-
-    public ResourceLocation getResourceLocation(int p_130087_1_)
-    {
-        return (ResourceLocation)this.mapResourceLocations.get(Integer.valueOf(p_130087_1_));
-    }
-
-    public boolean loadTextureMap(ResourceLocation p_130088_1_, TextureMap p_130088_2_)
-    {
-        if (this.loadTickableTexture(p_130088_1_, p_130088_2_))
-        {
-            this.mapResourceLocations.put(Integer.valueOf(p_130088_2_.getTextureType()), p_130088_1_);
-            return true;
-        }
-        else
-        {
-            return false;
-        }
     }
 
     public boolean loadTickableTexture(ResourceLocation p_110580_1_, ITickableTextureObject p_110580_2_)
@@ -147,7 +128,7 @@ public class TextureManager implements ITickable, IResourceManagerReloadListener
         }
     }
 
-    public void func_147645_c(ResourceLocation p_147645_1_)
+    public void deleteTexture(ResourceLocation p_147645_1_)
     {
         ITextureObject var2 = this.getTexture(p_147645_1_);
 

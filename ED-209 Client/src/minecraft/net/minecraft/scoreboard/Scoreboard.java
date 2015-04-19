@@ -1,26 +1,31 @@
 package net.minecraft.scoreboard;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.util.EnumChatFormatting;
 
 public class Scoreboard
 {
     /** Map of objective names to ScoreObjective objects. */
-    private final Map scoreObjectives = new HashMap();
-    private final Map scoreObjectiveCriterias = new HashMap();
-    private final Map field_96544_c = new HashMap();
-    private final ScoreObjective[] field_96541_d = new ScoreObjective[3];
+    private final Map scoreObjectives = Maps.newHashMap();
+    private final Map scoreObjectiveCriterias = Maps.newHashMap();
+    private final Map field_96544_c = Maps.newHashMap();
+
+    /** Index 0 is tab menu, 1 is sidebar, and 2 is below name */
+    private final ScoreObjective[] objectiveDisplaySlots = new ScoreObjective[19];
 
     /** Map of teamnames to ScorePlayerTeam instances */
-    private final Map teams = new HashMap();
+    private final Map teams = Maps.newHashMap();
 
     /** Map of usernames to ScorePlayerTeam objects. */
-    private final Map teamMemberships = new HashMap();
+    private final Map teamMemberships = Maps.newHashMap();
+    private static String[] field_178823_g = null;
     private static final String __OBFID = "CL_00000619";
 
     /**
@@ -46,7 +51,7 @@ public class Scoreboard
 
             if (var4 == null)
             {
-                var4 = new ArrayList();
+                var4 = Lists.newArrayList();
                 this.scoreObjectiveCriterias.put(p_96535_2_, var4);
             }
 
@@ -60,16 +65,31 @@ public class Scoreboard
     public Collection func_96520_a(IScoreObjectiveCriteria p_96520_1_)
     {
         Collection var2 = (Collection)this.scoreObjectiveCriterias.get(p_96520_1_);
-        return var2 == null ? new ArrayList() : new ArrayList(var2);
+        return var2 == null ? Lists.newArrayList() : Lists.newArrayList(var2);
     }
 
-    public Score func_96529_a(String p_96529_1_, ScoreObjective p_96529_2_)
+    public boolean func_178819_b(String p_178819_1_, ScoreObjective p_178819_2_)
+    {
+        Map var3 = (Map)this.field_96544_c.get(p_178819_1_);
+
+        if (var3 == null)
+        {
+            return false;
+        }
+        else
+        {
+            Score var4 = (Score)var3.get(p_178819_2_);
+            return var4 != null;
+        }
+    }
+
+    public Score getValueFromObjective(String p_96529_1_, ScoreObjective p_96529_2_)
     {
         Object var3 = (Map)this.field_96544_c.get(p_96529_1_);
 
         if (var3 == null)
         {
-            var3 = new HashMap();
+            var3 = Maps.newHashMap();
             this.field_96544_c.put(p_96529_1_, var3);
         }
 
@@ -84,9 +104,12 @@ public class Scoreboard
         return var4;
     }
 
-    public Collection func_96534_i(ScoreObjective p_96534_1_)
+    /**
+     * Returns an array of Score objects, sorting by Score.getScorePoints()
+     */
+    public Collection getSortedScores(ScoreObjective p_96534_1_)
     {
-        ArrayList var2 = new ArrayList();
+        ArrayList var2 = Lists.newArrayList();
         Iterator var3 = this.field_96544_c.values().iterator();
 
         while (var3.hasNext())
@@ -100,7 +123,7 @@ public class Scoreboard
             }
         }
 
-        Collections.sort(var2, Score.field_96658_a);
+        Collections.sort(var2, Score.scoreComparator);
         return var2;
     }
 
@@ -114,20 +137,48 @@ public class Scoreboard
         return this.field_96544_c.keySet();
     }
 
-    public void func_96515_c(String p_96515_1_)
+    public void func_178822_d(String p_178822_1_, ScoreObjective p_178822_2_)
     {
-        Map var2 = (Map)this.field_96544_c.remove(p_96515_1_);
+        Map var3;
 
-        if (var2 != null)
+        if (p_178822_2_ == null)
         {
-            this.func_96516_a(p_96515_1_);
+            var3 = (Map)this.field_96544_c.remove(p_178822_1_);
+
+            if (var3 != null)
+            {
+                this.func_96516_a(p_178822_1_);
+            }
+        }
+        else
+        {
+            var3 = (Map)this.field_96544_c.get(p_178822_1_);
+
+            if (var3 != null)
+            {
+                Score var4 = (Score)var3.remove(p_178822_2_);
+
+                if (var3.size() < 1)
+                {
+                    Map var5 = (Map)this.field_96544_c.remove(p_178822_1_);
+
+                    if (var5 != null)
+                    {
+                        this.func_96516_a(p_178822_1_);
+                    }
+                }
+                else if (var4 != null)
+                {
+                    this.func_178820_a(p_178822_1_, p_178822_2_);
+                }
+            }
         }
     }
 
     public Collection func_96528_e()
     {
         Collection var1 = this.field_96544_c.values();
-        ArrayList var2 = new ArrayList();
+        ArrayList var2 = Lists.newArrayList();
         Iterator var3 = var1.iterator();
 
         while (var3.hasNext())
@@ -145,7 +196,7 @@ public class Scoreboard
 
         if (var2 == null)
         {
-            var2 = new HashMap();
+            var2 = Maps.newHashMap();
         }
 
         return (Map)var2;
@@ -155,11 +206,11 @@ public class Scoreboard
     {
         this.scoreObjectives.remove(p_96519_1_.getName());
 
-        for (int var2 = 0; var2 < 3; ++var2)
+        for (int var2 = 0; var2 < 19; ++var2)
         {
-            if (this.func_96539_a(var2) == p_96519_1_)
+            if (this.getObjectiveInDisplaySlot(var2) == p_96519_1_)
             {
-                this.func_96530_a(var2, (ScoreObjective)null);
+                this.setObjectiveInDisplaySlot(var2, (ScoreObjective)null);
             }
         }
 
@@ -181,14 +232,20 @@ public class Scoreboard
         this.func_96533_c(p_96519_1_);
     }
 
-    public void func_96530_a(int p_96530_1_, ScoreObjective p_96530_2_)
+    /**
+     * 0 is tab menu, 1 is sidebar, 2 is below name
+     */
+    public void setObjectiveInDisplaySlot(int p_96530_1_, ScoreObjective p_96530_2_)
     {
-        this.field_96541_d[p_96530_1_] = p_96530_2_;
+        this.objectiveDisplaySlots[p_96530_1_] = p_96530_2_;
     }
 
-    public ScoreObjective func_96539_a(int p_96539_1_)
+    /**
+     * 0 is tab menu, 1 is sidebar, 2 is below name
+     */
+    public ScoreObjective getObjectiveInDisplaySlot(int p_96539_1_)
     {
-        return this.field_96541_d[p_96539_1_];
+        return this.objectiveDisplaySlots[p_96539_1_];
     }
 
     /**
@@ -199,10 +256,6 @@ public class Scoreboard
         return (ScorePlayerTeam)this.teams.get(p_96508_1_);
     }
 
-    /**
-     * Verifies that the given name doesn't already refer to an existing team, creates it otherwise and broadcasts the
-     * addition to all players
-     */
     public ScorePlayerTeam createTeam(String p_96527_1_)
     {
         ScorePlayerTeam var2 = this.getTeam(p_96527_1_);
@@ -215,7 +268,7 @@ public class Scoreboard
         {
             var2 = new ScorePlayerTeam(this, p_96527_1_);
             this.teams.put(p_96527_1_, var2);
-            this.func_96523_a(var2);
+            this.broadcastTeamCreated(var2);
             return var2;
         }
     }
@@ -249,7 +302,7 @@ public class Scoreboard
 
             if (this.getPlayersTeam(p_151392_1_) != null)
             {
-                this.func_96524_g(p_151392_1_);
+                this.removePlayerFromTeams(p_151392_1_);
             }
 
             this.teamMemberships.put(p_151392_1_, var3);
@@ -258,7 +311,7 @@ public class Scoreboard
         }
     }
 
-    public boolean func_96524_g(String p_96524_1_)
+    public boolean removePlayerFromTeams(String p_96524_1_)
     {
         ScorePlayerTeam var2 = this.getPlayersTeam(p_96524_1_);
 
@@ -324,9 +377,17 @@ public class Scoreboard
 
     public void func_96516_a(String p_96516_1_) {}
 
-    public void func_96523_a(ScorePlayerTeam p_96523_1_) {}
+    public void func_178820_a(String p_178820_1_, ScoreObjective p_178820_2_) {}
 
-    public void func_96538_b(ScorePlayerTeam p_96538_1_) {}
+    /**
+     * This packet will notify the players that this team is created, and that will register it on the client
+     */
+    public void broadcastTeamCreated(ScorePlayerTeam p_96523_1_) {}
+
+    /**
+     * This packet will notify the players that this team is removed
+     */
+    public void broadcastTeamRemoved(ScorePlayerTeam p_96538_1_) {}
 
     public void func_96513_c(ScorePlayerTeam p_96513_1_) {}
 
@@ -347,6 +408,16 @@ public class Scoreboard
                 return "belowName";
 
             default:
+                if (p_96517_0_ >= 3 && p_96517_0_ <= 18)
+                {
+                    EnumChatFormatting var1 = EnumChatFormatting.func_175744_a(p_96517_0_ - 3);
+
+                    if (var1 != null && var1 != EnumChatFormatting.RESET)
+                    {
+                        return "sidebar.team." + var1.getFriendlyName();
+                    }
+                }
+
                 return null;
         }
     }
@@ -356,6 +427,47 @@ public class Scoreboard
      */
     public static int getObjectiveDisplaySlotNumber(String p_96537_0_)
     {
-        return p_96537_0_.equalsIgnoreCase("list") ? 0 : (p_96537_0_.equalsIgnoreCase("sidebar") ? 1 : (p_96537_0_.equalsIgnoreCase("belowName") ? 2 : -1));
+        if (p_96537_0_.equalsIgnoreCase("list"))
+        {
+            return 0;
+        }
+        else if (p_96537_0_.equalsIgnoreCase("sidebar"))
+        {
+            return 1;
+        }
+        else if (p_96537_0_.equalsIgnoreCase("belowName"))
+        {
+            return 2;
+        }
+        else
+        {
+            if (p_96537_0_.startsWith("sidebar.team."))
+            {
+                String var1 = p_96537_0_.substring("sidebar.team.".length());
+                EnumChatFormatting var2 = EnumChatFormatting.getValueByName(var1);
+
+                if (var2 != null && var2.func_175746_b() >= 0)
+                {
+                    return var2.func_175746_b() + 3;
+                }
+            }
+
+            return -1;
+        }
+    }
+
+    public static String[] func_178821_h()
+    {
+        if (field_178823_g == null)
+        {
+            field_178823_g = new String[19];
+
+            for (int var0 = 0; var0 < 19; ++var0)
+            {
+                field_178823_g[var0] = getObjectiveDisplaySlot(var0);
+            }
+        }
+
+        return field_178823_g;
     }
 }

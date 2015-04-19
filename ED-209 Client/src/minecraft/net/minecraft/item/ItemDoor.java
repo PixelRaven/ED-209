@@ -1,113 +1,84 @@
 package net.minecraft.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import net.minecraft.block.BlockDoor;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class ItemDoor extends Item
 {
-    private Material doorMaterial;
+    private Block field_179236_a;
     private static final String __OBFID = "CL_00000020";
 
-    public ItemDoor(Material p_i45334_1_)
+    public ItemDoor(Block p_i45788_1_)
     {
-        this.doorMaterial = p_i45334_1_;
-        this.maxStackSize = 1;
+        this.field_179236_a = p_i45788_1_;
         this.setCreativeTab(CreativeTabs.tabRedstone);
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_77648_7_ != 1)
+        if (side != EnumFacing.UP)
         {
             return false;
         }
         else
         {
-            ++p_77648_5_;
-            Block var11;
+            IBlockState var9 = worldIn.getBlockState(pos);
+            Block var10 = var9.getBlock();
 
-            if (this.doorMaterial == Material.wood)
+            if (!var10.isReplaceable(worldIn, pos))
             {
-                var11 = Blocks.wooden_door;
-            }
-            else
-            {
-                var11 = Blocks.iron_door;
+                pos = pos.offset(side);
             }
 
-            if (p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_1_) && p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_ + 1, p_77648_6_, p_77648_7_, p_77648_1_))
-            {
-                if (!var11.canPlaceBlockAt(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_))
-                {
-                    return false;
-                }
-                else
-                {
-                    int var12 = MathHelper.floor_double((double)((p_77648_2_.rotationYaw + 180.0F) * 4.0F / 360.0F) - 0.5D) & 3;
-                    func_150924_a(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, var12, var11);
-                    --p_77648_1_.stackSize;
-                    return true;
-                }
-            }
-            else
+            if (!playerIn.func_175151_a(pos, side, stack))
             {
                 return false;
+            }
+            else if (!this.field_179236_a.canPlaceBlockAt(worldIn, pos))
+            {
+                return false;
+            }
+            else
+            {
+                func_179235_a(worldIn, pos, EnumFacing.fromAngle((double)playerIn.rotationYaw), this.field_179236_a);
+                --stack.stackSize;
+                return true;
             }
         }
     }
 
-    public static void func_150924_a(World p_150924_0_, int p_150924_1_, int p_150924_2_, int p_150924_3_, int p_150924_4_, Block p_150924_5_)
+    public static void func_179235_a(World worldIn, BlockPos p_179235_1_, EnumFacing p_179235_2_, Block p_179235_3_)
     {
-        byte var6 = 0;
-        byte var7 = 0;
+        BlockPos var4 = p_179235_1_.offset(p_179235_2_.rotateY());
+        BlockPos var5 = p_179235_1_.offset(p_179235_2_.rotateYCCW());
+        int var6 = (worldIn.getBlockState(var5).getBlock().isNormalCube() ? 1 : 0) + (worldIn.getBlockState(var5.offsetUp()).getBlock().isNormalCube() ? 1 : 0);
+        int var7 = (worldIn.getBlockState(var4).getBlock().isNormalCube() ? 1 : 0) + (worldIn.getBlockState(var4.offsetUp()).getBlock().isNormalCube() ? 1 : 0);
+        boolean var8 = worldIn.getBlockState(var5).getBlock() == p_179235_3_ || worldIn.getBlockState(var5.offsetUp()).getBlock() == p_179235_3_;
+        boolean var9 = worldIn.getBlockState(var4).getBlock() == p_179235_3_ || worldIn.getBlockState(var4.offsetUp()).getBlock() == p_179235_3_;
+        boolean var10 = false;
 
-        if (p_150924_4_ == 0)
+        if (var8 && !var9 || var7 > var6)
         {
-            var7 = 1;
+            var10 = true;
         }
 
-        if (p_150924_4_ == 1)
-        {
-            var6 = -1;
-        }
-
-        if (p_150924_4_ == 2)
-        {
-            var7 = -1;
-        }
-
-        if (p_150924_4_ == 3)
-        {
-            var6 = 1;
-        }
-
-        int var8 = (p_150924_0_.getBlock(p_150924_1_ - var6, p_150924_2_, p_150924_3_ - var7).isNormalCube() ? 1 : 0) + (p_150924_0_.getBlock(p_150924_1_ - var6, p_150924_2_ + 1, p_150924_3_ - var7).isNormalCube() ? 1 : 0);
-        int var9 = (p_150924_0_.getBlock(p_150924_1_ + var6, p_150924_2_, p_150924_3_ + var7).isNormalCube() ? 1 : 0) + (p_150924_0_.getBlock(p_150924_1_ + var6, p_150924_2_ + 1, p_150924_3_ + var7).isNormalCube() ? 1 : 0);
-        boolean var10 = p_150924_0_.getBlock(p_150924_1_ - var6, p_150924_2_, p_150924_3_ - var7) == p_150924_5_ || p_150924_0_.getBlock(p_150924_1_ - var6, p_150924_2_ + 1, p_150924_3_ - var7) == p_150924_5_;
-        boolean var11 = p_150924_0_.getBlock(p_150924_1_ + var6, p_150924_2_, p_150924_3_ + var7) == p_150924_5_ || p_150924_0_.getBlock(p_150924_1_ + var6, p_150924_2_ + 1, p_150924_3_ + var7) == p_150924_5_;
-        boolean var12 = false;
-
-        if (var10 && !var11)
-        {
-            var12 = true;
-        }
-        else if (var9 > var8)
-        {
-            var12 = true;
-        }
-
-        p_150924_0_.setBlock(p_150924_1_, p_150924_2_, p_150924_3_, p_150924_5_, p_150924_4_, 2);
-        p_150924_0_.setBlock(p_150924_1_, p_150924_2_ + 1, p_150924_3_, p_150924_5_, 8 | (var12 ? 1 : 0), 2);
-        p_150924_0_.notifyBlocksOfNeighborChange(p_150924_1_, p_150924_2_, p_150924_3_, p_150924_5_);
-        p_150924_0_.notifyBlocksOfNeighborChange(p_150924_1_, p_150924_2_ + 1, p_150924_3_, p_150924_5_);
+        BlockPos var11 = p_179235_1_.offsetUp();
+        IBlockState var12 = p_179235_3_.getDefaultState().withProperty(BlockDoor.FACING_PROP, p_179235_2_).withProperty(BlockDoor.HINGEPOSITION_PROP, var10 ? BlockDoor.EnumHingePosition.RIGHT : BlockDoor.EnumHingePosition.LEFT);
+        worldIn.setBlockState(p_179235_1_, var12.withProperty(BlockDoor.HALF_PROP, BlockDoor.EnumDoorHalf.LOWER), 2);
+        worldIn.setBlockState(var11, var12.withProperty(BlockDoor.HALF_PROP, BlockDoor.EnumDoorHalf.UPPER), 2);
+        worldIn.notifyNeighborsOfStateChange(p_179235_1_, p_179235_3_);
+        worldIn.notifyNeighborsOfStateChange(var11, p_179235_3_);
     }
 }

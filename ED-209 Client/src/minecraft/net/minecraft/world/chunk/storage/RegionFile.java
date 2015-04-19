@@ -1,5 +1,6 @@
 package net.minecraft.world.chunk.storage;
 
+import com.google.common.collect.Lists;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -8,7 +9,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
@@ -21,7 +22,7 @@ public class RegionFile
     private RandomAccessFile dataFile;
     private final int[] offsets = new int[1024];
     private final int[] chunkTimestamps = new int[1024];
-    private ArrayList sectorFree;
+    private List sectorFree;
 
     /** McRegion sizeDelta */
     private int sizeDelta;
@@ -67,7 +68,7 @@ public class RegionFile
             }
 
             var2 = (int)this.dataFile.length() / 4096;
-            this.sectorFree = new ArrayList(var2);
+            this.sectorFree = Lists.newArrayListWithCapacity(var2);
             int var3;
 
             for (var3 = 0; var3 < var2; ++var3)
@@ -278,7 +279,7 @@ public class RegionFile
                 }
             }
 
-            this.setChunkTimestamp(p_76706_1_, p_76706_2_, (int)(MinecraftServer.getSystemTimeMillis() / 1000L));
+            this.setChunkTimestamp(p_76706_1_, p_76706_2_, (int)(MinecraftServer.getCurrentTimeMillis() / 1000L));
         }
         catch (IOException var12)
         {

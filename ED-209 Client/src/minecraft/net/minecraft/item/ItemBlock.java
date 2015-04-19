@@ -2,122 +2,86 @@ package net.minecraft.item;
 
 import java.util.List;
 import net.minecraft.block.Block;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.BlockSnow;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.IIcon;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class ItemBlock extends Item
 {
-    protected final Block field_150939_a;
-    private IIcon field_150938_b;
+    protected final Block block;
     private static final String __OBFID = "CL_00001772";
 
-    public ItemBlock(Block p_i45328_1_)
+    public ItemBlock(Block block)
     {
-        this.field_150939_a = p_i45328_1_;
+        this.block = block;
     }
 
     /**
      * Sets the unlocalized name of this item to the string passed as the parameter, prefixed by "item."
      */
-    public ItemBlock setUnlocalizedName(String p_77655_1_)
+    public ItemBlock setUnlocalizedName(String unlocalizedName)
     {
-        super.setUnlocalizedName(p_77655_1_);
+        super.setUnlocalizedName(unlocalizedName);
         return this;
     }
 
     /**
-     * Returns 0 for /terrain.png, 1 for /gui/items.png
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public int getSpriteNumber()
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        return this.field_150939_a.getItemIconName() != null ? 1 : 0;
-    }
+        IBlockState var9 = worldIn.getBlockState(pos);
+        Block var10 = var9.getBlock();
 
-    /**
-     * Gets an icon index based on an item's damage value
-     */
-    public IIcon getIconFromDamage(int p_77617_1_)
-    {
-        return this.field_150938_b != null ? this.field_150938_b : this.field_150939_a.getBlockTextureFromSide(1);
-    }
-
-    /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
-     */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
-    {
-        Block var11 = p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_);
-
-        if (var11 == Blocks.snow_layer && (p_77648_3_.getBlockMetadata(p_77648_4_, p_77648_5_, p_77648_6_) & 7) < 1)
+        if (var10 == Blocks.snow_layer && ((Integer)var9.getValue(BlockSnow.LAYERS_PROP)).intValue() < 1)
         {
-            p_77648_7_ = 1;
+            side = EnumFacing.UP;
         }
-        else if (var11 != Blocks.vine && var11 != Blocks.tallgrass && var11 != Blocks.deadbush)
+        else if (!var10.isReplaceable(worldIn, pos))
         {
-            if (p_77648_7_ == 0)
-            {
-                --p_77648_5_;
-            }
-
-            if (p_77648_7_ == 1)
-            {
-                ++p_77648_5_;
-            }
-
-            if (p_77648_7_ == 2)
-            {
-                --p_77648_6_;
-            }
-
-            if (p_77648_7_ == 3)
-            {
-                ++p_77648_6_;
-            }
-
-            if (p_77648_7_ == 4)
-            {
-                --p_77648_4_;
-            }
-
-            if (p_77648_7_ == 5)
-            {
-                ++p_77648_4_;
-            }
+            pos = pos.offset(side);
         }
 
-        if (p_77648_1_.stackSize == 0)
+        if (stack.stackSize == 0)
         {
             return false;
         }
-        else if (!p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_1_))
+        else if (!playerIn.func_175151_a(pos, side, stack))
         {
             return false;
         }
-        else if (p_77648_5_ == 255 && this.field_150939_a.getMaterial().isSolid())
+        else if (pos.getY() == 255 && this.block.getMaterial().isSolid())
         {
             return false;
         }
-        else if (p_77648_3_.canPlaceEntityOnSide(this.field_150939_a, p_77648_4_, p_77648_5_, p_77648_6_, false, p_77648_7_, p_77648_2_, p_77648_1_))
+        else if (worldIn.canBlockBePlaced(this.block, pos, false, side, (Entity)null, stack))
         {
-            int var12 = this.getMetadata(p_77648_1_.getItemDamage());
-            int var13 = this.field_150939_a.onBlockPlaced(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_8_, p_77648_9_, p_77648_10_, var12);
+            int var11 = this.getMetadata(stack.getMetadata());
+            IBlockState var12 = this.block.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, var11, playerIn);
 
-            if (p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, this.field_150939_a, var13, 3))
+            if (worldIn.setBlockState(pos, var12, 3))
             {
-                if (p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_) == this.field_150939_a)
+                var12 = worldIn.getBlockState(pos);
+
+                if (var12.getBlock() == this.block)
                 {
-                    this.field_150939_a.onBlockPlacedBy(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, p_77648_2_, p_77648_1_);
-                    this.field_150939_a.onPostBlockPlaced(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, var13);
+                    setTileEntityNBT(worldIn, pos, stack);
+                    this.block.onBlockPlacedBy(worldIn, pos, var12, playerIn, stack);
                 }
 
-                p_77648_3_.playSoundEffect((double)((float)p_77648_4_ + 0.5F), (double)((float)p_77648_5_ + 0.5F), (double)((float)p_77648_6_ + 0.5F), this.field_150939_a.stepSound.func_150496_b(), (this.field_150939_a.stepSound.func_150497_c() + 1.0F) / 2.0F, this.field_150939_a.stepSound.func_150494_d() * 0.8F);
-                --p_77648_1_.stackSize;
+                worldIn.playSoundEffect((double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), this.block.stepSound.getPlaceSound(), (this.block.stepSound.getVolume() + 1.0F) / 2.0F, this.block.stepSound.getFrequency() * 0.8F);
+                --stack.stackSize;
             }
 
             return true;
@@ -128,57 +92,58 @@ public class ItemBlock extends Item
         }
     }
 
-    public boolean func_150936_a(World p_150936_1_, int p_150936_2_, int p_150936_3_, int p_150936_4_, int p_150936_5_, EntityPlayer p_150936_6_, ItemStack p_150936_7_)
+    public static boolean setTileEntityNBT(World worldIn, BlockPos p_179224_1_, ItemStack p_179224_2_)
     {
-        Block var8 = p_150936_1_.getBlock(p_150936_2_, p_150936_3_, p_150936_4_);
-
-        if (var8 == Blocks.snow_layer)
+        if (p_179224_2_.hasTagCompound() && p_179224_2_.getTagCompound().hasKey("BlockEntityTag", 10))
         {
-            p_150936_5_ = 1;
-        }
-        else if (var8 != Blocks.vine && var8 != Blocks.tallgrass && var8 != Blocks.deadbush)
-        {
-            if (p_150936_5_ == 0)
-            {
-                --p_150936_3_;
-            }
+            TileEntity var3 = worldIn.getTileEntity(p_179224_1_);
 
-            if (p_150936_5_ == 1)
+            if (var3 != null)
             {
-                ++p_150936_3_;
-            }
+                NBTTagCompound var4 = new NBTTagCompound();
+                NBTTagCompound var5 = (NBTTagCompound)var4.copy();
+                var3.writeToNBT(var4);
+                NBTTagCompound var6 = (NBTTagCompound)p_179224_2_.getTagCompound().getTag("BlockEntityTag");
+                var4.merge(var6);
+                var4.setInteger("x", p_179224_1_.getX());
+                var4.setInteger("y", p_179224_1_.getY());
+                var4.setInteger("z", p_179224_1_.getZ());
 
-            if (p_150936_5_ == 2)
-            {
-                --p_150936_4_;
-            }
-
-            if (p_150936_5_ == 3)
-            {
-                ++p_150936_4_;
-            }
-
-            if (p_150936_5_ == 4)
-            {
-                --p_150936_2_;
-            }
-
-            if (p_150936_5_ == 5)
-            {
-                ++p_150936_2_;
+                if (!var4.equals(var5))
+                {
+                    var3.readFromNBT(var4);
+                    var3.markDirty();
+                    return true;
+                }
             }
         }
 
-        return p_150936_1_.canPlaceEntityOnSide(this.field_150939_a, p_150936_2_, p_150936_3_, p_150936_4_, false, p_150936_5_, (Entity)null, p_150936_7_);
+        return false;
+    }
+
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos p_179222_2_, EnumFacing p_179222_3_, EntityPlayer p_179222_4_, ItemStack p_179222_5_)
+    {
+        Block var6 = worldIn.getBlockState(p_179222_2_).getBlock();
+
+        if (var6 == Blocks.snow_layer)
+        {
+            p_179222_3_ = EnumFacing.UP;
+        }
+        else if (!var6.isReplaceable(worldIn, p_179222_2_))
+        {
+            p_179222_2_ = p_179222_2_.offset(p_179222_3_);
+        }
+
+        return worldIn.canBlockBePlaced(this.block, p_179222_2_, false, p_179222_3_, (Entity)null, p_179222_5_);
     }
 
     /**
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        return this.field_150939_a.getUnlocalizedName();
+        return this.block.getUnlocalizedName();
     }
 
     /**
@@ -186,7 +151,7 @@ public class ItemBlock extends Item
      */
     public String getUnlocalizedName()
     {
-        return this.field_150939_a.getUnlocalizedName();
+        return this.block.getUnlocalizedName();
     }
 
     /**
@@ -194,24 +159,21 @@ public class ItemBlock extends Item
      */
     public CreativeTabs getCreativeTab()
     {
-        return this.field_150939_a.getCreativeTabToDisplayOn();
+        return this.block.getCreativeTabToDisplayOn();
     }
 
     /**
-     * This returns the sub items
+     * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
+     *  
+     * @param subItems The List of sub-items. This is a List of ItemStacks.
      */
-    public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List p_150895_3_)
+    public void getSubItems(Item itemIn, CreativeTabs tab, List subItems)
     {
-        this.field_150939_a.getSubBlocks(p_150895_1_, p_150895_2_, p_150895_3_);
+        this.block.getSubBlocks(itemIn, tab, subItems);
     }
 
-    public void registerIcons(IIconRegister p_94581_1_)
+    public Block getBlock()
     {
-        String var2 = this.field_150939_a.getItemIconName();
-
-        if (var2 != null)
-        {
-            this.field_150938_b = p_94581_1_.registerIcon(var2);
-        }
+        return this.block;
     }
 }

@@ -4,6 +4,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
 
 public class ItemCarrotOnAStick extends Item
@@ -37,26 +38,27 @@ public class ItemCarrotOnAStick extends Item
     /**
      * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
      */
-    public ItemStack onItemRightClick(ItemStack p_77659_1_, World p_77659_2_, EntityPlayer p_77659_3_)
+    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
     {
-        if (p_77659_3_.isRiding() && p_77659_3_.ridingEntity instanceof EntityPig)
+        if (playerIn.isRiding() && playerIn.ridingEntity instanceof EntityPig)
         {
-            EntityPig var4 = (EntityPig)p_77659_3_.ridingEntity;
+            EntityPig var4 = (EntityPig)playerIn.ridingEntity;
 
-            if (var4.getAIControlledByPlayer().isControlledByPlayer() && p_77659_1_.getMaxDamage() - p_77659_1_.getItemDamage() >= 7)
+            if (var4.getAIControlledByPlayer().isControlledByPlayer() && itemStackIn.getMaxDamage() - itemStackIn.getMetadata() >= 7)
             {
                 var4.getAIControlledByPlayer().boostSpeed();
-                p_77659_1_.damageItem(7, p_77659_3_);
+                itemStackIn.damageItem(7, playerIn);
 
-                if (p_77659_1_.stackSize == 0)
+                if (itemStackIn.stackSize == 0)
                 {
                     ItemStack var5 = new ItemStack(Items.fishing_rod);
-                    var5.setTagCompound(p_77659_1_.stackTagCompound);
+                    var5.setTagCompound(itemStackIn.getTagCompound());
                     return var5;
                 }
             }
         }
 
-        return p_77659_1_;
+        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+        return itemStackIn;
     }
 }

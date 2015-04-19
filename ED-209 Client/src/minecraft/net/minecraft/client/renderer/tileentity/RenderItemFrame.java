@@ -1,27 +1,29 @@
 package net.minecraft.client.renderer.tileentity;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureCompass;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemSkull;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.MapData;
@@ -30,14 +32,16 @@ import org.lwjgl.opengl.GL11;
 public class RenderItemFrame extends Render
 {
     private static final ResourceLocation mapBackgroundTextures = new ResourceLocation("textures/map/map_background.png");
-    private final RenderBlocks field_147916_f = new RenderBlocks();
     private final Minecraft field_147917_g = Minecraft.getMinecraft();
-    private IIcon field_94147_f;
+    private final ModelResourceLocation field_177072_f = new ModelResourceLocation("item_frame", "normal");
+    private final ModelResourceLocation field_177073_g = new ModelResourceLocation("item_frame", "map");
+    private RenderItem field_177074_h;
     private static final String __OBFID = "CL_00001002";
 
-    public void updateIcons(IIconRegister p_94143_1_)
+    public RenderItemFrame(RenderManager p_i46166_1_, RenderItem p_i46166_2_)
     {
-        this.field_94147_f = p_94143_1_.registerIcon("itemframe_background");
+        super(p_i46166_1_);
+        this.field_177074_h = p_i46166_2_;
     }
 
     /**
@@ -48,27 +52,35 @@ public class RenderItemFrame extends Render
      */
     public void doRender(EntityItemFrame p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        GL11.glPushMatrix();
-        double var10 = p_76986_1_.posX - p_76986_2_ - 0.5D;
-        double var12 = p_76986_1_.posY - p_76986_4_ - 0.5D;
-        double var14 = p_76986_1_.posZ - p_76986_6_ - 0.5D;
-        int var16 = p_76986_1_.field_146063_b + Direction.offsetX[p_76986_1_.hangingDirection];
-        int var17 = p_76986_1_.field_146064_c;
-        int var18 = p_76986_1_.field_146062_d + Direction.offsetZ[p_76986_1_.hangingDirection];
-        GL11.glTranslated((double)var16 - var10, (double)var17 - var12, (double)var18 - var14);
+        GlStateManager.pushMatrix();
+        BlockPos var10 = p_76986_1_.func_174857_n();
+        double var11 = (double)var10.getX() - p_76986_1_.posX + p_76986_2_;
+        double var13 = (double)var10.getY() - p_76986_1_.posY + p_76986_4_;
+        double var15 = (double)var10.getZ() - p_76986_1_.posZ + p_76986_6_;
+        GlStateManager.translate(var11 + 0.5D, var13 + 0.5D, var15 + 0.5D);
+        GlStateManager.rotate(180.0F - p_76986_1_.rotationYaw, 0.0F, 1.0F, 0.0F);
+        this.renderManager.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
+        BlockRendererDispatcher var17 = this.field_147917_g.getBlockRendererDispatcher();
+        ModelManager var18 = var17.func_175023_a().func_178126_b();
+        IBakedModel var19;
 
         if (p_76986_1_.getDisplayedItem() != null && p_76986_1_.getDisplayedItem().getItem() == Items.filled_map)
         {
-            this.func_147915_b(p_76986_1_);
+            var19 = var18.getModel(this.field_177073_g);
         }
         else
         {
-            this.renderFrameItemAsBlock(p_76986_1_);
+            var19 = var18.getModel(this.field_177072_f);
         }
 
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(-0.5F, -0.5F, -0.5F);
+        var17.func_175019_b().func_178262_a(var19, 1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.popMatrix();
+        GlStateManager.translate(0.0F, 0.0F, 0.4375F);
         this.func_82402_b(p_76986_1_);
-        GL11.glPopMatrix();
-        this.func_147914_a(p_76986_1_, p_76986_2_ + (double)((float)Direction.offsetX[p_76986_1_.hangingDirection] * 0.3F), p_76986_4_ - 0.25D, p_76986_6_ + (double)((float)Direction.offsetZ[p_76986_1_.hangingDirection] * 0.3F));
+        GlStateManager.popMatrix();
+        this.func_147914_a(p_76986_1_, p_76986_2_ + (double)((float)p_76986_1_.field_174860_b.getFrontOffsetX() * 0.3F), p_76986_4_ - 0.25D, p_76986_6_ + (double)((float)p_76986_1_.field_174860_b.getFrontOffsetZ() * 0.3F));
     }
 
     /**
@@ -77,85 +89,6 @@ public class RenderItemFrame extends Render
     protected ResourceLocation getEntityTexture(EntityItemFrame p_110775_1_)
     {
         return null;
-    }
-
-    private void func_147915_b(EntityItemFrame p_147915_1_)
-    {
-        GL11.glPushMatrix();
-        GL11.glRotatef(p_147915_1_.rotationYaw, 0.0F, 1.0F, 0.0F);
-        this.renderManager.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
-        Block var2 = Blocks.planks;
-        float var3 = 0.0625F;
-        float var4 = 1.0F;
-        float var5 = var4 / 2.0F;
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5 + 0.0625F), (double)(0.5F - var5 + 0.0625F), (double)var3, (double)(0.5F + var5 - 0.0625F), (double)(0.5F + var5 - 0.0625F));
-        this.field_147916_f.setOverrideBlockTexture(this.field_94147_f);
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        this.field_147916_f.clearOverrideBlockTexture();
-        this.field_147916_f.unlockBlockBounds();
-        GL11.glPopMatrix();
-        this.field_147916_f.setOverrideBlockTexture(Blocks.planks.getIcon(1, 2));
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5), (double)(0.5F - var5), (double)(var3 + 1.0E-4F), (double)(var3 + 0.5F - var5), (double)(0.5F + var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F + var5 - var3), (double)(0.5F - var5), (double)(var3 + 1.0E-4F), (double)(0.5F + var5), (double)(0.5F + var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5), (double)(0.5F - var5), (double)var3, (double)(0.5F + var5), (double)(var3 + 0.5F - var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5), (double)(0.5F + var5 - var3), (double)var3, (double)(0.5F + var5), (double)(0.5F + var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        this.field_147916_f.unlockBlockBounds();
-        this.field_147916_f.clearOverrideBlockTexture();
-        GL11.glPopMatrix();
-    }
-
-    /**
-     * Render the item frame's item as a block.
-     */
-    private void renderFrameItemAsBlock(EntityItemFrame p_82403_1_)
-    {
-        GL11.glPushMatrix();
-        GL11.glRotatef(p_82403_1_.rotationYaw, 0.0F, 1.0F, 0.0F);
-        this.renderManager.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
-        Block var2 = Blocks.planks;
-        float var3 = 0.0625F;
-        float var4 = 0.75F;
-        float var5 = var4 / 2.0F;
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5 + 0.0625F), (double)(0.5F - var5 + 0.0625F), (double)(var3 * 0.5F), (double)(0.5F + var5 - 0.0625F), (double)(0.5F + var5 - 0.0625F));
-        this.field_147916_f.setOverrideBlockTexture(this.field_94147_f);
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        this.field_147916_f.clearOverrideBlockTexture();
-        this.field_147916_f.unlockBlockBounds();
-        GL11.glPopMatrix();
-        this.field_147916_f.setOverrideBlockTexture(Blocks.planks.getIcon(1, 2));
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5), (double)(0.5F - var5), (double)(var3 + 1.0E-4F), (double)(var3 + 0.5F - var5), (double)(0.5F + var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F + var5 - var3), (double)(0.5F - var5), (double)(var3 + 1.0E-4F), (double)(0.5F + var5), (double)(0.5F + var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5), (double)(0.5F - var5), (double)var3, (double)(0.5F + var5), (double)(var3 + 0.5F - var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        GL11.glPushMatrix();
-        this.field_147916_f.overrideBlockBounds(0.0D, (double)(0.5F - var5), (double)(0.5F + var5 - var3), (double)var3, (double)(0.5F + var5), (double)(0.5F + var5));
-        this.field_147916_f.renderBlockAsItem(var2, 0, 1.0F);
-        GL11.glPopMatrix();
-        this.field_147916_f.unlockBlockBounds();
-        this.field_147916_f.clearOverrideBlockTexture();
-        GL11.glPopMatrix();
     }
 
     private void func_82402_b(EntityItemFrame p_82402_1_)
@@ -168,55 +101,26 @@ public class RenderItemFrame extends Render
             Item var4 = var3.getEntityItem().getItem();
             var3.getEntityItem().stackSize = 1;
             var3.hoverStart = 0.0F;
-            GL11.glPushMatrix();
-            GL11.glTranslatef(-0.453125F * (float)Direction.offsetX[p_82402_1_.hangingDirection], -0.18F, -0.453125F * (float)Direction.offsetZ[p_82402_1_.hangingDirection]);
-            GL11.glRotatef(180.0F + p_82402_1_.rotationYaw, 0.0F, 1.0F, 0.0F);
-            GL11.glRotatef((float)(-90 * p_82402_1_.getRotation()), 0.0F, 0.0F, 1.0F);
+            GlStateManager.pushMatrix();
+            GlStateManager.disableLighting();
+            int var5 = p_82402_1_.getRotation();
 
-            switch (p_82402_1_.getRotation())
+            if (var4 == Items.filled_map)
             {
-                case 1:
-                    GL11.glTranslatef(-0.16F, -0.16F, 0.0F);
-                    break;
-
-                case 2:
-                    GL11.glTranslatef(0.0F, -0.32F, 0.0F);
-                    break;
-
-                case 3:
-                    GL11.glTranslatef(0.16F, -0.16F, 0.0F);
+                var5 = var5 % 4 * 2;
             }
+
+            GlStateManager.rotate((float)var5 * 360.0F / 8.0F, 0.0F, 0.0F, 1.0F);
 
             if (var4 == Items.filled_map)
             {
                 this.renderManager.renderEngine.bindTexture(mapBackgroundTextures);
-                Tessellator var5 = Tessellator.instance;
-                GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
-                GL11.glRotatef(180.0F, 0.0F, 0.0F, 1.0F);
+                GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
                 float var6 = 0.0078125F;
-                GL11.glScalef(var6, var6, var6);
-
-                switch (p_82402_1_.getRotation())
-                {
-                    case 0:
-                        GL11.glTranslatef(-64.0F, -87.0F, -1.5F);
-                        break;
-
-                    case 1:
-                        GL11.glTranslatef(-66.5F, -84.5F, -1.5F);
-                        break;
-
-                    case 2:
-                        GL11.glTranslatef(-64.0F, -82.0F, -1.5F);
-                        break;
-
-                    case 3:
-                        GL11.glTranslatef(-61.5F, -84.5F, -1.5F);
-                }
-
-                GL11.glNormal3f(0.0F, 0.0F, -1.0F);
+                GlStateManager.scale(var6, var6, var6);
+                GlStateManager.translate(-64.0F, -64.0F, 0.0F);
                 MapData var7 = Items.filled_map.getMapData(var3.getEntityItem(), p_82402_1_.worldObj);
-                GL11.glTranslatef(0.0F, 0.0F, -1.0F);
+                GlStateManager.translate(0.0F, 0.0F, -1.0F);
 
                 if (var7 != null)
                 {
@@ -225,41 +129,51 @@ public class RenderItemFrame extends Render
             }
             else
             {
+                TextureAtlasSprite var12 = null;
+
                 if (var4 == Items.compass)
                 {
-                    TextureManager var12 = Minecraft.getMinecraft().getTextureManager();
-                    var12.bindTexture(TextureMap.locationItemsTexture);
-                    TextureAtlasSprite var14 = ((TextureMap)var12.getTexture(TextureMap.locationItemsTexture)).getAtlasSprite(Items.compass.getIconIndex(var3.getEntityItem()).getIconName());
+                    var12 = this.field_147917_g.getTextureMapBlocks().getAtlasSprite(TextureCompass.field_176608_l);
+                    this.field_147917_g.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
 
-                    if (var14 instanceof TextureCompass)
+                    if (var12 instanceof TextureCompass)
                     {
-                        TextureCompass var15 = (TextureCompass)var14;
-                        double var8 = var15.currentAngle;
-                        double var10 = var15.angleDelta;
-                        var15.currentAngle = 0.0D;
-                        var15.angleDelta = 0.0D;
-                        var15.updateCompass(p_82402_1_.worldObj, p_82402_1_.posX, p_82402_1_.posZ, (double)MathHelper.wrapAngleTo180_float((float)(180 + p_82402_1_.hangingDirection * 90)), false, true);
-                        var15.currentAngle = var8;
-                        var15.angleDelta = var10;
+                        TextureCompass var13 = (TextureCompass)var12;
+                        double var8 = var13.currentAngle;
+                        double var10 = var13.angleDelta;
+                        var13.currentAngle = 0.0D;
+                        var13.angleDelta = 0.0D;
+                        var13.updateCompass(p_82402_1_.worldObj, p_82402_1_.posX, p_82402_1_.posZ, (double)MathHelper.wrapAngleTo180_float((float)(180 + p_82402_1_.field_174860_b.getHorizontalIndex() * 90)), false, true);
+                        var13.currentAngle = var8;
+                        var13.angleDelta = var10;
+                    }
+                    else
+                    {
+                        var12 = null;
                     }
                 }
 
-                RenderItem.renderInFrame = true;
-                RenderManager.instance.func_147940_a(var3, 0.0D, 0.0D, 0.0D, 0.0F, 0.0F);
-                RenderItem.renderInFrame = false;
+                GlStateManager.scale(0.5F, 0.5F, 0.5F);
 
-                if (var4 == Items.compass)
+                if (!this.field_177074_h.func_175050_a(var3.getEntityItem()) || var4 instanceof ItemSkull)
                 {
-                    TextureAtlasSprite var13 = ((TextureMap)Minecraft.getMinecraft().getTextureManager().getTexture(TextureMap.locationItemsTexture)).getAtlasSprite(Items.compass.getIconIndex(var3.getEntityItem()).getIconName());
+                    GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+                }
 
-                    if (var13.getFrameCount() > 0)
-                    {
-                        var13.updateAnimation();
-                    }
+                GlStateManager.pushAttrib();
+                RenderHelper.enableStandardItemLighting();
+                this.field_177074_h.func_175043_b(var3.getEntityItem());
+                RenderHelper.disableStandardItemLighting();
+                GlStateManager.popAttrib();
+
+                if (var12 != null && var12.getFrameCount() > 0)
+                {
+                    var12.updateAnimation();
                 }
             }
 
-            GL11.glPopMatrix();
+            GlStateManager.enableLighting();
+            GlStateManager.popMatrix();
         }
     }
 
@@ -279,38 +193,39 @@ public class RenderItemFrame extends Render
                 if (p_147914_1_.isSneaking())
                 {
                     FontRenderer var14 = this.getFontRendererFromRenderManager();
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef((float)p_147914_2_ + 0.0F, (float)p_147914_4_ + p_147914_1_.height + 0.5F, (float)p_147914_6_);
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate((float)p_147914_2_ + 0.0F, (float)p_147914_4_ + p_147914_1_.height + 0.5F, (float)p_147914_6_);
                     GL11.glNormal3f(0.0F, 1.0F, 0.0F);
-                    GL11.glRotatef(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
-                    GL11.glRotatef(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
-                    GL11.glScalef(-var9, -var9, var9);
-                    GL11.glDisable(GL11.GL_LIGHTING);
-                    GL11.glTranslatef(0.0F, 0.25F / var9, 0.0F);
-                    GL11.glDepthMask(false);
-                    GL11.glEnable(GL11.GL_BLEND);
-                    GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-                    Tessellator var15 = Tessellator.instance;
-                    GL11.glDisable(GL11.GL_TEXTURE_2D);
-                    var15.startDrawingQuads();
-                    int var16 = var14.getStringWidth(var13) / 2;
-                    var15.setColorRGBA_F(0.0F, 0.0F, 0.0F, 0.25F);
-                    var15.addVertex((double)(-var16 - 1), -1.0D, 0.0D);
-                    var15.addVertex((double)(-var16 - 1), 8.0D, 0.0D);
-                    var15.addVertex((double)(var16 + 1), 8.0D, 0.0D);
-                    var15.addVertex((double)(var16 + 1), -1.0D, 0.0D);
+                    GlStateManager.rotate(-this.renderManager.playerViewY, 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate(this.renderManager.playerViewX, 1.0F, 0.0F, 0.0F);
+                    GlStateManager.scale(-var9, -var9, var9);
+                    GlStateManager.disableLighting();
+                    GlStateManager.translate(0.0F, 0.25F / var9, 0.0F);
+                    GlStateManager.depthMask(false);
+                    GlStateManager.enableBlend();
+                    GlStateManager.blendFunc(770, 771);
+                    Tessellator var15 = Tessellator.getInstance();
+                    WorldRenderer var16 = var15.getWorldRenderer();
+                    GlStateManager.func_179090_x();
+                    var16.startDrawingQuads();
+                    int var17 = var14.getStringWidth(var13) / 2;
+                    var16.func_178960_a(0.0F, 0.0F, 0.0F, 0.25F);
+                    var16.addVertex((double)(-var17 - 1), -1.0D, 0.0D);
+                    var16.addVertex((double)(-var17 - 1), 8.0D, 0.0D);
+                    var16.addVertex((double)(var17 + 1), 8.0D, 0.0D);
+                    var16.addVertex((double)(var17 + 1), -1.0D, 0.0D);
                     var15.draw();
-                    GL11.glEnable(GL11.GL_TEXTURE_2D);
-                    GL11.glDepthMask(true);
+                    GlStateManager.func_179098_w();
+                    GlStateManager.depthMask(true);
                     var14.drawString(var13, -var14.getStringWidth(var13) / 2, 0, 553648127);
-                    GL11.glEnable(GL11.GL_LIGHTING);
-                    GL11.glDisable(GL11.GL_BLEND);
-                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    GL11.glPopMatrix();
+                    GlStateManager.enableLighting();
+                    GlStateManager.disableBlend();
+                    GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                    GlStateManager.popMatrix();
                 }
                 else
                 {
-                    this.func_147906_a(p_147914_1_, var13, p_147914_2_, p_147914_4_, p_147914_6_, 64);
+                    this.renderLivingLabel(p_147914_1_, var13, p_147914_2_, p_147914_4_, p_147914_6_, 64);
                 }
             }
         }
@@ -322,6 +237,11 @@ public class RenderItemFrame extends Render
     protected ResourceLocation getEntityTexture(Entity p_110775_1_)
     {
         return this.getEntityTexture((EntityItemFrame)p_110775_1_);
+    }
+
+    protected void func_177067_a(Entity p_177067_1_, double p_177067_2_, double p_177067_4_, double p_177067_6_)
+    {
+        this.func_147914_a((EntityItemFrame)p_177067_1_, p_177067_2_, p_177067_4_, p_177067_6_);
     }
 
     /**

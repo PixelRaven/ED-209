@@ -1,7 +1,11 @@
 package net.minecraft.command;
 
+import java.util.Iterator;
 import java.util.List;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S19PacketEntityStatus;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.GameRules;
 
@@ -22,63 +26,81 @@ public class CommandGameRule extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.gamerule.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        String var6;
+        GameRules var3 = this.getGameRules();
+        String var4 = args.length > 0 ? args[0] : "";
+        String var5 = args.length > 1 ? func_180529_a(args, 1) : "";
 
-        if (p_71515_2_.length == 2)
+        switch (args.length)
         {
-            var6 = p_71515_2_[0];
-            String var7 = p_71515_2_[1];
-            GameRules var8 = this.getGameRules();
+            case 0:
+                sender.addChatMessage(new ChatComponentText(joinNiceString(var3.getRules())));
+                break;
 
-            if (var8.hasRule(var6))
-            {
-                var8.setOrCreateGameRule(var6, var7);
-                func_152373_a(p_71515_1_, this, "commands.gamerule.success", new Object[0]);
-            }
-            else
-            {
-                func_152373_a(p_71515_1_, this, "commands.gamerule.norule", new Object[] {var6});
-            }
-        }
-        else if (p_71515_2_.length == 1)
-        {
-            var6 = p_71515_2_[0];
-            GameRules var4 = this.getGameRules();
+            case 1:
+                if (!var3.hasRule(var4))
+                {
+                    throw new CommandException("commands.gamerule.norule", new Object[] {var4});
+                }
 
-            if (var4.hasRule(var6))
-            {
-                String var5 = var4.getGameRuleStringValue(var6);
-                p_71515_1_.addChatMessage((new ChatComponentText(var6)).appendText(" = ").appendText(var5));
-            }
-            else
-            {
-                func_152373_a(p_71515_1_, this, "commands.gamerule.norule", new Object[] {var6});
-            }
-        }
-        else if (p_71515_2_.length == 0)
-        {
-            GameRules var3 = this.getGameRules();
-            p_71515_1_.addChatMessage(new ChatComponentText(joinNiceString(var3.getRules())));
-        }
-        else
-        {
-            throw new WrongUsageException("commands.gamerule.usage", new Object[0]);
+                String var6 = var3.getGameRuleStringValue(var4);
+                sender.addChatMessage((new ChatComponentText(var4)).appendText(" = ").appendText(var6));
+                sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, var3.getInt(var4));
+                break;
+
+            default:
+                if (var3.areSameType(var4, GameRules.ValueType.BOOLEAN_VALUE) && !"true".equals(var5) && !"false".equals(var5))
+                {
+                    throw new CommandException("commands.generic.boolean.invalid", new Object[] {var5});
+                }
+
+                var3.setOrCreateGameRule(var4, var5);
+                func_175773_a(var3, var4);
+                notifyOperators(sender, this, "commands.gamerule.success", new Object[0]);
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public static void func_175773_a(GameRules p_175773_0_, String p_175773_1_)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, this.getGameRules().getRules()) : (p_71516_2_.length == 2 ? getListOfStringsMatchingLastWord(p_71516_2_, new String[] {"true", "false"}): null);
+        if ("reducedDebugInfo".equals(p_175773_1_))
+        {
+            int var2 = p_175773_0_.getGameRuleBooleanValue(p_175773_1_) ? 22 : 23;
+            Iterator var3 = MinecraftServer.getServer().getConfigurationManager().playerEntityList.iterator();
+
+            while (var3.hasNext())
+            {
+                EntityPlayerMP var4 = (EntityPlayerMP)var3.next();
+                var4.playerNetServerHandler.sendPacket(new S19PacketEntityStatus(var4, (byte)var2));
+            }
+        }
+    }
+
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    {
+        if (args.length == 1)
+        {
+            return getListOfStringsMatchingLastWord(args, this.getGameRules().getRules());
+        }
+        else
+        {
+            if (args.length == 2)
+            {
+                GameRules var4 = this.getGameRules();
+
+                if (var4.areSameType(args[0], GameRules.ValueType.BOOLEAN_VALUE))
+                {
+                    return getListOfStringsMatchingLastWord(args, new String[] {"true", "false"});
+                }
+            }
+
+            return null;
+        }
     }
 
     /**

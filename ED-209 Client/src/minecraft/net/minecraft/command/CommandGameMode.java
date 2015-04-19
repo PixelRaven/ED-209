@@ -3,6 +3,7 @@ package net.minecraft.command;
 import java.util.List;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.WorldSettings;
 
@@ -23,50 +24,53 @@ public class CommandGameMode extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.gamemode.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length > 0)
+        if (args.length <= 0)
         {
-            WorldSettings.GameType var3 = this.getGameModeFromCommand(p_71515_1_, p_71515_2_[0]);
-            EntityPlayerMP var4 = p_71515_2_.length >= 2 ? getPlayer(p_71515_1_, p_71515_2_[1]) : getCommandSenderAsPlayer(p_71515_1_);
-            var4.setGameType(var3);
-            var4.fallDistance = 0.0F;
-            ChatComponentTranslation var5 = new ChatComponentTranslation("gameMode." + var3.getName(), new Object[0]);
-
-            if (var4 != p_71515_1_)
-            {
-                func_152374_a(p_71515_1_, this, 1, "commands.gamemode.success.other", new Object[] {var4.getCommandSenderName(), var5});
-            }
-            else
-            {
-                func_152374_a(p_71515_1_, this, 1, "commands.gamemode.success.self", new Object[] {var5});
-            }
+            throw new WrongUsageException("commands.gamemode.usage", new Object[0]);
         }
         else
         {
-            throw new WrongUsageException("commands.gamemode.usage", new Object[0]);
+            WorldSettings.GameType var3 = this.getGameModeFromCommand(sender, args[0]);
+            EntityPlayerMP var4 = args.length >= 2 ? getPlayer(sender, args[1]) : getCommandSenderAsPlayer(sender);
+            var4.setGameType(var3);
+            var4.fallDistance = 0.0F;
+
+            if (sender.getEntityWorld().getGameRules().getGameRuleBooleanValue("sendCommandFeedback"))
+            {
+                var4.addChatMessage(new ChatComponentTranslation("gameMode.changed", new Object[0]));
+            }
+
+            ChatComponentTranslation var5 = new ChatComponentTranslation("gameMode." + var3.getName(), new Object[0]);
+
+            if (var4 != sender)
+            {
+                notifyOperators(sender, this, 1, "commands.gamemode.success.other", new Object[] {var4.getName(), var5});
+            }
+            else
+            {
+                notifyOperators(sender, this, 1, "commands.gamemode.success.self", new Object[] {var5});
+            }
         }
     }
 
     /**
      * Gets the Game Mode specified in the command.
      */
-    protected WorldSettings.GameType getGameModeFromCommand(ICommandSender p_71539_1_, String p_71539_2_)
+    protected WorldSettings.GameType getGameModeFromCommand(ICommandSender p_71539_1_, String p_71539_2_) throws CommandException
     {
-        return !p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.SURVIVAL.getName()) && !p_71539_2_.equalsIgnoreCase("s") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.CREATIVE.getName()) && !p_71539_2_.equalsIgnoreCase("c") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.ADVENTURE.getName()) && !p_71539_2_.equalsIgnoreCase("a") ? WorldSettings.getGameTypeById(parseIntBounded(p_71539_1_, p_71539_2_, 0, WorldSettings.GameType.values().length - 2)) : WorldSettings.GameType.ADVENTURE) : WorldSettings.GameType.CREATIVE) : WorldSettings.GameType.SURVIVAL;
+        return !p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.SURVIVAL.getName()) && !p_71539_2_.equalsIgnoreCase("s") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.CREATIVE.getName()) && !p_71539_2_.equalsIgnoreCase("c") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.ADVENTURE.getName()) && !p_71539_2_.equalsIgnoreCase("a") ? (!p_71539_2_.equalsIgnoreCase(WorldSettings.GameType.SPECTATOR.getName()) && !p_71539_2_.equalsIgnoreCase("sp") ? WorldSettings.getGameTypeById(parseInt(p_71539_2_, 0, WorldSettings.GameType.values().length - 2)) : WorldSettings.GameType.SPECTATOR) : WorldSettings.GameType.ADVENTURE) : WorldSettings.GameType.CREATIVE) : WorldSettings.GameType.SURVIVAL;
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, new String[] {"survival", "creative", "adventure"}): (p_71516_2_.length == 2 ? getListOfStringsMatchingLastWord(p_71516_2_, this.getListOfPlayerUsernames()) : null);
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"survival", "creative", "adventure", "spectator"}): (args.length == 2 ? getListOfStringsMatchingLastWord(args, this.getListOfPlayerUsernames()) : null);
     }
 
     /**
@@ -80,8 +84,8 @@ public class CommandGameMode extends CommandBase
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 1;
+        return index == 1;
     }
 }

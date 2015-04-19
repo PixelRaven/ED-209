@@ -14,7 +14,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 public class MapGenVillage extends MapGenStructure
 {
     /** A list of all the biomes villages can spawn in. */
-    public static final List villageSpawnBiomes = Arrays.asList(new BiomeGenBase[] {BiomeGenBase.plains, BiomeGenBase.desert, BiomeGenBase.field_150588_X});
+    public static final List villageSpawnBiomes = Arrays.asList(new BiomeGenBase[] {BiomeGenBase.plains, BiomeGenBase.desert, BiomeGenBase.savanna});
 
     /** World terrain type, 0 for normal, 1 for flat map */
     private int terrainType;
@@ -48,7 +48,7 @@ public class MapGenVillage extends MapGenStructure
         }
     }
 
-    public String func_143025_a()
+    public String getStructureName()
     {
         return "Village";
     }
@@ -101,11 +101,11 @@ public class MapGenVillage extends MapGenStructure
 
         public Start() {}
 
-        public Start(World p_i2092_1_, Random p_i2092_2_, int p_i2092_3_, int p_i2092_4_, int p_i2092_5_)
+        public Start(World worldIn, Random p_i2092_2_, int p_i2092_3_, int p_i2092_4_, int p_i2092_5_)
         {
             super(p_i2092_3_, p_i2092_4_);
             List var6 = StructureVillagePieces.getStructureVillageWeightedPieceList(p_i2092_2_, p_i2092_5_);
-            StructureVillagePieces.Start var7 = new StructureVillagePieces.Start(p_i2092_1_.getWorldChunkManager(), 0, p_i2092_2_, (p_i2092_3_ << 4) + 2, (p_i2092_4_ << 4) + 2, var6, p_i2092_5_);
+            StructureVillagePieces.Start var7 = new StructureVillagePieces.Start(worldIn.getWorldChunkManager(), 0, p_i2092_2_, (p_i2092_3_ << 4) + 2, (p_i2092_4_ << 4) + 2, var6, p_i2092_5_);
             this.components.add(var7);
             var7.buildComponent(var7, this.components, p_i2092_2_);
             List var8 = var7.field_74930_j;

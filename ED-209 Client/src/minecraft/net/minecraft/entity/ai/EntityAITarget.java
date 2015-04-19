@@ -1,21 +1,23 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.scoreboard.Team;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class EntityAITarget extends EntityAIBase
 {
     /** The entity that this task belongs to */
-    protected EntityCreature taskOwner;
+    protected final EntityCreature taskOwner;
 
     /**
      * If true, EntityAI targets must be able to be seen (cannot be blocked by walls) to be suitable targets.
@@ -36,7 +38,12 @@ public abstract class EntityAITarget extends EntityAIBase
      * When nearbyOnly is true, this throttles target searching to avoid excessive pathfinding.
      */
     private int targetSearchDelay;
-    private int field_75298_g;
+
+    /**
+     * If  @shouldCheckSight is true, the number of ticks before the interuption of this AITastk when the entity does't
+     * see the target
+     */
+    private int targetUnseenTicks;
     private static final String __OBFID = "CL_00001626";
 
     public EntityAITarget(EntityCreature p_i1669_1_, boolean p_i1669_2_)
@@ -68,27 +75,37 @@ public abstract class EntityAITarget extends EntityAIBase
         }
         else
         {
-            double var2 = this.getTargetDistance();
+            Team var2 = this.taskOwner.getTeam();
+            Team var3 = var1.getTeam();
 
-            if (this.taskOwner.getDistanceSqToEntity(var1) > var2 * var2)
+            if (var2 != null && var3 == var2)
             {
                 return false;
             }
             else
             {
-                if (this.shouldCheckSight)
-                {
-                    if (this.taskOwner.getEntitySenses().canSee(var1))
-                    {
-                        this.field_75298_g = 0;
-                    }
-                    else if (++this.field_75298_g > 60)
-                    {
-                        return false;
-                    }
-                }
+                double var4 = this.getTargetDistance();
 
-                return !(var1 instanceof EntityPlayerMP) || !((EntityPlayerMP)var1).theItemInWorldManager.isCreative();
+                if (this.taskOwner.getDistanceSqToEntity(var1) > var4 * var4)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (this.shouldCheckSight)
+                    {
+                        if (this.taskOwner.getEntitySenses().canSee(var1))
+                        {
+                            this.targetUnseenTicks = 0;
+                        }
+                        else if (++this.targetUnseenTicks > 60)
+                        {
+                            return false;
+                        }
+                    }
+
+                    return !(var1 instanceof EntityPlayer) || !((EntityPlayer)var1).capabilities.disableDamage;
+                }
             }
         }
     }
@@ -106,7 +123,7 @@ public abstract class EntityAITarget extends EntityAIBase
     {
         this.targetSearchStatus = 0;
         this.targetSearchDelay = 0;
-        this.field_75298_g = 0;
+        this.targetUnseenTicks = 0;
     }
 
     /**
@@ -117,76 +134,92 @@ public abstract class EntityAITarget extends EntityAIBase
         this.taskOwner.setAttackTarget((EntityLivingBase)null);
     }
 
-    /**
-     * A method used to see if an entity is a suitable target through a number of checks.
-     */
-    protected boolean isSuitableTarget(EntityLivingBase p_75296_1_, boolean p_75296_2_)
+    public static boolean func_179445_a(EntityLiving p_179445_0_, EntityLivingBase p_179445_1_, boolean p_179445_2_, boolean p_179445_3_)
     {
-        if (p_75296_1_ == null)
+        if (p_179445_1_ == null)
         {
             return false;
         }
-        else if (p_75296_1_ == this.taskOwner)
+        else if (p_179445_1_ == p_179445_0_)
         {
             return false;
         }
-        else if (!p_75296_1_.isEntityAlive())
+        else if (!p_179445_1_.isEntityAlive())
         {
             return false;
         }
-        else if (!this.taskOwner.canAttackClass(p_75296_1_.getClass()))
+        else if (!p_179445_0_.canAttackClass(p_179445_1_.getClass()))
         {
             return false;
         }
         else
         {
-            if (this.taskOwner instanceof IEntityOwnable && StringUtils.isNotEmpty(((IEntityOwnable)this.taskOwner).func_152113_b()))
-            {
-                if (p_75296_1_ instanceof IEntityOwnable && ((IEntityOwnable)this.taskOwner).func_152113_b().equals(((IEntityOwnable)p_75296_1_).func_152113_b()))
-                {
-                    return false;
-                }
+            Team var4 = p_179445_0_.getTeam();
+            Team var5 = p_179445_1_.getTeam();
 
-                if (p_75296_1_ == ((IEntityOwnable)this.taskOwner).getOwner())
-                {
-                    return false;
-                }
-            }
-            else if (p_75296_1_ instanceof EntityPlayer && !p_75296_2_ && ((EntityPlayer)p_75296_1_).capabilities.disableDamage)
-            {
-                return false;
-            }
-
-            if (!this.taskOwner.isWithinHomeDistance(MathHelper.floor_double(p_75296_1_.posX), MathHelper.floor_double(p_75296_1_.posY), MathHelper.floor_double(p_75296_1_.posZ)))
-            {
-                return false;
-            }
-            else if (this.shouldCheckSight && !this.taskOwner.getEntitySenses().canSee(p_75296_1_))
+            if (var4 != null && var5 == var4)
             {
                 return false;
             }
             else
             {
-                if (this.nearbyOnly)
+                if (p_179445_0_ instanceof IEntityOwnable && StringUtils.isNotEmpty(((IEntityOwnable)p_179445_0_).func_152113_b()))
                 {
-                    if (--this.targetSearchDelay <= 0)
+                    if (p_179445_1_ instanceof IEntityOwnable && ((IEntityOwnable)p_179445_0_).func_152113_b().equals(((IEntityOwnable)p_179445_1_).func_152113_b()))
                     {
-                        this.targetSearchStatus = 0;
+                        return false;
                     }
 
-                    if (this.targetSearchStatus == 0)
-                    {
-                        this.targetSearchStatus = this.canEasilyReach(p_75296_1_) ? 1 : 2;
-                    }
-
-                    if (this.targetSearchStatus == 2)
+                    if (p_179445_1_ == ((IEntityOwnable)p_179445_0_).getOwner())
                     {
                         return false;
                     }
                 }
+                else if (p_179445_1_ instanceof EntityPlayer && !p_179445_2_ && ((EntityPlayer)p_179445_1_).capabilities.disableDamage)
+                {
+                    return false;
+                }
 
-                return true;
+                return !p_179445_3_ || p_179445_0_.getEntitySenses().canSee(p_179445_1_);
             }
+        }
+    }
+
+    /**
+     * A method used to see if an entity is a suitable target through a number of checks. Args : entity,
+     * canTargetInvinciblePlayer
+     */
+    protected boolean isSuitableTarget(EntityLivingBase p_75296_1_, boolean p_75296_2_)
+    {
+        if (!func_179445_a(this.taskOwner, p_75296_1_, p_75296_2_, this.shouldCheckSight))
+        {
+            return false;
+        }
+        else if (!this.taskOwner.func_180485_d(new BlockPos(p_75296_1_)))
+        {
+            return false;
+        }
+        else
+        {
+            if (this.nearbyOnly)
+            {
+                if (--this.targetSearchDelay <= 0)
+                {
+                    this.targetSearchStatus = 0;
+                }
+
+                if (this.targetSearchStatus == 0)
+                {
+                    this.targetSearchStatus = this.canEasilyReach(p_75296_1_) ? 1 : 2;
+                }
+
+                if (this.targetSearchStatus == 2)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 

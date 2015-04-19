@@ -8,7 +8,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.MathHelper;
 
-public class S0EPacketSpawnObject extends Packet
+public class S0EPacketSpawnObject implements Packet
 {
     private int field_149018_a;
     private int field_149016_b;
@@ -87,58 +87,53 @@ public class S0EPacketSpawnObject extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149018_a = p_148837_1_.readVarIntFromBuffer();
-        this.field_149019_j = p_148837_1_.readByte();
-        this.field_149016_b = p_148837_1_.readInt();
-        this.field_149017_c = p_148837_1_.readInt();
-        this.field_149014_d = p_148837_1_.readInt();
-        this.field_149021_h = p_148837_1_.readByte();
-        this.field_149022_i = p_148837_1_.readByte();
-        this.field_149020_k = p_148837_1_.readInt();
+        this.field_149018_a = data.readVarIntFromBuffer();
+        this.field_149019_j = data.readByte();
+        this.field_149016_b = data.readInt();
+        this.field_149017_c = data.readInt();
+        this.field_149014_d = data.readInt();
+        this.field_149021_h = data.readByte();
+        this.field_149022_i = data.readByte();
+        this.field_149020_k = data.readInt();
 
         if (this.field_149020_k > 0)
         {
-            this.field_149015_e = p_148837_1_.readShort();
-            this.field_149012_f = p_148837_1_.readShort();
-            this.field_149013_g = p_148837_1_.readShort();
+            this.field_149015_e = data.readShort();
+            this.field_149012_f = data.readShort();
+            this.field_149013_g = data.readShort();
         }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeVarIntToBuffer(this.field_149018_a);
-        p_148840_1_.writeByte(this.field_149019_j);
-        p_148840_1_.writeInt(this.field_149016_b);
-        p_148840_1_.writeInt(this.field_149017_c);
-        p_148840_1_.writeInt(this.field_149014_d);
-        p_148840_1_.writeByte(this.field_149021_h);
-        p_148840_1_.writeByte(this.field_149022_i);
-        p_148840_1_.writeInt(this.field_149020_k);
+        data.writeVarIntToBuffer(this.field_149018_a);
+        data.writeByte(this.field_149019_j);
+        data.writeInt(this.field_149016_b);
+        data.writeInt(this.field_149017_c);
+        data.writeInt(this.field_149014_d);
+        data.writeByte(this.field_149021_h);
+        data.writeByte(this.field_149022_i);
+        data.writeInt(this.field_149020_k);
 
         if (this.field_149020_k > 0)
         {
-            p_148840_1_.writeShort(this.field_149015_e);
-            p_148840_1_.writeShort(this.field_149012_f);
-            p_148840_1_.writeShort(this.field_149013_g);
+            data.writeShort(this.field_149015_e);
+            data.writeShort(this.field_149012_f);
+            data.writeShort(this.field_149013_g);
         }
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
-    {
-        p_148833_1_.handleSpawnObject(this);
-    }
-
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        return String.format("id=%d, type=%d, x=%.2f, y=%.2f, z=%.2f", new Object[] {Integer.valueOf(this.field_149018_a), Integer.valueOf(this.field_149019_j), Float.valueOf((float)this.field_149016_b / 32.0F), Float.valueOf((float)this.field_149017_c / 32.0F), Float.valueOf((float)this.field_149014_d / 32.0F)});
+        handler.handleSpawnObject(this);
     }
 
     public int func_149001_c()
@@ -231,8 +226,11 @@ public class S0EPacketSpawnObject extends Packet
         this.field_149020_k = p_149002_1_;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

@@ -1,11 +1,14 @@
 package net.minecraft.client.particle;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class EntityLargeExplodeFX extends EntityFX
 {
@@ -18,44 +21,44 @@ public class EntityLargeExplodeFX extends EntityFX
     private float field_70582_as;
     private static final String __OBFID = "CL_00000910";
 
-    public EntityLargeExplodeFX(TextureManager p_i1213_1_, World p_i1213_2_, double p_i1213_3_, double p_i1213_5_, double p_i1213_7_, double p_i1213_9_, double p_i1213_11_, double p_i1213_13_)
+    protected EntityLargeExplodeFX(TextureManager p_i1213_1_, World worldIn, double p_i1213_3_, double p_i1213_5_, double p_i1213_7_, double p_i1213_9_, double p_i1213_11_, double p_i1213_13_)
     {
-        super(p_i1213_2_, p_i1213_3_, p_i1213_5_, p_i1213_7_, 0.0D, 0.0D, 0.0D);
+        super(worldIn, p_i1213_3_, p_i1213_5_, p_i1213_7_, 0.0D, 0.0D, 0.0D);
         this.theRenderEngine = p_i1213_1_;
         this.field_70584_aq = 6 + this.rand.nextInt(4);
         this.particleRed = this.particleGreen = this.particleBlue = this.rand.nextFloat() * 0.6F + 0.4F;
         this.field_70582_as = 1.0F - (float)p_i1213_9_ * 0.5F;
     }
 
-    public void renderParticle(Tessellator p_70539_1_, float p_70539_2_, float p_70539_3_, float p_70539_4_, float p_70539_5_, float p_70539_6_, float p_70539_7_)
+    public void func_180434_a(WorldRenderer p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_)
     {
-        int var8 = (int)(((float)this.field_70581_a + p_70539_2_) * 15.0F / (float)this.field_70584_aq);
+        int var9 = (int)(((float)this.field_70581_a + p_180434_3_) * 15.0F / (float)this.field_70584_aq);
 
-        if (var8 <= 15)
+        if (var9 <= 15)
         {
             this.theRenderEngine.bindTexture(field_110127_a);
-            float var9 = (float)(var8 % 4) / 4.0F;
-            float var10 = var9 + 0.24975F;
-            float var11 = (float)(var8 / 4) / 4.0F;
-            float var12 = var11 + 0.24975F;
-            float var13 = 2.0F * this.field_70582_as;
-            float var14 = (float)(this.prevPosX + (this.posX - this.prevPosX) * (double)p_70539_2_ - interpPosX);
-            float var15 = (float)(this.prevPosY + (this.posY - this.prevPosY) * (double)p_70539_2_ - interpPosY);
-            float var16 = (float)(this.prevPosZ + (this.posZ - this.prevPosZ) * (double)p_70539_2_ - interpPosZ);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glDisable(GL11.GL_LIGHTING);
+            float var10 = (float)(var9 % 4) / 4.0F;
+            float var11 = var10 + 0.24975F;
+            float var12 = (float)(var9 / 4) / 4.0F;
+            float var13 = var12 + 0.24975F;
+            float var14 = 2.0F * this.field_70582_as;
+            float var15 = (float)(this.prevPosX + (this.posX - this.prevPosX) * (double)p_180434_3_ - interpPosX);
+            float var16 = (float)(this.prevPosY + (this.posY - this.prevPosY) * (double)p_180434_3_ - interpPosY);
+            float var17 = (float)(this.prevPosZ + (this.posZ - this.prevPosZ) * (double)p_180434_3_ - interpPosZ);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.disableLighting();
             RenderHelper.disableStandardItemLighting();
-            p_70539_1_.startDrawingQuads();
-            p_70539_1_.setColorRGBA_F(this.particleRed, this.particleGreen, this.particleBlue, 1.0F);
-            p_70539_1_.setNormal(0.0F, 1.0F, 0.0F);
-            p_70539_1_.setBrightness(240);
-            p_70539_1_.addVertexWithUV((double)(var14 - p_70539_3_ * var13 - p_70539_6_ * var13), (double)(var15 - p_70539_4_ * var13), (double)(var16 - p_70539_5_ * var13 - p_70539_7_ * var13), (double)var10, (double)var12);
-            p_70539_1_.addVertexWithUV((double)(var14 - p_70539_3_ * var13 + p_70539_6_ * var13), (double)(var15 + p_70539_4_ * var13), (double)(var16 - p_70539_5_ * var13 + p_70539_7_ * var13), (double)var10, (double)var11);
-            p_70539_1_.addVertexWithUV((double)(var14 + p_70539_3_ * var13 + p_70539_6_ * var13), (double)(var15 + p_70539_4_ * var13), (double)(var16 + p_70539_5_ * var13 + p_70539_7_ * var13), (double)var9, (double)var11);
-            p_70539_1_.addVertexWithUV((double)(var14 + p_70539_3_ * var13 - p_70539_6_ * var13), (double)(var15 - p_70539_4_ * var13), (double)(var16 + p_70539_5_ * var13 - p_70539_7_ * var13), (double)var9, (double)var12);
-            p_70539_1_.draw();
-            GL11.glPolygonOffset(0.0F, 0.0F);
-            GL11.glEnable(GL11.GL_LIGHTING);
+            p_180434_1_.startDrawingQuads();
+            p_180434_1_.func_178960_a(this.particleRed, this.particleGreen, this.particleBlue, 1.0F);
+            p_180434_1_.func_178980_d(0.0F, 1.0F, 0.0F);
+            p_180434_1_.func_178963_b(240);
+            p_180434_1_.addVertexWithUV((double)(var15 - p_180434_4_ * var14 - p_180434_7_ * var14), (double)(var16 - p_180434_5_ * var14), (double)(var17 - p_180434_6_ * var14 - p_180434_8_ * var14), (double)var11, (double)var13);
+            p_180434_1_.addVertexWithUV((double)(var15 - p_180434_4_ * var14 + p_180434_7_ * var14), (double)(var16 + p_180434_5_ * var14), (double)(var17 - p_180434_6_ * var14 + p_180434_8_ * var14), (double)var11, (double)var12);
+            p_180434_1_.addVertexWithUV((double)(var15 + p_180434_4_ * var14 + p_180434_7_ * var14), (double)(var16 + p_180434_5_ * var14), (double)(var17 + p_180434_6_ * var14 + p_180434_8_ * var14), (double)var10, (double)var12);
+            p_180434_1_.addVertexWithUV((double)(var15 + p_180434_4_ * var14 - p_180434_7_ * var14), (double)(var16 - p_180434_5_ * var14), (double)(var17 + p_180434_6_ * var14 - p_180434_8_ * var14), (double)var10, (double)var13);
+            Tessellator.getInstance().draw();
+            GlStateManager.doPolygonOffset(0.0F, 0.0F);
+            GlStateManager.enableLighting();
         }
     }
 
@@ -83,5 +86,15 @@ public class EntityLargeExplodeFX extends EntityFX
     public int getFXLayer()
     {
         return 3;
+    }
+
+    public static class Factory implements IParticleFactory
+    {
+        private static final String __OBFID = "CL_00002598";
+
+        public EntityFX func_178902_a(int p_178902_1_, World worldIn, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int ... p_178902_15_)
+        {
+            return new EntityLargeExplodeFX(Minecraft.getMinecraft().getTextureManager(), worldIn, p_178902_3_, p_178902_5_, p_178902_7_, p_178902_9_, p_178902_11_, p_178902_13_);
+        }
     }
 }

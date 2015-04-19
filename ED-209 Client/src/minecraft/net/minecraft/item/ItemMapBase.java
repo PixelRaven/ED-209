@@ -16,7 +16,7 @@ public class ItemMapBase extends Item
         return true;
     }
 
-    public Packet func_150911_c(ItemStack p_150911_1_, World p_150911_2_, EntityPlayer p_150911_3_)
+    public Packet createMapDataPacket(ItemStack p_150911_1_, World worldIn, EntityPlayer p_150911_3_)
     {
         return null;
     }

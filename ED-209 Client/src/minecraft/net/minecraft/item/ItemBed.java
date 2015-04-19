@@ -1,9 +1,13 @@
 package net.minecraft.item;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -17,59 +21,53 @@ public class ItemBed extends Item
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_77648_3_.isClient)
+        if (worldIn.isRemote)
         {
             return true;
         }
-        else if (p_77648_7_ != 1)
+        else if (side != EnumFacing.UP)
         {
             return false;
         }
         else
         {
-            ++p_77648_5_;
-            BlockBed var11 = (BlockBed)Blocks.bed;
-            int var12 = MathHelper.floor_double((double)(p_77648_2_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-            byte var13 = 0;
-            byte var14 = 0;
+            IBlockState var9 = worldIn.getBlockState(pos);
+            Block var10 = var9.getBlock();
+            boolean var11 = var10.isReplaceable(worldIn, pos);
 
-            if (var12 == 0)
+            if (!var11)
             {
-                var14 = 1;
+                pos = pos.offsetUp();
             }
 
-            if (var12 == 1)
-            {
-                var13 = -1;
-            }
+            int var12 = MathHelper.floor_double((double)(playerIn.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+            EnumFacing var13 = EnumFacing.getHorizontal(var12);
+            BlockPos var14 = pos.offset(var13);
+            boolean var15 = var10.isReplaceable(worldIn, var14);
+            boolean var16 = worldIn.isAirBlock(pos) || var11;
+            boolean var17 = worldIn.isAirBlock(var14) || var15;
 
-            if (var12 == 2)
+            if (playerIn.func_175151_a(pos, side, stack) && playerIn.func_175151_a(var14, side, stack))
             {
-                var14 = -1;
-            }
-
-            if (var12 == 3)
-            {
-                var13 = 1;
-            }
-
-            if (p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_1_) && p_77648_2_.canPlayerEdit(p_77648_4_ + var13, p_77648_5_, p_77648_6_ + var14, p_77648_7_, p_77648_1_))
-            {
-                if (p_77648_3_.isAirBlock(p_77648_4_, p_77648_5_, p_77648_6_) && p_77648_3_.isAirBlock(p_77648_4_ + var13, p_77648_5_, p_77648_6_ + var14) && World.doesBlockHaveSolidTopSurface(p_77648_3_, p_77648_4_, p_77648_5_ - 1, p_77648_6_) && World.doesBlockHaveSolidTopSurface(p_77648_3_, p_77648_4_ + var13, p_77648_5_ - 1, p_77648_6_ + var14))
+                if (var16 && var17 && World.doesBlockHaveSolidTopSurface(worldIn, pos.offsetDown()) && World.doesBlockHaveSolidTopSurface(worldIn, var14.offsetDown()))
                 {
-                    p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, var11, var12, 3);
+                    int var18 = var13.getHorizontalIndex();
+                    IBlockState var19 = Blocks.bed.getDefaultState().withProperty(BlockBed.OCCUPIED_PROP, Boolean.valueOf(false)).withProperty(BlockBed.AGE, var13).withProperty(BlockBed.PART_PROP, BlockBed.EnumPartType.FOOT);
 
-                    if (p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_) == var11)
+                    if (worldIn.setBlockState(pos, var19, 3))
                     {
-                        p_77648_3_.setBlock(p_77648_4_ + var13, p_77648_5_, p_77648_6_ + var14, var11, var12 + 8, 3);
+                        IBlockState var20 = var19.withProperty(BlockBed.PART_PROP, BlockBed.EnumPartType.HEAD);
+                        worldIn.setBlockState(var14, var20, 3);
                     }
 
-                    --p_77648_1_.stackSize;
+                    --stack.stackSize;
                     return true;
                 }
                 else

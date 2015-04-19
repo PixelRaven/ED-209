@@ -41,7 +41,7 @@ public class StatCollector
      */
     public static boolean canTranslate(String p_94522_0_)
     {
-        return localizedName.containsTranslateKey(p_94522_0_);
+        return localizedName.isKeyTranslated(p_94522_0_);
     }
 
     /**

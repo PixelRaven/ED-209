@@ -19,7 +19,9 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.pathfinding.PathNavigateGround;
 import net.minecraft.stats.AchievementList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class EntityPig extends EntityAnimal
@@ -28,11 +30,11 @@ public class EntityPig extends EntityAnimal
     private final EntityAIControlledByPlayer aiControlledByPlayer;
     private static final String __OBFID = "CL_00001647";
 
-    public EntityPig(World p_i1689_1_)
+    public EntityPig(World worldIn)
     {
-        super(p_i1689_1_);
+        super(worldIn);
         this.setSize(0.9F, 0.9F);
-        this.getNavigator().setAvoidsWater(true);
+        ((PathNavigateGround)this.getNavigator()).func_179690_a(true);
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIPanic(this, 1.25D));
         this.tasks.addTask(2, this.aiControlledByPlayer = new EntityAIControlledByPlayer(this, 0.3F));
@@ -45,24 +47,11 @@ public class EntityPig extends EntityAnimal
         this.tasks.addTask(8, new EntityAILookIdle(this));
     }
 
-    /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
-    {
-        return true;
-    }
-
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(10.0D);
         this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25D);
-    }
-
-    protected void updateAITasks()
-    {
-        super.updateAITasks();
     }
 
     /**
@@ -84,19 +73,19 @@ public class EntityPig extends EntityAnimal
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setBoolean("Saddle", this.getSaddled());
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setBoolean("Saddle", this.getSaddled());
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.setSaddled(p_70037_1_.getBoolean("Saddle"));
+        super.readEntityFromNBT(tagCompund);
+        this.setSaddled(tagCompund.getBoolean("Saddle"));
     }
 
     /**
@@ -123,7 +112,7 @@ public class EntityPig extends EntityAnimal
         return "mob.pig.death";
     }
 
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.pig.step", 0.15F, 1.0F);
     }
@@ -137,7 +126,7 @@ public class EntityPig extends EntityAnimal
         {
             return true;
         }
-        else if (this.getSaddled() && !this.worldObj.isClient && (this.riddenByEntity == null || this.riddenByEntity == p_70085_1_))
+        else if (this.getSaddled() && !this.worldObj.isRemote && (this.riddenByEntity == null || this.riddenByEntity == p_70085_1_))
         {
             p_70085_1_.mountEntity(this);
             return true;
@@ -148,7 +137,7 @@ public class EntityPig extends EntityAnimal
         }
     }
 
-    protected Item func_146068_u()
+    protected Item getDropItem()
     {
         return this.isBurning() ? Items.cooked_porkchop : Items.porkchop;
     }
@@ -164,17 +153,17 @@ public class EntityPig extends EntityAnimal
         {
             if (this.isBurning())
             {
-                this.func_145779_a(Items.cooked_porkchop, 1);
+                this.dropItem(Items.cooked_porkchop, 1);
             }
             else
             {
-                this.func_145779_a(Items.porkchop, 1);
+                this.dropItem(Items.porkchop, 1);
             }
         }
 
         if (this.getSaddled())
         {
-            this.func_145779_a(Items.saddle, 1);
+            this.dropItem(Items.saddle, 1);
         }
     }
 
@@ -204,9 +193,9 @@ public class EntityPig extends EntityAnimal
     /**
      * Called when a lightning bolt hits the entity.
      */
-    public void onStruckByLightning(EntityLightningBolt p_70077_1_)
+    public void onStruckByLightning(EntityLightningBolt lightningBolt)
     {
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             EntityPigZombie var2 = new EntityPigZombie(this.worldObj);
             var2.setCurrentItemOrArmor(0, new ItemStack(Items.golden_sword));
@@ -216,14 +205,11 @@ public class EntityPig extends EntityAnimal
         }
     }
 
-    /**
-     * Called when the mob is falling. Calculates and applies fall damage.
-     */
-    protected void fall(float p_70069_1_)
+    public void fall(float distance, float damageMultiplier)
     {
-        super.fall(p_70069_1_);
+        super.fall(distance, damageMultiplier);
 
-        if (p_70069_1_ > 5.0F && this.riddenByEntity instanceof EntityPlayer)
+        if (distance > 5.0F && this.riddenByEntity instanceof EntityPlayer)
         {
             ((EntityPlayer)this.riddenByEntity).triggerAchievement(AchievementList.flyPig);
         }

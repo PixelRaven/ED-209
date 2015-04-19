@@ -1,6 +1,6 @@
 package net.minecraft.client.stream;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.crash.CrashReport;
@@ -14,7 +14,6 @@ import tv.twitch.Core;
 import tv.twitch.ErrorCode;
 import tv.twitch.MessageLevel;
 import tv.twitch.StandardCoreAPI;
-import tv.twitch.VideoEncoder;
 import tv.twitch.broadcast.ArchivingState;
 import tv.twitch.broadcast.AudioDeviceType;
 import tv.twitch.broadcast.AudioParams;
@@ -37,9 +36,9 @@ import tv.twitch.broadcast.StreamInfoForSetting;
 import tv.twitch.broadcast.UserInfo;
 import tv.twitch.broadcast.VideoParams;
 
-public class BroadcastController implements IStatCallbacks, IStreamCallbacks
+public class BroadcastController
 {
-    private static final Logger field_152861_B = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger();
     protected final int field_152865_a = 30;
     protected final int field_152866_b = 3;
     private static final ThreadSafeBoundList field_152862_C = new ThreadSafeBoundList(String.class, 50);
@@ -51,294 +50,28 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
     protected boolean field_152871_g = true;
     protected Core field_152872_h = null;
     protected Stream field_152873_i = null;
-    protected List field_152874_j = new ArrayList();
-    protected List field_152875_k = new ArrayList();
+    protected List field_152874_j = Lists.newArrayList();
+    protected List field_152875_k = Lists.newArrayList();
     protected boolean field_152876_l = false;
     protected boolean field_152877_m = false;
     protected boolean field_152878_n = false;
-    protected BroadcastController.BroadcastState field_152879_o;
+    protected BroadcastController.BroadcastState broadcastState;
     protected String field_152880_p;
     protected VideoParams field_152881_q;
     protected AudioParams field_152882_r;
     protected IngestList field_152883_s;
     protected IngestServer field_152884_t;
     protected AuthToken field_152885_u;
-    protected ChannelInfo field_152886_v;
+    protected ChannelInfo channelInfo;
     protected UserInfo field_152887_w;
     protected StreamInfo field_152888_x;
     protected ArchivingState field_152889_y;
     protected long field_152890_z;
     protected IngestServerTester field_152860_A;
     private ErrorCode field_152864_E;
+    protected IStreamCallbacks field_177948_B;
+    protected IStatCallbacks field_177949_C;
     private static final String __OBFID = "CL_00001822";
-
-    public void requestAuthTokenCallback(ErrorCode p_requestAuthTokenCallback_1_, AuthToken p_requestAuthTokenCallback_2_)
-    {
-        if (ErrorCode.succeeded(p_requestAuthTokenCallback_1_))
-        {
-            this.field_152885_u = p_requestAuthTokenCallback_2_;
-            this.func_152827_a(BroadcastController.BroadcastState.Authenticated);
-        }
-        else
-        {
-            this.field_152885_u.data = "";
-            this.func_152827_a(BroadcastController.BroadcastState.Initialized);
-            String var3 = ErrorCode.getString(p_requestAuthTokenCallback_1_);
-            this.func_152820_d(String.format("RequestAuthTokenDoneCallback got failure: %s", new Object[] {var3}));
-        }
-
-        try
-        {
-            if (this.field_152867_c != null)
-            {
-                this.field_152867_c.func_152900_a(p_requestAuthTokenCallback_1_, p_requestAuthTokenCallback_2_);
-            }
-        }
-        catch (Exception var4)
-        {
-            this.func_152820_d(var4.toString());
-        }
-    }
-
-    public void loginCallback(ErrorCode p_loginCallback_1_, ChannelInfo p_loginCallback_2_)
-    {
-        if (ErrorCode.succeeded(p_loginCallback_1_))
-        {
-            this.field_152886_v = p_loginCallback_2_;
-            this.func_152827_a(BroadcastController.BroadcastState.LoggedIn);
-            this.field_152877_m = true;
-        }
-        else
-        {
-            this.func_152827_a(BroadcastController.BroadcastState.Initialized);
-            this.field_152877_m = false;
-            String var3 = ErrorCode.getString(p_loginCallback_1_);
-            this.func_152820_d(String.format("LoginCallback got failure: %s", new Object[] {var3}));
-        }
-
-        try
-        {
-            if (this.field_152867_c != null)
-            {
-                this.field_152867_c.func_152897_a(p_loginCallback_1_);
-            }
-        }
-        catch (Exception var4)
-        {
-            this.func_152820_d(var4.toString());
-        }
-    }
-
-    public void getIngestServersCallback(ErrorCode p_getIngestServersCallback_1_, IngestList p_getIngestServersCallback_2_)
-    {
-        if (ErrorCode.succeeded(p_getIngestServersCallback_1_))
-        {
-            this.field_152883_s = p_getIngestServersCallback_2_;
-            this.field_152884_t = this.field_152883_s.getDefaultServer();
-            this.func_152827_a(BroadcastController.BroadcastState.ReceivedIngestServers);
-
-            try
-            {
-                if (this.field_152867_c != null)
-                {
-                    this.field_152867_c.func_152896_a(p_getIngestServersCallback_2_);
-                }
-            }
-            catch (Exception var4)
-            {
-                this.func_152820_d(var4.toString());
-            }
-        }
-        else
-        {
-            String var3 = ErrorCode.getString(p_getIngestServersCallback_1_);
-            this.func_152820_d(String.format("IngestListCallback got failure: %s", new Object[] {var3}));
-            this.func_152827_a(BroadcastController.BroadcastState.LoggingIn);
-        }
-    }
-
-    public void getUserInfoCallback(ErrorCode p_getUserInfoCallback_1_, UserInfo p_getUserInfoCallback_2_)
-    {
-        this.field_152887_w = p_getUserInfoCallback_2_;
-
-        if (ErrorCode.failed(p_getUserInfoCallback_1_))
-        {
-            String var3 = ErrorCode.getString(p_getUserInfoCallback_1_);
-            this.func_152820_d(String.format("UserInfoDoneCallback got failure: %s", new Object[] {var3}));
-        }
-    }
-
-    public void getStreamInfoCallback(ErrorCode p_getStreamInfoCallback_1_, StreamInfo p_getStreamInfoCallback_2_)
-    {
-        if (ErrorCode.succeeded(p_getStreamInfoCallback_1_))
-        {
-            this.field_152888_x = p_getStreamInfoCallback_2_;
-
-            try
-            {
-                if (this.field_152867_c != null)
-                {
-                    this.field_152867_c.func_152894_a(p_getStreamInfoCallback_2_);
-                }
-            }
-            catch (Exception var4)
-            {
-                this.func_152820_d(var4.toString());
-            }
-        }
-        else
-        {
-            String var3 = ErrorCode.getString(p_getStreamInfoCallback_1_);
-            this.func_152832_e(String.format("StreamInfoDoneCallback got failure: %s", new Object[] {var3}));
-        }
-    }
-
-    public void getArchivingStateCallback(ErrorCode p_getArchivingStateCallback_1_, ArchivingState p_getArchivingStateCallback_2_)
-    {
-        this.field_152889_y = p_getArchivingStateCallback_2_;
-
-        if (ErrorCode.failed(p_getArchivingStateCallback_1_))
-        {
-            ;
-        }
-    }
-
-    public void runCommercialCallback(ErrorCode p_runCommercialCallback_1_)
-    {
-        if (ErrorCode.failed(p_runCommercialCallback_1_))
-        {
-            String var2 = ErrorCode.getString(p_runCommercialCallback_1_);
-            this.func_152832_e(String.format("RunCommercialCallback got failure: %s", new Object[] {var2}));
-        }
-    }
-
-    public void setStreamInfoCallback(ErrorCode p_setStreamInfoCallback_1_)
-    {
-        if (ErrorCode.failed(p_setStreamInfoCallback_1_))
-        {
-            String var2 = ErrorCode.getString(p_setStreamInfoCallback_1_);
-            this.func_152832_e(String.format("SetStreamInfoCallback got failure: %s", new Object[] {var2}));
-        }
-    }
-
-    public void getGameNameListCallback(ErrorCode p_getGameNameListCallback_1_, GameInfoList p_getGameNameListCallback_2_)
-    {
-        if (ErrorCode.failed(p_getGameNameListCallback_1_))
-        {
-            String var3 = ErrorCode.getString(p_getGameNameListCallback_1_);
-            this.func_152820_d(String.format("GameNameListCallback got failure: %s", new Object[] {var3}));
-        }
-
-        try
-        {
-            if (this.field_152867_c != null)
-            {
-                this.field_152867_c.func_152898_a(p_getGameNameListCallback_1_, p_getGameNameListCallback_2_ == null ? new GameInfo[0] : p_getGameNameListCallback_2_.list);
-            }
-        }
-        catch (Exception var4)
-        {
-            this.func_152820_d(var4.toString());
-        }
-    }
-
-    public void bufferUnlockCallback(long p_bufferUnlockCallback_1_)
-    {
-        FrameBuffer var3 = FrameBuffer.lookupBuffer(p_bufferUnlockCallback_1_);
-        this.field_152875_k.add(var3);
-    }
-
-    public void startCallback(ErrorCode p_startCallback_1_)
-    {
-        if (ErrorCode.succeeded(p_startCallback_1_))
-        {
-            try
-            {
-                if (this.field_152867_c != null)
-                {
-                    this.field_152867_c.func_152899_b();
-                }
-            }
-            catch (Exception var3)
-            {
-                this.func_152820_d(var3.toString());
-            }
-
-            this.func_152827_a(BroadcastController.BroadcastState.Broadcasting);
-        }
-        else
-        {
-            this.field_152881_q = null;
-            this.field_152882_r = null;
-            this.func_152827_a(BroadcastController.BroadcastState.ReadyToBroadcast);
-            String var2 = ErrorCode.getString(p_startCallback_1_);
-            this.field_152867_c.func_152892_c(p_startCallback_1_);
-            this.func_152820_d(String.format("startCallback got failure: %s", new Object[] {var2}));
-        }
-    }
-
-    public void stopCallback(ErrorCode p_stopCallback_1_)
-    {
-        if (ErrorCode.succeeded(p_stopCallback_1_))
-        {
-            this.field_152881_q = null;
-            this.field_152882_r = null;
-            this.func_152831_M();
-
-            try
-            {
-                if (this.field_152867_c != null)
-                {
-                    this.field_152867_c.func_152901_c();
-                }
-            }
-            catch (Exception var3)
-            {
-                this.func_152820_d(var3.toString());
-            }
-
-            if (this.field_152877_m)
-            {
-                this.func_152827_a(BroadcastController.BroadcastState.ReadyToBroadcast);
-            }
-            else
-            {
-                this.func_152827_a(BroadcastController.BroadcastState.Initialized);
-            }
-        }
-        else
-        {
-            this.func_152827_a(BroadcastController.BroadcastState.ReadyToBroadcast);
-            String var2 = ErrorCode.getString(p_stopCallback_1_);
-            this.func_152820_d(String.format("stopCallback got failure: %s", new Object[] {var2}));
-        }
-    }
-
-    public void sendActionMetaDataCallback(ErrorCode p_sendActionMetaDataCallback_1_)
-    {
-        if (ErrorCode.failed(p_sendActionMetaDataCallback_1_))
-        {
-            this.func_152832_e("Failed sending action metadata: " + ErrorCode.getString(p_sendActionMetaDataCallback_1_));
-        }
-    }
-
-    public void sendStartSpanMetaDataCallback(ErrorCode p_sendStartSpanMetaDataCallback_1_)
-    {
-        if (ErrorCode.failed(p_sendStartSpanMetaDataCallback_1_))
-        {
-            this.func_152832_e("Failed sending span metadata start: " + ErrorCode.getString(p_sendStartSpanMetaDataCallback_1_));
-        }
-    }
-
-    public void sendEndSpanMetaDataCallback(ErrorCode p_sendEndSpanMetaDataCallback_1_)
-    {
-        if (ErrorCode.failed(p_sendEndSpanMetaDataCallback_1_))
-        {
-            this.func_152832_e("Failed sending span metadata end: " + ErrorCode.getString(p_sendEndSpanMetaDataCallback_1_));
-        }
-    }
-
-    public void statCallback(StatType p_statCallback_1_, long p_statCallback_2_) {}
 
     public void func_152841_a(BroadcastController.BroadcastListener p_152841_1_)
     {
@@ -362,27 +95,27 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public ChannelInfo func_152843_l()
     {
-        return this.field_152886_v;
+        return this.channelInfo;
     }
 
-    public boolean func_152850_m()
+    public boolean isBroadcasting()
     {
-        return this.field_152879_o == BroadcastController.BroadcastState.Broadcasting || this.field_152879_o == BroadcastController.BroadcastState.Paused;
+        return this.broadcastState == BroadcastController.BroadcastState.Broadcasting || this.broadcastState == BroadcastController.BroadcastState.Paused;
     }
 
     public boolean func_152857_n()
     {
-        return this.field_152879_o == BroadcastController.BroadcastState.ReadyToBroadcast;
+        return this.broadcastState == BroadcastController.BroadcastState.ReadyToBroadcast;
     }
 
-    public boolean func_152825_o()
+    public boolean isIngestTesting()
     {
-        return this.field_152879_o == BroadcastController.BroadcastState.IngestTesting;
+        return this.broadcastState == BroadcastController.BroadcastState.IngestTesting;
     }
 
-    public boolean func_152839_p()
+    public boolean isBroadcastPaused()
     {
-        return this.field_152879_o == BroadcastController.BroadcastState.Paused;
+        return this.broadcastState == BroadcastController.BroadcastState.Paused;
     }
 
     public boolean func_152849_q()
@@ -415,7 +148,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
         this.field_152873_i.setVolume(AudioDeviceType.TTV_PLAYBACK_DEVICE, p_152837_1_);
     }
 
-    public IngestServerTester func_152856_w()
+    public IngestServerTester isReady()
     {
         return this.field_152860_A;
     }
@@ -430,22 +163,308 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
         return true;
     }
 
+    public ErrorCode func_152852_P()
+    {
+        return this.field_152864_E;
+    }
+
     public BroadcastController()
     {
-        this.field_152879_o = BroadcastController.BroadcastState.Uninitialized;
+        this.broadcastState = BroadcastController.BroadcastState.Uninitialized;
         this.field_152880_p = null;
         this.field_152881_q = null;
         this.field_152882_r = null;
         this.field_152883_s = new IngestList(new IngestServer[0]);
         this.field_152884_t = null;
         this.field_152885_u = new AuthToken();
-        this.field_152886_v = new ChannelInfo();
+        this.channelInfo = new ChannelInfo();
         this.field_152887_w = new UserInfo();
         this.field_152888_x = new StreamInfo();
         this.field_152889_y = new ArchivingState();
         this.field_152890_z = 0L;
         this.field_152860_A = null;
-        this.field_152872_h = new Core(new StandardCoreAPI());
+        this.field_177948_B = new IStreamCallbacks()
+        {
+            private static final String __OBFID = "CL_00002375";
+            public void requestAuthTokenCallback(ErrorCode p_requestAuthTokenCallback_1_, AuthToken p_requestAuthTokenCallback_2_)
+            {
+                if (ErrorCode.succeeded(p_requestAuthTokenCallback_1_))
+                {
+                    BroadcastController.this.field_152885_u = p_requestAuthTokenCallback_2_;
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.Authenticated);
+                }
+                else
+                {
+                    BroadcastController.this.field_152885_u.data = "";
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.Initialized);
+                    String var3 = ErrorCode.getString(p_requestAuthTokenCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("RequestAuthTokenDoneCallback got failure: %s", new Object[] {var3}));
+                }
+
+                try
+                {
+                    if (BroadcastController.this.field_152867_c != null)
+                    {
+                        BroadcastController.this.field_152867_c.func_152900_a(p_requestAuthTokenCallback_1_, p_requestAuthTokenCallback_2_);
+                    }
+                }
+                catch (Exception var4)
+                {
+                    BroadcastController.this.func_152820_d(var4.toString());
+                }
+            }
+            public void loginCallback(ErrorCode p_loginCallback_1_, ChannelInfo p_loginCallback_2_)
+            {
+                if (ErrorCode.succeeded(p_loginCallback_1_))
+                {
+                    BroadcastController.this.channelInfo = p_loginCallback_2_;
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.LoggedIn);
+                    BroadcastController.this.field_152877_m = true;
+                }
+                else
+                {
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.Initialized);
+                    BroadcastController.this.field_152877_m = false;
+                    String var3 = ErrorCode.getString(p_loginCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("LoginCallback got failure: %s", new Object[] {var3}));
+                }
+
+                try
+                {
+                    if (BroadcastController.this.field_152867_c != null)
+                    {
+                        BroadcastController.this.field_152867_c.func_152897_a(p_loginCallback_1_);
+                    }
+                }
+                catch (Exception var4)
+                {
+                    BroadcastController.this.func_152820_d(var4.toString());
+                }
+            }
+            public void getIngestServersCallback(ErrorCode p_getIngestServersCallback_1_, IngestList p_getIngestServersCallback_2_)
+            {
+                if (ErrorCode.succeeded(p_getIngestServersCallback_1_))
+                {
+                    BroadcastController.this.field_152883_s = p_getIngestServersCallback_2_;
+                    BroadcastController.this.field_152884_t = BroadcastController.this.field_152883_s.getDefaultServer();
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.ReceivedIngestServers);
+
+                    try
+                    {
+                        if (BroadcastController.this.field_152867_c != null)
+                        {
+                            BroadcastController.this.field_152867_c.func_152896_a(p_getIngestServersCallback_2_);
+                        }
+                    }
+                    catch (Exception var4)
+                    {
+                        BroadcastController.this.func_152820_d(var4.toString());
+                    }
+                }
+                else
+                {
+                    String var3 = ErrorCode.getString(p_getIngestServersCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("IngestListCallback got failure: %s", new Object[] {var3}));
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.LoggingIn);
+                }
+            }
+            public void getUserInfoCallback(ErrorCode p_getUserInfoCallback_1_, UserInfo p_getUserInfoCallback_2_)
+            {
+                BroadcastController.this.field_152887_w = p_getUserInfoCallback_2_;
+
+                if (ErrorCode.failed(p_getUserInfoCallback_1_))
+                {
+                    String var3 = ErrorCode.getString(p_getUserInfoCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("UserInfoDoneCallback got failure: %s", new Object[] {var3}));
+                }
+            }
+            public void getStreamInfoCallback(ErrorCode p_getStreamInfoCallback_1_, StreamInfo p_getStreamInfoCallback_2_)
+            {
+                if (ErrorCode.succeeded(p_getStreamInfoCallback_1_))
+                {
+                    BroadcastController.this.field_152888_x = p_getStreamInfoCallback_2_;
+
+                    try
+                    {
+                        if (BroadcastController.this.field_152867_c != null)
+                        {
+                            BroadcastController.this.field_152867_c.func_152894_a(p_getStreamInfoCallback_2_);
+                        }
+                    }
+                    catch (Exception var4)
+                    {
+                        BroadcastController.this.func_152820_d(var4.toString());
+                    }
+                }
+                else
+                {
+                    String var3 = ErrorCode.getString(p_getStreamInfoCallback_1_);
+                    BroadcastController.this.func_152832_e(String.format("StreamInfoDoneCallback got failure: %s", new Object[] {var3}));
+                }
+            }
+            public void getArchivingStateCallback(ErrorCode p_getArchivingStateCallback_1_, ArchivingState p_getArchivingStateCallback_2_)
+            {
+                BroadcastController.this.field_152889_y = p_getArchivingStateCallback_2_;
+
+                if (ErrorCode.failed(p_getArchivingStateCallback_1_))
+                {
+                    ;
+                }
+            }
+            public void runCommercialCallback(ErrorCode p_runCommercialCallback_1_)
+            {
+                if (ErrorCode.failed(p_runCommercialCallback_1_))
+                {
+                    String var2 = ErrorCode.getString(p_runCommercialCallback_1_);
+                    BroadcastController.this.func_152832_e(String.format("RunCommercialCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+            public void setStreamInfoCallback(ErrorCode p_setStreamInfoCallback_1_)
+            {
+                if (ErrorCode.failed(p_setStreamInfoCallback_1_))
+                {
+                    String var2 = ErrorCode.getString(p_setStreamInfoCallback_1_);
+                    BroadcastController.this.func_152832_e(String.format("SetStreamInfoCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+            public void getGameNameListCallback(ErrorCode p_getGameNameListCallback_1_, GameInfoList p_getGameNameListCallback_2_)
+            {
+                if (ErrorCode.failed(p_getGameNameListCallback_1_))
+                {
+                    String var3 = ErrorCode.getString(p_getGameNameListCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("GameNameListCallback got failure: %s", new Object[] {var3}));
+                }
+
+                try
+                {
+                    if (BroadcastController.this.field_152867_c != null)
+                    {
+                        BroadcastController.this.field_152867_c.func_152898_a(p_getGameNameListCallback_1_, p_getGameNameListCallback_2_ == null ? new GameInfo[0] : p_getGameNameListCallback_2_.list);
+                    }
+                }
+                catch (Exception var4)
+                {
+                    BroadcastController.this.func_152820_d(var4.toString());
+                }
+            }
+            public void bufferUnlockCallback(long p_bufferUnlockCallback_1_)
+            {
+                FrameBuffer var3 = FrameBuffer.lookupBuffer(p_bufferUnlockCallback_1_);
+                BroadcastController.this.field_152875_k.add(var3);
+            }
+            public void startCallback(ErrorCode p_startCallback_1_)
+            {
+                if (ErrorCode.succeeded(p_startCallback_1_))
+                {
+                    try
+                    {
+                        if (BroadcastController.this.field_152867_c != null)
+                        {
+                            BroadcastController.this.field_152867_c.func_152899_b();
+                        }
+                    }
+                    catch (Exception var4)
+                    {
+                        BroadcastController.this.func_152820_d(var4.toString());
+                    }
+
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.Broadcasting);
+                }
+                else
+                {
+                    BroadcastController.this.field_152881_q = null;
+                    BroadcastController.this.field_152882_r = null;
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.ReadyToBroadcast);
+
+                    try
+                    {
+                        if (BroadcastController.this.field_152867_c != null)
+                        {
+                            BroadcastController.this.field_152867_c.func_152892_c(p_startCallback_1_);
+                        }
+                    }
+                    catch (Exception var3)
+                    {
+                        BroadcastController.this.func_152820_d(var3.toString());
+                    }
+
+                    String var2 = ErrorCode.getString(p_startCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("startCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+            public void stopCallback(ErrorCode p_stopCallback_1_)
+            {
+                if (ErrorCode.succeeded(p_stopCallback_1_))
+                {
+                    BroadcastController.this.field_152881_q = null;
+                    BroadcastController.this.field_152882_r = null;
+                    BroadcastController.this.func_152831_M();
+
+                    try
+                    {
+                        if (BroadcastController.this.field_152867_c != null)
+                        {
+                            BroadcastController.this.field_152867_c.func_152901_c();
+                        }
+                    }
+                    catch (Exception var3)
+                    {
+                        BroadcastController.this.func_152820_d(var3.toString());
+                    }
+
+                    if (BroadcastController.this.field_152877_m)
+                    {
+                        BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.ReadyToBroadcast);
+                    }
+                    else
+                    {
+                        BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.Initialized);
+                    }
+                }
+                else
+                {
+                    BroadcastController.this.func_152827_a(BroadcastController.BroadcastState.ReadyToBroadcast);
+                    String var2 = ErrorCode.getString(p_stopCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("stopCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+            public void sendActionMetaDataCallback(ErrorCode p_sendActionMetaDataCallback_1_)
+            {
+                if (ErrorCode.failed(p_sendActionMetaDataCallback_1_))
+                {
+                    String var2 = ErrorCode.getString(p_sendActionMetaDataCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("sendActionMetaDataCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+            public void sendStartSpanMetaDataCallback(ErrorCode p_sendStartSpanMetaDataCallback_1_)
+            {
+                if (ErrorCode.failed(p_sendStartSpanMetaDataCallback_1_))
+                {
+                    String var2 = ErrorCode.getString(p_sendStartSpanMetaDataCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("sendStartSpanMetaDataCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+            public void sendEndSpanMetaDataCallback(ErrorCode p_sendEndSpanMetaDataCallback_1_)
+            {
+                if (ErrorCode.failed(p_sendEndSpanMetaDataCallback_1_))
+                {
+                    String var2 = ErrorCode.getString(p_sendEndSpanMetaDataCallback_1_);
+                    BroadcastController.this.func_152820_d(String.format("sendEndSpanMetaDataCallback got failure: %s", new Object[] {var2}));
+                }
+            }
+        };
+        this.field_177949_C = new IStatCallbacks()
+        {
+            private static final String __OBFID = "CL_00002374";
+            public void statCallback(StatType p_statCallback_1_, long p_statCallback_2_) {}
+        };
+        this.field_152872_h = Core.getInstance();
+
+        if (Core.getInstance() == null)
+        {
+            this.field_152872_h = new Core(new StandardCoreAPI());
+        }
+
         this.field_152873_i = new Stream(new DesktopStreamAPI());
     }
 
@@ -462,44 +481,37 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
         }
         else
         {
-            ErrorCode var1 = this.field_152872_h.initialize(this.field_152868_d, VideoEncoder.TTV_VID_ENC_DEFAULT, System.getProperty("java.library.path"));
+            this.field_152873_i.setStreamCallbacks(this.field_177948_B);
+            ErrorCode var1 = this.field_152872_h.initialize(this.field_152868_d, System.getProperty("java.library.path"));
 
             if (!this.func_152853_a(var1))
             {
+                this.field_152873_i.setStreamCallbacks((IStreamCallbacks)null);
                 this.field_152864_E = var1;
                 return false;
             }
             else
             {
-                this.field_152873_i.setStreamCallbacks(this);
+                var1 = this.field_152872_h.setTraceLevel(MessageLevel.TTV_ML_ERROR);
 
                 if (!this.func_152853_a(var1))
                 {
                     this.field_152873_i.setStreamCallbacks((IStreamCallbacks)null);
+                    this.field_152872_h.shutdown();
                     this.field_152864_E = var1;
                     return false;
                 }
+                else if (ErrorCode.succeeded(var1))
+                {
+                    this.field_152876_l = true;
+                    this.func_152827_a(BroadcastController.BroadcastState.Initialized);
+                    return true;
+                }
                 else
                 {
-                    var1 = this.field_152872_h.setTraceLevel(MessageLevel.TTV_ML_ERROR);
-
-                    if (!this.func_152853_a(var1))
-                    {
-                        this.field_152873_i.setStreamCallbacks((IStreamCallbacks)null);
-                        this.field_152864_E = var1;
-                        return false;
-                    }
-                    else if (ErrorCode.succeeded(var1))
-                    {
-                        this.field_152876_l = true;
-                        this.func_152827_a(BroadcastController.BroadcastState.Initialized);
-                        return true;
-                    }
-                    else
-                    {
-                        this.field_152864_E = var1;
-                        return false;
-                    }
+                    this.field_152864_E = var1;
+                    this.field_152872_h.shutdown();
+                    return false;
                 }
             }
         }
@@ -511,7 +523,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
         {
             return true;
         }
-        else if (this.func_152825_o())
+        else if (this.isIngestTesting())
         {
             return false;
         }
@@ -530,9 +542,34 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
         }
     }
 
+    public void statCallback()
+    {
+        if (this.broadcastState != BroadcastController.BroadcastState.Uninitialized)
+        {
+            if (this.field_152860_A != null)
+            {
+                this.field_152860_A.func_153039_l();
+            }
+
+            for (; this.field_152860_A != null; this.func_152821_H())
+            {
+                try
+                {
+                    Thread.sleep(200L);
+                }
+                catch (Exception var2)
+                {
+                    this.func_152820_d(var2.toString());
+                }
+            }
+
+            this.func_152851_B();
+        }
+    }
+
     public boolean func_152818_a(String p_152818_1_, AuthToken p_152818_2_)
     {
-        if (this.func_152825_o())
+        if (this.isIngestTesting())
         {
             return false;
         }
@@ -570,13 +607,13 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public boolean func_152845_C()
     {
-        if (this.func_152825_o())
+        if (this.isIngestTesting())
         {
             return false;
         }
         else
         {
-            if (this.func_152850_m())
+            if (this.isBroadcasting())
             {
                 this.field_152873_i.stop(false);
             }
@@ -647,7 +684,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public boolean func_152830_D()
     {
-        if (!this.func_152850_m())
+        if (!this.isBroadcasting())
         {
             return false;
         }
@@ -681,6 +718,9 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
             this.field_152881_q = p_152836_1_.clone();
             this.field_152882_r = new AudioParams();
             this.field_152882_r.audioEnabled = this.field_152871_g && this.func_152848_y();
+            this.field_152882_r.enableMicCapture = this.field_152882_r.audioEnabled;
+            this.field_152882_r.enablePlaybackCapture = this.field_152882_r.audioEnabled;
+            this.field_152882_r.enablePassthroughAudio = false;
 
             if (!this.func_152823_L())
             {
@@ -716,7 +756,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public boolean func_152819_E()
     {
-        if (!this.func_152850_m())
+        if (!this.isBroadcasting())
         {
             return false;
         }
@@ -740,7 +780,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public boolean func_152847_F()
     {
-        if (!this.func_152850_m())
+        if (!this.isBroadcasting())
         {
             return false;
         }
@@ -765,7 +805,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public boolean func_152854_G()
     {
-        if (!this.func_152839_p())
+        if (!this.isBroadcastPaused())
         {
             return false;
         }
@@ -792,11 +832,47 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
         }
     }
 
+    public long func_177946_b(String p_177946_1_, long p_177946_2_, String p_177946_4_, String p_177946_5_)
+    {
+        long var6 = this.field_152873_i.sendStartSpanMetaData(this.field_152885_u, p_177946_1_, p_177946_2_, p_177946_4_, p_177946_5_);
+
+        if (var6 == -1L)
+        {
+            this.func_152820_d(String.format("Error in SendStartSpanMetaData\n", new Object[0]));
+        }
+
+        return var6;
+    }
+
+    public boolean func_177947_a(String p_177947_1_, long p_177947_2_, long p_177947_4_, String p_177947_6_, String p_177947_7_)
+    {
+        if (p_177947_4_ == -1L)
+        {
+            this.func_152820_d(String.format("Invalid sequence id: %d\n", new Object[] {Long.valueOf(p_177947_4_)}));
+            return false;
+        }
+        else
+        {
+            ErrorCode var8 = this.field_152873_i.sendEndSpanMetaData(this.field_152885_u, p_177947_1_, p_177947_2_, p_177947_4_, p_177947_6_, p_177947_7_);
+
+            if (ErrorCode.failed(var8))
+            {
+                String var9 = ErrorCode.getString(var8);
+                this.func_152820_d(String.format("Error in SendStopSpanMetaData: %s\n", new Object[] {var9}));
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
     protected void func_152827_a(BroadcastController.BroadcastState p_152827_1_)
     {
-        if (p_152827_1_ != this.field_152879_o)
+        if (p_152827_1_ != this.broadcastState)
         {
-            this.field_152879_o = p_152827_1_;
+            this.broadcastState = p_152827_1_;
 
             try
             {
@@ -819,7 +895,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
             ErrorCode var1 = this.field_152873_i.pollTasks();
             this.func_152853_a(var1);
 
-            if (this.func_152825_o())
+            if (this.isIngestTesting())
             {
                 this.field_152860_A.func_153041_j();
 
@@ -832,7 +908,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             String var2;
 
-            switch (BroadcastController.SwitchBroadcastState.field_152815_a[this.field_152879_o.ordinal()])
+            switch (BroadcastController.SwitchBroadcastState.field_177773_a[this.broadcastState.ordinal()])
             {
                 case 1:
                     this.func_152827_a(BroadcastController.BroadcastState.LoggingIn);
@@ -917,14 +993,14 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
     {
         if (this.func_152857_n() && this.field_152883_s != null)
         {
-            if (this.func_152825_o())
+            if (this.isIngestTesting())
             {
                 return null;
             }
             else
             {
                 this.field_152860_A = new IngestServerTester(this.field_152873_i, this.field_152883_s);
-                this.field_152860_A.func_153033_i();
+                this.field_152860_A.func_176004_j();
                 this.func_152827_a(BroadcastController.BroadcastState.IngestTesting);
                 return this.field_152860_A;
             }
@@ -1001,11 +1077,11 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     public ErrorCode func_152859_b(FrameBuffer p_152859_1_)
     {
-        if (this.func_152839_p())
+        if (this.isBroadcastPaused())
         {
             this.func_152854_G();
         }
-        else if (!this.func_152850_m())
+        else if (!this.isBroadcasting())
         {
             return ErrorCode.TTV_EC_STREAM_NOT_STARTED;
         }
@@ -1052,18 +1128,13 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
     {
         this.field_152863_D = p_152820_1_;
         field_152862_C.func_152757_a("<Error> " + p_152820_1_);
-        field_152861_B.error(TwitchStream.field_152949_a, "[Broadcast controller] {}", new Object[] {p_152820_1_});
+        logger.error(TwitchStream.field_152949_a, "[Broadcast controller] {}", new Object[] {p_152820_1_});
     }
 
     protected void func_152832_e(String p_152832_1_)
     {
         field_152862_C.func_152757_a("<Warning> " + p_152832_1_);
-        field_152861_B.warn(TwitchStream.field_152949_a, "[Broadcast controller] {}", new Object[] {p_152832_1_});
-    }
-
-    public ErrorCode func_152852_P()
-    {
-        return this.field_152864_E;
+        logger.warn(TwitchStream.field_152949_a, "[Broadcast controller] {}", new Object[] {p_152832_1_});
     }
 
     public interface BroadcastListener
@@ -1116,14 +1187,14 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
     static final class SwitchBroadcastState
     {
-        static final int[] field_152815_a = new int[BroadcastController.BroadcastState.values().length];
+        static final int[] field_177773_a = new int[BroadcastController.BroadcastState.values().length];
         private static final String __OBFID = "CL_00001821";
 
         static
         {
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Authenticated.ordinal()] = 1;
+                field_177773_a[BroadcastController.BroadcastState.Authenticated.ordinal()] = 1;
             }
             catch (NoSuchFieldError var12)
             {
@@ -1132,7 +1203,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.LoggedIn.ordinal()] = 2;
+                field_177773_a[BroadcastController.BroadcastState.LoggedIn.ordinal()] = 2;
             }
             catch (NoSuchFieldError var11)
             {
@@ -1141,7 +1212,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.ReceivedIngestServers.ordinal()] = 3;
+                field_177773_a[BroadcastController.BroadcastState.ReceivedIngestServers.ordinal()] = 3;
             }
             catch (NoSuchFieldError var10)
             {
@@ -1150,7 +1221,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Starting.ordinal()] = 4;
+                field_177773_a[BroadcastController.BroadcastState.Starting.ordinal()] = 4;
             }
             catch (NoSuchFieldError var9)
             {
@@ -1159,7 +1230,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Stopping.ordinal()] = 5;
+                field_177773_a[BroadcastController.BroadcastState.Stopping.ordinal()] = 5;
             }
             catch (NoSuchFieldError var8)
             {
@@ -1168,7 +1239,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.FindingIngestServer.ordinal()] = 6;
+                field_177773_a[BroadcastController.BroadcastState.FindingIngestServer.ordinal()] = 6;
             }
             catch (NoSuchFieldError var7)
             {
@@ -1177,7 +1248,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Authenticating.ordinal()] = 7;
+                field_177773_a[BroadcastController.BroadcastState.Authenticating.ordinal()] = 7;
             }
             catch (NoSuchFieldError var6)
             {
@@ -1186,7 +1257,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Initialized.ordinal()] = 8;
+                field_177773_a[BroadcastController.BroadcastState.Initialized.ordinal()] = 8;
             }
             catch (NoSuchFieldError var5)
             {
@@ -1195,7 +1266,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Uninitialized.ordinal()] = 9;
+                field_177773_a[BroadcastController.BroadcastState.Uninitialized.ordinal()] = 9;
             }
             catch (NoSuchFieldError var4)
             {
@@ -1204,7 +1275,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.IngestTesting.ordinal()] = 10;
+                field_177773_a[BroadcastController.BroadcastState.IngestTesting.ordinal()] = 10;
             }
             catch (NoSuchFieldError var3)
             {
@@ -1213,7 +1284,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Paused.ordinal()] = 11;
+                field_177773_a[BroadcastController.BroadcastState.Paused.ordinal()] = 11;
             }
             catch (NoSuchFieldError var2)
             {
@@ -1222,7 +1293,7 @@ public class BroadcastController implements IStatCallbacks, IStreamCallbacks
 
             try
             {
-                field_152815_a[BroadcastController.BroadcastState.Broadcasting.ordinal()] = 12;
+                field_177773_a[BroadcastController.BroadcastState.Broadcasting.ordinal()] = 12;
             }
             catch (NoSuchFieldError var1)
             {

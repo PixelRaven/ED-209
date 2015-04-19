@@ -15,9 +15,9 @@ import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemSeeds;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -34,10 +34,10 @@ public class EntityChicken extends EntityAnimal
     public boolean field_152118_bv;
     private static final String __OBFID = "CL_00001639";
 
-    public EntityChicken(World p_i1682_1_)
+    public EntityChicken(World worldIn)
     {
-        super(p_i1682_1_);
-        this.setSize(0.3F, 0.7F);
+        super(worldIn);
+        this.setSize(0.4F, 0.7F);
         this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIPanic(this, 1.4D));
@@ -49,12 +49,9 @@ public class EntityChicken extends EntityAnimal
         this.tasks.addTask(7, new EntityAILookIdle(this));
     }
 
-    /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
+    public float getEyeHeight()
     {
-        return true;
+        return this.height;
     }
 
     protected void applyEntityAttributes()
@@ -74,16 +71,7 @@ public class EntityChicken extends EntityAnimal
         this.field_70888_h = this.field_70886_e;
         this.field_70884_g = this.destPos;
         this.destPos = (float)((double)this.destPos + (double)(this.onGround ? -1 : 4) * 0.3D);
-
-        if (this.destPos < 0.0F)
-        {
-            this.destPos = 0.0F;
-        }
-
-        if (this.destPos > 1.0F)
-        {
-            this.destPos = 1.0F;
-        }
+        this.destPos = MathHelper.clamp_float(this.destPos, 0.0F, 1.0F);
 
         if (!this.onGround && this.field_70889_i < 1.0F)
         {
@@ -99,18 +87,15 @@ public class EntityChicken extends EntityAnimal
 
         this.field_70886_e += this.field_70889_i * 2.0F;
 
-        if (!this.worldObj.isClient && !this.isChild() && !this.func_152116_bZ() && --this.timeUntilNextEgg <= 0)
+        if (!this.worldObj.isRemote && !this.isChild() && !this.func_152116_bZ() && --this.timeUntilNextEgg <= 0)
         {
             this.playSound("mob.chicken.plop", 1.0F, (this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F + 1.0F);
-            this.func_145779_a(Items.egg, 1);
+            this.dropItem(Items.egg, 1);
             this.timeUntilNextEgg = this.rand.nextInt(6000) + 6000;
         }
     }
 
-    /**
-     * Called when the mob is falling. Calculates and applies fall damage.
-     */
-    protected void fall(float p_70069_1_) {}
+    public void fall(float distance, float damageMultiplier) {}
 
     /**
      * Returns the sound this mob makes while it's alive.
@@ -136,12 +121,12 @@ public class EntityChicken extends EntityAnimal
         return "mob.chicken.hurt";
     }
 
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.chicken.step", 0.15F, 1.0F);
     }
 
-    protected Item func_146068_u()
+    protected Item getDropItem()
     {
         return Items.feather;
     }
@@ -155,16 +140,16 @@ public class EntityChicken extends EntityAnimal
 
         for (int var4 = 0; var4 < var3; ++var4)
         {
-            this.func_145779_a(Items.feather, 1);
+            this.dropItem(Items.feather, 1);
         }
 
         if (this.isBurning())
         {
-            this.func_145779_a(Items.cooked_chicken, 1);
+            this.dropItem(Items.cooked_chicken, 1);
         }
         else
         {
-            this.func_145779_a(Items.chicken, 1);
+            this.dropItem(Items.chicken, 1);
         }
     }
 
@@ -179,16 +164,21 @@ public class EntityChicken extends EntityAnimal
      */
     public boolean isBreedingItem(ItemStack p_70877_1_)
     {
-        return p_70877_1_ != null && p_70877_1_.getItem() instanceof ItemSeeds;
+        return p_70877_1_ != null && p_70877_1_.getItem() == Items.wheat_seeds;
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.field_152118_bv = p_70037_1_.getBoolean("IsChickenJockey");
+        super.readEntityFromNBT(tagCompund);
+        this.field_152118_bv = tagCompund.getBoolean("IsChickenJockey");
+
+        if (tagCompund.hasKey("EggLayTime"))
+        {
+            this.timeUntilNextEgg = tagCompund.getInteger("EggLayTime");
+        }
     }
 
     /**
@@ -202,10 +192,11 @@ public class EntityChicken extends EntityAnimal
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setBoolean("IsChickenJockey", this.field_152118_bv);
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setBoolean("IsChickenJockey", this.field_152118_bv);
+        tagCompound.setInteger("EggLayTime", this.timeUntilNextEgg);
     }
 
     /**

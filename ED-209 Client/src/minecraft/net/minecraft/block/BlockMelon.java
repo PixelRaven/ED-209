@@ -2,32 +2,27 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
-import net.minecraft.util.IIcon;
 
 public class BlockMelon extends Block
 {
-    private IIcon field_150201_a;
     private static final String __OBFID = "CL_00000267";
 
     protected BlockMelon()
     {
-        super(Material.field_151572_C);
+        super(Material.gourd);
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        return p_149691_1_ != 1 && p_149691_1_ != 0 ? this.blockIcon : this.field_150201_a;
-    }
-
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.melon;
     }
@@ -35,29 +30,16 @@ public class BlockMelon extends Block
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
-        return 3 + p_149745_1_.nextInt(5);
+        return 3 + random.nextInt(5);
     }
 
     /**
-     * Returns the usual quantity dropped by the block plus a bonus of 1 to 'i' (inclusive).
+     * Get the quantity dropped based on the given fortune level
      */
-    public int quantityDroppedWithBonus(int p_149679_1_, Random p_149679_2_)
+    public int quantityDroppedWithBonus(int fortune, Random random)
     {
-        int var3 = this.quantityDropped(p_149679_2_) + p_149679_2_.nextInt(1 + p_149679_1_);
-
-        if (var3 > 9)
-        {
-            var3 = 9;
-        }
-
-        return var3;
-    }
-
-    public void registerBlockIcons(IIconRegister p_149651_1_)
-    {
-        this.blockIcon = p_149651_1_.registerIcon(this.getTextureName() + "_side");
-        this.field_150201_a = p_149651_1_.registerIcon(this.getTextureName() + "_top");
+        return Math.min(9, this.quantityDropped(random) + random.nextInt(1 + fortune));
     }
 }

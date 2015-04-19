@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenShrub extends WorldGenTrees
@@ -19,38 +20,43 @@ public class WorldGenShrub extends WorldGenTrees
         this.field_150528_a = p_i2015_2_;
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        Block var6;
+        Block var4;
 
-        while (((var6 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_)).getMaterial() == Material.air || var6.getMaterial() == Material.leaves) && p_76484_4_ > 0)
+        while (((var4 = worldIn.getBlockState(p_180709_3_).getBlock()).getMaterial() == Material.air || var4.getMaterial() == Material.leaves) && p_180709_3_.getY() > 0)
         {
-            --p_76484_4_;
+            p_180709_3_ = p_180709_3_.offsetDown();
         }
 
-        Block var7 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_);
+        Block var5 = worldIn.getBlockState(p_180709_3_).getBlock();
 
-        if (var7 == Blocks.dirt || var7 == Blocks.grass)
+        if (var5 == Blocks.dirt || var5 == Blocks.grass)
         {
-            ++p_76484_4_;
-            this.func_150516_a(p_76484_1_, p_76484_3_, p_76484_4_, p_76484_5_, Blocks.log, this.field_150527_b);
+            p_180709_3_ = p_180709_3_.offsetUp();
+            this.func_175905_a(worldIn, p_180709_3_, Blocks.log, this.field_150527_b);
 
-            for (int var8 = p_76484_4_; var8 <= p_76484_4_ + 2; ++var8)
+            for (int var6 = p_180709_3_.getY(); var6 <= p_180709_3_.getY() + 2; ++var6)
             {
-                int var9 = var8 - p_76484_4_;
-                int var10 = 2 - var9;
+                int var7 = var6 - p_180709_3_.getY();
+                int var8 = 2 - var7;
 
-                for (int var11 = p_76484_3_ - var10; var11 <= p_76484_3_ + var10; ++var11)
+                for (int var9 = p_180709_3_.getX() - var8; var9 <= p_180709_3_.getX() + var8; ++var9)
                 {
-                    int var12 = var11 - p_76484_3_;
+                    int var10 = var9 - p_180709_3_.getX();
 
-                    for (int var13 = p_76484_5_ - var10; var13 <= p_76484_5_ + var10; ++var13)
+                    for (int var11 = p_180709_3_.getZ() - var8; var11 <= p_180709_3_.getZ() + var8; ++var11)
                     {
-                        int var14 = var13 - p_76484_5_;
+                        int var12 = var11 - p_180709_3_.getZ();
 
-                        if ((Math.abs(var12) != var10 || Math.abs(var14) != var10 || p_76484_2_.nextInt(2) != 0) && !p_76484_1_.getBlock(var11, var8, var13).func_149730_j())
+                        if (Math.abs(var10) != var8 || Math.abs(var12) != var8 || p_180709_2_.nextInt(2) != 0)
                         {
-                            this.func_150516_a(p_76484_1_, var11, var8, var13, Blocks.leaves, this.field_150528_a);
+                            BlockPos var13 = new BlockPos(var9, var6, var11);
+
+                            if (!worldIn.getBlockState(var13).getBlock().isFullBlock())
+                            {
+                                this.func_175905_a(worldIn, var13, Blocks.leaves, this.field_150528_a);
+                            }
                         }
                     }
                 }

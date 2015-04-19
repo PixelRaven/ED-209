@@ -3,36 +3,30 @@ package net.minecraft.world.gen.feature;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenDeadBush extends WorldGenerator
 {
-    private Block field_150547_a;
     private static final String __OBFID = "CL_00000406";
 
-    public WorldGenDeadBush(Block p_i45451_1_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        this.field_150547_a = p_i45451_1_;
-    }
+        Block var4;
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
-    {
-        Block var6;
-
-        while (((var6 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_)).getMaterial() == Material.air || var6.getMaterial() == Material.leaves) && p_76484_4_ > 0)
+        while (((var4 = worldIn.getBlockState(p_180709_3_).getBlock()).getMaterial() == Material.air || var4.getMaterial() == Material.leaves) && p_180709_3_.getY() > 0)
         {
-            --p_76484_4_;
+            p_180709_3_ = p_180709_3_.offsetDown();
         }
 
-        for (int var7 = 0; var7 < 4; ++var7)
+        for (int var5 = 0; var5 < 4; ++var5)
         {
-            int var8 = p_76484_3_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
-            int var9 = p_76484_4_ + p_76484_2_.nextInt(4) - p_76484_2_.nextInt(4);
-            int var10 = p_76484_5_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
+            BlockPos var6 = p_180709_3_.add(p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8), p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4), p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8));
 
-            if (p_76484_1_.isAirBlock(var8, var9, var10) && this.field_150547_a.canBlockStay(p_76484_1_, var8, var9, var10))
+            if (worldIn.isAirBlock(var6) && Blocks.deadbush.canBlockStay(worldIn, var6, Blocks.deadbush.getDefaultState()))
             {
-                p_76484_1_.setBlock(var8, var9, var10, this.field_150547_a, 0, 2);
+                worldIn.setBlockState(var6, Blocks.deadbush.getDefaultState(), 2);
             }
         }
 

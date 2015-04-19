@@ -1,8 +1,8 @@
 package net.minecraft.client.util;
 
 import com.google.gson.JsonObject;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.JsonUtils;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
 public class JsonBlendingMode
@@ -53,22 +53,22 @@ public class JsonBlendingMode
 
                 if (this.field_148119_h)
                 {
-                    GL11.glDisable(GL11.GL_BLEND);
+                    GlStateManager.disableBlend();
                     return;
                 }
 
-                GL11.glEnable(GL11.GL_BLEND);
+                GlStateManager.enableBlend();
             }
 
             GL14.glBlendEquation(this.field_148112_f);
 
             if (this.field_148113_g)
             {
-                GL14.glBlendFuncSeparate(this.field_148116_b, this.field_148114_d, this.field_148117_c, this.field_148115_e);
+                GlStateManager.tryBlendFuncSeparate(this.field_148116_b, this.field_148114_d, this.field_148117_c, this.field_148115_e);
             }
             else
             {
-                GL11.glBlendFunc(this.field_148116_b, this.field_148114_d);
+                GlStateManager.blendFunc(this.field_148116_b, this.field_148114_d);
             }
         }
     }

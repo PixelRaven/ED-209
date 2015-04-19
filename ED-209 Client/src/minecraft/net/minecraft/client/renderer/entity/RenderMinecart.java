@@ -1,16 +1,16 @@
 package net.minecraft.client.renderer.entity;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelMinecart;
-import net.minecraft.client.renderer.RenderBlocks;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
-import org.lwjgl.opengl.GL11;
 
 public class RenderMinecart extends Render
 {
@@ -18,13 +18,12 @@ public class RenderMinecart extends Render
 
     /** instance of ModelMinecart for rendering */
     protected ModelBase modelMinecart = new ModelMinecart();
-    protected final RenderBlocks field_94145_f;
     private static final String __OBFID = "CL_00001013";
 
-    public RenderMinecart()
+    public RenderMinecart(RenderManager p_i46155_1_)
     {
+        super(p_i46155_1_);
         this.shadowSize = 0.5F;
-        this.field_94145_f = new RenderBlocks();
     }
 
     /**
@@ -35,14 +34,14 @@ public class RenderMinecart extends Render
      */
     public void doRender(EntityMinecart p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        GL11.glPushMatrix();
+        GlStateManager.pushMatrix();
         this.bindEntityTexture(p_76986_1_);
         long var10 = (long)p_76986_1_.getEntityId() * 493286711L;
         var10 = var10 * var10 * 4392167121L + var10 * 98761L;
         float var12 = (((float)(var10 >> 16 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         float var13 = (((float)(var10 >> 20 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
         float var14 = (((float)(var10 >> 24 & 7L) + 0.5F) / 8.0F - 0.5F) * 0.004F;
-        GL11.glTranslatef(var12, var13, var14);
+        GlStateManager.translate(var12, var13, var14);
         double var15 = p_76986_1_.lastTickPosX + (p_76986_1_.posX - p_76986_1_.lastTickPosX) * (double)p_76986_9_;
         double var17 = p_76986_1_.lastTickPosY + (p_76986_1_.posY - p_76986_1_.lastTickPosY) * (double)p_76986_9_;
         double var19 = p_76986_1_.lastTickPosZ + (p_76986_1_.posZ - p_76986_1_.lastTickPosZ) * (double)p_76986_9_;
@@ -78,42 +77,42 @@ public class RenderMinecart extends Render
             }
         }
 
-        GL11.glTranslatef((float)p_76986_2_, (float)p_76986_4_, (float)p_76986_6_);
-        GL11.glRotatef(180.0F - p_76986_8_, 0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(-var24, 0.0F, 0.0F, 1.0F);
-        float var31 = (float)p_76986_1_.getRollingAmplitude() - p_76986_9_;
-        float var32 = p_76986_1_.getDamage() - p_76986_9_;
+        GlStateManager.translate((float)p_76986_2_, (float)p_76986_4_ + 0.375F, (float)p_76986_6_);
+        GlStateManager.rotate(180.0F - p_76986_8_, 0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(-var24, 0.0F, 0.0F, 1.0F);
+        float var30 = (float)p_76986_1_.getRollingAmplitude() - p_76986_9_;
+        float var31 = p_76986_1_.getDamage() - p_76986_9_;
 
-        if (var32 < 0.0F)
+        if (var31 < 0.0F)
         {
-            var32 = 0.0F;
+            var31 = 0.0F;
         }
 
-        if (var31 > 0.0F)
+        if (var30 > 0.0F)
         {
-            GL11.glRotatef(MathHelper.sin(var31) * var31 * var32 / 10.0F * (float)p_76986_1_.getRollingDirection(), 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(MathHelper.sin(var30) * var30 * var31 / 10.0F * (float)p_76986_1_.getRollingDirection(), 1.0F, 0.0F, 0.0F);
         }
 
-        int var33 = p_76986_1_.getDisplayTileOffset();
-        Block var28 = p_76986_1_.func_145820_n();
-        int var29 = p_76986_1_.getDisplayTileData();
+        int var32 = p_76986_1_.getDisplayTileOffset();
+        IBlockState var28 = p_76986_1_.func_174897_t();
 
-        if (var28.getRenderType() != -1)
+        if (var28.getBlock().getRenderType() != -1)
         {
-            GL11.glPushMatrix();
+            GlStateManager.pushMatrix();
             this.bindTexture(TextureMap.locationBlocksTexture);
-            float var30 = 0.75F;
-            GL11.glScalef(var30, var30, var30);
-            GL11.glTranslatef(0.0F, (float)var33 / 16.0F, 0.0F);
-            this.func_147910_a(p_76986_1_, p_76986_9_, var28, var29);
-            GL11.glPopMatrix();
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            float var29 = 0.75F;
+            GlStateManager.scale(var29, var29, var29);
+            GlStateManager.translate(-0.5F, (float)(var32 - 8) / 16.0F, 0.5F);
+            this.func_180560_a(p_76986_1_, p_76986_9_, var28);
+            GlStateManager.popMatrix();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.bindEntityTexture(p_76986_1_);
         }
 
-        GL11.glScalef(-1.0F, -1.0F, 1.0F);
+        GlStateManager.scale(-1.0F, -1.0F, 1.0F);
         this.modelMinecart.render(p_76986_1_, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.0625F);
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
+        super.doRender(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     /**
@@ -124,12 +123,11 @@ public class RenderMinecart extends Render
         return minecartTextures;
     }
 
-    protected void func_147910_a(EntityMinecart p_147910_1_, float p_147910_2_, Block p_147910_3_, int p_147910_4_)
+    protected void func_180560_a(EntityMinecart p_180560_1_, float p_180560_2_, IBlockState p_180560_3_)
     {
-        float var5 = p_147910_1_.getBrightness(p_147910_2_);
-        GL11.glPushMatrix();
-        this.field_94145_f.renderBlockAsItem(p_147910_3_, p_147910_4_, var5);
-        GL11.glPopMatrix();
+        GlStateManager.pushMatrix();
+        Minecraft.getMinecraft().getBlockRendererDispatcher().func_175016_a(p_180560_3_, p_180560_1_.getBrightness(p_180560_2_));
+        GlStateManager.popMatrix();
     }
 
     /**

@@ -28,12 +28,12 @@ import org.apache.logging.log4j.Logger;
 
 public class UserList
 {
-    protected static final Logger field_152693_a = LogManager.getLogger();
-    protected final Gson field_152694_b;
-    private final File field_152695_c;
-    private final Map field_152696_d = Maps.newHashMap();
-    private boolean field_152697_e = true;
-    private static final ParameterizedType field_152698_f = new ParameterizedType()
+    protected static final Logger logger = LogManager.getLogger();
+    protected final Gson gson;
+    private final File saveFile;
+    private final Map values = Maps.newHashMap();
+    private boolean lanServer = true;
+    private static final ParameterizedType saveFileFormat = new ParameterizedType()
     {
         private static final String __OBFID = "CL_00001875";
         public Type[] getActualTypeArguments()
@@ -51,77 +51,87 @@ public class UserList
     };
     private static final String __OBFID = "CL_00001876";
 
-    public UserList(File p_i1144_1_)
+    public UserList(File saveFile)
     {
-        this.field_152695_c = p_i1144_1_;
+        this.saveFile = saveFile;
         GsonBuilder var2 = (new GsonBuilder()).setPrettyPrinting();
         var2.registerTypeHierarchyAdapter(UserListEntry.class, new UserList.Serializer(null));
-        this.field_152694_b = var2.create();
+        this.gson = var2.create();
     }
 
-    public boolean func_152689_b()
+    public boolean isLanServer()
     {
-        return this.field_152697_e;
+        return this.lanServer;
     }
 
-    public void func_152686_a(boolean p_152686_1_)
+    public void setLanServer(boolean state)
     {
-        this.field_152697_e = p_152686_1_;
+        this.lanServer = state;
     }
 
-    public void func_152687_a(UserListEntry p_152687_1_)
+    /**
+     * Adds an entry to the list
+     */
+    public void addEntry(UserListEntry entry)
     {
-        this.field_152696_d.put(this.func_152681_a(p_152687_1_.func_152640_f()), p_152687_1_);
+        this.values.put(this.getObjectKey(entry.getValue()), entry);
 
         try
         {
-            this.func_152678_f();
+            this.writeChanges();
         }
         catch (IOException var3)
         {
-            field_152693_a.warn("Could not save the list after adding a user.", var3);
+            logger.warn("Could not save the list after adding a user.", var3);
         }
     }
 
-    public UserListEntry func_152683_b(Object p_152683_1_)
+    public UserListEntry getEntry(Object obj)
     {
-        this.func_152680_h();
-        return (UserListEntry)this.field_152696_d.get(this.func_152681_a(p_152683_1_));
+        this.removeExpired();
+        return (UserListEntry)this.values.get(this.getObjectKey(obj));
     }
 
-    public void func_152684_c(Object p_152684_1_)
+    public void removeEntry(Object p_152684_1_)
     {
-        this.field_152696_d.remove(this.func_152681_a(p_152684_1_));
+        this.values.remove(this.getObjectKey(p_152684_1_));
 
         try
         {
-            this.func_152678_f();
+            this.writeChanges();
         }
         catch (IOException var3)
         {
-            field_152693_a.warn("Could not save the list after removing a user.", var3);
+            logger.warn("Could not save the list after removing a user.", var3);
         }
     }
 
-    public String[] func_152685_a()
+    public String[] getKeys()
     {
-        return (String[])this.field_152696_d.keySet().toArray(new String[this.field_152696_d.size()]);
+        return (String[])this.values.keySet().toArray(new String[this.values.size()]);
     }
 
-    protected String func_152681_a(Object p_152681_1_)
+    /**
+     * Gets the key value for the given object
+     */
+    protected String getObjectKey(Object obj)
     {
-        return p_152681_1_.toString();
+        return obj.toString();
     }
 
-    protected boolean func_152692_d(Object p_152692_1_)
+    protected boolean hasEntry(Object entry)
     {
-        return this.field_152696_d.containsKey(this.func_152681_a(p_152692_1_));
+        return this.values.containsKey(this.getObjectKey(entry));
     }
 
-    private void func_152680_h()
+    /**
+     * Removes expired bans from the list. Never actually does anything since UserListEntry#hasBanExpired always returns
+     * false. Appears to be an effort by Mojang to add temp ban functionality. (1.7.10)
+     */
+    private void removeExpired()
     {
         ArrayList var1 = Lists.newArrayList();
-        Iterator var2 = this.field_152696_d.values().iterator();
+        Iterator var2 = this.values.values().iterator();
 
         while (var2.hasNext())
         {
@@ -129,7 +139,7 @@ public class UserList
 
             if (var3.hasBanExpired())
             {
-                var1.add(var3.func_152640_f());
+                var1.add(var3.getValue());
             }
         }
 
@@ -138,29 +148,29 @@ public class UserList
         while (var2.hasNext())
         {
             Object var4 = var2.next();
-            this.field_152696_d.remove(var4);
+            this.values.remove(var4);
         }
     }
 
-    protected UserListEntry func_152682_a(JsonObject p_152682_1_)
+    protected UserListEntry createEntry(JsonObject entryData)
     {
-        return new UserListEntry((Object)null, p_152682_1_);
+        return new UserListEntry((Object)null, entryData);
     }
 
-    protected Map func_152688_e()
+    protected Map getValues()
     {
-        return this.field_152696_d;
+        return this.values;
     }
 
-    public void func_152678_f() throws IOException
+    public void writeChanges() throws IOException
     {
-        Collection var1 = this.field_152696_d.values();
-        String var2 = this.field_152694_b.toJson(var1);
+        Collection var1 = this.values.values();
+        String var2 = this.gson.toJson(var1);
         BufferedWriter var3 = null;
 
         try
         {
-            var3 = Files.newWriter(this.field_152695_c, Charsets.UTF_8);
+            var3 = Files.newWriter(this.saveFile, Charsets.UTF_8);
             var3.write(var2);
         }
         finally
@@ -175,19 +185,19 @@ public class UserList
 
         private Serializer() {}
 
-        public JsonElement func_152751_a(UserListEntry p_152751_1_, Type p_152751_2_, JsonSerializationContext p_152751_3_)
+        public JsonElement serializeEntry(UserListEntry p_152751_1_, Type p_152751_2_, JsonSerializationContext p_152751_3_)
         {
             JsonObject var4 = new JsonObject();
-            p_152751_1_.func_152641_a(var4);
+            p_152751_1_.onSerialization(var4);
             return var4;
         }
 
-        public UserListEntry func_152750_a(JsonElement p_152750_1_, Type p_152750_2_, JsonDeserializationContext p_152750_3_)
+        public UserListEntry deserializeEntry(JsonElement p_152750_1_, Type p_152750_2_, JsonDeserializationContext p_152750_3_)
         {
             if (p_152750_1_.isJsonObject())
             {
                 JsonObject var4 = p_152750_1_.getAsJsonObject();
-                UserListEntry var5 = UserList.this.func_152682_a(var4);
+                UserListEntry var5 = UserList.this.createEntry(var4);
                 return var5;
             }
             else
@@ -198,12 +208,12 @@ public class UserList
 
         public JsonElement serialize(Object p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_)
         {
-            return this.func_152751_a((UserListEntry)p_serialize_1_, p_serialize_2_, p_serialize_3_);
+            return this.serializeEntry((UserListEntry)p_serialize_1_, p_serialize_2_, p_serialize_3_);
         }
 
         public Object deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_)
         {
-            return this.func_152750_a(p_deserialize_1_, p_deserialize_2_, p_deserialize_3_);
+            return this.deserializeEntry(p_deserialize_1_, p_deserialize_2_, p_deserialize_3_);
         }
 
         Serializer(Object p_i1141_2_)

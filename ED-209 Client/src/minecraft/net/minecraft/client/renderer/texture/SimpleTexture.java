@@ -3,7 +3,6 @@ package net.minecraft.client.renderer.texture;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.data.TextureMetadataSection;
@@ -24,14 +23,14 @@ public class SimpleTexture extends AbstractTexture
 
     public void loadTexture(IResourceManager p_110551_1_) throws IOException
     {
-        this.func_147631_c();
+        this.deleteGlTexture();
         InputStream var2 = null;
 
         try
         {
             IResource var3 = p_110551_1_.getResource(this.textureLocation);
             var2 = var3.getInputStream();
-            BufferedImage var4 = ImageIO.read(var2);
+            BufferedImage var4 = TextureUtil.func_177053_a(var2);
             boolean var5 = false;
             boolean var6 = false;
 

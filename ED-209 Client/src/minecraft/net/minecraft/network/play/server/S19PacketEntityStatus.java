@@ -8,7 +8,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.World;
 
-public class S19PacketEntityStatus extends Packet
+public class S19PacketEntityStatus implements Packet
 {
     private int field_149164_a;
     private byte field_149163_b;
@@ -25,29 +25,29 @@ public class S19PacketEntityStatus extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149164_a = p_148837_1_.readInt();
-        this.field_149163_b = p_148837_1_.readByte();
+        this.field_149164_a = data.readInt();
+        this.field_149163_b = data.readByte();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149164_a);
-        p_148840_1_.writeByte(this.field_149163_b);
+        data.writeInt(this.field_149164_a);
+        data.writeByte(this.field_149163_b);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180736_a(INetHandlerPlayClient p_180736_1_)
     {
-        p_148833_1_.handleEntityStatus(this);
+        p_180736_1_.handleEntityStatus(this);
     }
 
-    public Entity func_149161_a(World p_149161_1_)
+    public Entity func_149161_a(World worldIn)
     {
-        return p_149161_1_.getEntityByID(this.field_149164_a);
+        return worldIn.getEntityByID(this.field_149164_a);
     }
 
     public byte func_149160_c()
@@ -55,8 +55,11 @@ public class S19PacketEntityStatus extends Packet
         return this.field_149163_b;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180736_a((INetHandlerPlayClient)handler);
     }
 }

@@ -11,4 +11,9 @@ public class WorldProviderSurface extends WorldProvider
     {
         return "Overworld";
     }
+
+    public String getInternalNameSuffix()
+    {
+        return "";
+    }
 }

@@ -28,6 +28,6 @@ public class StringUtils
      */
     public static boolean isNullOrEmpty(String p_151246_0_)
     {
-        return p_151246_0_ == null || "".equals(p_151246_0_);
+        return org.apache.commons.lang3.StringUtils.isEmpty(p_151246_0_);
     }
 }

@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 public class EntityDamageSource extends DamageSource
 {
     protected Entity damageSourceEntity;
+    private boolean field_180140_r = false;
     private static final String __OBFID = "CL_00001522";
 
     public EntityDamageSource(String p_i1567_1_, Entity p_i1567_2_)
@@ -16,17 +17,31 @@ public class EntityDamageSource extends DamageSource
         this.damageSourceEntity = p_i1567_2_;
     }
 
+    public EntityDamageSource func_180138_v()
+    {
+        this.field_180140_r = true;
+        return this;
+    }
+
+    public boolean func_180139_w()
+    {
+        return this.field_180140_r;
+    }
+
     public Entity getEntity()
     {
         return this.damageSourceEntity;
     }
 
-    public IChatComponent func_151519_b(EntityLivingBase p_151519_1_)
+    /**
+     * Gets the death message that is displayed when the player dies
+     */
+    public IChatComponent getDeathMessage(EntityLivingBase p_151519_1_)
     {
         ItemStack var2 = this.damageSourceEntity instanceof EntityLivingBase ? ((EntityLivingBase)this.damageSourceEntity).getHeldItem() : null;
         String var3 = "death.attack." + this.damageType;
         String var4 = var3 + ".item";
-        return var2 != null && var2.hasDisplayName() && StatCollector.canTranslate(var4) ? new ChatComponentTranslation(var4, new Object[] {p_151519_1_.func_145748_c_(), this.damageSourceEntity.func_145748_c_(), var2.func_151000_E()}): new ChatComponentTranslation(var3, new Object[] {p_151519_1_.func_145748_c_(), this.damageSourceEntity.func_145748_c_()});
+        return var2 != null && var2.hasDisplayName() && StatCollector.canTranslate(var4) ? new ChatComponentTranslation(var4, new Object[] {p_151519_1_.getDisplayName(), this.damageSourceEntity.getDisplayName(), var2.getChatComponent()}): new ChatComponentTranslation(var3, new Object[] {p_151519_1_.getDisplayName(), this.damageSourceEntity.getDisplayName()});
     }
 
     /**

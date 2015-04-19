@@ -1,19 +1,20 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import net.minecraft.client.AnvilConverterException;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveFormatComparator;
 import net.minecraft.world.storage.WorldInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +30,7 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
     private GuiSelectWorld.List field_146638_t;
     private String field_146637_u;
     private String field_146636_v;
-    private String[] field_146635_w = new String[3];
+    private String[] field_146635_w = new String[4];
     private boolean field_146643_x;
     private GuiButton field_146642_y;
     private GuiButton field_146641_z;
@@ -65,9 +66,19 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
         this.field_146635_w[WorldSettings.GameType.SURVIVAL.getID()] = I18n.format("gameMode.survival", new Object[0]);
         this.field_146635_w[WorldSettings.GameType.CREATIVE.getID()] = I18n.format("gameMode.creative", new Object[0]);
         this.field_146635_w[WorldSettings.GameType.ADVENTURE.getID()] = I18n.format("gameMode.adventure", new Object[0]);
-        this.field_146638_t = new GuiSelectWorld.List();
-        this.field_146638_t.func_148134_d(4, 5);
+        this.field_146635_w[WorldSettings.GameType.SPECTATOR.getID()] = I18n.format("gameMode.spectator", new Object[0]);
+        this.field_146638_t = new GuiSelectWorld.List(this.mc);
+        this.field_146638_t.registerScrollButtons(4, 5);
         this.func_146618_g();
+    }
+
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
+    {
+        super.handleMouseInput();
+        this.field_146638_t.func_178039_p();
     }
 
     private void func_146627_h() throws AnvilConverterException
@@ -87,7 +98,7 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
     {
         String var2 = ((SaveFormatComparator)this.field_146639_s.get(p_146614_1_)).getDisplayName();
 
-        if (var2 == null || MathHelper.stringNullOrLengthZero(var2))
+        if (StringUtils.isEmpty(var2))
         {
             var2 = I18n.format("selectWorld.world", new Object[0]) + " " + (p_146614_1_ + 1);
         }
@@ -109,11 +120,11 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
         this.field_146631_B.enabled = false;
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.enabled)
+        if (button.enabled)
         {
-            if (p_146284_1_.id == 2)
+            if (button.id == 2)
             {
                 String var2 = this.func_146614_d(this.field_146640_r);
 
@@ -124,23 +135,23 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
                     this.mc.displayGuiScreen(var3);
                 }
             }
-            else if (p_146284_1_.id == 1)
+            else if (button.id == 1)
             {
                 this.func_146615_e(this.field_146640_r);
             }
-            else if (p_146284_1_.id == 3)
+            else if (button.id == 3)
             {
                 this.mc.displayGuiScreen(new GuiCreateWorld(this));
             }
-            else if (p_146284_1_.id == 6)
+            else if (button.id == 6)
             {
                 this.mc.displayGuiScreen(new GuiRenameWorld(this, this.func_146621_a(this.field_146640_r)));
             }
-            else if (p_146284_1_.id == 0)
+            else if (button.id == 0)
             {
                 this.mc.displayGuiScreen(this.field_146632_a);
             }
-            else if (p_146284_1_.id == 7)
+            else if (button.id == 7)
             {
                 GuiCreateWorld var5 = new GuiCreateWorld(this);
                 ISaveHandler var6 = this.mc.getSaveLoader().getSaveLoader(this.func_146621_a(this.field_146640_r), false);
@@ -151,7 +162,7 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
             }
             else
             {
-                this.field_146638_t.func_148147_a(p_146284_1_);
+                this.field_146638_t.actionPerformed(button);
             }
         }
     }
@@ -184,17 +195,17 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
         }
     }
 
-    public void confirmClicked(boolean p_73878_1_, int p_73878_2_)
+    public void confirmClicked(boolean result, int id)
     {
         if (this.field_146643_x)
         {
             this.field_146643_x = false;
 
-            if (p_73878_1_)
+            if (result)
             {
                 ISaveFormat var3 = this.mc.getSaveLoader();
                 var3.flushCache();
-                var3.deleteWorldDirectory(this.func_146621_a(p_73878_2_));
+                var3.deleteWorldDirectory(this.func_146621_a(id));
 
                 try
                 {
@@ -211,13 +222,13 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        this.field_146638_t.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
+        this.field_146638_t.drawScreen(mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRendererObj, this.field_146628_f, this.width / 2, 20, 16777215);
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
     public static GuiYesNo func_152129_a(GuiYesNoCallback p_152129_0_, String p_152129_1_, int p_152129_2_)
@@ -234,9 +245,9 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
     {
         private static final String __OBFID = "CL_00000712";
 
-        public List()
+        public List(Minecraft mcIn)
         {
-            super(GuiSelectWorld.this.mc, GuiSelectWorld.this.width, GuiSelectWorld.this.height, 32, GuiSelectWorld.this.height - 64, 36);
+            super(mcIn, GuiSelectWorld.this.width, GuiSelectWorld.this.height, 32, GuiSelectWorld.this.height - 64, 36);
         }
 
         protected int getSize()
@@ -244,27 +255,27 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
             return GuiSelectWorld.this.field_146639_s.size();
         }
 
-        protected void elementClicked(int p_148144_1_, boolean p_148144_2_, int p_148144_3_, int p_148144_4_)
+        protected void elementClicked(int slotIndex, boolean isDoubleClick, int mouseX, int mouseY)
         {
-            GuiSelectWorld.this.field_146640_r = p_148144_1_;
+            GuiSelectWorld.this.field_146640_r = slotIndex;
             boolean var5 = GuiSelectWorld.this.field_146640_r >= 0 && GuiSelectWorld.this.field_146640_r < this.getSize();
             GuiSelectWorld.this.field_146641_z.enabled = var5;
             GuiSelectWorld.this.field_146642_y.enabled = var5;
             GuiSelectWorld.this.field_146630_A.enabled = var5;
             GuiSelectWorld.this.field_146631_B.enabled = var5;
 
-            if (p_148144_2_ && var5)
+            if (isDoubleClick && var5)
             {
-                GuiSelectWorld.this.func_146615_e(p_148144_1_);
+                GuiSelectWorld.this.func_146615_e(slotIndex);
             }
         }
 
-        protected boolean isSelected(int p_148131_1_)
+        protected boolean isSelected(int slotIndex)
         {
-            return p_148131_1_ == GuiSelectWorld.this.field_146640_r;
+            return slotIndex == GuiSelectWorld.this.field_146640_r;
         }
 
-        protected int func_148138_e()
+        protected int getContentHeight()
         {
             return GuiSelectWorld.this.field_146639_s.size() * 36;
         }
@@ -274,43 +285,43 @@ public class GuiSelectWorld extends GuiScreen implements GuiYesNoCallback
             GuiSelectWorld.this.drawDefaultBackground();
         }
 
-        protected void drawSlot(int p_148126_1_, int p_148126_2_, int p_148126_3_, int p_148126_4_, Tessellator p_148126_5_, int p_148126_6_, int p_148126_7_)
+        protected void drawSlot(int p_180791_1_, int p_180791_2_, int p_180791_3_, int p_180791_4_, int p_180791_5_, int p_180791_6_)
         {
-            SaveFormatComparator var8 = (SaveFormatComparator)GuiSelectWorld.this.field_146639_s.get(p_148126_1_);
-            String var9 = var8.getDisplayName();
+            SaveFormatComparator var7 = (SaveFormatComparator)GuiSelectWorld.this.field_146639_s.get(p_180791_1_);
+            String var8 = var7.getDisplayName();
 
-            if (var9 == null || MathHelper.stringNullOrLengthZero(var9))
+            if (StringUtils.isEmpty(var8))
             {
-                var9 = GuiSelectWorld.this.field_146637_u + " " + (p_148126_1_ + 1);
+                var8 = GuiSelectWorld.this.field_146637_u + " " + (p_180791_1_ + 1);
             }
 
-            String var10 = var8.getFileName();
-            var10 = var10 + " (" + GuiSelectWorld.this.field_146633_h.format(new Date(var8.getLastTimePlayed()));
-            var10 = var10 + ")";
-            String var11 = "";
+            String var9 = var7.getFileName();
+            var9 = var9 + " (" + GuiSelectWorld.this.field_146633_h.format(new Date(var7.getLastTimePlayed()));
+            var9 = var9 + ")";
+            String var10 = "";
 
-            if (var8.requiresConversion())
+            if (var7.requiresConversion())
             {
-                var11 = GuiSelectWorld.this.field_146636_v + " " + var11;
+                var10 = GuiSelectWorld.this.field_146636_v + " " + var10;
             }
             else
             {
-                var11 = GuiSelectWorld.this.field_146635_w[var8.getEnumGameType().getID()];
+                var10 = GuiSelectWorld.this.field_146635_w[var7.getEnumGameType().getID()];
 
-                if (var8.isHardcoreModeEnabled())
+                if (var7.isHardcoreModeEnabled())
                 {
-                    var11 = EnumChatFormatting.DARK_RED + I18n.format("gameMode.hardcore", new Object[0]) + EnumChatFormatting.RESET;
+                    var10 = EnumChatFormatting.DARK_RED + I18n.format("gameMode.hardcore", new Object[0]) + EnumChatFormatting.RESET;
                 }
 
-                if (var8.getCheatsEnabled())
+                if (var7.getCheatsEnabled())
                 {
-                    var11 = var11 + ", " + I18n.format("selectWorld.cheats", new Object[0]);
+                    var10 = var10 + ", " + I18n.format("selectWorld.cheats", new Object[0]);
                 }
             }
 
-            GuiSelectWorld.this.drawString(GuiSelectWorld.this.fontRendererObj, var9, p_148126_2_ + 2, p_148126_3_ + 1, 16777215);
-            GuiSelectWorld.this.drawString(GuiSelectWorld.this.fontRendererObj, var10, p_148126_2_ + 2, p_148126_3_ + 12, 8421504);
-            GuiSelectWorld.this.drawString(GuiSelectWorld.this.fontRendererObj, var11, p_148126_2_ + 2, p_148126_3_ + 12 + 10, 8421504);
+            GuiSelectWorld.this.drawString(GuiSelectWorld.this.fontRendererObj, var8, p_180791_2_ + 2, p_180791_3_ + 1, 16777215);
+            GuiSelectWorld.this.drawString(GuiSelectWorld.this.fontRendererObj, var9, p_180791_2_ + 2, p_180791_3_ + 12, 8421504);
+            GuiSelectWorld.this.drawString(GuiSelectWorld.this.fontRendererObj, var10, p_180791_2_ + 2, p_180791_3_ + 12 + 10, 8421504);
         }
     }
 }

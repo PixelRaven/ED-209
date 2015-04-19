@@ -2,26 +2,23 @@ package net.minecraft.item;
 
 import java.util.List;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockColored;
-import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public class ItemDye extends Item
 {
-    public static final String[] field_150923_a = new String[] {"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "lightBlue", "magenta", "orange", "white"};
-    public static final String[] field_150921_b = new String[] {"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "light_blue", "magenta", "orange", "white"};
-    public static final int[] field_150922_c = new int[] {1973019, 11743532, 3887386, 5320730, 2437522, 8073150, 2651799, 11250603, 4408131, 14188952, 4312372, 14602026, 6719955, 12801229, 15435844, 15790320};
-    private IIcon[] field_150920_d;
+    public static final int[] dyeColors = new int[] {1973019, 11743532, 3887386, 5320730, 2437522, 8073150, 2651799, 11250603, 4408131, 14188952, 4312372, 14602026, 6719955, 12801229, 15435844, 15790320};
     private static final String __OBFID = "CL_00000022";
 
     public ItemDye()
@@ -32,93 +29,70 @@ public class ItemDye extends Item
     }
 
     /**
-     * Gets an icon index based on an item's damage value
-     */
-    public IIcon getIconFromDamage(int p_77617_1_)
-    {
-        int var2 = MathHelper.clamp_int(p_77617_1_, 0, 15);
-        return this.field_150920_d[var2];
-    }
-
-    /**
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        int var2 = MathHelper.clamp_int(p_77667_1_.getItemDamage(), 0, 15);
-        return super.getUnlocalizedName() + "." + field_150923_a[var2];
+        int var2 = stack.getMetadata();
+        return super.getUnlocalizedName() + "." + EnumDyeColor.func_176766_a(var2).func_176762_d();
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_1_))
+        if (!playerIn.func_175151_a(pos.offset(side), side, stack))
         {
             return false;
         }
         else
         {
-            if (p_77648_1_.getItemDamage() == 15)
+            EnumDyeColor var9 = EnumDyeColor.func_176766_a(stack.getMetadata());
+
+            if (var9 == EnumDyeColor.WHITE)
             {
-                if (func_150919_a(p_77648_1_, p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_))
+                if (func_179234_a(stack, worldIn, pos))
                 {
-                    if (!p_77648_3_.isClient)
+                    if (!worldIn.isRemote)
                     {
-                        p_77648_3_.playAuxSFX(2005, p_77648_4_, p_77648_5_, p_77648_6_, 0);
+                        worldIn.playAuxSFX(2005, pos, 0);
                     }
 
                     return true;
                 }
             }
-            else if (p_77648_1_.getItemDamage() == 3)
+            else if (var9 == EnumDyeColor.BROWN)
             {
-                Block var11 = p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_);
-                int var12 = p_77648_3_.getBlockMetadata(p_77648_4_, p_77648_5_, p_77648_6_);
+                IBlockState var10 = worldIn.getBlockState(pos);
+                Block var11 = var10.getBlock();
 
-                if (var11 == Blocks.log && BlockLog.func_150165_c(var12) == 3)
+                if (var11 == Blocks.log && var10.getValue(BlockPlanks.VARIANT_PROP) == BlockPlanks.EnumType.JUNGLE)
                 {
-                    if (p_77648_7_ == 0)
+                    if (side == EnumFacing.DOWN)
                     {
                         return false;
                     }
 
-                    if (p_77648_7_ == 1)
+                    if (side == EnumFacing.UP)
                     {
                         return false;
                     }
 
-                    if (p_77648_7_ == 2)
-                    {
-                        --p_77648_6_;
-                    }
+                    pos = pos.offset(side);
 
-                    if (p_77648_7_ == 3)
+                    if (worldIn.isAirBlock(pos))
                     {
-                        ++p_77648_6_;
-                    }
+                        IBlockState var12 = Blocks.cocoa.onBlockPlaced(worldIn, pos, side, hitX, hitY, hitZ, 0, playerIn);
+                        worldIn.setBlockState(pos, var12, 2);
 
-                    if (p_77648_7_ == 4)
-                    {
-                        --p_77648_4_;
-                    }
-
-                    if (p_77648_7_ == 5)
-                    {
-                        ++p_77648_4_;
-                    }
-
-                    if (p_77648_3_.isAirBlock(p_77648_4_, p_77648_5_, p_77648_6_))
-                    {
-                        int var13 = Blocks.cocoa.onBlockPlaced(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_8_, p_77648_9_, p_77648_10_, 0);
-                        p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, Blocks.cocoa, var13, 2);
-
-                        if (!p_77648_2_.capabilities.isCreativeMode)
+                        if (!playerIn.capabilities.isCreativeMode)
                         {
-                            --p_77648_1_.stackSize;
+                            --stack.stackSize;
                         }
                     }
 
@@ -130,24 +104,24 @@ public class ItemDye extends Item
         }
     }
 
-    public static boolean func_150919_a(ItemStack p_150919_0_, World p_150919_1_, int p_150919_2_, int p_150919_3_, int p_150919_4_)
+    public static boolean func_179234_a(ItemStack p_179234_0_, World worldIn, BlockPos p_179234_2_)
     {
-        Block var5 = p_150919_1_.getBlock(p_150919_2_, p_150919_3_, p_150919_4_);
+        IBlockState var3 = worldIn.getBlockState(p_179234_2_);
 
-        if (var5 instanceof IGrowable)
+        if (var3.getBlock() instanceof IGrowable)
         {
-            IGrowable var6 = (IGrowable)var5;
+            IGrowable var4 = (IGrowable)var3.getBlock();
 
-            if (var6.func_149851_a(p_150919_1_, p_150919_2_, p_150919_3_, p_150919_4_, p_150919_1_.isClient))
+            if (var4.isStillGrowing(worldIn, p_179234_2_, var3, worldIn.isRemote))
             {
-                if (!p_150919_1_.isClient)
+                if (!worldIn.isRemote)
                 {
-                    if (var6.func_149852_a(p_150919_1_, p_150919_1_.rand, p_150919_2_, p_150919_3_, p_150919_4_))
+                    if (var4.canUseBonemeal(worldIn, worldIn.rand, p_179234_2_, var3))
                     {
-                        var6.func_149853_b(p_150919_1_, p_150919_1_.rand, p_150919_2_, p_150919_3_, p_150919_4_);
+                        var4.grow(worldIn, worldIn.rand, p_179234_2_, var3);
                     }
 
-                    --p_150919_0_.stackSize;
+                    --p_179234_0_.stackSize;
                 }
 
                 return true;
@@ -157,25 +131,25 @@ public class ItemDye extends Item
         return false;
     }
 
-    public static void func_150918_a(World p_150918_0_, int p_150918_1_, int p_150918_2_, int p_150918_3_, int p_150918_4_)
+    public static void func_180617_a(World worldIn, BlockPos p_180617_1_, int p_180617_2_)
     {
-        if (p_150918_4_ == 0)
+        if (p_180617_2_ == 0)
         {
-            p_150918_4_ = 15;
+            p_180617_2_ = 15;
         }
 
-        Block var5 = p_150918_0_.getBlock(p_150918_1_, p_150918_2_, p_150918_3_);
+        Block var3 = worldIn.getBlockState(p_180617_1_).getBlock();
 
-        if (var5.getMaterial() != Material.air)
+        if (var3.getMaterial() != Material.air)
         {
-            var5.setBlockBoundsBasedOnState(p_150918_0_, p_150918_1_, p_150918_2_, p_150918_3_);
+            var3.setBlockBoundsBasedOnState(worldIn, p_180617_1_);
 
-            for (int var6 = 0; var6 < p_150918_4_; ++var6)
+            for (int var4 = 0; var4 < p_180617_2_; ++var4)
             {
+                double var5 = itemRand.nextGaussian() * 0.02D;
                 double var7 = itemRand.nextGaussian() * 0.02D;
                 double var9 = itemRand.nextGaussian() * 0.02D;
-                double var11 = itemRand.nextGaussian() * 0.02D;
-                p_150918_0_.spawnParticle("happyVillager", (double)((float)p_150918_1_ + itemRand.nextFloat()), (double)p_150918_2_ + (double)itemRand.nextFloat() * var5.getBlockBoundsMaxY(), (double)((float)p_150918_3_ + itemRand.nextFloat()), var7, var9, var11);
+                worldIn.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, (double)((float)p_180617_1_.getX() + itemRand.nextFloat()), (double)p_180617_1_.getY() + (double)itemRand.nextFloat() * var3.getBlockBoundsMaxY(), (double)((float)p_180617_1_.getZ() + itemRand.nextFloat()), var5, var7, var9, new int[0]);
             }
         }
     }
@@ -183,17 +157,17 @@ public class ItemDye extends Item
     /**
      * Returns true if the item can be used on the given entity, e.g. shears on sheep.
      */
-    public boolean itemInteractionForEntity(ItemStack p_111207_1_, EntityPlayer p_111207_2_, EntityLivingBase p_111207_3_)
+    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target)
     {
-        if (p_111207_3_ instanceof EntitySheep)
+        if (target instanceof EntitySheep)
         {
-            EntitySheep var4 = (EntitySheep)p_111207_3_;
-            int var5 = BlockColored.func_150032_b(p_111207_1_.getItemDamage());
+            EntitySheep var4 = (EntitySheep)target;
+            EnumDyeColor var5 = EnumDyeColor.func_176766_a(stack.getMetadata());
 
-            if (!var4.getSheared() && var4.getFleeceColor() != var5)
+            if (!var4.getSheared() && var4.func_175509_cj() != var5)
             {
-                var4.setFleeceColor(var5);
-                --p_111207_1_.stackSize;
+                var4.func_175512_b(var5);
+                --stack.stackSize;
             }
 
             return true;
@@ -205,23 +179,15 @@ public class ItemDye extends Item
     }
 
     /**
-     * This returns the sub items
+     * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
+     *  
+     * @param subItems The List of sub-items. This is a List of ItemStacks.
      */
-    public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List p_150895_3_)
+    public void getSubItems(Item itemIn, CreativeTabs tab, List subItems)
     {
         for (int var4 = 0; var4 < 16; ++var4)
         {
-            p_150895_3_.add(new ItemStack(p_150895_1_, 1, var4));
-        }
-    }
-
-    public void registerIcons(IIconRegister p_94581_1_)
-    {
-        this.field_150920_d = new IIcon[field_150921_b.length];
-
-        for (int var2 = 0; var2 < field_150921_b.length; ++var2)
-        {
-            this.field_150920_d[var2] = p_94581_1_.registerIcon(this.getIconString() + "_" + field_150921_b[var2]);
+            subItems.add(new ItemStack(itemIn, 1, var4));
         }
     }
 }

@@ -14,30 +14,30 @@ public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispense
     /**
      * Dispense the specified stack, play the dispense sound and spawn particles.
      */
-    public ItemStack dispenseStack(IBlockSource p_82487_1_, ItemStack p_82487_2_)
+    public ItemStack dispenseStack(IBlockSource source, ItemStack stack)
     {
-        World var3 = p_82487_1_.getWorld();
-        IPosition var4 = BlockDispenser.func_149939_a(p_82487_1_);
-        EnumFacing var5 = BlockDispenser.func_149937_b(p_82487_1_.getBlockMetadata());
+        World var3 = source.getWorld();
+        IPosition var4 = BlockDispenser.getDispensePosition(source);
+        EnumFacing var5 = BlockDispenser.getFacing(source.getBlockMetadata());
         IProjectile var6 = this.getProjectileEntity(var3, var4);
         var6.setThrowableHeading((double)var5.getFrontOffsetX(), (double)((float)var5.getFrontOffsetY() + 0.1F), (double)var5.getFrontOffsetZ(), this.func_82500_b(), this.func_82498_a());
         var3.spawnEntityInWorld((Entity)var6);
-        p_82487_2_.splitStack(1);
-        return p_82487_2_;
+        stack.splitStack(1);
+        return stack;
     }
 
     /**
      * Play the dispense sound from the specified block.
      */
-    protected void playDispenseSound(IBlockSource p_82485_1_)
+    protected void playDispenseSound(IBlockSource source)
     {
-        p_82485_1_.getWorld().playAuxSFX(1002, p_82485_1_.getXInt(), p_82485_1_.getYInt(), p_82485_1_.getZInt(), 0);
+        source.getWorld().playAuxSFX(1002, source.getBlockPos(), 0);
     }
 
     /**
      * Return the projectile entity spawned by this dispense behavior.
      */
-    protected abstract IProjectile getProjectileEntity(World p_82499_1_, IPosition p_82499_2_);
+    protected abstract IProjectile getProjectileEntity(World worldIn, IPosition position);
 
     protected float func_82498_a()
     {

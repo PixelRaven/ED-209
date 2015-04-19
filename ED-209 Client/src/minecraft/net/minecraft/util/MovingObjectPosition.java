@@ -4,23 +4,11 @@ import net.minecraft.entity.Entity;
 
 public class MovingObjectPosition
 {
+    private BlockPos field_178783_e;
+
     /** What type of ray trace hit was this? 0 = block, 1 = entity */
     public MovingObjectPosition.MovingObjectType typeOfHit;
-
-    /** x coordinate of the block ray traced against */
-    public int blockX;
-
-    /** y coordinate of the block ray traced against */
-    public int blockY;
-
-    /** z coordinate of the block ray traced against */
-    public int blockZ;
-
-    /**
-     * Which side was hit. If its -1 then it went the full length of the ray trace. Bottom = 0, Top = 1, East = 2, West
-     * = 3, North = 4, South = 5.
-     */
-    public int sideHit;
+    public EnumFacing field_178784_b;
 
     /** The vector position of the hit */
     public Vec3 hitVec;
@@ -29,24 +17,27 @@ public class MovingObjectPosition
     public Entity entityHit;
     private static final String __OBFID = "CL_00000610";
 
-    public MovingObjectPosition(int p_i2303_1_, int p_i2303_2_, int p_i2303_3_, int p_i2303_4_, Vec3 p_i2303_5_)
+    public MovingObjectPosition(Vec3 p_i45551_1_, EnumFacing p_i45551_2_, BlockPos p_i45551_3_)
     {
-        this(p_i2303_1_, p_i2303_2_, p_i2303_3_, p_i2303_4_, p_i2303_5_, true);
+        this(MovingObjectPosition.MovingObjectType.BLOCK, p_i45551_1_, p_i45551_2_, p_i45551_3_);
     }
 
-    public MovingObjectPosition(int p_i45481_1_, int p_i45481_2_, int p_i45481_3_, int p_i45481_4_, Vec3 p_i45481_5_, boolean p_i45481_6_)
+    public MovingObjectPosition(Vec3 p_i45552_1_, EnumFacing p_i45552_2_)
     {
-        this.typeOfHit = p_i45481_6_ ? MovingObjectPosition.MovingObjectType.BLOCK : MovingObjectPosition.MovingObjectType.MISS;
-        this.blockX = p_i45481_1_;
-        this.blockY = p_i45481_2_;
-        this.blockZ = p_i45481_3_;
-        this.sideHit = p_i45481_4_;
-        this.hitVec = Vec3.createVectorHelper(p_i45481_5_.xCoord, p_i45481_5_.yCoord, p_i45481_5_.zCoord);
+        this(MovingObjectPosition.MovingObjectType.BLOCK, p_i45552_1_, p_i45552_2_, BlockPos.ORIGIN);
     }
 
     public MovingObjectPosition(Entity p_i2304_1_)
     {
-        this(p_i2304_1_, Vec3.createVectorHelper(p_i2304_1_.posX, p_i2304_1_.posY, p_i2304_1_.posZ));
+        this(p_i2304_1_, new Vec3(p_i2304_1_.posX, p_i2304_1_.posY, p_i2304_1_.posZ));
+    }
+
+    public MovingObjectPosition(MovingObjectPosition.MovingObjectType p_i45553_1_, Vec3 p_i45553_2_, EnumFacing p_i45553_3_, BlockPos p_i45553_4_)
+    {
+        this.typeOfHit = p_i45553_1_;
+        this.field_178783_e = p_i45553_4_;
+        this.field_178784_b = p_i45553_3_;
+        this.hitVec = new Vec3(p_i45553_2_.xCoord, p_i45553_2_.yCoord, p_i45553_2_.zCoord);
     }
 
     public MovingObjectPosition(Entity p_i45482_1_, Vec3 p_i45482_2_)
@@ -56,9 +47,14 @@ public class MovingObjectPosition
         this.hitVec = p_i45482_2_;
     }
 
+    public BlockPos func_178782_a()
+    {
+        return this.field_178783_e;
+    }
+
     public String toString()
     {
-        return "HitResult{type=" + this.typeOfHit + ", x=" + this.blockX + ", y=" + this.blockY + ", z=" + this.blockZ + ", f=" + this.sideHit + ", pos=" + this.hitVec + ", entity=" + this.entityHit + '}';
+        return "HitResult{type=" + this.typeOfHit + ", blockpos=" + this.field_178783_e + ", f=" + this.field_178784_b + ", pos=" + this.hitVec + ", entity=" + this.entityHit + '}';
     }
 
     public static enum MovingObjectType

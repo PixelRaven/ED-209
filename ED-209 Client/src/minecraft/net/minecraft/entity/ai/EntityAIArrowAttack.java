@@ -30,7 +30,7 @@ public class EntityAIArrowAttack extends EntityAIBase
      */
     private int maxRangedAttackTime;
     private float field_96562_i;
-    private float field_82642_h;
+    private float maxAttackDistance;
     private static final String __OBFID = "CL_00001609";
 
     public EntityAIArrowAttack(IRangedAttackMob p_i1649_1_, double p_i1649_2_, int p_i1649_4_, float p_i1649_5_)
@@ -54,7 +54,7 @@ public class EntityAIArrowAttack extends EntityAIBase
             this.field_96561_g = p_i1650_4_;
             this.maxRangedAttackTime = p_i1650_5_;
             this.field_96562_i = p_i1650_6_;
-            this.field_82642_h = p_i1650_6_ * p_i1650_6_;
+            this.maxAttackDistance = p_i1650_6_ * p_i1650_6_;
             this.setMutexBits(3);
         }
     }
@@ -100,7 +100,7 @@ public class EntityAIArrowAttack extends EntityAIBase
      */
     public void updateTask()
     {
-        double var1 = this.entityHost.getDistanceSq(this.attackTarget.posX, this.attackTarget.boundingBox.minY, this.attackTarget.posZ);
+        double var1 = this.entityHost.getDistanceSq(this.attackTarget.posX, this.attackTarget.getEntityBoundingBox().minY, this.attackTarget.posZ);
         boolean var3 = this.entityHost.getEntitySenses().canSee(this.attackTarget);
 
         if (var3)
@@ -112,7 +112,7 @@ public class EntityAIArrowAttack extends EntityAIBase
             this.field_75318_f = 0;
         }
 
-        if (var1 <= (double)this.field_82642_h && this.field_75318_f >= 20)
+        if (var1 <= (double)this.maxAttackDistance && this.field_75318_f >= 20)
         {
             this.entityHost.getNavigator().clearPathEntity();
         }
@@ -126,24 +126,13 @@ public class EntityAIArrowAttack extends EntityAIBase
 
         if (--this.rangedAttackTime == 0)
         {
-            if (var1 > (double)this.field_82642_h || !var3)
+            if (var1 > (double)this.maxAttackDistance || !var3)
             {
                 return;
             }
 
             var4 = MathHelper.sqrt_double(var1) / this.field_96562_i;
-            float var5 = var4;
-
-            if (var4 < 0.1F)
-            {
-                var5 = 0.1F;
-            }
-
-            if (var5 > 1.0F)
-            {
-                var5 = 1.0F;
-            }
-
+            float var5 = MathHelper.clamp_float(var4, 0.1F, 1.0F);
             this.rangedAttackEntityHost.attackEntityWithRangedAttack(this.attackTarget, var5);
             this.rangedAttackTime = MathHelper.floor_float(var4 * (float)(this.maxRangedAttackTime - this.field_96561_g) + (float)this.field_96561_g);
         }

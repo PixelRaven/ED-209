@@ -7,9 +7,9 @@ public class ItemBook extends Item
     /**
      * Checks isDamagable and if it cannot be stacked
      */
-    public boolean isItemTool(ItemStack p_77616_1_)
+    public boolean isItemTool(ItemStack stack)
     {
-        return p_77616_1_.stackSize == 1;
+        return stack.stackSize == 1;
     }
 
     /**

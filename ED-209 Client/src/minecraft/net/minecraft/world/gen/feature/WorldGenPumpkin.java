@@ -1,24 +1,25 @@
 package net.minecraft.world.gen.feature;
 
 import java.util.Random;
+import net.minecraft.block.BlockPumpkin;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class WorldGenPumpkin extends WorldGenerator
 {
     private static final String __OBFID = "CL_00000428";
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        for (int var6 = 0; var6 < 64; ++var6)
+        for (int var4 = 0; var4 < 64; ++var4)
         {
-            int var7 = p_76484_3_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
-            int var8 = p_76484_4_ + p_76484_2_.nextInt(4) - p_76484_2_.nextInt(4);
-            int var9 = p_76484_5_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
+            BlockPos var5 = p_180709_3_.add(p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8), p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4), p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8));
 
-            if (p_76484_1_.isAirBlock(var7, var8, var9) && p_76484_1_.getBlock(var7, var8 - 1, var9) == Blocks.grass && Blocks.pumpkin.canPlaceBlockAt(p_76484_1_, var7, var8, var9))
+            if (worldIn.isAirBlock(var5) && worldIn.getBlockState(var5.offsetDown()).getBlock() == Blocks.grass && Blocks.pumpkin.canPlaceBlockAt(worldIn, var5))
             {
-                p_76484_1_.setBlock(var7, var8, var9, Blocks.pumpkin, p_76484_2_.nextInt(4), 2);
+                worldIn.setBlockState(var5, Blocks.pumpkin.getDefaultState().withProperty(BlockPumpkin.AGE, EnumFacing.Plane.HORIZONTAL.random(p_180709_2_)), 2);
             }
         }
 

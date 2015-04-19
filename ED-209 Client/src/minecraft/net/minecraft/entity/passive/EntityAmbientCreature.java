@@ -8,9 +8,9 @@ public abstract class EntityAmbientCreature extends EntityLiving implements IAni
 {
     private static final String __OBFID = "CL_00001636";
 
-    public EntityAmbientCreature(World p_i1679_1_)
+    public EntityAmbientCreature(World worldIn)
     {
-        super(p_i1679_1_);
+        super(worldIn);
     }
 
     public boolean allowLeashing()

@@ -8,40 +8,39 @@ import net.minecraft.tileentity.TileEntityFurnace;
 
 public class ContainerFurnace extends Container
 {
-    private TileEntityFurnace furnace;
-    private int lastCookTime;
-    private int lastBurnTime;
-    private int lastItemBurnTime;
+    private final IInventory tileFurnace;
+    private int field_178152_f;
+    private int field_178153_g;
+    private int field_178154_h;
+    private int field_178155_i;
     private static final String __OBFID = "CL_00001748";
 
-    public ContainerFurnace(InventoryPlayer p_i1812_1_, TileEntityFurnace p_i1812_2_)
+    public ContainerFurnace(InventoryPlayer p_i45794_1_, IInventory p_i45794_2_)
     {
-        this.furnace = p_i1812_2_;
-        this.addSlotToContainer(new Slot(p_i1812_2_, 0, 56, 17));
-        this.addSlotToContainer(new Slot(p_i1812_2_, 1, 56, 53));
-        this.addSlotToContainer(new SlotFurnace(p_i1812_1_.player, p_i1812_2_, 2, 116, 35));
+        this.tileFurnace = p_i45794_2_;
+        this.addSlotToContainer(new Slot(p_i45794_2_, 0, 56, 17));
+        this.addSlotToContainer(new SlotFurnaceFuel(p_i45794_2_, 1, 56, 53));
+        this.addSlotToContainer(new SlotFurnaceOutput(p_i45794_1_.player, p_i45794_2_, 2, 116, 35));
         int var3;
 
         for (var3 = 0; var3 < 3; ++var3)
         {
             for (int var4 = 0; var4 < 9; ++var4)
             {
-                this.addSlotToContainer(new Slot(p_i1812_1_, var4 + var3 * 9 + 9, 8 + var4 * 18, 84 + var3 * 18));
+                this.addSlotToContainer(new Slot(p_i45794_1_, var4 + var3 * 9 + 9, 8 + var4 * 18, 84 + var3 * 18));
             }
         }
 
         for (var3 = 0; var3 < 9; ++var3)
         {
-            this.addSlotToContainer(new Slot(p_i1812_1_, var3, 8 + var3 * 18, 142));
+            this.addSlotToContainer(new Slot(p_i45794_1_, var3, 8 + var3 * 18, 142));
         }
     }
 
-    public void addCraftingToCrafters(ICrafting p_75132_1_)
+    public void onCraftGuiOpened(ICrafting p_75132_1_)
     {
-        super.addCraftingToCrafters(p_75132_1_);
-        p_75132_1_.sendProgressBarUpdate(this, 0, this.furnace.field_145961_j);
-        p_75132_1_.sendProgressBarUpdate(this, 1, this.furnace.field_145956_a);
-        p_75132_1_.sendProgressBarUpdate(this, 2, this.furnace.field_145963_i);
+        super.onCraftGuiOpened(p_75132_1_);
+        p_75132_1_.func_175173_a(this, this.tileFurnace);
     }
 
     /**
@@ -55,64 +54,57 @@ public class ContainerFurnace extends Container
         {
             ICrafting var2 = (ICrafting)this.crafters.get(var1);
 
-            if (this.lastCookTime != this.furnace.field_145961_j)
+            if (this.field_178152_f != this.tileFurnace.getField(2))
             {
-                var2.sendProgressBarUpdate(this, 0, this.furnace.field_145961_j);
+                var2.sendProgressBarUpdate(this, 2, this.tileFurnace.getField(2));
             }
 
-            if (this.lastBurnTime != this.furnace.field_145956_a)
+            if (this.field_178154_h != this.tileFurnace.getField(0))
             {
-                var2.sendProgressBarUpdate(this, 1, this.furnace.field_145956_a);
+                var2.sendProgressBarUpdate(this, 0, this.tileFurnace.getField(0));
             }
 
-            if (this.lastItemBurnTime != this.furnace.field_145963_i)
+            if (this.field_178155_i != this.tileFurnace.getField(1))
             {
-                var2.sendProgressBarUpdate(this, 2, this.furnace.field_145963_i);
+                var2.sendProgressBarUpdate(this, 1, this.tileFurnace.getField(1));
+            }
+
+            if (this.field_178153_g != this.tileFurnace.getField(3))
+            {
+                var2.sendProgressBarUpdate(this, 3, this.tileFurnace.getField(3));
             }
         }
 
-        this.lastCookTime = this.furnace.field_145961_j;
-        this.lastBurnTime = this.furnace.field_145956_a;
-        this.lastItemBurnTime = this.furnace.field_145963_i;
+        this.field_178152_f = this.tileFurnace.getField(2);
+        this.field_178154_h = this.tileFurnace.getField(0);
+        this.field_178155_i = this.tileFurnace.getField(1);
+        this.field_178153_g = this.tileFurnace.getField(3);
     }
 
     public void updateProgressBar(int p_75137_1_, int p_75137_2_)
     {
-        if (p_75137_1_ == 0)
-        {
-            this.furnace.field_145961_j = p_75137_2_;
-        }
-
-        if (p_75137_1_ == 1)
-        {
-            this.furnace.field_145956_a = p_75137_2_;
-        }
-
-        if (p_75137_1_ == 2)
-        {
-            this.furnace.field_145963_i = p_75137_2_;
-        }
+        this.tileFurnace.setField(p_75137_1_, p_75137_2_);
     }
 
-    public boolean canInteractWith(EntityPlayer p_75145_1_)
+    public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.furnace.isUseableByPlayer(p_75145_1_);
+        return this.tileFurnace.isUseableByPlayer(playerIn);
     }
 
     /**
-     * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
+     * Take a stack from the specified inventory slot.
      */
-    public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_)
+    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack var3 = null;
-        Slot var4 = (Slot)this.inventorySlots.get(p_82846_2_);
+        Slot var4 = (Slot)this.inventorySlots.get(index);
 
         if (var4 != null && var4.getHasStack())
         {
             ItemStack var5 = var4.getStack();
             var3 = var5.copy();
 
-            if (p_82846_2_ == 2)
+            if (index == 2)
             {
                 if (!this.mergeItemStack(var5, 3, 39, true))
                 {
@@ -121,30 +113,30 @@ public class ContainerFurnace extends Container
 
                 var4.onSlotChange(var5, var3);
             }
-            else if (p_82846_2_ != 1 && p_82846_2_ != 0)
+            else if (index != 1 && index != 0)
             {
-                if (FurnaceRecipes.smelting().func_151395_a(var5) != null)
+                if (FurnaceRecipes.instance().getSmeltingResult(var5) != null)
                 {
                     if (!this.mergeItemStack(var5, 0, 1, false))
                     {
                         return null;
                     }
                 }
-                else if (TileEntityFurnace.func_145954_b(var5))
+                else if (TileEntityFurnace.isItemFuel(var5))
                 {
                     if (!this.mergeItemStack(var5, 1, 2, false))
                     {
                         return null;
                     }
                 }
-                else if (p_82846_2_ >= 3 && p_82846_2_ < 30)
+                else if (index >= 3 && index < 30)
                 {
                     if (!this.mergeItemStack(var5, 30, 39, false))
                     {
                         return null;
                     }
                 }
-                else if (p_82846_2_ >= 30 && p_82846_2_ < 39 && !this.mergeItemStack(var5, 3, 30, false))
+                else if (index >= 30 && index < 39 && !this.mergeItemStack(var5, 3, 30, false))
                 {
                     return null;
                 }
@@ -168,7 +160,7 @@ public class ContainerFurnace extends Container
                 return null;
             }
 
-            var4.onPickupFromSlot(p_82846_1_, var5);
+            var4.onPickupFromSlot(playerIn, var5);
         }
 
         return var3;

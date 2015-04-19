@@ -20,15 +20,15 @@ public class CommandToggleDownfall extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.downfall.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
         this.toggleDownfall();
-        func_152373_a(p_71515_1_, this, "commands.downfall.success", new Object[0]);
+        notifyOperators(sender, this, "commands.downfall.success", new Object[0]);
     }
 
     /**

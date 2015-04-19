@@ -8,46 +8,49 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginServer;
 
-public class C00PacketLoginStart extends Packet
+public class C00PacketLoginStart implements Packet
 {
-    private GameProfile field_149305_a;
+    private GameProfile profile;
     private static final String __OBFID = "CL_00001379";
 
     public C00PacketLoginStart() {}
 
-    public C00PacketLoginStart(GameProfile p_i45270_1_)
+    public C00PacketLoginStart(GameProfile profileIn)
     {
-        this.field_149305_a = p_i45270_1_;
+        this.profile = profileIn;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149305_a = new GameProfile((UUID)null, p_148837_1_.readStringFromBuffer(16));
+        this.profile = new GameProfile((UUID)null, data.readStringFromBuffer(16));
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(this.field_149305_a.getName());
+        data.writeString(this.profile.getName());
     }
 
-    public void processPacket(INetHandlerLoginServer p_148833_1_)
+    public void func_180773_a(INetHandlerLoginServer p_180773_1_)
     {
-        p_148833_1_.processLoginStart(this);
+        p_180773_1_.processLoginStart(this);
     }
 
-    public GameProfile func_149304_c()
+    public GameProfile getProfile()
     {
-        return this.field_149305_a;
+        return this.profile;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerLoginServer)p_148833_1_);
+        this.func_180773_a((INetHandlerLoginServer)handler);
     }
 }

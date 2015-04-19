@@ -1,62 +1,79 @@
 package net.minecraft.block;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockFenceGate extends BlockDirectional
 {
+    public static final PropertyBool field_176466_a = PropertyBool.create("open");
+    public static final PropertyBool field_176465_b = PropertyBool.create("powered");
+    public static final PropertyBool field_176467_M = PropertyBool.create("in_wall");
     private static final String __OBFID = "CL_00000243";
 
     public BlockFenceGate()
     {
         super(Material.wood);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176466_a, Boolean.valueOf(false)).withProperty(field_176465_b, Boolean.valueOf(false)).withProperty(field_176467_M, Boolean.valueOf(false)));
         this.setCreativeTab(CreativeTabs.tabRedstone);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Get the actual Block state of this Block at the given position. This applies properties not visible in the
+     * metadata, such as fence connections.
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
     {
-        return Blocks.planks.getBlockTextureFromSide(p_149691_1_);
-    }
+        EnumFacing.Axis var4 = ((EnumFacing)state.getValue(AGE)).getAxis();
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
-    {
-        return !p_149742_1_.getBlock(p_149742_2_, p_149742_3_ - 1, p_149742_4_).getMaterial().isSolid() ? false : super.canPlaceBlockAt(p_149742_1_, p_149742_2_, p_149742_3_, p_149742_4_);
-    }
-
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
-    {
-        int var5 = p_149668_1_.getBlockMetadata(p_149668_2_, p_149668_3_, p_149668_4_);
-        return isFenceGateOpen(var5) ? null : (var5 != 2 && var5 != 0 ? AxisAlignedBB.getBoundingBox((double)((float)p_149668_2_ + 0.375F), (double)p_149668_3_, (double)p_149668_4_, (double)((float)p_149668_2_ + 0.625F), (double)((float)p_149668_3_ + 1.5F), (double)(p_149668_4_ + 1)) : AxisAlignedBB.getBoundingBox((double)p_149668_2_, (double)p_149668_3_, (double)((float)p_149668_4_ + 0.375F), (double)(p_149668_2_ + 1), (double)((float)p_149668_3_ + 1.5F), (double)((float)p_149668_4_ + 0.625F)));
-    }
-
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
-    {
-        int var5 = func_149895_l(p_149719_1_.getBlockMetadata(p_149719_2_, p_149719_3_, p_149719_4_));
-
-        if (var5 != 2 && var5 != 0)
+        if (var4 == EnumFacing.Axis.Z && (worldIn.getBlockState(pos.offsetWest()).getBlock() == Blocks.cobblestone_wall || worldIn.getBlockState(pos.offsetEast()).getBlock() == Blocks.cobblestone_wall) || var4 == EnumFacing.Axis.X && (worldIn.getBlockState(pos.offsetNorth()).getBlock() == Blocks.cobblestone_wall || worldIn.getBlockState(pos.offsetSouth()).getBlock() == Blocks.cobblestone_wall))
         {
-            this.setBlockBounds(0.375F, 0.0F, 0.0F, 0.625F, 1.0F, 1.0F);
+            state = state.withProperty(field_176467_M, Boolean.valueOf(true));
+        }
+
+        return state;
+    }
+
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+    {
+        return worldIn.getBlockState(pos.offsetDown()).getBlock().getMaterial().isSolid() ? super.canPlaceBlockAt(worldIn, pos) : false;
+    }
+
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    {
+        if (((Boolean)state.getValue(field_176466_a)).booleanValue())
+        {
+            return null;
         }
         else
         {
+            EnumFacing.Axis var4 = ((EnumFacing)state.getValue(AGE)).getAxis();
+            return var4 == EnumFacing.Axis.Z ? new AxisAlignedBB((double)pos.getX(), (double)pos.getY(), (double)((float)pos.getZ() + 0.375F), (double)(pos.getX() + 1), (double)((float)pos.getY() + 1.5F), (double)((float)pos.getZ() + 0.625F)) : new AxisAlignedBB((double)((float)pos.getX() + 0.375F), (double)pos.getY(), (double)pos.getZ(), (double)((float)pos.getX() + 0.625F), (double)((float)pos.getY() + 1.5F), (double)(pos.getZ() + 1));
+        }
+    }
+
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
+    {
+        EnumFacing.Axis var3 = ((EnumFacing)access.getBlockState(pos).getValue(AGE)).getAxis();
+
+        if (var3 == EnumFacing.Axis.Z)
+        {
             this.setBlockBounds(0.0F, 0.0F, 0.375F, 1.0F, 1.0F, 0.625F);
+        }
+        else
+        {
+            this.setBlockBounds(0.375F, 0.0F, 0.0F, 0.625F, 1.0F, 1.0F);
         }
     }
 
@@ -65,96 +82,107 @@ public class BlockFenceGate extends BlockDirectional
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
-    public boolean getBlocksMovement(IBlockAccess p_149655_1_, int p_149655_2_, int p_149655_3_, int p_149655_4_)
+    public boolean isPassable(IBlockAccess blockAccess, BlockPos pos)
     {
-        return isFenceGateOpen(p_149655_1_.getBlockMetadata(p_149655_2_, p_149655_3_, p_149655_4_));
+        return ((Boolean)blockAccess.getBlockState(pos).getValue(field_176466_a)).booleanValue();
     }
 
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        return 21;
+        return this.getDefaultState().withProperty(AGE, placer.func_174811_aO()).withProperty(field_176466_a, Boolean.valueOf(false)).withProperty(field_176465_b, Boolean.valueOf(false)).withProperty(field_176467_M, Boolean.valueOf(false));
     }
 
-    /**
-     * Called when the block is placed in the world.
-     */
-    public void onBlockPlacedBy(World p_149689_1_, int p_149689_2_, int p_149689_3_, int p_149689_4_, EntityLivingBase p_149689_5_, ItemStack p_149689_6_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        int var7 = (MathHelper.floor_double((double)(p_149689_5_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) % 4;
-        p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, var7, 2);
-    }
-
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
-    {
-        int var10 = p_149727_1_.getBlockMetadata(p_149727_2_, p_149727_3_, p_149727_4_);
-
-        if (isFenceGateOpen(var10))
+        if (((Boolean)state.getValue(field_176466_a)).booleanValue())
         {
-            p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, var10 & -5, 2);
+            state = state.withProperty(field_176466_a, Boolean.valueOf(false));
+            worldIn.setBlockState(pos, state, 2);
         }
         else
         {
-            int var11 = (MathHelper.floor_double((double)(p_149727_5_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) % 4;
-            int var12 = func_149895_l(var10);
+            EnumFacing var9 = EnumFacing.fromAngle((double)playerIn.rotationYaw);
 
-            if (var12 == (var11 + 2) % 4)
+            if (state.getValue(AGE) == var9.getOpposite())
             {
-                var10 = var11;
+                state = state.withProperty(AGE, var9);
             }
 
-            p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, var10 | 4, 2);
+            state = state.withProperty(field_176466_a, Boolean.valueOf(true));
+            worldIn.setBlockState(pos, state, 2);
         }
 
-        p_149727_1_.playAuxSFXAtEntity(p_149727_5_, 1003, p_149727_2_, p_149727_3_, p_149727_4_, 0);
+        worldIn.playAuxSFXAtEntity(playerIn, ((Boolean)state.getValue(field_176466_a)).booleanValue() ? 1003 : 1006, pos, 0);
         return true;
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
-        if (!p_149695_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            int var6 = p_149695_1_.getBlockMetadata(p_149695_2_, p_149695_3_, p_149695_4_);
-            boolean var7 = p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_, p_149695_4_);
+            boolean var5 = worldIn.isBlockPowered(pos);
 
-            if (var7 || p_149695_5_.canProvidePower())
+            if (var5 || neighborBlock.canProvidePower())
             {
-                if (var7 && !isFenceGateOpen(var6))
+                if (var5 && !((Boolean)state.getValue(field_176466_a)).booleanValue() && !((Boolean)state.getValue(field_176465_b)).booleanValue())
                 {
-                    p_149695_1_.setBlockMetadataWithNotify(p_149695_2_, p_149695_3_, p_149695_4_, var6 | 4, 2);
-                    p_149695_1_.playAuxSFXAtEntity((EntityPlayer)null, 1003, p_149695_2_, p_149695_3_, p_149695_4_, 0);
+                    worldIn.setBlockState(pos, state.withProperty(field_176466_a, Boolean.valueOf(true)).withProperty(field_176465_b, Boolean.valueOf(true)), 2);
+                    worldIn.playAuxSFXAtEntity((EntityPlayer)null, 1003, pos, 0);
                 }
-                else if (!var7 && isFenceGateOpen(var6))
+                else if (!var5 && ((Boolean)state.getValue(field_176466_a)).booleanValue() && ((Boolean)state.getValue(field_176465_b)).booleanValue())
                 {
-                    p_149695_1_.setBlockMetadataWithNotify(p_149695_2_, p_149695_3_, p_149695_4_, var6 & -5, 2);
-                    p_149695_1_.playAuxSFXAtEntity((EntityPlayer)null, 1003, p_149695_2_, p_149695_3_, p_149695_4_, 0);
+                    worldIn.setBlockState(pos, state.withProperty(field_176466_a, Boolean.valueOf(false)).withProperty(field_176465_b, Boolean.valueOf(false)), 2);
+                    worldIn.playAuxSFXAtEntity((EntityPlayer)null, 1006, pos, 0);
+                }
+                else if (var5 != ((Boolean)state.getValue(field_176465_b)).booleanValue())
+                {
+                    worldIn.setBlockState(pos, state.withProperty(field_176465_b, Boolean.valueOf(var5)), 2);
                 }
             }
         }
+    }
+
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    {
+        return true;
     }
 
     /**
-     * Returns if the fence gate is open according to its metadata.
+     * Convert the given metadata into a BlockState for this Block
      */
-    public static boolean isFenceGateOpen(int p_149896_0_)
+    public IBlockState getStateFromMeta(int meta)
     {
-        return (p_149896_0_ & 4) != 0;
+        return this.getDefaultState().withProperty(AGE, EnumFacing.getHorizontal(meta)).withProperty(field_176466_a, Boolean.valueOf((meta & 4) != 0)).withProperty(field_176465_b, Boolean.valueOf((meta & 8) != 0));
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess p_149646_1_, int p_149646_2_, int p_149646_3_, int p_149646_4_, int p_149646_5_)
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
     {
-        return true;
+        byte var2 = 0;
+        int var3 = var2 | ((EnumFacing)state.getValue(AGE)).getHorizontalIndex();
+
+        if (((Boolean)state.getValue(field_176465_b)).booleanValue())
+        {
+            var3 |= 8;
+        }
+
+        if (((Boolean)state.getValue(field_176466_a)).booleanValue())
+        {
+            var3 |= 4;
+        }
+
+        return var3;
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_) {}
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {AGE, field_176466_a, field_176465_b, field_176467_M});
+    }
 }

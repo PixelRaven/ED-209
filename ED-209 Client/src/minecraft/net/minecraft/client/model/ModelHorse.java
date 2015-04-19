@@ -1,16 +1,16 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.util.MathHelper;
-import org.lwjgl.opengl.GL11;
 
 public class ModelHorse extends ModelBase
 {
     private ModelRenderer head;
-    private ModelRenderer mouthTop;
-    private ModelRenderer mouthBottom;
+    private ModelRenderer field_178711_b;
+    private ModelRenderer field_178712_c;
     private ModelRenderer horseLeftEar;
     private ModelRenderer horseRightEar;
 
@@ -122,16 +122,16 @@ public class ModelHorse extends ModelBase
         this.head.addBox(-2.5F, -10.0F, -1.5F, 5, 5, 7);
         this.head.setRotationPoint(0.0F, 4.0F, -10.0F);
         this.setBoxRotation(this.head, 0.5235988F, 0.0F, 0.0F);
-        this.mouthTop = new ModelRenderer(this, 24, 18);
-        this.mouthTop.addBox(-2.0F, -10.0F, -7.0F, 4, 3, 6);
-        this.mouthTop.setRotationPoint(0.0F, 3.95F, -10.0F);
-        this.setBoxRotation(this.mouthTop, 0.5235988F, 0.0F, 0.0F);
-        this.mouthBottom = new ModelRenderer(this, 24, 27);
-        this.mouthBottom.addBox(-2.0F, -7.0F, -6.5F, 4, 2, 5);
-        this.mouthBottom.setRotationPoint(0.0F, 4.0F, -10.0F);
-        this.setBoxRotation(this.mouthBottom, 0.5235988F, 0.0F, 0.0F);
-        this.head.addChild(this.mouthTop);
-        this.head.addChild(this.mouthBottom);
+        this.field_178711_b = new ModelRenderer(this, 24, 18);
+        this.field_178711_b.addBox(-2.0F, -10.0F, -7.0F, 4, 3, 6);
+        this.field_178711_b.setRotationPoint(0.0F, 3.95F, -10.0F);
+        this.setBoxRotation(this.field_178711_b, 0.5235988F, 0.0F, 0.0F);
+        this.field_178712_c = new ModelRenderer(this, 24, 27);
+        this.field_178712_c.addBox(-2.0F, -7.0F, -6.5F, 4, 2, 5);
+        this.field_178712_c.setRotationPoint(0.0F, 4.0F, -10.0F);
+        this.setBoxRotation(this.field_178712_c, 0.5235988F, 0.0F, 0.0F);
+        this.head.addChild(this.field_178711_b);
+        this.head.addChild(this.field_178712_c);
         this.horseLeftEar = new ModelRenderer(this, 0, 0);
         this.horseLeftEar.addBox(0.45F, -12.0F, 4.0F, 2, 3, 1);
         this.horseLeftEar.setRotationPoint(0.0F, 4.0F, -10.0F);
@@ -242,9 +242,9 @@ public class ModelHorse extends ModelBase
 
         if (!var11)
         {
-            GL11.glPushMatrix();
-            GL11.glScalef(var15, 0.5F + var15 * 0.5F, var15);
-            GL11.glTranslatef(0.0F, 0.95F * (1.0F - var15), 0.0F);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(var15, 0.5F + var15 * 0.5F, var15);
+            GlStateManager.translate(0.0F, 0.95F * (1.0F - var15), 0.0F);
         }
 
         this.backLeftLeg.render(p_78088_7_);
@@ -262,10 +262,10 @@ public class ModelHorse extends ModelBase
 
         if (!var11)
         {
-            GL11.glPopMatrix();
-            GL11.glPushMatrix();
-            GL11.glScalef(var15, var15, var15);
-            GL11.glTranslatef(0.0F, 1.35F * (1.0F - var15), 0.0F);
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(var15, var15, var15);
+            GlStateManager.translate(0.0F, 1.35F * (1.0F - var15), 0.0F);
         }
 
         this.body.render(p_78088_7_);
@@ -277,18 +277,18 @@ public class ModelHorse extends ModelBase
 
         if (!var11)
         {
-            GL11.glPopMatrix();
-            GL11.glPushMatrix();
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
             float var17 = 0.5F + var15 * var15 * 0.5F;
-            GL11.glScalef(var17, var17, var17);
+            GlStateManager.scale(var17, var17, var17);
 
             if (var10 <= 0.0F)
             {
-                GL11.glTranslatef(0.0F, 1.35F * (1.0F - var15), 0.0F);
+                GlStateManager.translate(0.0F, 1.35F * (1.0F - var15), 0.0F);
             }
             else
             {
-                GL11.glTranslatef(0.0F, 0.9F * (1.0F - var15) * var10 + 1.35F * (1.0F - var15) * (1.0F - var10), 0.15F * (1.0F - var15) * var10);
+                GlStateManager.translate(0.0F, 0.9F * (1.0F - var15) * var10 + 1.35F * (1.0F - var15) * (1.0F - var10), 0.15F * (1.0F - var15) * var10);
             }
         }
 
@@ -307,7 +307,7 @@ public class ModelHorse extends ModelBase
 
         if (!var11)
         {
-            GL11.glPopMatrix();
+            GlStateManager.popMatrix();
         }
 
         if (var13)
@@ -396,45 +396,45 @@ public class ModelHorse extends ModelBase
         this.head.rotateAngleX = 0.5235988F + var9;
         this.head.rotateAngleY = var8 / (180F / (float)Math.PI);
         this.head.rotateAngleX = var12 * (0.2617994F + var9) + var11 * 2.18166F + (1.0F - Math.max(var12, var11)) * this.head.rotateAngleX;
-        this.head.rotateAngleY = var12 * (var8 / (180F / (float)Math.PI)) + (1.0F - Math.max(var12, var11)) * this.head.rotateAngleY;
+        this.head.rotateAngleY = var12 * var8 / (180F / (float)Math.PI) + (1.0F - Math.max(var12, var11)) * this.head.rotateAngleY;
         this.head.rotationPointY = var12 * -6.0F + var11 * 11.0F + (1.0F - Math.max(var12, var11)) * this.head.rotationPointY;
         this.head.rotationPointZ = var12 * -1.0F + var11 * -10.0F + (1.0F - Math.max(var12, var11)) * this.head.rotationPointZ;
         this.tailBase.rotationPointY = var12 * 9.0F + var13 * this.tailBase.rotationPointY;
         this.tailMiddle.rotationPointZ = var12 * 18.0F + var13 * this.tailMiddle.rotationPointZ;
         this.muleRightChest.rotationPointY = var12 * 5.5F + var13 * this.muleRightChest.rotationPointY;
         this.muleRightChest.rotationPointZ = var12 * 15.0F + var13 * this.muleRightChest.rotationPointZ;
-        this.body.rotateAngleX = var12 * -((float)Math.PI / 4F) + var13 * this.body.rotateAngleX;
+        this.body.rotateAngleX = var12 * -45.0F / (180F / (float)Math.PI) + var13 * this.body.rotateAngleX;
         this.horseLeftEar.rotationPointY = this.head.rotationPointY;
         this.horseRightEar.rotationPointY = this.head.rotationPointY;
         this.muleLeftEar.rotationPointY = this.head.rotationPointY;
         this.muleRightEar.rotationPointY = this.head.rotationPointY;
         this.neck.rotationPointY = this.head.rotationPointY;
-        this.mouthTop.rotationPointY = 0.02F;
-        this.mouthBottom.rotationPointY = 0.0F;
+        this.field_178711_b.rotationPointY = 0.02F;
+        this.field_178712_c.rotationPointY = 0.0F;
         this.mane.rotationPointY = this.head.rotationPointY;
         this.horseLeftEar.rotationPointZ = this.head.rotationPointZ;
         this.horseRightEar.rotationPointZ = this.head.rotationPointZ;
         this.muleLeftEar.rotationPointZ = this.head.rotationPointZ;
         this.muleRightEar.rotationPointZ = this.head.rotationPointZ;
         this.neck.rotationPointZ = this.head.rotationPointZ;
-        this.mouthTop.rotationPointZ = 0.02F - var14 * 1.0F;
-        this.mouthBottom.rotationPointZ = 0.0F + var14 * 1.0F;
+        this.field_178711_b.rotationPointZ = 0.02F - var14 * 1.0F;
+        this.field_178712_c.rotationPointZ = 0.0F + var14 * 1.0F;
         this.mane.rotationPointZ = this.head.rotationPointZ;
         this.horseLeftEar.rotateAngleX = this.head.rotateAngleX;
         this.horseRightEar.rotateAngleX = this.head.rotateAngleX;
         this.muleLeftEar.rotateAngleX = this.head.rotateAngleX;
         this.muleRightEar.rotateAngleX = this.head.rotateAngleX;
         this.neck.rotateAngleX = this.head.rotateAngleX;
-        this.mouthTop.rotateAngleX = 0.0F - 0.09424778F * var14;
-        this.mouthBottom.rotateAngleX = 0.0F + 0.15707964F * var14;
+        this.field_178711_b.rotateAngleX = 0.0F - 0.09424778F * var14;
+        this.field_178712_c.rotateAngleX = 0.0F + 0.15707964F * var14;
         this.mane.rotateAngleX = this.head.rotateAngleX;
         this.horseLeftEar.rotateAngleY = this.head.rotateAngleY;
         this.horseRightEar.rotateAngleY = this.head.rotateAngleY;
         this.muleLeftEar.rotateAngleY = this.head.rotateAngleY;
         this.muleRightEar.rotateAngleY = this.head.rotateAngleY;
         this.neck.rotateAngleY = this.head.rotateAngleY;
-        this.mouthTop.rotateAngleY = 0.0F;
-        this.mouthBottom.rotateAngleY = 0.0F;
+        this.field_178711_b.rotateAngleY = 0.0F;
+        this.field_178712_c.rotateAngleY = 0.0F;
         this.mane.rotateAngleY = this.head.rotateAngleY;
         this.muleLeftChest.rotateAngleX = var20 / 5.0F;
         this.muleRightChest.rotateAngleX = -var20 / 5.0F;

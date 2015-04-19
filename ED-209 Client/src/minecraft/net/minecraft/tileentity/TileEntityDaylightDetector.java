@@ -1,20 +1,24 @@
 package net.minecraft.tileentity;
 
 import net.minecraft.block.BlockDaylightDetector;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
 
-public class TileEntityDaylightDetector extends TileEntity
+public class TileEntityDaylightDetector extends TileEntity implements IUpdatePlayerListBox
 {
     private static final String __OBFID = "CL_00000350";
 
-    public void updateEntity()
+    /**
+     * Updates the JList with a new model.
+     */
+    public void update()
     {
-        if (this.worldObj != null && !this.worldObj.isClient && this.worldObj.getTotalWorldTime() % 20L == 0L)
+        if (this.worldObj != null && !this.worldObj.isRemote && this.worldObj.getTotalWorldTime() % 20L == 0L)
         {
             this.blockType = this.getBlockType();
 
             if (this.blockType instanceof BlockDaylightDetector)
             {
-                ((BlockDaylightDetector)this.blockType).func_149957_e(this.worldObj, this.field_145851_c, this.field_145848_d, this.field_145849_e);
+                ((BlockDaylightDetector)this.blockType).func_180677_d(this.worldObj, this.pos);
             }
         }
     }

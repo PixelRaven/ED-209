@@ -1,99 +1,86 @@
 package net.minecraft.enchantment;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
 public abstract class Enchantment
 {
-    public static final Enchantment[] enchantmentsList = new Enchantment[256];
-
-    /** The list of enchantments applicable by the anvil from a book */
-    public static final Enchantment[] enchantmentsBookList;
-
-    /** Converts environmental damage to armour damage */
-    public static final Enchantment protection = new EnchantmentProtection(0, 10, 0);
+    private static final Enchantment[] field_180311_a = new Enchantment[256];
+    public static final Enchantment[] enchantmentsList;
+    private static final Map field_180307_E = Maps.newHashMap();
+    public static final Enchantment field_180310_c = new EnchantmentProtection(0, new ResourceLocation("protection"), 10, 0);
 
     /** Protection against fire */
-    public static final Enchantment fireProtection = new EnchantmentProtection(1, 5, 1);
-
-    /** Less fall damage */
-    public static final Enchantment featherFalling = new EnchantmentProtection(2, 5, 2);
+    public static final Enchantment fireProtection = new EnchantmentProtection(1, new ResourceLocation("fire_protection"), 5, 1);
+    public static final Enchantment field_180309_e = new EnchantmentProtection(2, new ResourceLocation("feather_falling"), 5, 2);
 
     /** Protection against explosions */
-    public static final Enchantment blastProtection = new EnchantmentProtection(3, 2, 3);
-
-    /** Protection against projectile entities (e.g. arrows) */
-    public static final Enchantment projectileProtection = new EnchantmentProtection(4, 5, 4);
-
-    /**
-     * Decreases the rate of air loss underwater; increases time between damage while suffocating
-     */
-    public static final Enchantment respiration = new EnchantmentOxygen(5, 2);
+    public static final Enchantment blastProtection = new EnchantmentProtection(3, new ResourceLocation("blast_protection"), 2, 3);
+    public static final Enchantment field_180308_g = new EnchantmentProtection(4, new ResourceLocation("projectile_protection"), 5, 4);
+    public static final Enchantment field_180317_h = new EnchantmentOxygen(5, new ResourceLocation("respiration"), 2);
 
     /** Increases underwater mining rate */
-    public static final Enchantment aquaAffinity = new EnchantmentWaterWorker(6, 2);
-    public static final Enchantment thorns = new EnchantmentThorns(7, 1);
-
-    /** Extra damage to mobs */
-    public static final Enchantment sharpness = new EnchantmentDamage(16, 10, 0);
-
-    /** Extra damage to zombies, zombie pigmen and skeletons */
-    public static final Enchantment smite = new EnchantmentDamage(17, 5, 1);
-
-    /** Extra damage to spiders, cave spiders and silverfish */
-    public static final Enchantment baneOfArthropods = new EnchantmentDamage(18, 5, 2);
-
-    /** Knocks mob and players backwards upon hit */
-    public static final Enchantment knockback = new EnchantmentKnockback(19, 5);
+    public static final Enchantment aquaAffinity = new EnchantmentWaterWorker(6, new ResourceLocation("aqua_affinity"), 2);
+    public static final Enchantment thorns = new EnchantmentThorns(7, new ResourceLocation("thorns"), 1);
+    public static final Enchantment field_180316_k = new EnchantmentWaterWalker(8, new ResourceLocation("depth_strider"), 2);
+    public static final Enchantment field_180314_l = new EnchantmentDamage(16, new ResourceLocation("sharpness"), 10, 0);
+    public static final Enchantment field_180315_m = new EnchantmentDamage(17, new ResourceLocation("smite"), 5, 1);
+    public static final Enchantment field_180312_n = new EnchantmentDamage(18, new ResourceLocation("bane_of_arthropods"), 5, 2);
+    public static final Enchantment field_180313_o = new EnchantmentKnockback(19, new ResourceLocation("knockback"), 5);
 
     /** Lights mobs on fire */
-    public static final Enchantment fireAspect = new EnchantmentFireAspect(20, 2);
+    public static final Enchantment fireAspect = new EnchantmentFireAspect(20, new ResourceLocation("fire_aspect"), 2);
 
     /** Mobs have a chance to drop more loot */
-    public static final Enchantment looting = new EnchantmentLootBonus(21, 2, EnumEnchantmentType.weapon);
+    public static final Enchantment looting = new EnchantmentLootBonus(21, new ResourceLocation("looting"), 2, EnumEnchantmentType.WEAPON);
 
     /** Faster resource gathering while in use */
-    public static final Enchantment efficiency = new EnchantmentDigging(32, 10);
+    public static final Enchantment efficiency = new EnchantmentDigging(32, new ResourceLocation("efficiency"), 10);
 
     /**
      * Blocks mined will drop themselves, even if it should drop something else (e.g. stone will drop stone, not
      * cobblestone)
      */
-    public static final Enchantment silkTouch = new EnchantmentUntouching(33, 1);
+    public static final Enchantment silkTouch = new EnchantmentUntouching(33, new ResourceLocation("silk_touch"), 1);
 
     /**
      * Sometimes, the tool's durability will not be spent when the tool is used
      */
-    public static final Enchantment unbreaking = new EnchantmentDurability(34, 5);
+    public static final Enchantment unbreaking = new EnchantmentDurability(34, new ResourceLocation("unbreaking"), 5);
 
     /** Can multiply the drop rate of items from blocks */
-    public static final Enchantment fortune = new EnchantmentLootBonus(35, 2, EnumEnchantmentType.digger);
+    public static final Enchantment fortune = new EnchantmentLootBonus(35, new ResourceLocation("fortune"), 2, EnumEnchantmentType.DIGGER);
 
     /** Power enchantment for bows, add's extra damage to arrows. */
-    public static final Enchantment power = new EnchantmentArrowDamage(48, 10);
+    public static final Enchantment power = new EnchantmentArrowDamage(48, new ResourceLocation("power"), 10);
 
     /**
      * Knockback enchantments for bows, the arrows will knockback the target when hit.
      */
-    public static final Enchantment punch = new EnchantmentArrowKnockback(49, 2);
+    public static final Enchantment punch = new EnchantmentArrowKnockback(49, new ResourceLocation("punch"), 2);
 
     /**
      * Flame enchantment for bows. Arrows fired by the bow will be on fire. Any target hit will also set on fire.
      */
-    public static final Enchantment flame = new EnchantmentArrowFire(50, 2);
+    public static final Enchantment flame = new EnchantmentArrowFire(50, new ResourceLocation("flame"), 2);
 
     /**
      * Infinity enchantment for bows. The bow will not consume arrows anymore, but will still required at least one
      * arrow on inventory use the bow.
      */
-    public static final Enchantment infinity = new EnchantmentArrowInfinite(51, 1);
-    public static final Enchantment field_151370_z = new EnchantmentLootBonus(61, 2, EnumEnchantmentType.fishing_rod);
-    public static final Enchantment field_151369_A = new EnchantmentFishingSpeed(62, 2, EnumEnchantmentType.fishing_rod);
+    public static final Enchantment infinity = new EnchantmentArrowInfinite(51, new ResourceLocation("infinity"), 1);
+    public static final Enchantment luckOfTheSea = new EnchantmentLootBonus(61, new ResourceLocation("luck_of_the_sea"), 2, EnumEnchantmentType.FISHING_ROD);
+    public static final Enchantment lure = new EnchantmentFishingSpeed(62, new ResourceLocation("lure"), 2, EnumEnchantmentType.FISHING_ROD);
     public final int effectId;
     private final int weight;
 
@@ -104,20 +91,45 @@ public abstract class Enchantment
     protected String name;
     private static final String __OBFID = "CL_00000105";
 
-    protected Enchantment(int p_i1926_1_, int p_i1926_2_, EnumEnchantmentType p_i1926_3_)
+    public static Enchantment func_180306_c(int p_180306_0_)
     {
-        this.effectId = p_i1926_1_;
-        this.weight = p_i1926_2_;
-        this.type = p_i1926_3_;
+        return p_180306_0_ >= 0 && p_180306_0_ < field_180311_a.length ? field_180311_a[p_180306_0_] : null;
+    }
 
-        if (enchantmentsList[p_i1926_1_] != null)
+    protected Enchantment(int p_i45771_1_, ResourceLocation p_i45771_2_, int p_i45771_3_, EnumEnchantmentType p_i45771_4_)
+    {
+        this.effectId = p_i45771_1_;
+        this.weight = p_i45771_3_;
+        this.type = p_i45771_4_;
+
+        if (field_180311_a[p_i45771_1_] != null)
         {
             throw new IllegalArgumentException("Duplicate enchantment id!");
         }
         else
         {
-            enchantmentsList[p_i1926_1_] = this;
+            field_180311_a[p_i45771_1_] = this;
+            field_180307_E.put(p_i45771_2_, this);
         }
+    }
+
+    public static Enchantment func_180305_b(String p_180305_0_)
+    {
+        return (Enchantment)field_180307_E.get(new ResourceLocation(p_180305_0_));
+    }
+
+    public static String[] func_180304_c()
+    {
+        String[] var0 = new String[field_180307_E.size()];
+        int var1 = 0;
+        ResourceLocation var3;
+
+        for (Iterator var2 = field_180307_E.keySet().iterator(); var2.hasNext(); var0[var1++] = var3.toString())
+        {
+            var3 = (ResourceLocation)var2.next();
+        }
+
+        return var0;
     }
 
     public int getWeight()
@@ -215,8 +227,8 @@ public abstract class Enchantment
 
     static
     {
-        ArrayList var0 = new ArrayList();
-        Enchantment[] var1 = enchantmentsList;
+        ArrayList var0 = Lists.newArrayList();
+        Enchantment[] var1 = field_180311_a;
         int var2 = var1.length;
 
         for (int var3 = 0; var3 < var2; ++var3)
@@ -229,6 +241,6 @@ public abstract class Enchantment
             }
         }
 
-        enchantmentsBookList = (Enchantment[])var0.toArray(new Enchantment[0]);
+        enchantmentsList = (Enchantment[])var0.toArray(new Enchantment[var0.size()]);
     }
 }

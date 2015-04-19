@@ -1,13 +1,17 @@
 package net.minecraft.entity;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.entity.ai.EntityMinecartMobSpawner;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityEnderEye;
@@ -17,6 +21,7 @@ import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.item.EntityMinecartChest;
 import net.minecraft.entity.item.EntityMinecartEmpty;
 import net.minecraft.entity.item.EntityMinecartFurnace;
@@ -29,8 +34,10 @@ import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityCaveSpider;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityEnderman;
+import net.minecraft.entity.monster.EntityEndermite;
 import net.minecraft.entity.monster.EntityGhast;
 import net.minecraft.entity.monster.EntityGiantZombie;
+import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.entity.monster.EntityIronGolem;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntityMob;
@@ -49,10 +56,12 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.passive.EntityPig;
+import net.minecraft.entity.passive.EntityRabbit;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.entity.projectile.EntityPotion;
@@ -71,22 +80,20 @@ public class EntityList
     private static final Logger logger = LogManager.getLogger();
 
     /** Provides a mapping between entity classes and a string */
-    private static Map stringToClassMapping = new HashMap();
+    private static final Map stringToClassMapping = Maps.newHashMap();
 
     /** Provides a mapping between a string and an entity classes */
-    private static Map classToStringMapping = new HashMap();
+    private static final Map classToStringMapping = Maps.newHashMap();
 
     /** provides a mapping between an entityID and an Entity Class */
-    private static Map IDtoClassMapping = new HashMap();
+    private static final Map idToClassMapping = Maps.newHashMap();
 
     /** provides a mapping between an Entity Class and an entity ID */
-    private static Map classToIDMapping = new HashMap();
-
-    /** Maps entity names to their numeric identifiers */
-    private static Map stringToIDMapping = new HashMap();
+    private static final Map classToIDMapping = Maps.newHashMap();
+    private static final Map field_180126_g = Maps.newHashMap();
 
     /** This is a HashMap of the Creative Entity Eggs/Spawners. */
-    public static HashMap entityEggs = new LinkedHashMap();
+    public static final Map entityEggs = Maps.newLinkedHashMap();
     private static final String __OBFID = "CL_00001538";
 
     /**
@@ -98,17 +105,25 @@ public class EntityList
         {
             throw new IllegalArgumentException("ID is already registered: " + p_75618_1_);
         }
-        else if (IDtoClassMapping.containsKey(Integer.valueOf(p_75618_2_)))
+        else if (idToClassMapping.containsKey(Integer.valueOf(p_75618_2_)))
         {
             throw new IllegalArgumentException("ID is already registered: " + p_75618_2_);
+        }
+        else if (p_75618_2_ == 0)
+        {
+            throw new IllegalArgumentException("Cannot register to reserved id: " + p_75618_2_);
+        }
+        else if (p_75618_0_ == null)
+        {
+            throw new IllegalArgumentException("Cannot register null clazz for id: " + p_75618_2_);
         }
         else
         {
             stringToClassMapping.put(p_75618_1_, p_75618_0_);
             classToStringMapping.put(p_75618_0_, p_75618_1_);
-            IDtoClassMapping.put(Integer.valueOf(p_75618_2_), p_75618_0_);
+            idToClassMapping.put(Integer.valueOf(p_75618_2_), p_75618_0_);
             classToIDMapping.put(p_75618_0_, Integer.valueOf(p_75618_2_));
-            stringToIDMapping.put(p_75618_1_, Integer.valueOf(p_75618_2_));
+            field_180126_g.put(p_75618_1_, Integer.valueOf(p_75618_2_));
         }
     }
 
@@ -124,7 +139,7 @@ public class EntityList
     /**
      * Create a new instance of an entity in the world by using the entity name.
      */
-    public static Entity createEntityByName(String p_75620_0_, World p_75620_1_)
+    public static Entity createEntityByName(String p_75620_0_, World worldIn)
     {
         Entity var2 = null;
 
@@ -134,7 +149,7 @@ public class EntityList
 
             if (var3 != null)
             {
-                var2 = (Entity)var3.getConstructor(new Class[] {World.class}).newInstance(new Object[] {p_75620_1_});
+                var2 = (Entity)var3.getConstructor(new Class[] {World.class}).newInstance(new Object[] {worldIn});
             }
         }
         catch (Exception var4)
@@ -148,26 +163,13 @@ public class EntityList
     /**
      * create a new instance of an entity from NBT store
      */
-    public static Entity createEntityFromNBT(NBTTagCompound p_75615_0_, World p_75615_1_)
+    public static Entity createEntityFromNBT(NBTTagCompound p_75615_0_, World worldIn)
     {
         Entity var2 = null;
 
         if ("Minecart".equals(p_75615_0_.getString("id")))
         {
-            switch (p_75615_0_.getInteger("Type"))
-            {
-                case 0:
-                    p_75615_0_.setString("id", "MinecartRideable");
-                    break;
-
-                case 1:
-                    p_75615_0_.setString("id", "MinecartChest");
-                    break;
-
-                case 2:
-                    p_75615_0_.setString("id", "MinecartFurnace");
-            }
-
+            p_75615_0_.setString("id", EntityMinecart.EnumMinecartType.func_180038_a(p_75615_0_.getInteger("Type")).func_180040_b());
             p_75615_0_.removeTag("Type");
         }
 
@@ -177,7 +179,7 @@ public class EntityList
 
             if (var3 != null)
             {
-                var2 = (Entity)var3.getConstructor(new Class[] {World.class}).newInstance(new Object[] {p_75615_1_});
+                var2 = (Entity)var3.getConstructor(new Class[] {World.class}).newInstance(new Object[] {worldIn});
             }
         }
         catch (Exception var4)
@@ -200,7 +202,7 @@ public class EntityList
     /**
      * Create a new instance of an entity in the world by using an entity ID.
      */
-    public static Entity createEntityByID(int p_75616_0_, World p_75616_1_)
+    public static Entity createEntityByID(int p_75616_0_, World worldIn)
     {
         Entity var2 = null;
 
@@ -210,7 +212,7 @@ public class EntityList
 
             if (var3 != null)
             {
-                var2 = (Entity)var3.getConstructor(new Class[] {World.class}).newInstance(new Object[] {p_75616_1_});
+                var2 = (Entity)var3.getConstructor(new Class[] {World.class}).newInstance(new Object[] {worldIn});
             }
         }
         catch (Exception var4)
@@ -231,8 +233,8 @@ public class EntityList
      */
     public static int getEntityID(Entity p_75619_0_)
     {
-        Class var1 = p_75619_0_.getClass();
-        return classToIDMapping.containsKey(var1) ? ((Integer)classToIDMapping.get(var1)).intValue() : 0;
+        Integer var1 = (Integer)classToIDMapping.get(p_75619_0_.getClass());
+        return var1 == null ? 0 : var1.intValue();
     }
 
     /**
@@ -240,7 +242,7 @@ public class EntityList
      */
     public static Class getClassFromID(int p_90035_0_)
     {
-        return (Class)IDtoClassMapping.get(Integer.valueOf(p_90035_0_));
+        return (Class)idToClassMapping.get(Integer.valueOf(p_90035_0_));
     }
 
     /**
@@ -251,20 +253,62 @@ public class EntityList
         return (String)classToStringMapping.get(p_75621_0_.getClass());
     }
 
+    public static int func_180122_a(String p_180122_0_)
+    {
+        Integer var1 = (Integer)field_180126_g.get(p_180122_0_);
+        return var1 == null ? 90 : var1.intValue();
+    }
+
     /**
      * Finds the class using IDtoClassMapping and classToStringMapping
      */
     public static String getStringFromID(int p_75617_0_)
     {
-        Class var1 = getClassFromID(p_75617_0_);
-        return var1 != null ? (String)classToStringMapping.get(var1) : null;
+        return (String)classToStringMapping.get(getClassFromID(p_75617_0_));
     }
 
     public static void func_151514_a() {}
 
-    public static Set func_151515_b()
+    public static List func_180124_b()
     {
-        return Collections.unmodifiableSet(stringToIDMapping.keySet());
+        Set var0 = stringToClassMapping.keySet();
+        ArrayList var1 = Lists.newArrayList();
+        Iterator var2 = var0.iterator();
+
+        while (var2.hasNext())
+        {
+            String var3 = (String)var2.next();
+            Class var4 = (Class)stringToClassMapping.get(var3);
+
+            if ((var4.getModifiers() & 1024) != 1024)
+            {
+                var1.add(var3);
+            }
+        }
+
+        var1.add("LightningBolt");
+        return var1;
+    }
+
+    public static boolean func_180123_a(Entity p_180123_0_, String p_180123_1_)
+    {
+        String var2 = getEntityString(p_180123_0_);
+
+        if (var2 == null && p_180123_0_ instanceof EntityPlayer)
+        {
+            var2 = "Player";
+        }
+        else if (var2 == null && p_180123_0_ instanceof EntityLightningBolt)
+        {
+            var2 = "LightningBolt";
+        }
+
+        return p_180123_1_.equals(var2);
+    }
+
+    public static boolean func_180125_b(String p_180125_0_)
+    {
+        return "Player".equals(p_180125_0_) || func_180124_b().contains(p_180125_0_);
     }
 
     static
@@ -286,14 +330,15 @@ public class EntityList
         addMapping(EntityTNTPrimed.class, "PrimedTnt", 20);
         addMapping(EntityFallingBlock.class, "FallingSand", 21);
         addMapping(EntityFireworkRocket.class, "FireworksRocketEntity", 22);
+        addMapping(EntityArmorStand.class, "ArmorStand", 30);
         addMapping(EntityBoat.class, "Boat", 41);
-        addMapping(EntityMinecartEmpty.class, "MinecartRideable", 42);
-        addMapping(EntityMinecartChest.class, "MinecartChest", 43);
-        addMapping(EntityMinecartFurnace.class, "MinecartFurnace", 44);
-        addMapping(EntityMinecartTNT.class, "MinecartTNT", 45);
-        addMapping(EntityMinecartHopper.class, "MinecartHopper", 46);
-        addMapping(EntityMinecartMobSpawner.class, "MinecartSpawner", 47);
-        addMapping(EntityMinecartCommandBlock.class, "MinecartCommandBlock", 40);
+        addMapping(EntityMinecartEmpty.class, EntityMinecart.EnumMinecartType.RIDEABLE.func_180040_b(), 42);
+        addMapping(EntityMinecartChest.class, EntityMinecart.EnumMinecartType.CHEST.func_180040_b(), 43);
+        addMapping(EntityMinecartFurnace.class, EntityMinecart.EnumMinecartType.FURNACE.func_180040_b(), 44);
+        addMapping(EntityMinecartTNT.class, EntityMinecart.EnumMinecartType.TNT.func_180040_b(), 45);
+        addMapping(EntityMinecartHopper.class, EntityMinecart.EnumMinecartType.HOPPER.func_180040_b(), 46);
+        addMapping(EntityMinecartMobSpawner.class, EntityMinecart.EnumMinecartType.SPAWNER.func_180040_b(), 47);
+        addMapping(EntityMinecartCommandBlock.class, EntityMinecart.EnumMinecartType.COMMAND_BLOCK.func_180040_b(), 40);
         addMapping(EntityLiving.class, "Mob", 48);
         addMapping(EntityMob.class, "Monster", 49);
         addMapping(EntityCreeper.class, "Creeper", 50, 894731, 0);
@@ -313,6 +358,8 @@ public class EntityList
         addMapping(EntityWither.class, "WitherBoss", 64);
         addMapping(EntityBat.class, "Bat", 65, 4996656, 986895);
         addMapping(EntityWitch.class, "Witch", 66, 3407872, 5349438);
+        addMapping(EntityEndermite.class, "Endermite", 67, 1447446, 7237230);
+        addMapping(EntityGuardian.class, "Guardian", 68, 5931634, 15826224);
         addMapping(EntityPig.class, "Pig", 90, 15771042, 14377823);
         addMapping(EntitySheep.class, "Sheep", 91, 15198183, 16758197);
         addMapping(EntityCow.class, "Cow", 92, 4470310, 10592673);
@@ -324,6 +371,7 @@ public class EntityList
         addMapping(EntityOcelot.class, "Ozelot", 98, 15720061, 5653556);
         addMapping(EntityIronGolem.class, "VillagerGolem", 99);
         addMapping(EntityHorse.class, "EntityHorse", 100, 12623485, 15656192);
+        addMapping(EntityRabbit.class, "Rabbit", 101, 10051392, 7555121);
         addMapping(EntityVillager.class, "Villager", 120, 5651507, 12422002);
         addMapping(EntityEnderCrystal.class, "EnderCrystal", 200);
     }

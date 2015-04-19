@@ -3,11 +3,14 @@ package net.minecraft.entity.item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 
@@ -17,37 +20,42 @@ public class EntityItemFrame extends EntityHanging
     private float itemDropChance = 1.0F;
     private static final String __OBFID = "CL_00001547";
 
-    public EntityItemFrame(World p_i1590_1_)
+    public EntityItemFrame(World worldIn)
     {
-        super(p_i1590_1_);
+        super(worldIn);
     }
 
-    public EntityItemFrame(World p_i1591_1_, int p_i1591_2_, int p_i1591_3_, int p_i1591_4_, int p_i1591_5_)
+    public EntityItemFrame(World worldIn, BlockPos p_i45852_2_, EnumFacing p_i45852_3_)
     {
-        super(p_i1591_1_, p_i1591_2_, p_i1591_3_, p_i1591_4_, p_i1591_5_);
-        this.setDirection(p_i1591_5_);
+        super(worldIn, p_i45852_2_);
+        this.func_174859_a(p_i45852_3_);
     }
 
     protected void entityInit()
     {
-        this.getDataWatcher().addObjectByDataType(2, 5);
-        this.getDataWatcher().addObject(3, Byte.valueOf((byte)0));
+        this.getDataWatcher().addObjectByDataType(8, 5);
+        this.getDataWatcher().addObject(9, Byte.valueOf((byte)0));
+    }
+
+    public float getCollisionBorderSize()
+    {
+        return 0.0F;
     }
 
     /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource p_70097_1_, float p_70097_2_)
+    public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        if (this.isEntityInvulnerable())
+        if (this.func_180431_b(source))
         {
             return false;
         }
-        else if (this.getDisplayedItem() != null)
+        else if (!source.isExplosion() && this.getDisplayedItem() != null)
         {
-            if (!this.worldObj.isClient)
+            if (!this.worldObj.isRemote)
             {
-                this.func_146065_b(p_70097_1_.getEntity(), false);
+                this.func_146065_b(source.getEntity(), false);
                 this.setDisplayedItem((ItemStack)null);
             }
 
@@ -55,29 +63,29 @@ public class EntityItemFrame extends EntityHanging
         }
         else
         {
-            return super.attackEntityFrom(p_70097_1_, p_70097_2_);
+            return super.attackEntityFrom(source, amount);
         }
     }
 
     public int getWidthPixels()
     {
-        return 9;
+        return 12;
     }
 
     public int getHeightPixels()
     {
-        return 9;
+        return 12;
     }
 
     /**
      * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge
      * length * 64 * renderDistanceWeight Args: distance
      */
-    public boolean isInRangeToRenderDist(double p_70112_1_)
+    public boolean isInRangeToRenderDist(double distance)
     {
         double var3 = 16.0D;
         var3 *= 64.0D * this.renderDistanceWeight;
-        return p_70112_1_ < var3 * var3;
+        return distance < var3 * var3;
     }
 
     /**
@@ -90,29 +98,32 @@ public class EntityItemFrame extends EntityHanging
 
     public void func_146065_b(Entity p_146065_1_, boolean p_146065_2_)
     {
-        ItemStack var3 = this.getDisplayedItem();
-
-        if (p_146065_1_ instanceof EntityPlayer)
+        if (this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops"))
         {
-            EntityPlayer var4 = (EntityPlayer)p_146065_1_;
+            ItemStack var3 = this.getDisplayedItem();
 
-            if (var4.capabilities.isCreativeMode)
+            if (p_146065_1_ instanceof EntityPlayer)
             {
-                this.removeFrameFromMap(var3);
-                return;
+                EntityPlayer var4 = (EntityPlayer)p_146065_1_;
+
+                if (var4.capabilities.isCreativeMode)
+                {
+                    this.removeFrameFromMap(var3);
+                    return;
+                }
             }
-        }
 
-        if (p_146065_2_)
-        {
-            this.entityDropItem(new ItemStack(Items.item_frame), 0.0F);
-        }
+            if (p_146065_2_)
+            {
+                this.entityDropItem(new ItemStack(Items.item_frame), 0.0F);
+            }
 
-        if (var3 != null && this.rand.nextFloat() < this.itemDropChance)
-        {
-            var3 = var3.copy();
-            this.removeFrameFromMap(var3);
-            this.entityDropItem(var3, 0.0F);
+            if (var3 != null && this.rand.nextFloat() < this.itemDropChance)
+            {
+                var3 = var3.copy();
+                this.removeFrameFromMap(var3);
+                this.entityDropItem(var3, 0.0F);
+            }
         }
     }
 
@@ -135,20 +146,30 @@ public class EntityItemFrame extends EntityHanging
 
     public ItemStack getDisplayedItem()
     {
-        return this.getDataWatcher().getWatchableObjectItemStack(2);
+        return this.getDataWatcher().getWatchableObjectItemStack(8);
     }
 
     public void setDisplayedItem(ItemStack p_82334_1_)
     {
-        if (p_82334_1_ != null)
+        this.func_174864_a(p_82334_1_, true);
+    }
+
+    private void func_174864_a(ItemStack p_174864_1_, boolean p_174864_2_)
+    {
+        if (p_174864_1_ != null)
         {
-            p_82334_1_ = p_82334_1_.copy();
-            p_82334_1_.stackSize = 1;
-            p_82334_1_.setItemFrame(this);
+            p_174864_1_ = p_174864_1_.copy();
+            p_174864_1_.stackSize = 1;
+            p_174864_1_.setItemFrame(this);
         }
 
-        this.getDataWatcher().updateObject(2, p_82334_1_);
-        this.getDataWatcher().setObjectWatched(2);
+        this.getDataWatcher().updateObject(8, p_174864_1_);
+        this.getDataWatcher().setObjectWatched(8);
+
+        if (p_174864_2_ && this.field_174861_a != null)
+        {
+            this.worldObj.updateComparatorOutputLevel(this.field_174861_a, Blocks.air);
+        }
     }
 
     /**
@@ -156,74 +177,94 @@ public class EntityItemFrame extends EntityHanging
      */
     public int getRotation()
     {
-        return this.getDataWatcher().getWatchableObjectByte(3);
+        return this.getDataWatcher().getWatchableObjectByte(9);
     }
 
     public void setItemRotation(int p_82336_1_)
     {
-        this.getDataWatcher().updateObject(3, Byte.valueOf((byte)(p_82336_1_ % 4)));
+        this.func_174865_a(p_82336_1_, true);
+    }
+
+    private void func_174865_a(int p_174865_1_, boolean p_174865_2_)
+    {
+        this.getDataWatcher().updateObject(9, Byte.valueOf((byte)(p_174865_1_ % 8)));
+
+        if (p_174865_2_ && this.field_174861_a != null)
+        {
+            this.worldObj.updateComparatorOutputLevel(this.field_174861_a, Blocks.air);
+        }
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
         if (this.getDisplayedItem() != null)
         {
-            p_70014_1_.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
-            p_70014_1_.setByte("ItemRotation", (byte)this.getRotation());
-            p_70014_1_.setFloat("ItemDropChance", this.itemDropChance);
+            tagCompound.setTag("Item", this.getDisplayedItem().writeToNBT(new NBTTagCompound()));
+            tagCompound.setByte("ItemRotation", (byte)this.getRotation());
+            tagCompound.setFloat("ItemDropChance", this.itemDropChance);
         }
 
-        super.writeEntityToNBT(p_70014_1_);
+        super.writeEntityToNBT(tagCompound);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        NBTTagCompound var2 = p_70037_1_.getCompoundTag("Item");
+        NBTTagCompound var2 = tagCompund.getCompoundTag("Item");
 
         if (var2 != null && !var2.hasNoTags())
         {
-            this.setDisplayedItem(ItemStack.loadItemStackFromNBT(var2));
-            this.setItemRotation(p_70037_1_.getByte("ItemRotation"));
+            this.func_174864_a(ItemStack.loadItemStackFromNBT(var2), false);
+            this.func_174865_a(tagCompund.getByte("ItemRotation"), false);
 
-            if (p_70037_1_.func_150297_b("ItemDropChance", 99))
+            if (tagCompund.hasKey("ItemDropChance", 99))
             {
-                this.itemDropChance = p_70037_1_.getFloat("ItemDropChance");
+                this.itemDropChance = tagCompund.getFloat("ItemDropChance");
+            }
+
+            if (tagCompund.hasKey("Direction"))
+            {
+                this.func_174865_a(this.getRotation() * 2, false);
             }
         }
 
-        super.readEntityFromNBT(p_70037_1_);
+        super.readEntityFromNBT(tagCompund);
     }
 
     /**
      * First layer of player interaction
      */
-    public boolean interactFirst(EntityPlayer p_130002_1_)
+    public boolean interactFirst(EntityPlayer playerIn)
     {
         if (this.getDisplayedItem() == null)
         {
-            ItemStack var2 = p_130002_1_.getHeldItem();
+            ItemStack var2 = playerIn.getHeldItem();
 
-            if (var2 != null && !this.worldObj.isClient)
+            if (var2 != null && !this.worldObj.isRemote)
             {
                 this.setDisplayedItem(var2);
 
-                if (!p_130002_1_.capabilities.isCreativeMode && --var2.stackSize <= 0)
+                if (!playerIn.capabilities.isCreativeMode && --var2.stackSize <= 0)
                 {
-                    p_130002_1_.inventory.setInventorySlotContents(p_130002_1_.inventory.currentItem, (ItemStack)null);
+                    playerIn.inventory.setInventorySlotContents(playerIn.inventory.currentItem, (ItemStack)null);
                 }
             }
         }
-        else if (!this.worldObj.isClient)
+        else if (!this.worldObj.isRemote)
         {
             this.setItemRotation(this.getRotation() + 1);
         }
 
         return true;
+    }
+
+    public int func_174866_q()
+    {
+        return this.getDisplayedItem() == null ? 0 : this.getRotation() % 8 + 1;
     }
 }

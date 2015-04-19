@@ -1,6 +1,7 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.pathfinding.PathNavigateGround;
 
 public class EntityAIRestrictSun extends EntityAIBase
 {
@@ -25,7 +26,7 @@ public class EntityAIRestrictSun extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.theEntity.getNavigator().setAvoidSun(true);
+        ((PathNavigateGround)this.theEntity.getNavigator()).func_179685_e(true);
     }
 
     /**
@@ -33,6 +34,6 @@ public class EntityAIRestrictSun extends EntityAIBase
      */
     public void resetTask()
     {
-        this.theEntity.getNavigator().setAvoidSun(false);
+        ((PathNavigateGround)this.theEntity.getNavigator()).func_179685_e(false);
     }
 }

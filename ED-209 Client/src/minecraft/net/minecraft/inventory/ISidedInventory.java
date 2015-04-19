@@ -1,24 +1,21 @@
 package net.minecraft.inventory;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
 
 public interface ISidedInventory extends IInventory
 {
-    /**
-     * Returns an array containing the indices of the slots that can be accessed by automation on the given side of this
-     * block.
-     */
-    int[] getAccessibleSlotsFromSide(int p_94128_1_);
+    int[] getSlotsForFace(EnumFacing side);
 
     /**
-     * Returns true if automation can insert the given item in the given slot from the given side. Args: Slot, item,
+     * Returns true if automation can insert the given item in the given slot from the given side. Args: slot, item,
      * side
      */
-    boolean canInsertItem(int p_102007_1_, ItemStack p_102007_2_, int p_102007_3_);
+    boolean canInsertItem(int slotIn, ItemStack itemStackIn, EnumFacing direction);
 
     /**
-     * Returns true if automation can extract the given item in the given slot from the given side. Args: Slot, item,
+     * Returns true if automation can extract the given item in the given slot from the given side. Args: slot, item,
      * side
      */
-    boolean canExtractItem(int p_102008_1_, ItemStack p_102008_2_, int p_102008_3_);
+    boolean canExtractItem(int slotId, ItemStack stack, EnumFacing direction);
 }

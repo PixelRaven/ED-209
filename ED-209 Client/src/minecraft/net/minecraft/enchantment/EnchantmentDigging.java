@@ -2,14 +2,15 @@ package net.minecraft.enchantment;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentDigging extends Enchantment
 {
     private static final String __OBFID = "CL_00000104";
 
-    protected EnchantmentDigging(int p_i1925_1_, int p_i1925_2_)
+    protected EnchantmentDigging(int p_i45772_1_, ResourceLocation p_i45772_2_, int p_i45772_3_)
     {
-        super(p_i1925_1_, p_i1925_2_, EnumEnchantmentType.digger);
+        super(p_i45772_1_, p_i45772_2_, p_i45772_3_, EnumEnchantmentType.DIGGER);
         this.setName("digging");
     }
 

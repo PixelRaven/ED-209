@@ -1,8 +1,14 @@
 package net.minecraft.tileentity;
 
+import java.util.Arrays;
 import java.util.List;
+import net.minecraft.block.BlockBrewingStand;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerBrewingStand;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPotion;
@@ -10,30 +16,45 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.potion.PotionHelper;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
+import net.minecraft.util.EnumFacing;
 
-public class TileEntityBrewingStand extends TileEntity implements ISidedInventory
+public class TileEntityBrewingStand extends TileEntityLockable implements IUpdatePlayerListBox, ISidedInventory
 {
-    private static final int[] field_145941_a = new int[] {3};
-    private static final int[] field_145947_i = new int[] {0, 1, 2};
-    private ItemStack[] field_145945_j = new ItemStack[4];
-    private int field_145946_k;
-    private int field_145943_l;
-    private Item field_145944_m;
+    /** an array of the input slot indices */
+    private static final int[] inputSlots = new int[] {3};
+
+    /** an array of the output slot indices */
+    private static final int[] outputSlots = new int[] {0, 1, 2};
+
+    /** The ItemStacks currently placed in the slots of the brewing stand */
+    private ItemStack[] brewingItemStacks = new ItemStack[4];
+    private int brewTime;
+
+    /**
+     * an integer with each bit specifying whether that slot of the stand contains a potion
+     */
+    private boolean[] filledSlots;
+
+    /**
+     * used to check if the current ingredient has been removed from the brewing stand during brewing
+     */
+    private Item ingredientID;
     private String field_145942_n;
     private static final String __OBFID = "CL_00000345";
 
     /**
-     * Returns the name of the inventory
+     * Gets the name of this command sender (usually username, but possibly "Rcon")
      */
-    public String getInventoryName()
+    public String getName()
     {
-        return this.isInventoryNameLocalized() ? this.field_145942_n : "container.brewing";
+        return this.hasCustomName() ? this.field_145942_n : "container.brewing";
     }
 
     /**
-     * Returns if the inventory name is localized
+     * Returns true if this thing is named
      */
-    public boolean isInventoryNameLocalized()
+    public boolean hasCustomName()
     {
         return this.field_145942_n != null && this.field_145942_n.length() > 0;
     }
@@ -48,58 +69,69 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
      */
     public int getSizeInventory()
     {
-        return this.field_145945_j.length;
+        return this.brewingItemStacks.length;
     }
 
-    public void updateEntity()
+    /**
+     * Updates the JList with a new model.
+     */
+    public void update()
     {
-        if (this.field_145946_k > 0)
+        if (this.brewTime > 0)
         {
-            --this.field_145946_k;
+            --this.brewTime;
 
-            if (this.field_145946_k == 0)
+            if (this.brewTime == 0)
             {
-                this.func_145940_l();
-                this.onInventoryChanged();
+                this.brewPotions();
+                this.markDirty();
             }
-            else if (!this.func_145934_k())
+            else if (!this.canBrew())
             {
-                this.field_145946_k = 0;
-                this.onInventoryChanged();
+                this.brewTime = 0;
+                this.markDirty();
             }
-            else if (this.field_145944_m != this.field_145945_j[3].getItem())
+            else if (this.ingredientID != this.brewingItemStacks[3].getItem())
             {
-                this.field_145946_k = 0;
-                this.onInventoryChanged();
+                this.brewTime = 0;
+                this.markDirty();
             }
         }
-        else if (this.func_145934_k())
+        else if (this.canBrew())
         {
-            this.field_145946_k = 400;
-            this.field_145944_m = this.field_145945_j[3].getItem();
+            this.brewTime = 400;
+            this.ingredientID = this.brewingItemStacks[3].getItem();
         }
 
-        int var1 = this.func_145939_j();
-
-        if (var1 != this.field_145943_l)
+        if (!this.worldObj.isRemote)
         {
-            this.field_145943_l = var1;
-            this.worldObj.setBlockMetadataWithNotify(this.field_145851_c, this.field_145848_d, this.field_145849_e, var1, 2);
-        }
+            boolean[] var1 = this.func_174902_m();
 
-        super.updateEntity();
+            if (!Arrays.equals(var1, this.filledSlots))
+            {
+                this.filledSlots = var1;
+                IBlockState var2 = this.worldObj.getBlockState(this.getPos());
+
+                if (!(var2.getBlock() instanceof BlockBrewingStand))
+                {
+                    return;
+                }
+
+                for (int var3 = 0; var3 < BlockBrewingStand.BOTTLE_PROPS.length; ++var3)
+                {
+                    var2 = var2.withProperty(BlockBrewingStand.BOTTLE_PROPS[var3], Boolean.valueOf(var1[var3]));
+                }
+
+                this.worldObj.setBlockState(this.pos, var2, 2);
+            }
+        }
     }
 
-    public int func_145935_i()
+    private boolean canBrew()
     {
-        return this.field_145946_k;
-    }
-
-    private boolean func_145934_k()
-    {
-        if (this.field_145945_j[3] != null && this.field_145945_j[3].stackSize > 0)
+        if (this.brewingItemStacks[3] != null && this.brewingItemStacks[3].stackSize > 0)
         {
-            ItemStack var1 = this.field_145945_j[3];
+            ItemStack var1 = this.brewingItemStacks[3];
 
             if (!var1.getItem().isPotionIngredient(var1))
             {
@@ -111,9 +143,9 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
 
                 for (int var3 = 0; var3 < 3; ++var3)
                 {
-                    if (this.field_145945_j[var3] != null && this.field_145945_j[var3].getItem() == Items.potionitem)
+                    if (this.brewingItemStacks[var3] != null && this.brewingItemStacks[var3].getItem() == Items.potionitem)
                     {
-                        int var4 = this.field_145945_j[var3].getItemDamage();
+                        int var4 = this.brewingItemStacks[var3].getMetadata();
                         int var5 = this.func_145936_c(var4, var1);
 
                         if (!ItemPotion.isSplash(var4) && ItemPotion.isSplash(var5))
@@ -142,17 +174,17 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
         }
     }
 
-    private void func_145940_l()
+    private void brewPotions()
     {
-        if (this.func_145934_k())
+        if (this.canBrew())
         {
-            ItemStack var1 = this.field_145945_j[3];
+            ItemStack var1 = this.brewingItemStacks[3];
 
             for (int var2 = 0; var2 < 3; ++var2)
             {
-                if (this.field_145945_j[var2] != null && this.field_145945_j[var2].getItem() == Items.potionitem)
+                if (this.brewingItemStacks[var2] != null && this.brewingItemStacks[var2].getItem() == Items.potionitem)
                 {
-                    int var3 = this.field_145945_j[var2].getItemDamage();
+                    int var3 = this.brewingItemStacks[var2].getMetadata();
                     int var4 = this.func_145936_c(var3, var1);
                     List var5 = Items.potionitem.getEffects(var3);
                     List var6 = Items.potionitem.getEffects(var4);
@@ -161,27 +193,27 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
                     {
                         if (var3 != var4)
                         {
-                            this.field_145945_j[var2].setItemDamage(var4);
+                            this.brewingItemStacks[var2].setItemDamage(var4);
                         }
                     }
                     else if (!ItemPotion.isSplash(var3) && ItemPotion.isSplash(var4))
                     {
-                        this.field_145945_j[var2].setItemDamage(var4);
+                        this.brewingItemStacks[var2].setItemDamage(var4);
                     }
                 }
             }
 
             if (var1.getItem().hasContainerItem())
             {
-                this.field_145945_j[3] = new ItemStack(var1.getItem().getContainerItem());
+                this.brewingItemStacks[3] = new ItemStack(var1.getItem().getContainerItem());
             }
             else
             {
-                --this.field_145945_j[3].stackSize;
+                --this.brewingItemStacks[3].stackSize;
 
-                if (this.field_145945_j[3].stackSize <= 0)
+                if (this.brewingItemStacks[3].stackSize <= 0)
                 {
-                    this.field_145945_j[3] = null;
+                    this.brewingItemStacks[3] = null;
                 }
             }
         }
@@ -192,74 +224,74 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
         return p_145936_2_ == null ? p_145936_1_ : (p_145936_2_.getItem().isPotionIngredient(p_145936_2_) ? PotionHelper.applyIngredient(p_145936_1_, p_145936_2_.getItem().getPotionEffect(p_145936_2_)) : p_145936_1_);
     }
 
-    public void readFromNBT(NBTTagCompound p_145839_1_)
+    public void readFromNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(p_145839_1_);
-        NBTTagList var2 = p_145839_1_.getTagList("Items", 10);
-        this.field_145945_j = new ItemStack[this.getSizeInventory()];
+        super.readFromNBT(compound);
+        NBTTagList var2 = compound.getTagList("Items", 10);
+        this.brewingItemStacks = new ItemStack[this.getSizeInventory()];
 
         for (int var3 = 0; var3 < var2.tagCount(); ++var3)
         {
             NBTTagCompound var4 = var2.getCompoundTagAt(var3);
             byte var5 = var4.getByte("Slot");
 
-            if (var5 >= 0 && var5 < this.field_145945_j.length)
+            if (var5 >= 0 && var5 < this.brewingItemStacks.length)
             {
-                this.field_145945_j[var5] = ItemStack.loadItemStackFromNBT(var4);
+                this.brewingItemStacks[var5] = ItemStack.loadItemStackFromNBT(var4);
             }
         }
 
-        this.field_145946_k = p_145839_1_.getShort("BrewTime");
+        this.brewTime = compound.getShort("BrewTime");
 
-        if (p_145839_1_.func_150297_b("CustomName", 8))
+        if (compound.hasKey("CustomName", 8))
         {
-            this.field_145942_n = p_145839_1_.getString("CustomName");
+            this.field_145942_n = compound.getString("CustomName");
         }
     }
 
-    public void writeToNBT(NBTTagCompound p_145841_1_)
+    public void writeToNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(p_145841_1_);
-        p_145841_1_.setShort("BrewTime", (short)this.field_145946_k);
+        super.writeToNBT(compound);
+        compound.setShort("BrewTime", (short)this.brewTime);
         NBTTagList var2 = new NBTTagList();
 
-        for (int var3 = 0; var3 < this.field_145945_j.length; ++var3)
+        for (int var3 = 0; var3 < this.brewingItemStacks.length; ++var3)
         {
-            if (this.field_145945_j[var3] != null)
+            if (this.brewingItemStacks[var3] != null)
             {
                 NBTTagCompound var4 = new NBTTagCompound();
                 var4.setByte("Slot", (byte)var3);
-                this.field_145945_j[var3].writeToNBT(var4);
+                this.brewingItemStacks[var3].writeToNBT(var4);
                 var2.appendTag(var4);
             }
         }
 
-        p_145841_1_.setTag("Items", var2);
+        compound.setTag("Items", var2);
 
-        if (this.isInventoryNameLocalized())
+        if (this.hasCustomName())
         {
-            p_145841_1_.setString("CustomName", this.field_145942_n);
+            compound.setString("CustomName", this.field_145942_n);
         }
     }
 
     /**
      * Returns the stack in slot i
      */
-    public ItemStack getStackInSlot(int p_70301_1_)
+    public ItemStack getStackInSlot(int slotIn)
     {
-        return p_70301_1_ >= 0 && p_70301_1_ < this.field_145945_j.length ? this.field_145945_j[p_70301_1_] : null;
+        return slotIn >= 0 && slotIn < this.brewingItemStacks.length ? this.brewingItemStacks[slotIn] : null;
     }
 
     /**
      * Removes from an inventory slot (first arg) up to a specified number (second arg) of items and returns them in a
      * new stack.
      */
-    public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
+    public ItemStack decrStackSize(int index, int count)
     {
-        if (p_70298_1_ >= 0 && p_70298_1_ < this.field_145945_j.length)
+        if (index >= 0 && index < this.brewingItemStacks.length)
         {
-            ItemStack var3 = this.field_145945_j[p_70298_1_];
-            this.field_145945_j[p_70298_1_] = null;
+            ItemStack var3 = this.brewingItemStacks[index];
+            this.brewingItemStacks[index] = null;
             return var3;
         }
         else
@@ -272,12 +304,12 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
      * When some containers are closed they call this on each slot, then drop whatever it returns as an EntityItem -
      * like when you close a workbench GUI.
      */
-    public ItemStack getStackInSlotOnClosing(int p_70304_1_)
+    public ItemStack getStackInSlotOnClosing(int index)
     {
-        if (p_70304_1_ >= 0 && p_70304_1_ < this.field_145945_j.length)
+        if (index >= 0 && index < this.brewingItemStacks.length)
         {
-            ItemStack var2 = this.field_145945_j[p_70304_1_];
-            this.field_145945_j[p_70304_1_] = null;
+            ItemStack var2 = this.brewingItemStacks[index];
+            this.brewingItemStacks[index] = null;
             return var2;
         }
         else
@@ -289,16 +321,17 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_)
+    public void setInventorySlotContents(int index, ItemStack stack)
     {
-        if (p_70299_1_ >= 0 && p_70299_1_ < this.field_145945_j.length)
+        if (index >= 0 && index < this.brewingItemStacks.length)
         {
-            this.field_145945_j[p_70299_1_] = p_70299_2_;
+            this.brewingItemStacks[index] = stack;
         }
     }
 
     /**
-     * Returns the maximum stack size for a inventory slot.
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended. *Isn't
+     * this more of a set than a get?*
      */
     public int getInventoryStackLimit()
     {
@@ -308,67 +341,104 @@ public class TileEntityBrewingStand extends TileEntity implements ISidedInventor
     /**
      * Do not make give this method the name canInteractWith because it clashes with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer p_70300_1_)
+    public boolean isUseableByPlayer(EntityPlayer playerIn)
     {
-        return this.worldObj.getTileEntity(this.field_145851_c, this.field_145848_d, this.field_145849_e) != this ? false : p_70300_1_.getDistanceSq((double)this.field_145851_c + 0.5D, (double)this.field_145848_d + 0.5D, (double)this.field_145849_e + 0.5D) <= 64.0D;
+        return this.worldObj.getTileEntity(this.pos) != this ? false : playerIn.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
     }
 
-    public void openInventory() {}
+    public void openInventory(EntityPlayer playerIn) {}
 
-    public void closeInventory() {}
+    public void closeInventory(EntityPlayer playerIn) {}
 
     /**
      * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
      */
-    public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
+    public boolean isItemValidForSlot(int index, ItemStack stack)
     {
-        return p_94041_1_ == 3 ? p_94041_2_.getItem().isPotionIngredient(p_94041_2_) : p_94041_2_.getItem() == Items.potionitem || p_94041_2_.getItem() == Items.glass_bottle;
+        return index == 3 ? stack.getItem().isPotionIngredient(stack) : stack.getItem() == Items.potionitem || stack.getItem() == Items.glass_bottle;
     }
 
-    public void func_145938_d(int p_145938_1_)
+    public boolean[] func_174902_m()
     {
-        this.field_145946_k = p_145938_1_;
-    }
-
-    public int func_145939_j()
-    {
-        int var1 = 0;
+        boolean[] var1 = new boolean[3];
 
         for (int var2 = 0; var2 < 3; ++var2)
         {
-            if (this.field_145945_j[var2] != null)
+            if (this.brewingItemStacks[var2] != null)
             {
-                var1 |= 1 << var2;
+                var1[var2] = true;
             }
         }
 
         return var1;
     }
 
-    /**
-     * Returns an array containing the indices of the slots that can be accessed by automation on the given side of this
-     * block.
-     */
-    public int[] getAccessibleSlotsFromSide(int p_94128_1_)
+    public int[] getSlotsForFace(EnumFacing side)
     {
-        return p_94128_1_ == 1 ? field_145941_a : field_145947_i;
+        return side == EnumFacing.UP ? inputSlots : outputSlots;
     }
 
     /**
-     * Returns true if automation can insert the given item in the given slot from the given side. Args: Slot, item,
+     * Returns true if automation can insert the given item in the given slot from the given side. Args: slot, item,
      * side
      */
-    public boolean canInsertItem(int p_102007_1_, ItemStack p_102007_2_, int p_102007_3_)
+    public boolean canInsertItem(int slotIn, ItemStack itemStackIn, EnumFacing direction)
     {
-        return this.isItemValidForSlot(p_102007_1_, p_102007_2_);
+        return this.isItemValidForSlot(slotIn, itemStackIn);
     }
 
     /**
-     * Returns true if automation can extract the given item in the given slot from the given side. Args: Slot, item,
+     * Returns true if automation can extract the given item in the given slot from the given side. Args: slot, item,
      * side
      */
-    public boolean canExtractItem(int p_102008_1_, ItemStack p_102008_2_, int p_102008_3_)
+    public boolean canExtractItem(int slotId, ItemStack stack, EnumFacing direction)
     {
         return true;
+    }
+
+    public String getGuiID()
+    {
+        return "minecraft:brewing_stand";
+    }
+
+    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
+    {
+        return new ContainerBrewingStand(playerInventory, this);
+    }
+
+    public int getField(int id)
+    {
+        switch (id)
+        {
+            case 0:
+                return this.brewTime;
+
+            default:
+                return 0;
+        }
+    }
+
+    public void setField(int id, int value)
+    {
+        switch (id)
+        {
+            case 0:
+                this.brewTime = value;
+
+            default:
+        }
+    }
+
+    public int getFieldCount()
+    {
+        return 1;
+    }
+
+    public void clearInventory()
+    {
+        for (int var1 = 0; var1 < this.brewingItemStacks.length; ++var1)
+        {
+            this.brewingItemStacks[var1] = null;
+        }
     }
 }

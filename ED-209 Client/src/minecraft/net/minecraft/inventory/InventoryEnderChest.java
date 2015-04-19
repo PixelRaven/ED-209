@@ -16,9 +16,9 @@ public class InventoryEnderChest extends InventoryBasic
         super("container.enderchest", false, 27);
     }
 
-    public void func_146031_a(TileEntityEnderChest p_146031_1_)
+    public void setChestTileEntity(TileEntityEnderChest chestTileEntity)
     {
-        this.associatedChest = p_146031_1_;
+        this.associatedChest = chestTileEntity;
     }
 
     public void loadInventoryFromNBT(NBTTagList p_70486_1_)
@@ -65,29 +65,29 @@ public class InventoryEnderChest extends InventoryBasic
     /**
      * Do not make give this method the name canInteractWith because it clashes with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer p_70300_1_)
+    public boolean isUseableByPlayer(EntityPlayer playerIn)
     {
-        return this.associatedChest != null && !this.associatedChest.func_145971_a(p_70300_1_) ? false : super.isUseableByPlayer(p_70300_1_);
+        return this.associatedChest != null && !this.associatedChest.func_145971_a(playerIn) ? false : super.isUseableByPlayer(playerIn);
     }
 
-    public void openInventory()
+    public void openInventory(EntityPlayer playerIn)
     {
         if (this.associatedChest != null)
         {
             this.associatedChest.func_145969_a();
         }
 
-        super.openInventory();
+        super.openInventory(playerIn);
     }
 
-    public void closeInventory()
+    public void closeInventory(EntityPlayer playerIn)
     {
         if (this.associatedChest != null)
         {
             this.associatedChest.func_145970_b();
         }
 
-        super.closeInventory();
+        super.closeInventory(playerIn);
         this.associatedChest = null;
     }
 }

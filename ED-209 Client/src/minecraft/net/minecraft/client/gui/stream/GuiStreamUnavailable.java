@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.stream;
 
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,14 +82,14 @@ public class GuiStreamUnavailable extends GuiScreen
     }
 
     /**
-     * "Called when the screen is unloaded. Used to disable keyboard repeat events."
+     * Called when the screen is unloaded. Used to disable keyboard repeat events
      */
     public void onGuiClosed() {}
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         int var4 = Math.max((int)((double)this.height * 0.85D / 2.0D - (double)((float)(this.field_152323_r.size() * this.fontRendererObj.FONT_HEIGHT) / 2.0F)), 50);
@@ -100,14 +101,14 @@ public class GuiStreamUnavailable extends GuiScreen
             this.drawCenteredString(this.fontRendererObj, var6, this.width / 2, var4, 10526880);
         }
 
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.enabled)
+        if (button.enabled)
         {
-            if (p_146284_1_.id == 1)
+            if (button.id == 1)
             {
                 switch (GuiStreamUnavailable.SwitchReason.field_152577_a[this.field_152326_h.ordinal()])
                 {
@@ -152,7 +153,7 @@ public class GuiStreamUnavailable extends GuiScreen
     public static void func_152321_a(GuiScreen p_152321_0_)
     {
         Minecraft var1 = Minecraft.getMinecraft();
-        IStream var2 = var1.func_152346_Z();
+        IStream var2 = var1.getTwitchStream();
 
         if (!OpenGlHelper.framebufferSupported)
         {
@@ -190,9 +191,9 @@ public class GuiStreamUnavailable extends GuiScreen
                     var1.displayGuiScreen(new GuiStreamUnavailable(p_152321_0_, GuiStreamUnavailable.Reason.UNSUPPORTED_OS_OTHER));
             }
         }
-        else if (!var1.func_152341_N().containsKey("twitch_access_token"))
+        else if (!var1.func_180509_L().containsKey("twitch_access_token"))
         {
-            if (var1.getSession().func_152428_f() == Session.Type.LEGACY)
+            if (var1.getSession().getSessionType() == Session.Type.LEGACY)
             {
                 var1.displayGuiScreen(new GuiStreamUnavailable(p_152321_0_, GuiStreamUnavailable.Reason.ACCOUNT_NOT_MIGRATED));
             }

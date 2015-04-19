@@ -1,12 +1,14 @@
 package net.minecraft.enchantment;
 
+import net.minecraft.util.ResourceLocation;
+
 public class EnchantmentArrowKnockback extends Enchantment
 {
     private static final String __OBFID = "CL_00000101";
 
-    public EnchantmentArrowKnockback(int p_i1922_1_, int p_i1922_2_)
+    public EnchantmentArrowKnockback(int p_i45775_1_, ResourceLocation p_i45775_2_, int p_i45775_3_)
     {
-        super(p_i1922_1_, p_i1922_2_, EnumEnchantmentType.bow);
+        super(p_i45775_1_, p_i45775_2_, p_i45775_3_, EnumEnchantmentType.BOW);
         this.setName("arrowKnockback");
     }
 

@@ -6,55 +6,52 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class C00PacketKeepAlive extends Packet
+public class C00PacketKeepAlive implements Packet
 {
-    private int field_149461_a;
+    private int key;
     private static final String __OBFID = "CL_00001359";
 
     public C00PacketKeepAlive() {}
 
     public C00PacketKeepAlive(int p_i45252_1_)
     {
-        this.field_149461_a = p_i45252_1_;
+        this.key = p_i45252_1_;
     }
 
-    public void processPacket(INetHandlerPlayServer p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
     {
-        p_148833_1_.processKeepAlive(this);
+        handler.processKeepAlive(this);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149461_a = p_148837_1_.readInt();
+        this.key = data.readVarIntFromBuffer();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149461_a);
+        data.writeVarIntToBuffer(this.key);
+    }
+
+    public int getKey()
+    {
+        return this.key;
     }
 
     /**
-     * If true, the network manager will process the packet immediately when received, otherwise it will queue it for
-     * processing. Currently true for: Disconnect, LoginSuccess, KeepAlive, ServerQuery/Info, Ping/Pong
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public boolean hasPriority()
+    public void processPacket(INetHandler handler)
     {
-        return true;
-    }
-
-    public int func_149460_c()
-    {
-        return this.field_149461_a;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerPlayServer)p_148833_1_);
+        this.processPacket((INetHandlerPlayServer)handler);
     }
 }

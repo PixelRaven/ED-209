@@ -7,12 +7,13 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.potion.PotionEffect;
 
-public class S1DPacketEntityEffect extends Packet
+public class S1DPacketEntityEffect implements Packet
 {
     private int field_149434_a;
     private byte field_149432_b;
     private byte field_149433_c;
-    private short field_149431_d;
+    private int field_149431_d;
+    private byte field_179708_e;
     private static final String __OBFID = "CL_00001343";
 
     public S1DPacketEntityEffect() {}
@@ -29,30 +30,34 @@ public class S1DPacketEntityEffect extends Packet
         }
         else
         {
-            this.field_149431_d = (short)p_i45237_2_.getDuration();
+            this.field_149431_d = p_i45237_2_.getDuration();
         }
+
+        this.field_179708_e = (byte)(p_i45237_2_.func_180154_f() ? 1 : 0);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149434_a = p_148837_1_.readInt();
-        this.field_149432_b = p_148837_1_.readByte();
-        this.field_149433_c = p_148837_1_.readByte();
-        this.field_149431_d = p_148837_1_.readShort();
+        this.field_149434_a = data.readVarIntFromBuffer();
+        this.field_149432_b = data.readByte();
+        this.field_149433_c = data.readByte();
+        this.field_149431_d = data.readVarIntFromBuffer();
+        this.field_179708_e = data.readByte();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149434_a);
-        p_148840_1_.writeByte(this.field_149432_b);
-        p_148840_1_.writeByte(this.field_149433_c);
-        p_148840_1_.writeShort(this.field_149431_d);
+        data.writeVarIntToBuffer(this.field_149434_a);
+        data.writeByte(this.field_149432_b);
+        data.writeByte(this.field_149433_c);
+        data.writeVarIntToBuffer(this.field_149431_d);
+        data.writeByte(this.field_179708_e);
     }
 
     public boolean func_149429_c()
@@ -60,9 +65,12 @@ public class S1DPacketEntityEffect extends Packet
         return this.field_149431_d == 32767;
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleEntityEffect(this);
+        handler.handleEntityEffect(this);
     }
 
     public int func_149426_d()
@@ -80,13 +88,21 @@ public class S1DPacketEntityEffect extends Packet
         return this.field_149433_c;
     }
 
-    public short func_149425_g()
+    public int func_180755_e()
     {
         return this.field_149431_d;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    public boolean func_179707_f()
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        return this.field_179708_e != 0;
+    }
+
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
+    {
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

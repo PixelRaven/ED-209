@@ -5,56 +5,77 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
+import net.minecraft.util.BlockPos;
 import org.apache.commons.lang3.StringUtils;
 
-public class C14PacketTabComplete extends Packet
+public class C14PacketTabComplete implements Packet
 {
-    private String field_149420_a;
+    private String message;
+    private BlockPos field_179710_b;
     private static final String __OBFID = "CL_00001346";
 
     public C14PacketTabComplete() {}
 
-    public C14PacketTabComplete(String p_i45239_1_)
+    public C14PacketTabComplete(String msg)
     {
-        this.field_149420_a = p_i45239_1_;
+        this(msg, (BlockPos)null);
+    }
+
+    public C14PacketTabComplete(String p_i45948_1_, BlockPos p_i45948_2_)
+    {
+        this.message = p_i45948_1_;
+        this.field_179710_b = p_i45948_2_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149420_a = p_148837_1_.readStringFromBuffer(32767);
+        this.message = data.readStringFromBuffer(32767);
+        boolean var2 = data.readBoolean();
+
+        if (var2)
+        {
+            this.field_179710_b = data.readBlockPos();
+        }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(StringUtils.substring(this.field_149420_a, 0, 32767));
+        data.writeString(StringUtils.substring(this.message, 0, 32767));
+        boolean var2 = this.field_179710_b != null;
+        data.writeBoolean(var2);
+
+        if (var2)
+        {
+            data.writeBlockPos(this.field_179710_b);
+        }
     }
 
-    public void processPacket(INetHandlerPlayServer p_148833_1_)
+    public void func_180756_a(INetHandlerPlayServer p_180756_1_)
     {
-        p_148833_1_.processTabComplete(this);
+        p_180756_1_.processTabComplete(this);
     }
 
-    public String func_149419_c()
+    public String getMessage()
     {
-        return this.field_149420_a;
+        return this.message;
+    }
+
+    public BlockPos func_179709_b()
+    {
+        return this.field_179710_b;
     }
 
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandler handler)
     {
-        return String.format("message=\'%s\'", new Object[] {this.field_149420_a});
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerPlayServer)p_148833_1_);
+        this.func_180756_a((INetHandlerPlayServer)handler);
     }
 }

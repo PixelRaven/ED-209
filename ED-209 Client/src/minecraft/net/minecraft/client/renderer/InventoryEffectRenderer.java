@@ -7,11 +7,11 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.Container;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import org.lwjgl.opengl.GL11;
 
 public abstract class InventoryEffectRenderer extends GuiContainer
 {
-    private boolean field_147045_u;
+    /** True if there is some potion effect to display */
+    private boolean hasActivePotionEffects;
     private static final String __OBFID = "CL_00000755";
 
     public InventoryEffectRenderer(Container p_i1089_1_)
@@ -25,38 +25,50 @@ public abstract class InventoryEffectRenderer extends GuiContainer
     public void initGui()
     {
         super.initGui();
+        this.func_175378_g();
+    }
 
+    protected void func_175378_g()
+    {
         if (!this.mc.thePlayer.getActivePotionEffects().isEmpty())
         {
-            this.field_147003_i = 160 + (this.width - this.field_146999_f - 200) / 2;
-            this.field_147045_u = true;
+            this.guiLeft = 160 + (this.width - this.xSize - 200) / 2;
+            this.hasActivePotionEffects = true;
+        }
+        else
+        {
+            this.guiLeft = (this.width - this.xSize) / 2;
+            this.hasActivePotionEffects = false;
         }
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
 
-        if (this.field_147045_u)
+        if (this.hasActivePotionEffects)
         {
-            this.func_147044_g();
+            this.drawActivePotionEffects();
         }
     }
 
-    private void func_147044_g()
+    /**
+     * Display the potion effects list
+     */
+    private void drawActivePotionEffects()
     {
-        int var1 = this.field_147003_i - 124;
-        int var2 = this.field_147009_r;
+        int var1 = this.guiLeft - 124;
+        int var2 = this.guiTop;
         boolean var3 = true;
         Collection var4 = this.mc.thePlayer.getActivePotionEffects();
 
         if (!var4.isEmpty())
         {
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glDisable(GL11.GL_LIGHTING);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.disableLighting();
             int var5 = 33;
 
             if (var4.size() > 5)
@@ -68,8 +80,8 @@ public abstract class InventoryEffectRenderer extends GuiContainer
             {
                 PotionEffect var7 = (PotionEffect)var6.next();
                 Potion var8 = Potion.potionTypes[var7.getPotionID()];
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                this.mc.getTextureManager().bindTexture(field_147001_a);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                this.mc.getTextureManager().bindTexture(inventoryBackground);
                 this.drawTexturedModalRect(var1, var2, 0, 166, 140, 32);
 
                 if (var8.hasStatusIcon())
@@ -93,9 +105,9 @@ public abstract class InventoryEffectRenderer extends GuiContainer
                     var11 = var11 + " " + I18n.format("enchantment.level.4", new Object[0]);
                 }
 
-                this.fontRendererObj.drawStringWithShadow(var11, var1 + 10 + 18, var2 + 6, 16777215);
+                this.fontRendererObj.func_175063_a(var11, (float)(var1 + 10 + 18), (float)(var2 + 6), 16777215);
                 String var10 = Potion.getDurationString(var7);
-                this.fontRendererObj.drawStringWithShadow(var10, var1 + 10 + 18, var2 + 6 + 10, 8355711);
+                this.fontRendererObj.func_175063_a(var10, (float)(var1 + 10 + 18), (float)(var2 + 6 + 10), 8355711);
             }
         }
     }

@@ -89,11 +89,7 @@ public class Achievement extends StatBase
         this.parentAchievement = p_i45302_6_;
     }
 
-    /**
-     * Initializes the current stat as independent (i.e., lacking prerequisites for being updated) and returns the
-     * current instance.
-     */
-    public Achievement initIndependentStat()
+    public Achievement func_180789_a()
     {
         this.isIndependent = true;
         return this;
@@ -109,10 +105,7 @@ public class Achievement extends StatBase
         return this;
     }
 
-    /**
-     * Register the stat into StatList.
-     */
-    public Achievement registerStat()
+    public Achievement func_180788_c()
     {
         super.registerStat();
         AchievementList.achievementList.add(this);
@@ -127,16 +120,16 @@ public class Achievement extends StatBase
         return true;
     }
 
-    public IChatComponent func_150951_e()
+    public IChatComponent getStatName()
     {
-        IChatComponent var1 = super.func_150951_e();
+        IChatComponent var1 = super.getStatName();
         var1.getChatStyle().setColor(this.getSpecial() ? EnumChatFormatting.DARK_PURPLE : EnumChatFormatting.GREEN);
         return var1;
     }
 
-    public Achievement func_150953_b(Class p_150953_1_)
+    public Achievement func_180787_a(Class p_180787_1_)
     {
-        return (Achievement)super.func_150953_b(p_150953_1_);
+        return (Achievement)super.func_150953_b(p_180787_1_);
     }
 
     /**
@@ -163,5 +156,27 @@ public class Achievement extends StatBase
     public boolean getSpecial()
     {
         return this.isSpecial;
+    }
+
+    public StatBase func_150953_b(Class p_150953_1_)
+    {
+        return this.func_180787_a(p_150953_1_);
+    }
+
+    /**
+     * Register the stat into StatList.
+     */
+    public StatBase registerStat()
+    {
+        return this.func_180788_c();
+    }
+
+    /**
+     * Initializes the current stat as independent (i.e., lacking prerequisites for being updated) and returns the
+     * current instance.
+     */
+    public StatBase initIndependentStat()
+    {
+        return this.func_180789_a();
     }
 }

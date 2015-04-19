@@ -8,5 +8,5 @@ public interface IBossDisplayData
 
     float getHealth();
 
-    IChatComponent func_145748_c_();
+    IChatComponent getDisplayName();
 }

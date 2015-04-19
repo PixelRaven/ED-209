@@ -1,9 +1,14 @@
 package net.minecraft.item;
 
+import net.minecraft.block.BlockStandingSign;
+import net.minecraft.block.BlockWallSign;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -18,76 +23,55 @@ public class ItemSign extends Item
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_77648_7_ == 0)
+        if (side == EnumFacing.DOWN)
         {
             return false;
         }
-        else if (!p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_).getMaterial().isSolid())
+        else if (!worldIn.getBlockState(pos).getBlock().getMaterial().isSolid())
         {
             return false;
         }
         else
         {
-            if (p_77648_7_ == 1)
-            {
-                ++p_77648_5_;
-            }
+            pos = pos.offset(side);
 
-            if (p_77648_7_ == 2)
-            {
-                --p_77648_6_;
-            }
-
-            if (p_77648_7_ == 3)
-            {
-                ++p_77648_6_;
-            }
-
-            if (p_77648_7_ == 4)
-            {
-                --p_77648_4_;
-            }
-
-            if (p_77648_7_ == 5)
-            {
-                ++p_77648_4_;
-            }
-
-            if (!p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_1_))
+            if (!playerIn.func_175151_a(pos, side, stack))
             {
                 return false;
             }
-            else if (!Blocks.standing_sign.canPlaceBlockAt(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_))
+            else if (!Blocks.standing_sign.canPlaceBlockAt(worldIn, pos))
             {
                 return false;
             }
-            else if (p_77648_3_.isClient)
+            else if (worldIn.isRemote)
             {
                 return true;
             }
             else
             {
-                if (p_77648_7_ == 1)
+                if (side == EnumFacing.UP)
                 {
-                    int var11 = MathHelper.floor_double((double)((p_77648_2_.rotationYaw + 180.0F) * 16.0F / 360.0F) + 0.5D) & 15;
-                    p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, Blocks.standing_sign, var11, 3);
+                    int var9 = MathHelper.floor_double((double)((playerIn.rotationYaw + 180.0F) * 16.0F / 360.0F) + 0.5D) & 15;
+                    worldIn.setBlockState(pos, Blocks.standing_sign.getDefaultState().withProperty(BlockStandingSign.ROTATION_PROP, Integer.valueOf(var9)), 3);
                 }
                 else
                 {
-                    p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, Blocks.wall_sign, p_77648_7_, 3);
+                    worldIn.setBlockState(pos, Blocks.wall_sign.getDefaultState().withProperty(BlockWallSign.field_176412_a, side), 3);
                 }
 
-                --p_77648_1_.stackSize;
-                TileEntitySign var12 = (TileEntitySign)p_77648_3_.getTileEntity(p_77648_4_, p_77648_5_, p_77648_6_);
+                --stack.stackSize;
+                TileEntity var10 = worldIn.getTileEntity(pos);
 
-                if (var12 != null)
+                if (var10 instanceof TileEntitySign && !ItemBlock.setTileEntityNBT(worldIn, pos, stack))
                 {
-                    p_77648_2_.func_146100_a(var12);
+                    playerIn.func_175141_a((TileEntitySign)var10);
                 }
 
                 return true;

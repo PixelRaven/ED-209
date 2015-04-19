@@ -3,6 +3,7 @@ package net.minecraft.command;
 import java.util.List;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public class CommandXP extends CommandBase
 {
@@ -21,78 +22,70 @@ public class CommandXP extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.xp.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length <= 0)
+        if (args.length <= 0)
         {
             throw new WrongUsageException("commands.xp.usage", new Object[0]);
         }
         else
         {
-            String var4 = p_71515_2_[0];
-            boolean var5 = var4.endsWith("l") || var4.endsWith("L");
+            String var3 = args[0];
+            boolean var4 = var3.endsWith("l") || var3.endsWith("L");
 
-            if (var5 && var4.length() > 1)
+            if (var4 && var3.length() > 1)
             {
-                var4 = var4.substring(0, var4.length() - 1);
+                var3 = var3.substring(0, var3.length() - 1);
             }
 
-            int var6 = parseInt(p_71515_1_, var4);
-            boolean var7 = var6 < 0;
+            int var5 = parseInt(var3);
+            boolean var6 = var5 < 0;
 
-            if (var7)
+            if (var6)
             {
-                var6 *= -1;
+                var5 *= -1;
             }
 
-            EntityPlayerMP var3;
+            EntityPlayerMP var7 = args.length > 1 ? getPlayer(sender, args[1]) : getCommandSenderAsPlayer(sender);
 
-            if (p_71515_2_.length > 1)
+            if (var4)
             {
-                var3 = getPlayer(p_71515_1_, p_71515_2_[1]);
-            }
-            else
-            {
-                var3 = getCommandSenderAsPlayer(p_71515_1_);
-            }
+                sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, var7.experienceLevel);
 
-            if (var5)
-            {
-                if (var7)
+                if (var6)
                 {
-                    var3.addExperienceLevel(-var6);
-                    func_152373_a(p_71515_1_, this, "commands.xp.success.negative.levels", new Object[] {Integer.valueOf(var6), var3.getCommandSenderName()});
+                    var7.addExperienceLevel(-var5);
+                    notifyOperators(sender, this, "commands.xp.success.negative.levels", new Object[] {Integer.valueOf(var5), var7.getName()});
                 }
                 else
                 {
-                    var3.addExperienceLevel(var6);
-                    func_152373_a(p_71515_1_, this, "commands.xp.success.levels", new Object[] {Integer.valueOf(var6), var3.getCommandSenderName()});
+                    var7.addExperienceLevel(var5);
+                    notifyOperators(sender, this, "commands.xp.success.levels", new Object[] {Integer.valueOf(var5), var7.getName()});
                 }
             }
             else
             {
-                if (var7)
+                sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, var7.experienceTotal);
+
+                if (var6)
                 {
-                    throw new WrongUsageException("commands.xp.failure.widthdrawXp", new Object[0]);
+                    throw new CommandException("commands.xp.failure.widthdrawXp", new Object[0]);
                 }
 
-                var3.addExperience(var6);
-                func_152373_a(p_71515_1_, this, "commands.xp.success", new Object[] {Integer.valueOf(var6), var3.getCommandSenderName()});
+                var7.addExperience(var5);
+                notifyOperators(sender, this, "commands.xp.success", new Object[] {Integer.valueOf(var5), var7.getName()});
             }
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 2 ? getListOfStringsMatchingLastWord(p_71516_2_, this.getAllUsernames()) : null;
+        return args.length == 2 ? getListOfStringsMatchingLastWord(args, this.getAllUsernames()) : null;
     }
 
     protected String[] getAllUsernames()
@@ -103,8 +96,8 @@ public class CommandXP extends CommandBase
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 1;
+        return index == 1;
     }
 }

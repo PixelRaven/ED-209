@@ -8,49 +8,58 @@ import net.minecraft.util.EnumChatFormatting;
 
 public abstract class GuiResourcePackList extends GuiListExtended
 {
-    protected final Minecraft field_148205_k;
+    protected final Minecraft mc;
     protected final List field_148204_l;
     private static final String __OBFID = "CL_00000825";
 
-    public GuiResourcePackList(Minecraft p_i45055_1_, int p_i45055_2_, int p_i45055_3_, List p_i45055_4_)
+    public GuiResourcePackList(Minecraft mcIn, int p_i45055_2_, int p_i45055_3_, List p_i45055_4_)
     {
-        super(p_i45055_1_, p_i45055_2_, p_i45055_3_, 32, p_i45055_3_ - 55 + 4, 36);
-        this.field_148205_k = p_i45055_1_;
+        super(mcIn, p_i45055_2_, p_i45055_3_, 32, p_i45055_3_ - 55 + 4, 36);
+        this.mc = mcIn;
         this.field_148204_l = p_i45055_4_;
         this.field_148163_i = false;
-        this.func_148133_a(true, (int)((float)p_i45055_1_.fontRenderer.FONT_HEIGHT * 1.5F));
+        this.setHasListHeader(true, (int)((float)mcIn.fontRendererObj.FONT_HEIGHT * 1.5F));
     }
 
-    protected void func_148129_a(int p_148129_1_, int p_148129_2_, Tessellator p_148129_3_)
+    /**
+     * Handles drawing a list's header row.
+     */
+    protected void drawListHeader(int p_148129_1_, int p_148129_2_, Tessellator p_148129_3_)
     {
-        String var4 = EnumChatFormatting.UNDERLINE + "" + EnumChatFormatting.BOLD + this.func_148202_k();
-        this.field_148205_k.fontRenderer.drawString(var4, p_148129_1_ + this.field_148155_a / 2 - this.field_148205_k.fontRenderer.getStringWidth(var4) / 2, Math.min(this.field_148153_b + 3, p_148129_2_), 16777215);
+        String var4 = EnumChatFormatting.UNDERLINE + "" + EnumChatFormatting.BOLD + this.getListHeader();
+        this.mc.fontRendererObj.drawString(var4, p_148129_1_ + this.width / 2 - this.mc.fontRendererObj.getStringWidth(var4) / 2, Math.min(this.top + 3, p_148129_2_), 16777215);
     }
 
-    protected abstract String func_148202_k();
+    protected abstract String getListHeader();
 
-    public List func_148201_l()
+    public List getList()
     {
         return this.field_148204_l;
     }
 
     protected int getSize()
     {
-        return this.func_148201_l().size();
+        return this.getList().size();
     }
 
-    public ResourcePackListEntry func_148180_b(int p_148180_1_)
+    /**
+     * Gets the IGuiListEntry object for the given index
+     */
+    public ResourcePackListEntry getListEntry(int p_148180_1_)
     {
-        return (ResourcePackListEntry)this.func_148201_l().get(p_148180_1_);
+        return (ResourcePackListEntry)this.getList().get(p_148180_1_);
     }
 
-    public int func_148139_c()
+    /**
+     * Gets the width of the list
+     */
+    public int getListWidth()
     {
-        return this.field_148155_a;
+        return this.width;
     }
 
-    protected int func_148137_d()
+    protected int getScrollBarX()
     {
-        return this.field_148151_d - 6;
+        return this.right - 6;
     }
 }

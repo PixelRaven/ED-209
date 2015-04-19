@@ -1,11 +1,10 @@
 package net.minecraft.client.renderer.tileentity;
 
 import net.minecraft.client.model.ModelChest;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityEnderChest;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer
 {
@@ -13,58 +12,78 @@ public class TileEntityEnderChestRenderer extends TileEntitySpecialRenderer
     private ModelChest field_147521_c = new ModelChest();
     private static final String __OBFID = "CL_00000967";
 
-    public void renderTileEntityAt(TileEntityEnderChest p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_)
+    public void func_180540_a(TileEntityEnderChest p_180540_1_, double p_180540_2_, double p_180540_4_, double p_180540_6_, float p_180540_8_, int p_180540_9_)
     {
-        int var9 = 0;
+        int var10 = 0;
 
-        if (p_147500_1_.hasWorldObj())
+        if (p_180540_1_.hasWorldObj())
         {
-            var9 = p_147500_1_.getBlockMetadata();
+            var10 = p_180540_1_.getBlockMetadata();
         }
 
-        this.bindTexture(field_147520_b);
-        GL11.glPushMatrix();
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glTranslatef((float)p_147500_2_, (float)p_147500_4_ + 1.0F, (float)p_147500_6_ + 1.0F);
-        GL11.glScalef(1.0F, -1.0F, -1.0F);
-        GL11.glTranslatef(0.5F, 0.5F, 0.5F);
-        short var10 = 0;
-
-        if (var9 == 2)
+        if (p_180540_9_ >= 0)
         {
-            var10 = 180;
+            this.bindTexture(DESTROY_STAGES[p_180540_9_]);
+            GlStateManager.matrixMode(5890);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(4.0F, 4.0F, 1.0F);
+            GlStateManager.translate(0.0625F, 0.0625F, 0.0625F);
+            GlStateManager.matrixMode(5888);
+        }
+        else
+        {
+            this.bindTexture(field_147520_b);
         }
 
-        if (var9 == 3)
+        GlStateManager.pushMatrix();
+        GlStateManager.enableRescaleNormal();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.translate((float)p_180540_2_, (float)p_180540_4_ + 1.0F, (float)p_180540_6_ + 1.0F);
+        GlStateManager.scale(1.0F, -1.0F, -1.0F);
+        GlStateManager.translate(0.5F, 0.5F, 0.5F);
+        short var11 = 0;
+
+        if (var10 == 2)
         {
-            var10 = 0;
+            var11 = 180;
         }
 
-        if (var9 == 4)
+        if (var10 == 3)
         {
-            var10 = 90;
+            var11 = 0;
         }
 
-        if (var9 == 5)
+        if (var10 == 4)
         {
-            var10 = -90;
+            var11 = 90;
         }
 
-        GL11.glRotatef((float)var10, 0.0F, 1.0F, 0.0F);
-        GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
-        float var11 = p_147500_1_.field_145975_i + (p_147500_1_.field_145972_a - p_147500_1_.field_145975_i) * p_147500_8_;
-        var11 = 1.0F - var11;
-        var11 = 1.0F - var11 * var11 * var11;
-        this.field_147521_c.chestLid.rotateAngleX = -(var11 * (float)Math.PI / 2.0F);
+        if (var10 == 5)
+        {
+            var11 = -90;
+        }
+
+        GlStateManager.rotate((float)var11, 0.0F, 1.0F, 0.0F);
+        GlStateManager.translate(-0.5F, -0.5F, -0.5F);
+        float var12 = p_180540_1_.prevLidAngle + (p_180540_1_.field_145972_a - p_180540_1_.prevLidAngle) * p_180540_8_;
+        var12 = 1.0F - var12;
+        var12 = 1.0F - var12 * var12 * var12;
+        this.field_147521_c.chestLid.rotateAngleX = -(var12 * (float)Math.PI / 2.0F);
         this.field_147521_c.renderAll();
-        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        GL11.glPopMatrix();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableRescaleNormal();
+        GlStateManager.popMatrix();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        if (p_180540_9_ >= 0)
+        {
+            GlStateManager.matrixMode(5890);
+            GlStateManager.popMatrix();
+            GlStateManager.matrixMode(5888);
+        }
     }
 
-    public void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_)
+    public void renderTileEntityAt(TileEntity p_180535_1_, double p_180535_2_, double p_180535_4_, double p_180535_6_, float p_180535_8_, int p_180535_9_)
     {
-        this.renderTileEntityAt((TileEntityEnderChest)p_147500_1_, p_147500_2_, p_147500_4_, p_147500_6_, p_147500_8_);
+        this.func_180540_a((TileEntityEnderChest)p_180535_1_, p_180535_2_, p_180535_4_, p_180535_6_, p_180535_8_, p_180535_9_);
     }
 }

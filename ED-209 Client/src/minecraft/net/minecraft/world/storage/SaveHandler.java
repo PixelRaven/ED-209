@@ -30,7 +30,7 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
     /**
      * The time in milliseconds when this field was initialized. Stored in the session lock file.
      */
-    private final long initializationTime = MinecraftServer.getSystemTimeMillis();
+    private final long initializationTime = MinecraftServer.getCurrentTimeMillis();
 
     /** The directory name of the world */
     private final String saveDirectoryName;
@@ -116,7 +116,7 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
     }
 
     /**
-     * Returns the chunk loader with the provided world provider
+     * initializes and returns the chunk loader for the specified world provider
      */
     public IChunkLoader getChunkLoader(WorldProvider p_75763_1_)
     {
@@ -207,7 +207,7 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
     }
 
     /**
-     * Saves the passed in world info.
+     * used to update level.dat from old format to MCRegion format
      */
     public void saveWorldInfo(WorldInfo p_75761_1_)
     {
@@ -269,7 +269,7 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
         }
         catch (Exception var5)
         {
-            logger.warn("Failed to save player data for " + p_75753_1_.getCommandSenderName());
+            logger.warn("Failed to save player data for " + p_75753_1_.getName());
         }
     }
 
@@ -291,7 +291,7 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
         }
         catch (Exception var4)
         {
-            logger.warn("Failed to load player data for " + p_75752_1_.getCommandSenderName());
+            logger.warn("Failed to load player data for " + p_75752_1_.getName());
         }
 
         if (var2 != null)
@@ -302,10 +302,7 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
         return var2;
     }
 
-    /**
-     * returns null if no saveHandler is relevent (eg. SMP)
-     */
-    public IPlayerFileData getSaveHandler()
+    public IPlayerFileData getPlayerNBTManager()
     {
         return this;
     }
@@ -316,6 +313,11 @@ public class SaveHandler implements ISaveHandler, IPlayerFileData
     public String[] getAvailablePlayerDat()
     {
         String[] var1 = this.playersDirectory.list();
+
+        if (var1 == null)
+        {
+            var1 = new String[0];
+        }
 
         for (int var2 = 0; var2 < var1.length; ++var2)
         {

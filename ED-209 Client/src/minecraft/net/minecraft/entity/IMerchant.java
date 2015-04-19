@@ -2,6 +2,7 @@ package net.minecraft.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 
@@ -17,5 +18,11 @@ public interface IMerchant
 
     void useRecipe(MerchantRecipe p_70933_1_);
 
-    void func_110297_a_(ItemStack p_110297_1_);
+    /**
+     * Notifies the merchant of a possible merchantrecipe being fulfilled or not. Usually, this is just a sound byte
+     * being played depending if the suggested itemstack is not null.
+     */
+    void verifySellingItem(ItemStack p_110297_1_);
+
+    IChatComponent getDisplayName();
 }

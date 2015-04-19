@@ -8,7 +8,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.world.World;
 
-public class S19PacketEntityHeadLook extends Packet
+public class S19PacketEntityHeadLook implements Packet
 {
     private int field_149384_a;
     private byte field_149383_b;
@@ -25,37 +25,29 @@ public class S19PacketEntityHeadLook extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149384_a = p_148837_1_.readInt();
-        this.field_149383_b = p_148837_1_.readByte();
+        this.field_149384_a = data.readVarIntFromBuffer();
+        this.field_149383_b = data.readByte();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149384_a);
-        p_148840_1_.writeByte(this.field_149383_b);
+        data.writeVarIntToBuffer(this.field_149384_a);
+        data.writeByte(this.field_149383_b);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180745_a(INetHandlerPlayClient p_180745_1_)
     {
-        p_148833_1_.handleEntityHeadLook(this);
+        p_180745_1_.handleEntityHeadLook(this);
     }
 
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
+    public Entity func_149381_a(World worldIn)
     {
-        return String.format("id=%d, rot=%d", new Object[] {Integer.valueOf(this.field_149384_a), Byte.valueOf(this.field_149383_b)});
-    }
-
-    public Entity func_149381_a(World p_149381_1_)
-    {
-        return p_149381_1_.getEntityByID(this.field_149384_a);
+        return worldIn.getEntityByID(this.field_149384_a);
     }
 
     public byte func_149380_c()
@@ -63,8 +55,11 @@ public class S19PacketEntityHeadLook extends Packet
         return this.field_149383_b;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180745_a((INetHandlerPlayClient)handler);
     }
 }

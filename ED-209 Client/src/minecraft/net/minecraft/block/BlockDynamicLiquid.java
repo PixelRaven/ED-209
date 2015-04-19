@@ -1,15 +1,19 @@
 package net.minecraft.block;
 
+import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class BlockDynamicLiquid extends BlockLiquid
 {
     int field_149815_a;
-    boolean[] field_149814_b = new boolean[4];
-    int[] field_149816_M = new int[4];
     private static final String __OBFID = "CL_00000234";
 
     protected BlockDynamicLiquid(Material p_i45403_1_)
@@ -17,341 +21,285 @@ public class BlockDynamicLiquid extends BlockLiquid
         super(p_i45403_1_);
     }
 
-    private void func_149811_n(World p_149811_1_, int p_149811_2_, int p_149811_3_, int p_149811_4_)
+    private void func_180690_f(World worldIn, BlockPos p_180690_2_, IBlockState p_180690_3_)
     {
-        int var5 = p_149811_1_.getBlockMetadata(p_149811_2_, p_149811_3_, p_149811_4_);
-        p_149811_1_.setBlock(p_149811_2_, p_149811_3_, p_149811_4_, Block.getBlockById(Block.getIdFromBlock(this) + 1), var5, 2);
+        worldIn.setBlockState(p_180690_2_, getStaticLiquidForMaterial(this.blockMaterial).getDefaultState().withProperty(LEVEL, p_180690_3_.getValue(LEVEL)), 2);
     }
 
-    /**
-     * Ticks the block if it's been scheduled
-     */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        int var6 = this.func_149804_e(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
-        byte var7 = 1;
+        int var5 = ((Integer)state.getValue(LEVEL)).intValue();
+        byte var6 = 1;
 
-        if (this.blockMaterial == Material.lava && !p_149674_1_.provider.isHellWorld)
+        if (this.blockMaterial == Material.lava && !worldIn.provider.func_177500_n())
         {
-            var7 = 2;
+            var6 = 2;
         }
 
-        boolean var8 = true;
-        int var9 = this.func_149738_a(p_149674_1_);
-        int var11;
+        int var7 = this.tickRate(worldIn);
+        int var16;
 
-        if (var6 > 0)
+        if (var5 > 0)
         {
-            byte var10 = -100;
+            int var8 = -100;
             this.field_149815_a = 0;
-            int var13 = this.func_149810_a(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_, var10);
-            var13 = this.func_149810_a(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_, var13);
-            var13 = this.func_149810_a(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1, var13);
-            var13 = this.func_149810_a(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1, var13);
-            var11 = var13 + var7;
+            EnumFacing var10;
 
-            if (var11 >= 8 || var13 < 0)
+            for (Iterator var9 = EnumFacing.Plane.HORIZONTAL.iterator(); var9.hasNext(); var8 = this.func_176371_a(worldIn, pos.offset(var10), var8))
             {
-                var11 = -1;
+                var10 = (EnumFacing)var9.next();
             }
 
-            if (this.func_149804_e(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_) >= 0)
-            {
-                int var12 = this.func_149804_e(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_);
+            int var14 = var8 + var6;
 
-                if (var12 >= 8)
+            if (var14 >= 8 || var8 < 0)
+            {
+                var14 = -1;
+            }
+
+            if (this.func_176362_e(worldIn, pos.offsetUp()) >= 0)
+            {
+                var16 = this.func_176362_e(worldIn, pos.offsetUp());
+
+                if (var16 >= 8)
                 {
-                    var11 = var12;
+                    var14 = var16;
                 }
                 else
                 {
-                    var11 = var12 + 8;
+                    var14 = var16 + 8;
                 }
             }
 
             if (this.field_149815_a >= 2 && this.blockMaterial == Material.water)
             {
-                if (p_149674_1_.getBlock(p_149674_2_, p_149674_3_ - 1, p_149674_4_).getMaterial().isSolid())
+                IBlockState var17 = worldIn.getBlockState(pos.offsetDown());
+
+                if (var17.getBlock().getMaterial().isSolid())
                 {
-                    var11 = 0;
+                    var14 = 0;
                 }
-                else if (p_149674_1_.getBlock(p_149674_2_, p_149674_3_ - 1, p_149674_4_).getMaterial() == this.blockMaterial && p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_ - 1, p_149674_4_) == 0)
+                else if (var17.getBlock().getMaterial() == this.blockMaterial && ((Integer)var17.getValue(LEVEL)).intValue() == 0)
                 {
-                    var11 = 0;
+                    var14 = 0;
                 }
             }
 
-            if (this.blockMaterial == Material.lava && var6 < 8 && var11 < 8 && var11 > var6 && p_149674_5_.nextInt(4) != 0)
+            if (this.blockMaterial == Material.lava && var5 < 8 && var14 < 8 && var14 > var5 && rand.nextInt(4) != 0)
             {
-                var9 *= 4;
+                var7 *= 4;
             }
 
-            if (var11 == var6)
+            if (var14 == var5)
             {
-                if (var8)
-                {
-                    this.func_149811_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
-                }
+                this.func_180690_f(worldIn, pos, state);
             }
             else
             {
-                var6 = var11;
+                var5 = var14;
 
-                if (var11 < 0)
+                if (var14 < 0)
                 {
-                    p_149674_1_.setBlockToAir(p_149674_2_, p_149674_3_, p_149674_4_);
+                    worldIn.setBlockToAir(pos);
                 }
                 else
                 {
-                    p_149674_1_.setBlockMetadataWithNotify(p_149674_2_, p_149674_3_, p_149674_4_, var11, 2);
-                    p_149674_1_.scheduleBlockUpdate(p_149674_2_, p_149674_3_, p_149674_4_, this, var9);
-                    p_149674_1_.notifyBlocksOfNeighborChange(p_149674_2_, p_149674_3_, p_149674_4_, this);
+                    state = state.withProperty(LEVEL, Integer.valueOf(var14));
+                    worldIn.setBlockState(pos, state, 2);
+                    worldIn.scheduleUpdate(pos, this, var7);
+                    worldIn.notifyNeighborsOfStateChange(pos, this);
                 }
             }
         }
         else
         {
-            this.func_149811_n(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
+            this.func_180690_f(worldIn, pos, state);
         }
 
-        if (this.func_149809_q(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_))
+        IBlockState var13 = worldIn.getBlockState(pos.offsetDown());
+
+        if (this.func_176373_h(worldIn, pos.offsetDown(), var13))
         {
-            if (this.blockMaterial == Material.lava && p_149674_1_.getBlock(p_149674_2_, p_149674_3_ - 1, p_149674_4_).getMaterial() == Material.water)
+            if (this.blockMaterial == Material.lava && worldIn.getBlockState(pos.offsetDown()).getBlock().getMaterial() == Material.water)
             {
-                p_149674_1_.setBlock(p_149674_2_, p_149674_3_ - 1, p_149674_4_, Blocks.stone);
-                this.func_149799_m(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_);
+                worldIn.setBlockState(pos.offsetDown(), Blocks.stone.getDefaultState());
+                this.func_180688_d(worldIn, pos.offsetDown());
                 return;
             }
 
-            if (var6 >= 8)
+            if (var5 >= 8)
             {
-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, var6);
+                this.func_176375_a(worldIn, pos.offsetDown(), var13, var5);
             }
             else
             {
-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_, var6 + 8);
+                this.func_176375_a(worldIn, pos.offsetDown(), var13, var5 + 8);
             }
         }
-        else if (var6 >= 0 && (var6 == 0 || this.func_149807_p(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_)))
+        else if (var5 >= 0 && (var5 == 0 || this.func_176372_g(worldIn, pos.offsetDown(), var13)))
         {
-            boolean[] var14 = this.func_149808_o(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_);
-            var11 = var6 + var7;
+            Set var15 = this.func_176376_e(worldIn, pos);
+            var16 = var5 + var6;
 
-            if (var6 >= 8)
+            if (var5 >= 8)
             {
-                var11 = 1;
+                var16 = 1;
             }
 
-            if (var11 >= 8)
+            if (var16 >= 8)
             {
                 return;
             }
 
-            if (var14[0])
-            {
-                this.func_149813_h(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_, var11);
-            }
+            Iterator var11 = var15.iterator();
 
-            if (var14[1])
+            while (var11.hasNext())
             {
-                this.func_149813_h(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_, var11);
-            }
-
-            if (var14[2])
-            {
-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1, var11);
-            }
-
-            if (var14[3])
-            {
-                this.func_149813_h(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1, var11);
+                EnumFacing var12 = (EnumFacing)var11.next();
+                this.func_176375_a(worldIn, pos.offset(var12), worldIn.getBlockState(pos.offset(var12)), var16);
             }
         }
     }
 
-    private void func_149813_h(World p_149813_1_, int p_149813_2_, int p_149813_3_, int p_149813_4_, int p_149813_5_)
+    private void func_176375_a(World worldIn, BlockPos p_176375_2_, IBlockState p_176375_3_, int p_176375_4_)
     {
-        if (this.func_149809_q(p_149813_1_, p_149813_2_, p_149813_3_, p_149813_4_))
+        if (this.func_176373_h(worldIn, p_176375_2_, p_176375_3_))
         {
-            Block var6 = p_149813_1_.getBlock(p_149813_2_, p_149813_3_, p_149813_4_);
-
-            if (this.blockMaterial == Material.lava)
+            if (p_176375_3_.getBlock() != Blocks.air)
             {
-                this.func_149799_m(p_149813_1_, p_149813_2_, p_149813_3_, p_149813_4_);
-            }
-            else
-            {
-                var6.dropBlockAsItem(p_149813_1_, p_149813_2_, p_149813_3_, p_149813_4_, p_149813_1_.getBlockMetadata(p_149813_2_, p_149813_3_, p_149813_4_), 0);
+                if (this.blockMaterial == Material.lava)
+                {
+                    this.func_180688_d(worldIn, p_176375_2_);
+                }
+                else
+                {
+                    p_176375_3_.getBlock().dropBlockAsItem(worldIn, p_176375_2_, p_176375_3_, 0);
+                }
             }
 
-            p_149813_1_.setBlock(p_149813_2_, p_149813_3_, p_149813_4_, this, p_149813_5_, 3);
+            worldIn.setBlockState(p_176375_2_, this.getDefaultState().withProperty(LEVEL, Integer.valueOf(p_176375_4_)), 3);
         }
     }
 
-    private int func_149812_c(World p_149812_1_, int p_149812_2_, int p_149812_3_, int p_149812_4_, int p_149812_5_, int p_149812_6_)
+    private int func_176374_a(World worldIn, BlockPos p_176374_2_, int p_176374_3_, EnumFacing p_176374_4_)
     {
-        int var7 = 1000;
+        int var5 = 1000;
+        Iterator var6 = EnumFacing.Plane.HORIZONTAL.iterator();
 
-        for (int var8 = 0; var8 < 4; ++var8)
+        while (var6.hasNext())
         {
-            if ((var8 != 0 || p_149812_6_ != 1) && (var8 != 1 || p_149812_6_ != 0) && (var8 != 2 || p_149812_6_ != 3) && (var8 != 3 || p_149812_6_ != 2))
+            EnumFacing var7 = (EnumFacing)var6.next();
+
+            if (var7 != p_176374_4_)
             {
-                int var9 = p_149812_2_;
-                int var11 = p_149812_4_;
+                BlockPos var8 = p_176374_2_.offset(var7);
+                IBlockState var9 = worldIn.getBlockState(var8);
 
-                if (var8 == 0)
+                if (!this.func_176372_g(worldIn, var8, var9) && (var9.getBlock().getMaterial() != this.blockMaterial || ((Integer)var9.getValue(LEVEL)).intValue() > 0))
                 {
-                    var9 = p_149812_2_ - 1;
-                }
-
-                if (var8 == 1)
-                {
-                    ++var9;
-                }
-
-                if (var8 == 2)
-                {
-                    var11 = p_149812_4_ - 1;
-                }
-
-                if (var8 == 3)
-                {
-                    ++var11;
-                }
-
-                if (!this.func_149807_p(p_149812_1_, var9, p_149812_3_, var11) && (p_149812_1_.getBlock(var9, p_149812_3_, var11).getMaterial() != this.blockMaterial || p_149812_1_.getBlockMetadata(var9, p_149812_3_, var11) != 0))
-                {
-                    if (!this.func_149807_p(p_149812_1_, var9, p_149812_3_ - 1, var11))
+                    if (!this.func_176372_g(worldIn, var8.offsetDown(), var9))
                     {
-                        return p_149812_5_;
+                        return p_176374_3_;
                     }
 
-                    if (p_149812_5_ < 4)
+                    if (p_176374_3_ < 4)
                     {
-                        int var12 = this.func_149812_c(p_149812_1_, var9, p_149812_3_, var11, p_149812_5_ + 1, var8);
+                        int var10 = this.func_176374_a(worldIn, var8, p_176374_3_ + 1, var7.getOpposite());
 
-                        if (var12 < var7)
+                        if (var10 < var5)
                         {
-                            var7 = var12;
+                            var5 = var10;
                         }
                     }
                 }
             }
         }
 
-        return var7;
+        return var5;
     }
 
-    private boolean[] func_149808_o(World p_149808_1_, int p_149808_2_, int p_149808_3_, int p_149808_4_)
+    private Set func_176376_e(World worldIn, BlockPos p_176376_2_)
     {
-        int var5;
-        int var6;
+        int var3 = 1000;
+        EnumSet var4 = EnumSet.noneOf(EnumFacing.class);
+        Iterator var5 = EnumFacing.Plane.HORIZONTAL.iterator();
 
-        for (var5 = 0; var5 < 4; ++var5)
+        while (var5.hasNext())
         {
-            this.field_149816_M[var5] = 1000;
-            var6 = p_149808_2_;
-            int var8 = p_149808_4_;
+            EnumFacing var6 = (EnumFacing)var5.next();
+            BlockPos var7 = p_176376_2_.offset(var6);
+            IBlockState var8 = worldIn.getBlockState(var7);
 
-            if (var5 == 0)
+            if (!this.func_176372_g(worldIn, var7, var8) && (var8.getBlock().getMaterial() != this.blockMaterial || ((Integer)var8.getValue(LEVEL)).intValue() > 0))
             {
-                var6 = p_149808_2_ - 1;
-            }
+                int var9;
 
-            if (var5 == 1)
-            {
-                ++var6;
-            }
-
-            if (var5 == 2)
-            {
-                var8 = p_149808_4_ - 1;
-            }
-
-            if (var5 == 3)
-            {
-                ++var8;
-            }
-
-            if (!this.func_149807_p(p_149808_1_, var6, p_149808_3_, var8) && (p_149808_1_.getBlock(var6, p_149808_3_, var8).getMaterial() != this.blockMaterial || p_149808_1_.getBlockMetadata(var6, p_149808_3_, var8) != 0))
-            {
-                if (this.func_149807_p(p_149808_1_, var6, p_149808_3_ - 1, var8))
+                if (this.func_176372_g(worldIn, var7.offsetDown(), worldIn.getBlockState(var7.offsetDown())))
                 {
-                    this.field_149816_M[var5] = this.func_149812_c(p_149808_1_, var6, p_149808_3_, var8, 1, var5);
+                    var9 = this.func_176374_a(worldIn, var7, 1, var6.getOpposite());
                 }
                 else
                 {
-                    this.field_149816_M[var5] = 0;
+                    var9 = 0;
+                }
+
+                if (var9 < var3)
+                {
+                    var4.clear();
+                }
+
+                if (var9 <= var3)
+                {
+                    var4.add(var6);
+                    var3 = var9;
                 }
             }
         }
 
-        var5 = this.field_149816_M[0];
-
-        for (var6 = 1; var6 < 4; ++var6)
-        {
-            if (this.field_149816_M[var6] < var5)
-            {
-                var5 = this.field_149816_M[var6];
-            }
-        }
-
-        for (var6 = 0; var6 < 4; ++var6)
-        {
-            this.field_149814_b[var6] = this.field_149816_M[var6] == var5;
-        }
-
-        return this.field_149814_b;
+        return var4;
     }
 
-    private boolean func_149807_p(World p_149807_1_, int p_149807_2_, int p_149807_3_, int p_149807_4_)
+    private boolean func_176372_g(World worldIn, BlockPos p_176372_2_, IBlockState p_176372_3_)
     {
-        Block var5 = p_149807_1_.getBlock(p_149807_2_, p_149807_3_, p_149807_4_);
-        return var5 != Blocks.wooden_door && var5 != Blocks.iron_door && var5 != Blocks.standing_sign && var5 != Blocks.ladder && var5 != Blocks.reeds ? (var5.blockMaterial == Material.Portal ? true : var5.blockMaterial.blocksMovement()) : true;
+        Block var4 = worldIn.getBlockState(p_176372_2_).getBlock();
+        return !(var4 instanceof BlockDoor) && var4 != Blocks.standing_sign && var4 != Blocks.ladder && var4 != Blocks.reeds ? (var4.blockMaterial == Material.portal ? true : var4.blockMaterial.blocksMovement()) : true;
     }
 
-    protected int func_149810_a(World p_149810_1_, int p_149810_2_, int p_149810_3_, int p_149810_4_, int p_149810_5_)
+    protected int func_176371_a(World worldIn, BlockPos p_176371_2_, int p_176371_3_)
     {
-        int var6 = this.func_149804_e(p_149810_1_, p_149810_2_, p_149810_3_, p_149810_4_);
+        int var4 = this.func_176362_e(worldIn, p_176371_2_);
 
-        if (var6 < 0)
+        if (var4 < 0)
         {
-            return p_149810_5_;
+            return p_176371_3_;
         }
         else
         {
-            if (var6 == 0)
+            if (var4 == 0)
             {
                 ++this.field_149815_a;
             }
 
-            if (var6 >= 8)
+            if (var4 >= 8)
             {
-                var6 = 0;
+                var4 = 0;
             }
 
-            return p_149810_5_ >= 0 && var6 >= p_149810_5_ ? p_149810_5_ : var6;
+            return p_176371_3_ >= 0 && var4 >= p_176371_3_ ? p_176371_3_ : var4;
         }
     }
 
-    private boolean func_149809_q(World p_149809_1_, int p_149809_2_, int p_149809_3_, int p_149809_4_)
+    private boolean func_176373_h(World worldIn, BlockPos p_176373_2_, IBlockState p_176373_3_)
     {
-        Material var5 = p_149809_1_.getBlock(p_149809_2_, p_149809_3_, p_149809_4_).getMaterial();
-        return var5 == this.blockMaterial ? false : (var5 == Material.lava ? false : !this.func_149807_p(p_149809_1_, p_149809_2_, p_149809_3_, p_149809_4_));
+        Material var4 = p_176373_3_.getBlock().getMaterial();
+        return var4 != this.blockMaterial && var4 != Material.lava && !this.func_176372_g(worldIn, p_176373_2_, p_176373_3_);
     }
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        super.onBlockAdded(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
-
-        if (p_149726_1_.getBlock(p_149726_2_, p_149726_3_, p_149726_4_) == this)
+        if (!this.func_176365_e(worldIn, pos, state))
         {
-            p_149726_1_.scheduleBlockUpdate(p_149726_2_, p_149726_3_, p_149726_4_, this, this.func_149738_a(p_149726_1_));
+            worldIn.scheduleUpdate(pos, this, this.tickRate(worldIn));
         }
-    }
-
-    public boolean func_149698_L()
-    {
-        return true;
     }
 }

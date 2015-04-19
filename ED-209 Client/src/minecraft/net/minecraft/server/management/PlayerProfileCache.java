@@ -40,13 +40,13 @@ import org.apache.commons.io.IOUtils;
 
 public class PlayerProfileCache
 {
-    public static final SimpleDateFormat field_152659_a = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
     private final Map field_152661_c = Maps.newHashMap();
     private final Map field_152662_d = Maps.newHashMap();
     private final LinkedList field_152663_e = Lists.newLinkedList();
     private final MinecraftServer field_152664_f;
-    protected final Gson field_152660_b;
-    private final File field_152665_g;
+    protected final Gson gson;
+    private final File usercacheFile;
     private static final ParameterizedType field_152666_h = new ParameterizedType()
     {
         private static final String __OBFID = "CL_00001886";
@@ -68,10 +68,10 @@ public class PlayerProfileCache
     public PlayerProfileCache(MinecraftServer p_i1171_1_, File p_i1171_2_)
     {
         this.field_152664_f = p_i1171_1_;
-        this.field_152665_g = p_i1171_2_;
+        this.usercacheFile = p_i1171_2_;
         GsonBuilder var3 = new GsonBuilder();
         var3.registerTypeHierarchyAdapter(PlayerProfileCache.ProfileEntry.class, new PlayerProfileCache.Serializer(null));
-        this.field_152660_b = var3.create();
+        this.gson = var3.create();
         this.func_152657_b();
     }
 
@@ -90,11 +90,11 @@ public class PlayerProfileCache
                 var2[0] = null;
             }
         };
-        p_152650_0_.func_152359_aw().findProfilesByNames(new String[] {p_152650_1_}, Agent.MINECRAFT, var3);
+        p_152650_0_.getGameProfileRepository().findProfilesByNames(new String[] {p_152650_1_}, Agent.MINECRAFT, var3);
 
         if (!p_152650_0_.isServerInOnlineMode() && var2[0] == null)
         {
-            UUID var4 = EntityPlayer.func_146094_a(new GameProfile((UUID)null, p_152650_1_));
+            UUID var4 = EntityPlayer.getUUID(new GameProfile((UUID)null, p_152650_1_));
             GameProfile var5 = new GameProfile(var4, p_152650_1_);
             var3.onProfileLookupSucceeded(var5);
         }
@@ -119,30 +119,26 @@ public class PlayerProfileCache
             p_152651_2_ = var4.getTime();
         }
 
-        String var10 = p_152651_1_.getName().toLowerCase(Locale.ROOT);
+        String var7 = p_152651_1_.getName().toLowerCase(Locale.ROOT);
         PlayerProfileCache.ProfileEntry var5 = new PlayerProfileCache.ProfileEntry(p_152651_1_, p_152651_2_, null);
-        LinkedList var6 = this.field_152663_e;
 
-        synchronized (this.field_152663_e)
+        if (this.field_152662_d.containsKey(var3))
         {
-            if (this.field_152662_d.containsKey(var3))
-            {
-                PlayerProfileCache.ProfileEntry var7 = (PlayerProfileCache.ProfileEntry)this.field_152662_d.get(var3);
-                this.field_152661_c.remove(var7.func_152668_a().getName().toLowerCase(Locale.ROOT));
-                this.field_152661_c.put(p_152651_1_.getName().toLowerCase(Locale.ROOT), var5);
-                this.field_152663_e.remove(p_152651_1_);
-            }
-            else
-            {
-                this.field_152662_d.put(var3, var5);
-                this.field_152661_c.put(var10, var5);
-            }
-
-            this.field_152663_e.addFirst(p_152651_1_);
+            PlayerProfileCache.ProfileEntry var6 = (PlayerProfileCache.ProfileEntry)this.field_152662_d.get(var3);
+            this.field_152661_c.remove(var6.func_152668_a().getName().toLowerCase(Locale.ROOT));
+            this.field_152661_c.put(p_152651_1_.getName().toLowerCase(Locale.ROOT), var5);
+            this.field_152663_e.remove(p_152651_1_);
         }
+        else
+        {
+            this.field_152662_d.put(var3, var5);
+            this.field_152661_c.put(var7, var5);
+        }
+
+        this.field_152663_e.addFirst(p_152651_1_);
     }
 
-    public GameProfile func_152655_a(String p_152655_1_)
+    public GameProfile getGameProfileForUsername(String p_152655_1_)
     {
         String var2 = p_152655_1_.toLowerCase(Locale.ROOT);
         PlayerProfileCache.ProfileEntry var3 = (PlayerProfileCache.ProfileEntry)this.field_152661_c.get(var2);
@@ -151,36 +147,25 @@ public class PlayerProfileCache
         {
             this.field_152662_d.remove(var3.func_152668_a().getId());
             this.field_152661_c.remove(var3.func_152668_a().getName().toLowerCase(Locale.ROOT));
-            LinkedList var4 = this.field_152663_e;
-
-            synchronized (this.field_152663_e)
-            {
-                this.field_152663_e.remove(var3.func_152668_a());
-            }
-
+            this.field_152663_e.remove(var3.func_152668_a());
             var3 = null;
         }
 
-        GameProfile var9;
+        GameProfile var4;
 
         if (var3 != null)
         {
-            var9 = var3.func_152668_a();
-            LinkedList var5 = this.field_152663_e;
-
-            synchronized (this.field_152663_e)
-            {
-                this.field_152663_e.remove(var9);
-                this.field_152663_e.addFirst(var9);
-            }
+            var4 = var3.func_152668_a();
+            this.field_152663_e.remove(var4);
+            this.field_152663_e.addFirst(var4);
         }
         else
         {
-            var9 = func_152650_a(this.field_152664_f, var2);
+            var4 = func_152650_a(this.field_152664_f, var2);
 
-            if (var9 != null)
+            if (var4 != null)
             {
-                this.func_152649_a(var9);
+                this.func_152649_a(var4);
                 var3 = (PlayerProfileCache.ProfileEntry)this.field_152661_c.get(var2);
             }
         }
@@ -208,13 +193,8 @@ public class PlayerProfileCache
         if (var2 != null)
         {
             GameProfile var3 = var2.func_152668_a();
-            LinkedList var4 = this.field_152663_e;
-
-            synchronized (this.field_152663_e)
-            {
-                this.field_152663_e.remove(var3);
-                this.field_152663_e.addFirst(var3);
-            }
+            this.field_152663_e.remove(var3);
+            this.field_152663_e.addFirst(var3);
         }
 
         return var2;
@@ -224,15 +204,15 @@ public class PlayerProfileCache
     {
         List var1 = null;
         BufferedReader var2 = null;
-        label81:
+        label64:
         {
             try
             {
-                var2 = Files.newReader(this.field_152665_g, Charsets.UTF_8);
-                var1 = (List)this.field_152660_b.fromJson(var2, field_152666_h);
-                break label81;
+                var2 = Files.newReader(this.usercacheFile, Charsets.UTF_8);
+                var1 = (List)this.gson.fromJson(var2, field_152666_h);
+                break label64;
             }
-            catch (FileNotFoundException var10)
+            catch (FileNotFoundException var7)
             {
                 ;
             }
@@ -248,19 +228,13 @@ public class PlayerProfileCache
         {
             this.field_152661_c.clear();
             this.field_152662_d.clear();
-            LinkedList var3 = this.field_152663_e;
-
-            synchronized (this.field_152663_e)
-            {
-                this.field_152663_e.clear();
-            }
-
+            this.field_152663_e.clear();
             var1 = Lists.reverse(var1);
-            Iterator var12 = var1.iterator();
+            Iterator var3 = var1.iterator();
 
-            while (var12.hasNext())
+            while (var3.hasNext())
             {
-                PlayerProfileCache.ProfileEntry var4 = (PlayerProfileCache.ProfileEntry)var12.next();
+                PlayerProfileCache.ProfileEntry var4 = (PlayerProfileCache.ProfileEntry)var3.next();
 
                 if (var4 != null)
                 {
@@ -272,22 +246,22 @@ public class PlayerProfileCache
 
     public void func_152658_c()
     {
-        String var1 = this.field_152660_b.toJson(this.func_152656_a(1000));
+        String var1 = this.gson.toJson(this.func_152656_a(1000));
         BufferedWriter var2 = null;
 
         try
         {
-            var2 = Files.newWriter(this.field_152665_g, Charsets.UTF_8);
+            var2 = Files.newWriter(this.usercacheFile, Charsets.UTF_8);
             var2.write(var1);
             return;
         }
         catch (FileNotFoundException var8)
         {
-            return;
+            ;
         }
         catch (IOException var9)
         {
-            ;
+            return;
         }
         finally
         {
@@ -298,19 +272,12 @@ public class PlayerProfileCache
     private List func_152656_a(int p_152656_1_)
     {
         ArrayList var2 = Lists.newArrayList();
-        LinkedList var4 = this.field_152663_e;
-        ArrayList var3;
+        ArrayList var3 = Lists.newArrayList(Iterators.limit(this.field_152663_e.iterator(), p_152656_1_));
+        Iterator var4 = var3.iterator();
 
-        synchronized (this.field_152663_e)
+        while (var4.hasNext())
         {
-            var3 = Lists.newArrayList(Iterators.limit(this.field_152663_e.iterator(), p_152656_1_));
-        }
-
-        Iterator var8 = var3.iterator();
-
-        while (var8.hasNext())
-        {
-            GameProfile var5 = (GameProfile)var8.next();
+            GameProfile var5 = (GameProfile)var4.next();
             PlayerProfileCache.ProfileEntry var6 = this.func_152653_b(var5.getId());
 
             if (var6 != null)
@@ -362,7 +329,7 @@ public class PlayerProfileCache
             var4.addProperty("name", p_152676_1_.func_152668_a().getName());
             UUID var5 = p_152676_1_.func_152668_a().getId();
             var4.addProperty("uuid", var5 == null ? "" : var5.toString());
-            var4.addProperty("expiresOn", PlayerProfileCache.field_152659_a.format(p_152676_1_.func_152670_b()));
+            var4.addProperty("expiresOn", PlayerProfileCache.dateFormat.format(p_152676_1_.func_152670_b()));
             return var4;
         }
 
@@ -385,7 +352,7 @@ public class PlayerProfileCache
                     {
                         try
                         {
-                            var10 = PlayerProfileCache.field_152659_a.parse(var7.getAsString());
+                            var10 = PlayerProfileCache.dateFormat.parse(var7.getAsString());
                         }
                         catch (ParseException var14)
                         {

@@ -12,14 +12,16 @@ public class AnimationMetadataSection implements IMetadataSection
     private final int frameWidth;
     private final int frameHeight;
     private final int frameTime;
+    private final boolean field_177220_e;
     private static final String __OBFID = "CL_00001106";
 
-    public AnimationMetadataSection(List p_i1309_1_, int p_i1309_2_, int p_i1309_3_, int p_i1309_4_)
+    public AnimationMetadataSection(List p_i46088_1_, int p_i46088_2_, int p_i46088_3_, int p_i46088_4_, boolean p_i46088_5_)
     {
-        this.animationFrames = p_i1309_1_;
-        this.frameWidth = p_i1309_2_;
-        this.frameHeight = p_i1309_3_;
-        this.frameTime = p_i1309_4_;
+        this.animationFrames = p_i46088_1_;
+        this.frameWidth = p_i46088_2_;
+        this.frameHeight = p_i46088_3_;
+        this.frameTime = p_i46088_4_;
+        this.field_177220_e = p_i46088_5_;
     }
 
     public int getFrameHeight()
@@ -40,6 +42,11 @@ public class AnimationMetadataSection implements IMetadataSection
     public int getFrameTime()
     {
         return this.frameTime;
+    }
+
+    public boolean func_177219_e()
+    {
+        return this.field_177220_e;
     }
 
     private AnimationFrame getAnimationFrame(int p_130072_1_)

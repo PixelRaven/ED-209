@@ -1,12 +1,17 @@
 diff -r -U 3 minecraft_server\net\minecraft\util\EnumChatFormatting.java minecraft_server_patched\net\minecraft\util\EnumChatFormatting.java
 --- minecraft_server\net\minecraft\util\EnumChatFormatting.java
 +++ minecraft_server_patched\net\minecraft\util\EnumChatFormatting.java
-@@ -39,7 +39,7 @@
-    private static final String __OBFID = "CL_00000342";
- 
-    private EnumChatFormatting(char p_i1336_3_) {
--      this(p_i1336_1_, p_i1336_2_, p_i1336_3_, false);
-+      this(p_i1336_3_, false);
+@@ -45,11 +45,11 @@
     }
  
-    private EnumChatFormatting(char p_i1337_3_, boolean p_i1337_4_) {
+    private EnumChatFormatting(String p_i46291_3_, char p_i46291_4_, int p_i46291_5_) {
+-      this(p_i46291_1_, p_i46291_2_, p_i46291_3_, p_i46291_4_, false, p_i46291_5_);
++      this(p_i46291_3_, p_i46291_4_, false, p_i46291_5_);
+    }
+ 
+    private EnumChatFormatting(String p_i46292_3_, char p_i46292_4_, boolean p_i46292_5_) {
+-      this(p_i46292_1_, p_i46292_2_, p_i46292_3_, p_i46292_4_, p_i46292_5_, -1);
++      this(p_i46292_3_, p_i46292_4_, p_i46292_5_, -1);
+    }
+ 
+    private EnumChatFormatting(String p_i46293_3_, char p_i46293_4_, boolean p_i46293_5_, int p_i46293_6_) {

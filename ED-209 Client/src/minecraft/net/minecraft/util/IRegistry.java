@@ -1,6 +1,6 @@
 package net.minecraft.util;
 
-public interface IRegistry
+public interface IRegistry extends Iterable
 {
     Object getObject(Object p_82594_1_);
 

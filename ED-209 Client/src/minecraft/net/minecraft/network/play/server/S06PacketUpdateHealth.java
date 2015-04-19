@@ -6,64 +6,67 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S06PacketUpdateHealth extends Packet
+public class S06PacketUpdateHealth implements Packet
 {
-    private float field_149336_a;
-    private int field_149334_b;
-    private float field_149335_c;
+    private float health;
+    private int foodLevel;
+    private float saturationLevel;
     private static final String __OBFID = "CL_00001332";
 
     public S06PacketUpdateHealth() {}
 
-    public S06PacketUpdateHealth(float p_i45223_1_, int p_i45223_2_, float p_i45223_3_)
+    public S06PacketUpdateHealth(float healthIn, int foodLevelIn, float saturationIn)
     {
-        this.field_149336_a = p_i45223_1_;
-        this.field_149334_b = p_i45223_2_;
-        this.field_149335_c = p_i45223_3_;
+        this.health = healthIn;
+        this.foodLevel = foodLevelIn;
+        this.saturationLevel = saturationIn;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149336_a = p_148837_1_.readFloat();
-        this.field_149334_b = p_148837_1_.readShort();
-        this.field_149335_c = p_148837_1_.readFloat();
+        this.health = data.readFloat();
+        this.foodLevel = data.readVarIntFromBuffer();
+        this.saturationLevel = data.readFloat();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeFloat(this.field_149336_a);
-        p_148840_1_.writeShort(this.field_149334_b);
-        p_148840_1_.writeFloat(this.field_149335_c);
+        data.writeFloat(this.health);
+        data.writeVarIntToBuffer(this.foodLevel);
+        data.writeFloat(this.saturationLevel);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180750_a(INetHandlerPlayClient p_180750_1_)
     {
-        p_148833_1_.handleUpdateHealth(this);
+        p_180750_1_.handleUpdateHealth(this);
     }
 
-    public float func_149332_c()
+    public float getHealth()
     {
-        return this.field_149336_a;
+        return this.health;
     }
 
-    public int func_149330_d()
+    public int getFoodLevel()
     {
-        return this.field_149334_b;
+        return this.foodLevel;
     }
 
-    public float func_149331_e()
+    public float getSaturationLevel()
     {
-        return this.field_149335_c;
+        return this.saturationLevel;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180750_a((INetHandlerPlayClient)handler);
     }
 }

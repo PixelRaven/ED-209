@@ -6,16 +6,16 @@ import net.minecraft.entity.player.EntityPlayer;
 
 public class EntityAIWatchClosest extends EntityAIBase
 {
-    private EntityLiving theWatcher;
+    protected EntityLiving theWatcher;
 
     /** The closest entity which is being watched by this one. */
     protected Entity closestEntity;
 
     /** This is the Maximum distance that the AI will look for the Entity */
-    private float maxDistanceForPlayer;
+    protected float maxDistanceForPlayer;
     private int lookTime;
     private float field_75331_e;
-    private Class watchedClass;
+    protected Class watchedClass;
     private static final String __OBFID = "CL_00001592";
 
     public EntityAIWatchClosest(EntityLiving p_i1631_1_, Class p_i1631_2_, float p_i1631_3_)
@@ -58,7 +58,7 @@ public class EntityAIWatchClosest extends EntityAIBase
             }
             else
             {
-                this.closestEntity = this.theWatcher.worldObj.findNearestEntityWithinAABB(this.watchedClass, this.theWatcher.boundingBox.expand((double)this.maxDistanceForPlayer, 3.0D, (double)this.maxDistanceForPlayer), this.theWatcher);
+                this.closestEntity = this.theWatcher.worldObj.findNearestEntityWithinAABB(this.watchedClass, this.theWatcher.getEntityBoundingBox().expand((double)this.maxDistanceForPlayer, 3.0D, (double)this.maxDistanceForPlayer), this.theWatcher);
             }
 
             return this.closestEntity != null;

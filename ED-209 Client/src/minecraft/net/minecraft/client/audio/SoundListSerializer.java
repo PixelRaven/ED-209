@@ -15,11 +15,11 @@ public class SoundListSerializer implements JsonDeserializer
 
     public SoundList deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_)
     {
-        JsonObject var4 = JsonUtils.getJsonElementAsJsonObject(p_deserialize_1_, "entry");
+        JsonObject var4 = JsonUtils.getElementAsJsonObject(p_deserialize_1_, "entry");
         SoundList var5 = new SoundList();
-        var5.func_148572_a(JsonUtils.getJsonObjectBooleanFieldValueOrDefault(var4, "replace", false));
+        var5.setReplaceExisting(JsonUtils.getJsonObjectBooleanFieldValueOrDefault(var4, "replace", false));
         SoundCategory var6 = SoundCategory.func_147154_a(JsonUtils.getJsonObjectStringFieldValueOrDefault(var4, "category", SoundCategory.MASTER.getCategoryName()));
-        var5.func_148571_a(var6);
+        var5.setSoundCategory(var6);
         Validate.notNull(var6, "Invalid category", new Object[0]);
 
         if (var4.has("sounds"))
@@ -33,18 +33,18 @@ public class SoundListSerializer implements JsonDeserializer
 
                 if (JsonUtils.jsonElementTypeIsString(var9))
                 {
-                    var10.func_148561_a(JsonUtils.getJsonElementStringValue(var9, "sound"));
+                    var10.setSoundEntryName(JsonUtils.getJsonElementStringValue(var9, "sound"));
                 }
                 else
                 {
-                    JsonObject var11 = JsonUtils.getJsonElementAsJsonObject(var9, "sound");
-                    var10.func_148561_a(JsonUtils.getJsonObjectStringFieldValue(var11, "name"));
+                    JsonObject var11 = JsonUtils.getElementAsJsonObject(var9, "sound");
+                    var10.setSoundEntryName(JsonUtils.getJsonObjectStringFieldValue(var11, "name"));
 
                     if (var11.has("type"))
                     {
-                        SoundList.SoundEntry.Type var12 = SoundList.SoundEntry.Type.func_148580_a(JsonUtils.getJsonObjectStringFieldValue(var11, "type"));
+                        SoundList.SoundEntry.Type var12 = SoundList.SoundEntry.Type.getType(JsonUtils.getJsonObjectStringFieldValue(var11, "type"));
                         Validate.notNull(var12, "Invalid type", new Object[0]);
-                        var10.func_148562_a(var12);
+                        var10.setSoundEntryType(var12);
                     }
 
                     float var13;
@@ -53,30 +53,30 @@ public class SoundListSerializer implements JsonDeserializer
                     {
                         var13 = JsonUtils.getJsonObjectFloatFieldValue(var11, "volume");
                         Validate.isTrue(var13 > 0.0F, "Invalid volume", new Object[0]);
-                        var10.func_148553_a(var13);
+                        var10.setSoundEntryVolume(var13);
                     }
 
                     if (var11.has("pitch"))
                     {
                         var13 = JsonUtils.getJsonObjectFloatFieldValue(var11, "pitch");
                         Validate.isTrue(var13 > 0.0F, "Invalid pitch", new Object[0]);
-                        var10.func_148559_b(var13);
+                        var10.setSoundEntryPitch(var13);
                     }
 
                     if (var11.has("weight"))
                     {
                         int var14 = JsonUtils.getJsonObjectIntegerFieldValue(var11, "weight");
                         Validate.isTrue(var14 > 0, "Invalid weight", new Object[0]);
-                        var10.func_148554_a(var14);
+                        var10.setSoundEntryWeight(var14);
                     }
 
                     if (var11.has("stream"))
                     {
-                        var10.func_148557_a(JsonUtils.getJsonObjectBooleanFieldValue(var11, "stream"));
+                        var10.setStreaming(JsonUtils.getJsonObjectBooleanFieldValue(var11, "stream"));
                     }
                 }
 
-                var5.func_148570_a().add(var10);
+                var5.getSoundList().add(var10);
             }
         }
 

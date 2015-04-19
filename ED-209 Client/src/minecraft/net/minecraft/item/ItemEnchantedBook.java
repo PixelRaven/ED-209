@@ -15,7 +15,7 @@ public class ItemEnchantedBook extends Item
 {
     private static final String __OBFID = "CL_00000025";
 
-    public boolean hasEffect(ItemStack p_77636_1_)
+    public boolean hasEffect(ItemStack stack)
     {
         return true;
     }
@@ -23,7 +23,7 @@ public class ItemEnchantedBook extends Item
     /**
      * Checks isDamagable and if it cannot be stacked
      */
-    public boolean isItemTool(ItemStack p_77616_1_)
+    public boolean isItemTool(ItemStack stack)
     {
         return false;
     }
@@ -31,23 +31,27 @@ public class ItemEnchantedBook extends Item
     /**
      * Return an item rarity from EnumRarity
      */
-    public EnumRarity getRarity(ItemStack p_77613_1_)
+    public EnumRarity getRarity(ItemStack stack)
     {
-        return this.func_92110_g(p_77613_1_).tagCount() > 0 ? EnumRarity.uncommon : super.getRarity(p_77613_1_);
+        return this.func_92110_g(stack).tagCount() > 0 ? EnumRarity.UNCOMMON : super.getRarity(stack);
     }
 
     public NBTTagList func_92110_g(ItemStack p_92110_1_)
     {
-        return p_92110_1_.stackTagCompound != null && p_92110_1_.stackTagCompound.func_150297_b("StoredEnchantments", 9) ? (NBTTagList)p_92110_1_.stackTagCompound.getTag("StoredEnchantments") : new NBTTagList();
+        NBTTagCompound var2 = p_92110_1_.getTagCompound();
+        return var2 != null && var2.hasKey("StoredEnchantments", 9) ? (NBTTagList)var2.getTag("StoredEnchantments") : new NBTTagList();
     }
 
     /**
      * allows items to add custom lines of information to the mouseover description
+     *  
+     * @param tooltip All lines to display in the Item's tooltip. This is a List of Strings.
+     * @param advanced Whether the setting "Advanced tooltips" is enabled
      */
-    public void addInformation(ItemStack p_77624_1_, EntityPlayer p_77624_2_, List p_77624_3_, boolean p_77624_4_)
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced)
     {
-        super.addInformation(p_77624_1_, p_77624_2_, p_77624_3_, p_77624_4_);
-        NBTTagList var5 = this.func_92110_g(p_77624_1_);
+        super.addInformation(stack, playerIn, tooltip, advanced);
+        NBTTagList var5 = this.func_92110_g(stack);
 
         if (var5 != null)
         {
@@ -56,9 +60,9 @@ public class ItemEnchantedBook extends Item
                 short var7 = var5.getCompoundTagAt(var6).getShort("id");
                 short var8 = var5.getCompoundTagAt(var6).getShort("lvl");
 
-                if (Enchantment.enchantmentsList[var7] != null)
+                if (Enchantment.func_180306_c(var7) != null)
                 {
-                    p_77624_3_.add(Enchantment.enchantmentsList[var7].getTranslatedName(var8));
+                    tooltip.add(Enchantment.func_180306_c(var7).getTranslatedName(var8));
                 }
             }
         }
@@ -122,7 +126,7 @@ public class ItemEnchantedBook extends Item
         }
     }
 
-    public WeightedRandomChestContent func_92114_b(Random p_92114_1_)
+    public WeightedRandomChestContent getRandomEnchantedBook(Random p_92114_1_)
     {
         return this.func_92112_a(p_92114_1_, 1, 1, 1);
     }

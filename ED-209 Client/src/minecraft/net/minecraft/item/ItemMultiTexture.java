@@ -1,52 +1,61 @@
 package net.minecraft.item;
 
+import com.google.common.base.Function;
 import net.minecraft.block.Block;
-import net.minecraft.util.IIcon;
 
 public class ItemMultiTexture extends ItemBlock
 {
-    protected final Block field_150941_b;
-    protected final String[] field_150942_c;
+    protected final Block theBlock;
+    protected final Function nameFunction;
     private static final String __OBFID = "CL_00000051";
 
-    public ItemMultiTexture(Block p_i45346_1_, Block p_i45346_2_, String[] p_i45346_3_)
+    public ItemMultiTexture(Block p_i45784_1_, Block p_i45784_2_, Function p_i45784_3_)
     {
-        super(p_i45346_1_);
-        this.field_150941_b = p_i45346_2_;
-        this.field_150942_c = p_i45346_3_;
+        super(p_i45784_1_);
+        this.theBlock = p_i45784_2_;
+        this.nameFunction = p_i45784_3_;
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
     }
 
-    /**
-     * Gets an icon index based on an item's damage value
-     */
-    public IIcon getIconFromDamage(int p_77617_1_)
+    public ItemMultiTexture(Block p_i45346_1_, Block p_i45346_2_, final String[] p_i45346_3_)
     {
-        return this.field_150941_b.getIcon(2, p_77617_1_);
+        this(p_i45346_1_, p_i45346_2_, new Function()
+        {
+            private static final String __OBFID = "CL_00002161";
+            public String apply(ItemStack p_179541_1_)
+            {
+                int var2 = p_179541_1_.getMetadata();
+
+                if (var2 < 0 || var2 >= p_i45346_3_.length)
+                {
+                    var2 = 0;
+                }
+
+                return p_i45346_3_[var2];
+            }
+            public Object apply(Object p_apply_1_)
+            {
+                return this.apply((ItemStack)p_apply_1_);
+            }
+        });
     }
 
     /**
-     * Returns the metadata of the block which this Item (ItemBlock) can place
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
      */
-    public int getMetadata(int p_77647_1_)
+    public int getMetadata(int damage)
     {
-        return p_77647_1_;
+        return damage;
     }
 
     /**
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        int var2 = p_77667_1_.getItemDamage();
-
-        if (var2 < 0 || var2 >= this.field_150942_c.length)
-        {
-            var2 = 0;
-        }
-
-        return super.getUnlocalizedName() + "." + this.field_150942_c[var2];
+        return super.getUnlocalizedName() + "." + (String)this.nameFunction.apply(stack);
     }
 }

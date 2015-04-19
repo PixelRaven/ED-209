@@ -1,6 +1,8 @@
 package net.minecraft.entity.ai.attributes;
 
+import io.netty.util.internal.ThreadLocalRandom;
 import java.util.UUID;
+import net.minecraft.util.MathHelper;
 import org.apache.commons.lang3.Validate;
 
 public class AttributeModifier
@@ -18,7 +20,7 @@ public class AttributeModifier
 
     public AttributeModifier(String p_i1605_1_, double p_i1605_2_, int p_i1605_4_)
     {
-        this(UUID.randomUUID(), p_i1605_1_, p_i1605_2_, p_i1605_4_);
+        this(MathHelper.func_180182_a(ThreadLocalRandom.current()), p_i1605_1_, p_i1605_2_, p_i1605_4_);
     }
 
     public AttributeModifier(UUID p_i1606_1_, String p_i1606_2_, double p_i1606_3_, int p_i1606_5_)
@@ -29,7 +31,7 @@ public class AttributeModifier
         this.amount = p_i1606_3_;
         this.operation = p_i1606_5_;
         Validate.notEmpty(p_i1606_2_, "Modifier name cannot be empty", new Object[0]);
-        Validate.inclusiveBetween(Integer.valueOf(0), Integer.valueOf(2), Integer.valueOf(p_i1606_5_), "Invalid operation", new Object[0]);
+        Validate.inclusiveBetween(0L, 2L, (long)p_i1606_5_, "Invalid operation");
     }
 
     public UUID getID()

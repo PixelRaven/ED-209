@@ -1,14 +1,15 @@
 package net.minecraft.world.gen.structure;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 
@@ -30,7 +31,7 @@ public class MapGenStronghold extends MapGenStructure
         this.structureCoords = new ChunkCoordIntPair[3];
         this.field_82671_h = 32.0D;
         this.field_82672_i = 3;
-        this.field_151546_e = new ArrayList();
+        this.field_151546_e = Lists.newArrayList();
         BiomeGenBase[] var1 = BiomeGenBase.getBiomeGenArray();
         int var2 = var1.length;
 
@@ -69,7 +70,7 @@ public class MapGenStronghold extends MapGenStructure
         }
     }
 
-    public String func_143025_a()
+    public String getStructureName()
     {
         return "Stronghold";
     }
@@ -88,12 +89,12 @@ public class MapGenStronghold extends MapGenStructure
                 double var8 = (1.25D * (double)var6 + var3.nextDouble()) * this.field_82671_h * (double)var6;
                 int var10 = (int)Math.round(Math.cos(var4) * var8);
                 int var11 = (int)Math.round(Math.sin(var4) * var8);
-                ChunkPosition var12 = this.worldObj.getWorldChunkManager().func_150795_a((var10 << 4) + 8, (var11 << 4) + 8, 112, this.field_151546_e, var3);
+                BlockPos var12 = this.worldObj.getWorldChunkManager().findBiomePosition((var10 << 4) + 8, (var11 << 4) + 8, 112, this.field_151546_e, var3);
 
                 if (var12 != null)
                 {
-                    var10 = var12.field_151329_a >> 4;
-                    var11 = var12.field_151328_c >> 4;
+                    var10 = var12.getX() >> 4;
+                    var11 = var12.getZ() >> 4;
                 }
 
                 this.structureCoords[var7] = new ChunkCoordIntPair(var10, var11);
@@ -131,7 +132,7 @@ public class MapGenStronghold extends MapGenStructure
      */
     protected List getCoordList()
     {
-        ArrayList var1 = new ArrayList();
+        ArrayList var1 = Lists.newArrayList();
         ChunkCoordIntPair[] var2 = this.structureCoords;
         int var3 = var2.length;
 
@@ -141,7 +142,7 @@ public class MapGenStronghold extends MapGenStructure
 
             if (var5 != null)
             {
-                var1.add(var5.func_151349_a(64));
+                var1.add(var5.getCenterBlock(64));
             }
         }
 
@@ -166,7 +167,7 @@ public class MapGenStronghold extends MapGenStructure
 
         public Start() {}
 
-        public Start(World p_i2067_1_, Random p_i2067_2_, int p_i2067_3_, int p_i2067_4_)
+        public Start(World worldIn, Random p_i2067_2_, int p_i2067_3_, int p_i2067_4_)
         {
             super(p_i2067_3_, p_i2067_4_);
             StructureStrongholdPieces.prepareStructurePieces();
@@ -183,7 +184,7 @@ public class MapGenStronghold extends MapGenStructure
             }
 
             this.updateBoundingBox();
-            this.markAvailableHeight(p_i2067_1_, p_i2067_2_, 10);
+            this.markAvailableHeight(worldIn, p_i2067_2_, 10);
         }
     }
 }

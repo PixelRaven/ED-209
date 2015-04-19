@@ -4,10 +4,10 @@ import net.minecraft.util.EnumChatFormatting;
 
 public enum EnumRarity
 {
-    common(EnumChatFormatting.WHITE, "Common"),
-    uncommon(EnumChatFormatting.YELLOW, "Uncommon"),
-    rare(EnumChatFormatting.AQUA, "Rare"),
-    epic(EnumChatFormatting.LIGHT_PURPLE, "Epic");
+    COMMON(EnumChatFormatting.WHITE, "Common"),
+    UNCOMMON(EnumChatFormatting.YELLOW, "Uncommon"),
+    RARE(EnumChatFormatting.AQUA, "Rare"),
+    EPIC(EnumChatFormatting.LIGHT_PURPLE, "Epic");
 
     /**
      * A decimal representation of the hex color codes of a the color assigned to this rarity type. (13 becomes d as in

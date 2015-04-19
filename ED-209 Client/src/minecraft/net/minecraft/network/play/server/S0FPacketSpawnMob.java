@@ -11,7 +11,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.MathHelper;
 
-public class S0FPacketSpawnMob extends Packet
+public class S0FPacketSpawnMob implements Packet
 {
     private int field_149042_a;
     private int field_149040_b;
@@ -34,9 +34,9 @@ public class S0FPacketSpawnMob extends Packet
     {
         this.field_149042_a = p_i45192_1_.getEntityId();
         this.field_149040_b = (byte)EntityList.getEntityID(p_i45192_1_);
-        this.field_149041_c = p_i45192_1_.myEntitySize.multiplyBy32AndRound(p_i45192_1_.posX);
+        this.field_149041_c = MathHelper.floor_double(p_i45192_1_.posX * 32.0D);
         this.field_149038_d = MathHelper.floor_double(p_i45192_1_.posY * 32.0D);
-        this.field_149039_e = p_i45192_1_.myEntitySize.multiplyBy32AndRound(p_i45192_1_.posZ);
+        this.field_149039_e = MathHelper.floor_double(p_i45192_1_.posZ * 32.0D);
         this.field_149048_i = (byte)((int)(p_i45192_1_.rotationYaw * 256.0F / 360.0F));
         this.field_149045_j = (byte)((int)(p_i45192_1_.rotationPitch * 256.0F / 360.0F));
         this.field_149046_k = (byte)((int)(p_i45192_1_.rotationYawHead * 256.0F / 360.0F));
@@ -84,44 +84,44 @@ public class S0FPacketSpawnMob extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149042_a = p_148837_1_.readVarIntFromBuffer();
-        this.field_149040_b = p_148837_1_.readByte() & 255;
-        this.field_149041_c = p_148837_1_.readInt();
-        this.field_149038_d = p_148837_1_.readInt();
-        this.field_149039_e = p_148837_1_.readInt();
-        this.field_149048_i = p_148837_1_.readByte();
-        this.field_149045_j = p_148837_1_.readByte();
-        this.field_149046_k = p_148837_1_.readByte();
-        this.field_149036_f = p_148837_1_.readShort();
-        this.field_149037_g = p_148837_1_.readShort();
-        this.field_149047_h = p_148837_1_.readShort();
-        this.field_149044_m = DataWatcher.readWatchedListFromPacketBuffer(p_148837_1_);
+        this.field_149042_a = data.readVarIntFromBuffer();
+        this.field_149040_b = data.readByte() & 255;
+        this.field_149041_c = data.readInt();
+        this.field_149038_d = data.readInt();
+        this.field_149039_e = data.readInt();
+        this.field_149048_i = data.readByte();
+        this.field_149045_j = data.readByte();
+        this.field_149046_k = data.readByte();
+        this.field_149036_f = data.readShort();
+        this.field_149037_g = data.readShort();
+        this.field_149047_h = data.readShort();
+        this.field_149044_m = DataWatcher.readWatchedListFromPacketBuffer(data);
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeVarIntToBuffer(this.field_149042_a);
-        p_148840_1_.writeByte(this.field_149040_b & 255);
-        p_148840_1_.writeInt(this.field_149041_c);
-        p_148840_1_.writeInt(this.field_149038_d);
-        p_148840_1_.writeInt(this.field_149039_e);
-        p_148840_1_.writeByte(this.field_149048_i);
-        p_148840_1_.writeByte(this.field_149045_j);
-        p_148840_1_.writeByte(this.field_149046_k);
-        p_148840_1_.writeShort(this.field_149036_f);
-        p_148840_1_.writeShort(this.field_149037_g);
-        p_148840_1_.writeShort(this.field_149047_h);
-        this.field_149043_l.func_151509_a(p_148840_1_);
+        data.writeVarIntToBuffer(this.field_149042_a);
+        data.writeByte(this.field_149040_b & 255);
+        data.writeInt(this.field_149041_c);
+        data.writeInt(this.field_149038_d);
+        data.writeInt(this.field_149039_e);
+        data.writeByte(this.field_149048_i);
+        data.writeByte(this.field_149045_j);
+        data.writeByte(this.field_149046_k);
+        data.writeShort(this.field_149036_f);
+        data.writeShort(this.field_149037_g);
+        data.writeShort(this.field_149047_h);
+        this.field_149043_l.writeTo(data);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180721_a(INetHandlerPlayClient p_180721_1_)
     {
-        p_148833_1_.handleSpawnMob(this);
+        p_180721_1_.handleSpawnMob(this);
     }
 
     public List func_149027_c()
@@ -132,14 +132,6 @@ public class S0FPacketSpawnMob extends Packet
         }
 
         return this.field_149044_m;
-    }
-
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
-    {
-        return String.format("id=%d, type=%d, x=%.2f, y=%.2f, z=%.2f, xd=%.2f, yd=%.2f, zd=%.2f", new Object[] {Integer.valueOf(this.field_149042_a), Integer.valueOf(this.field_149040_b), Float.valueOf((float)this.field_149041_c / 32.0F), Float.valueOf((float)this.field_149038_d / 32.0F), Float.valueOf((float)this.field_149039_e / 32.0F), Float.valueOf((float)this.field_149036_f / 8000.0F), Float.valueOf((float)this.field_149037_g / 8000.0F), Float.valueOf((float)this.field_149047_h / 8000.0F)});
     }
 
     public int func_149024_d()
@@ -197,8 +189,11 @@ public class S0FPacketSpawnMob extends Packet
         return this.field_149046_k;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180721_a((INetHandlerPlayClient)handler);
     }
 }

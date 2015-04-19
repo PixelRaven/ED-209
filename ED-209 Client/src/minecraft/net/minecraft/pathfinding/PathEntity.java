@@ -81,7 +81,7 @@ public class PathEntity
         double var3 = (double)this.points[p_75881_2_].xCoord + (double)((int)(p_75881_1_.width + 1.0F)) * 0.5D;
         double var5 = (double)this.points[p_75881_2_].yCoord;
         double var7 = (double)this.points[p_75881_2_].zCoord + (double)((int)(p_75881_1_.width + 1.0F)) * 0.5D;
-        return Vec3.createVectorHelper(var3, var5, var7);
+        return new Vec3(var3, var5, var7);
     }
 
     /**

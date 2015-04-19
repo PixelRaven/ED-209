@@ -1,5 +1,7 @@
 package net.minecraft.entity.ai.attributes;
 
+import net.minecraft.util.MathHelper;
+
 public class RangedAttribute extends BaseAttribute
 {
     private final double minimumValue;
@@ -7,21 +9,21 @@ public class RangedAttribute extends BaseAttribute
     private String description;
     private static final String __OBFID = "CL_00001568";
 
-    public RangedAttribute(String p_i1609_1_, double p_i1609_2_, double p_i1609_4_, double p_i1609_6_)
+    public RangedAttribute(IAttribute p_i45891_1_, String p_i45891_2_, double p_i45891_3_, double p_i45891_5_, double p_i45891_7_)
     {
-        super(p_i1609_1_, p_i1609_2_);
-        this.minimumValue = p_i1609_4_;
-        this.maximumValue = p_i1609_6_;
+        super(p_i45891_1_, p_i45891_2_, p_i45891_3_);
+        this.minimumValue = p_i45891_5_;
+        this.maximumValue = p_i45891_7_;
 
-        if (p_i1609_4_ > p_i1609_6_)
+        if (p_i45891_5_ > p_i45891_7_)
         {
             throw new IllegalArgumentException("Minimum value cannot be bigger than maximum value!");
         }
-        else if (p_i1609_2_ < p_i1609_4_)
+        else if (p_i45891_3_ < p_i45891_5_)
         {
             throw new IllegalArgumentException("Default value cannot be lower than minimum value!");
         }
-        else if (p_i1609_2_ > p_i1609_6_)
+        else if (p_i45891_3_ > p_i45891_7_)
         {
             throw new IllegalArgumentException("Default value cannot be bigger than maximum value!");
         }
@@ -40,16 +42,7 @@ public class RangedAttribute extends BaseAttribute
 
     public double clampValue(double p_111109_1_)
     {
-        if (p_111109_1_ < this.minimumValue)
-        {
-            p_111109_1_ = this.minimumValue;
-        }
-
-        if (p_111109_1_ > this.maximumValue)
-        {
-            p_111109_1_ = this.maximumValue;
-        }
-
+        p_111109_1_ = MathHelper.clamp_double(p_111109_1_, this.minimumValue, this.maximumValue);
         return p_111109_1_;
     }
 }

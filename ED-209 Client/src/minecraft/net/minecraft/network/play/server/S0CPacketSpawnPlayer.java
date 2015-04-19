@@ -1,9 +1,6 @@
 package net.minecraft.network.play.server;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.entity.DataWatcher;
@@ -16,10 +13,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.MathHelper;
 
-public class S0CPacketSpawnPlayer extends Packet
+public class S0CPacketSpawnPlayer implements Packet
 {
     private int field_148957_a;
-    private GameProfile field_148955_b;
+    private UUID field_179820_b;
     private int field_148956_c;
     private int field_148953_d;
     private int field_148954_e;
@@ -35,7 +32,7 @@ public class S0CPacketSpawnPlayer extends Packet
     public S0CPacketSpawnPlayer(EntityPlayer p_i45171_1_)
     {
         this.field_148957_a = p_i45171_1_.getEntityId();
-        this.field_148955_b = p_i45171_1_.getGameProfile();
+        this.field_179820_b = p_i45171_1_.getGameProfile().getId();
         this.field_148956_c = MathHelper.floor_double(p_i45171_1_.posX * 32.0D);
         this.field_148953_d = MathHelper.floor_double(p_i45171_1_.posY * 32.0D);
         this.field_148954_e = MathHelper.floor_double(p_i45171_1_.posZ * 32.0D);
@@ -49,62 +46,41 @@ public class S0CPacketSpawnPlayer extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_148957_a = p_148837_1_.readVarIntFromBuffer();
-        UUID var2 = UUID.fromString(p_148837_1_.readStringFromBuffer(36));
-        this.field_148955_b = new GameProfile(var2, p_148837_1_.readStringFromBuffer(16));
-        int var3 = p_148837_1_.readVarIntFromBuffer();
-
-        for (int var4 = 0; var4 < var3; ++var4)
-        {
-            String var5 = p_148837_1_.readStringFromBuffer(32767);
-            String var6 = p_148837_1_.readStringFromBuffer(32767);
-            String var7 = p_148837_1_.readStringFromBuffer(32767);
-            this.field_148955_b.getProperties().put(var5, new Property(var5, var6, var7));
-        }
-
-        this.field_148956_c = p_148837_1_.readInt();
-        this.field_148953_d = p_148837_1_.readInt();
-        this.field_148954_e = p_148837_1_.readInt();
-        this.field_148951_f = p_148837_1_.readByte();
-        this.field_148952_g = p_148837_1_.readByte();
-        this.field_148959_h = p_148837_1_.readShort();
-        this.field_148958_j = DataWatcher.readWatchedListFromPacketBuffer(p_148837_1_);
+        this.field_148957_a = data.readVarIntFromBuffer();
+        this.field_179820_b = data.readUuid();
+        this.field_148956_c = data.readInt();
+        this.field_148953_d = data.readInt();
+        this.field_148954_e = data.readInt();
+        this.field_148951_f = data.readByte();
+        this.field_148952_g = data.readByte();
+        this.field_148959_h = data.readShort();
+        this.field_148958_j = DataWatcher.readWatchedListFromPacketBuffer(data);
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeVarIntToBuffer(this.field_148957_a);
-        UUID var2 = this.field_148955_b.getId();
-        p_148840_1_.writeStringToBuffer(var2 == null ? "" : var2.toString());
-        p_148840_1_.writeStringToBuffer(this.field_148955_b.getName());
-        p_148840_1_.writeVarIntToBuffer(this.field_148955_b.getProperties().size());
-        Iterator var3 = this.field_148955_b.getProperties().values().iterator();
-
-        while (var3.hasNext())
-        {
-            Property var4 = (Property)var3.next();
-            p_148840_1_.writeStringToBuffer(var4.getName());
-            p_148840_1_.writeStringToBuffer(var4.getValue());
-            p_148840_1_.writeStringToBuffer(var4.getSignature());
-        }
-
-        p_148840_1_.writeInt(this.field_148956_c);
-        p_148840_1_.writeInt(this.field_148953_d);
-        p_148840_1_.writeInt(this.field_148954_e);
-        p_148840_1_.writeByte(this.field_148951_f);
-        p_148840_1_.writeByte(this.field_148952_g);
-        p_148840_1_.writeShort(this.field_148959_h);
-        this.field_148960_i.func_151509_a(p_148840_1_);
+        data.writeVarIntToBuffer(this.field_148957_a);
+        data.writeUuid(this.field_179820_b);
+        data.writeInt(this.field_148956_c);
+        data.writeInt(this.field_148953_d);
+        data.writeInt(this.field_148954_e);
+        data.writeByte(this.field_148951_f);
+        data.writeByte(this.field_148952_g);
+        data.writeShort(this.field_148959_h);
+        this.field_148960_i.writeTo(data);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleSpawnPlayer(this);
+        handler.handleSpawnPlayer(this);
     }
 
     public List func_148944_c()
@@ -117,22 +93,14 @@ public class S0CPacketSpawnPlayer extends Packet
         return this.field_148958_j;
     }
 
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
-    {
-        return String.format("id=%d, gameProfile=\'%s\', x=%.2f, y=%.2f, z=%.2f, carried=%d", new Object[] {Integer.valueOf(this.field_148957_a), this.field_148955_b, Float.valueOf((float)this.field_148956_c / 32.0F), Float.valueOf((float)this.field_148953_d / 32.0F), Float.valueOf((float)this.field_148954_e / 32.0F), Integer.valueOf(this.field_148959_h)});
-    }
-
     public int func_148943_d()
     {
         return this.field_148957_a;
     }
 
-    public GameProfile func_148948_e()
+    public UUID func_179819_c()
     {
-        return this.field_148955_b;
+        return this.field_179820_b;
     }
 
     public int func_148942_f()
@@ -165,8 +133,11 @@ public class S0CPacketSpawnPlayer extends Packet
         return this.field_148959_h;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

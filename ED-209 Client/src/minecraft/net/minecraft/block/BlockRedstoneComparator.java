@@ -1,245 +1,336 @@
 package net.minecraft.block;
 
+import com.google.common.base.Predicate;
+import java.util.List;
 import java.util.Random;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityComparator;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockRedstoneComparator extends BlockRedstoneDiode implements ITileEntityProvider
 {
+    public static final PropertyBool field_176464_a = PropertyBool.create("powered");
+    public static final PropertyEnum field_176463_b = PropertyEnum.create("mode", BlockRedstoneComparator.Mode.class);
     private static final String __OBFID = "CL_00000220";
 
     public BlockRedstoneComparator(boolean p_i45399_1_)
     {
         super(p_i45399_1_);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE, EnumFacing.NORTH).withProperty(field_176464_a, Boolean.valueOf(false)).withProperty(field_176463_b, BlockRedstoneComparator.Mode.COMPARE));
         this.isBlockContainer = true;
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
-    {
-        return Items.comparator;
-    }
-
     /**
-     * Gets an item for the block being called on. Args: world, x, y, z
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
      */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.comparator;
     }
 
-    protected int func_149901_b(int p_149901_1_)
+    public Item getItem(World worldIn, BlockPos pos)
+    {
+        return Items.comparator;
+    }
+
+    protected int func_176403_d(IBlockState p_176403_1_)
     {
         return 2;
     }
 
-    protected BlockRedstoneDiode func_149906_e()
+    protected IBlockState func_180674_e(IBlockState p_180674_1_)
     {
-        return Blocks.powered_comparator;
+        Boolean var2 = (Boolean)p_180674_1_.getValue(field_176464_a);
+        BlockRedstoneComparator.Mode var3 = (BlockRedstoneComparator.Mode)p_180674_1_.getValue(field_176463_b);
+        EnumFacing var4 = (EnumFacing)p_180674_1_.getValue(AGE);
+        return Blocks.powered_comparator.getDefaultState().withProperty(AGE, var4).withProperty(field_176464_a, var2).withProperty(field_176463_b, var3);
     }
 
-    protected BlockRedstoneDiode func_149898_i()
+    protected IBlockState func_180675_k(IBlockState p_180675_1_)
     {
-        return Blocks.unpowered_comparator;
+        Boolean var2 = (Boolean)p_180675_1_.getValue(field_176464_a);
+        BlockRedstoneComparator.Mode var3 = (BlockRedstoneComparator.Mode)p_180675_1_.getValue(field_176463_b);
+        EnumFacing var4 = (EnumFacing)p_180675_1_.getValue(AGE);
+        return Blocks.unpowered_comparator.getDefaultState().withProperty(AGE, var4).withProperty(field_176464_a, var2).withProperty(field_176463_b, var3);
     }
 
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
+    protected boolean func_176406_l(IBlockState p_176406_1_)
     {
-        return 37;
+        return this.isRepeaterPowered || ((Boolean)p_176406_1_.getValue(field_176464_a)).booleanValue();
     }
 
-    /**
-     * Gets the block's texture. Args: side, meta
-     */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    protected int func_176408_a(IBlockAccess p_176408_1_, BlockPos p_176408_2_, IBlockState p_176408_3_)
     {
-        boolean var3 = this.field_149914_a || (p_149691_2_ & 8) != 0;
-        return p_149691_1_ == 0 ? (var3 ? Blocks.redstone_torch.getBlockTextureFromSide(p_149691_1_) : Blocks.unlit_redstone_torch.getBlockTextureFromSide(p_149691_1_)) : (p_149691_1_ == 1 ? (var3 ? Blocks.powered_comparator.blockIcon : this.blockIcon) : Blocks.double_stone_slab.getBlockTextureFromSide(1));
+        TileEntity var4 = p_176408_1_.getTileEntity(p_176408_2_);
+        return var4 instanceof TileEntityComparator ? ((TileEntityComparator)var4).getOutputSignal() : 0;
     }
 
-    protected boolean func_149905_c(int p_149905_1_)
+    private int func_176460_j(World worldIn, BlockPos p_176460_2_, IBlockState p_176460_3_)
     {
-        return this.field_149914_a || (p_149905_1_ & 8) != 0;
+        return p_176460_3_.getValue(field_176463_b) == BlockRedstoneComparator.Mode.SUBTRACT ? Math.max(this.func_176397_f(worldIn, p_176460_2_, p_176460_3_) - this.func_176407_c(worldIn, p_176460_2_, p_176460_3_), 0) : this.func_176397_f(worldIn, p_176460_2_, p_176460_3_);
     }
 
-    protected int func_149904_f(IBlockAccess p_149904_1_, int p_149904_2_, int p_149904_3_, int p_149904_4_, int p_149904_5_)
+    protected boolean func_176404_e(World worldIn, BlockPos p_176404_2_, IBlockState p_176404_3_)
     {
-        return this.func_149971_e(p_149904_1_, p_149904_2_, p_149904_3_, p_149904_4_).func_145996_a();
-    }
+        int var4 = this.func_176397_f(worldIn, p_176404_2_, p_176404_3_);
 
-    private int func_149970_j(World p_149970_1_, int p_149970_2_, int p_149970_3_, int p_149970_4_, int p_149970_5_)
-    {
-        return !this.func_149969_d(p_149970_5_) ? this.func_149903_h(p_149970_1_, p_149970_2_, p_149970_3_, p_149970_4_, p_149970_5_) : Math.max(this.func_149903_h(p_149970_1_, p_149970_2_, p_149970_3_, p_149970_4_, p_149970_5_) - this.func_149902_h(p_149970_1_, p_149970_2_, p_149970_3_, p_149970_4_, p_149970_5_), 0);
-    }
-
-    public boolean func_149969_d(int p_149969_1_)
-    {
-        return (p_149969_1_ & 4) == 4;
-    }
-
-    protected boolean func_149900_a(World p_149900_1_, int p_149900_2_, int p_149900_3_, int p_149900_4_, int p_149900_5_)
-    {
-        int var6 = this.func_149903_h(p_149900_1_, p_149900_2_, p_149900_3_, p_149900_4_, p_149900_5_);
-
-        if (var6 >= 15)
+        if (var4 >= 15)
         {
             return true;
         }
-        else if (var6 == 0)
+        else if (var4 == 0)
         {
             return false;
         }
         else
         {
-            int var7 = this.func_149902_h(p_149900_1_, p_149900_2_, p_149900_3_, p_149900_4_, p_149900_5_);
-            return var7 == 0 ? true : var6 >= var7;
+            int var5 = this.func_176407_c(worldIn, p_176404_2_, p_176404_3_);
+            return var5 == 0 ? true : var4 >= var5;
         }
     }
 
-    protected int func_149903_h(World p_149903_1_, int p_149903_2_, int p_149903_3_, int p_149903_4_, int p_149903_5_)
+    protected int func_176397_f(World worldIn, BlockPos p_176397_2_, IBlockState p_176397_3_)
     {
-        int var6 = super.func_149903_h(p_149903_1_, p_149903_2_, p_149903_3_, p_149903_4_, p_149903_5_);
-        int var7 = func_149895_l(p_149903_5_);
-        int var8 = p_149903_2_ + Direction.offsetX[var7];
-        int var9 = p_149903_4_ + Direction.offsetZ[var7];
-        Block var10 = p_149903_1_.getBlock(var8, p_149903_3_, var9);
+        int var4 = super.func_176397_f(worldIn, p_176397_2_, p_176397_3_);
+        EnumFacing var5 = (EnumFacing)p_176397_3_.getValue(AGE);
+        BlockPos var6 = p_176397_2_.offset(var5);
+        Block var7 = worldIn.getBlockState(var6).getBlock();
 
-        if (var10.hasComparatorInputOverride())
+        if (var7.hasComparatorInputOverride())
         {
-            var6 = var10.getComparatorInputOverride(p_149903_1_, var8, p_149903_3_, var9, Direction.rotateOpposite[var7]);
+            var4 = var7.getComparatorInputOverride(worldIn, var6);
         }
-        else if (var6 < 15 && var10.isNormalCube())
+        else if (var4 < 15 && var7.isNormalCube())
         {
-            var8 += Direction.offsetX[var7];
-            var9 += Direction.offsetZ[var7];
-            var10 = p_149903_1_.getBlock(var8, p_149903_3_, var9);
+            var6 = var6.offset(var5);
+            var7 = worldIn.getBlockState(var6).getBlock();
 
-            if (var10.hasComparatorInputOverride())
+            if (var7.hasComparatorInputOverride())
             {
-                var6 = var10.getComparatorInputOverride(p_149903_1_, var8, p_149903_3_, var9, Direction.rotateOpposite[var7]);
+                var4 = var7.getComparatorInputOverride(worldIn, var6);
+            }
+            else if (var7.getMaterial() == Material.air)
+            {
+                EntityItemFrame var8 = this.func_176461_a(worldIn, var5, var6);
+
+                if (var8 != null)
+                {
+                    var4 = var8.func_174866_q();
+                }
             }
         }
 
-        return var6;
+        return var4;
     }
 
-    public TileEntityComparator func_149971_e(IBlockAccess p_149971_1_, int p_149971_2_, int p_149971_3_, int p_149971_4_)
+    private EntityItemFrame func_176461_a(World worldIn, final EnumFacing p_176461_2_, BlockPos p_176461_3_)
     {
-        return (TileEntityComparator)p_149971_1_.getTileEntity(p_149971_2_, p_149971_3_, p_149971_4_);
-    }
-
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
-    {
-        int var10 = p_149727_1_.getBlockMetadata(p_149727_2_, p_149727_3_, p_149727_4_);
-        boolean var11 = this.field_149914_a | (var10 & 8) != 0;
-        boolean var12 = !this.func_149969_d(var10);
-        int var13 = var12 ? 4 : 0;
-        var13 |= var11 ? 8 : 0;
-        p_149727_1_.playSoundEffect((double)p_149727_2_ + 0.5D, (double)p_149727_3_ + 0.5D, (double)p_149727_4_ + 0.5D, "random.click", 0.3F, var12 ? 0.55F : 0.5F);
-        p_149727_1_.setBlockMetadataWithNotify(p_149727_2_, p_149727_3_, p_149727_4_, var13 | var10 & 3, 2);
-        this.func_149972_c(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, p_149727_1_.rand);
-        return true;
-    }
-
-    protected void func_149897_b(World p_149897_1_, int p_149897_2_, int p_149897_3_, int p_149897_4_, Block p_149897_5_)
-    {
-        if (!p_149897_1_.func_147477_a(p_149897_2_, p_149897_3_, p_149897_4_, this))
+        List var4 = worldIn.func_175647_a(EntityItemFrame.class, new AxisAlignedBB((double)p_176461_3_.getX(), (double)p_176461_3_.getY(), (double)p_176461_3_.getZ(), (double)(p_176461_3_.getX() + 1), (double)(p_176461_3_.getY() + 1), (double)(p_176461_3_.getZ() + 1)), new Predicate()
         {
-            int var6 = p_149897_1_.getBlockMetadata(p_149897_2_, p_149897_3_, p_149897_4_);
-            int var7 = this.func_149970_j(p_149897_1_, p_149897_2_, p_149897_3_, p_149897_4_, var6);
-            int var8 = this.func_149971_e(p_149897_1_, p_149897_2_, p_149897_3_, p_149897_4_).func_145996_a();
-
-            if (var7 != var8 || this.func_149905_c(var6) != this.func_149900_a(p_149897_1_, p_149897_2_, p_149897_3_, p_149897_4_, var6))
+            private static final String __OBFID = "CL_00002129";
+            public boolean func_180416_a(Entity p_180416_1_)
             {
-                if (this.func_149912_i(p_149897_1_, p_149897_2_, p_149897_3_, p_149897_4_, var6))
+                return p_180416_1_ != null && p_180416_1_.func_174811_aO() == p_176461_2_;
+            }
+            public boolean apply(Object p_apply_1_)
+            {
+                return this.func_180416_a((Entity)p_apply_1_);
+            }
+        });
+        return var4.size() == 1 ? (EntityItemFrame)var4.get(0) : null;
+    }
+
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    {
+        if (!playerIn.capabilities.allowEdit)
+        {
+            return false;
+        }
+        else
+        {
+            state = state.cycleProperty(field_176463_b);
+            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "random.click", 0.3F, state.getValue(field_176463_b) == BlockRedstoneComparator.Mode.SUBTRACT ? 0.55F : 0.5F);
+            worldIn.setBlockState(pos, state, 2);
+            this.func_176462_k(worldIn, pos, state);
+            return true;
+        }
+    }
+
+    protected void func_176398_g(World worldIn, BlockPos p_176398_2_, IBlockState p_176398_3_)
+    {
+        if (!worldIn.isBlockTickPending(p_176398_2_, this))
+        {
+            int var4 = this.func_176460_j(worldIn, p_176398_2_, p_176398_3_);
+            TileEntity var5 = worldIn.getTileEntity(p_176398_2_);
+            int var6 = var5 instanceof TileEntityComparator ? ((TileEntityComparator)var5).getOutputSignal() : 0;
+
+            if (var4 != var6 || this.func_176406_l(p_176398_3_) != this.func_176404_e(worldIn, p_176398_2_, p_176398_3_))
+            {
+                if (this.func_176402_i(worldIn, p_176398_2_, p_176398_3_))
                 {
-                    p_149897_1_.func_147454_a(p_149897_2_, p_149897_3_, p_149897_4_, this, this.func_149901_b(0), -1);
+                    worldIn.func_175654_a(p_176398_2_, this, 2, -1);
                 }
                 else
                 {
-                    p_149897_1_.func_147454_a(p_149897_2_, p_149897_3_, p_149897_4_, this, this.func_149901_b(0), 0);
+                    worldIn.func_175654_a(p_176398_2_, this, 2, 0);
                 }
             }
         }
     }
 
-    private void func_149972_c(World p_149972_1_, int p_149972_2_, int p_149972_3_, int p_149972_4_, Random p_149972_5_)
+    private void func_176462_k(World worldIn, BlockPos p_176462_2_, IBlockState p_176462_3_)
     {
-        int var6 = p_149972_1_.getBlockMetadata(p_149972_2_, p_149972_3_, p_149972_4_);
-        int var7 = this.func_149970_j(p_149972_1_, p_149972_2_, p_149972_3_, p_149972_4_, var6);
-        int var8 = this.func_149971_e(p_149972_1_, p_149972_2_, p_149972_3_, p_149972_4_).func_145996_a();
-        this.func_149971_e(p_149972_1_, p_149972_2_, p_149972_3_, p_149972_4_).func_145995_a(var7);
+        int var4 = this.func_176460_j(worldIn, p_176462_2_, p_176462_3_);
+        TileEntity var5 = worldIn.getTileEntity(p_176462_2_);
+        int var6 = 0;
 
-        if (var8 != var7 || !this.func_149969_d(var6))
+        if (var5 instanceof TileEntityComparator)
         {
-            boolean var9 = this.func_149900_a(p_149972_1_, p_149972_2_, p_149972_3_, p_149972_4_, var6);
-            boolean var10 = this.field_149914_a || (var6 & 8) != 0;
-
-            if (var10 && !var9)
-            {
-                p_149972_1_.setBlockMetadataWithNotify(p_149972_2_, p_149972_3_, p_149972_4_, var6 & -9, 2);
-            }
-            else if (!var10 && var9)
-            {
-                p_149972_1_.setBlockMetadataWithNotify(p_149972_2_, p_149972_3_, p_149972_4_, var6 | 8, 2);
-            }
-
-            this.func_149911_e(p_149972_1_, p_149972_2_, p_149972_3_, p_149972_4_);
+            TileEntityComparator var7 = (TileEntityComparator)var5;
+            var6 = var7.getOutputSignal();
+            var7.setOutputSignal(var4);
         }
+
+        if (var6 != var4 || p_176462_3_.getValue(field_176463_b) == BlockRedstoneComparator.Mode.COMPARE)
+        {
+            boolean var9 = this.func_176404_e(worldIn, p_176462_2_, p_176462_3_);
+            boolean var8 = this.func_176406_l(p_176462_3_);
+
+            if (var8 && !var9)
+            {
+                worldIn.setBlockState(p_176462_2_, p_176462_3_.withProperty(field_176464_a, Boolean.valueOf(false)), 2);
+            }
+            else if (!var8 && var9)
+            {
+                worldIn.setBlockState(p_176462_2_, p_176462_3_.withProperty(field_176464_a, Boolean.valueOf(true)), 2);
+            }
+
+            this.func_176400_h(worldIn, p_176462_2_, p_176462_3_);
+        }
+    }
+
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
+    {
+        if (this.isRepeaterPowered)
+        {
+            worldIn.setBlockState(pos, this.func_180675_k(state).withProperty(field_176464_a, Boolean.valueOf(true)), 4);
+        }
+
+        this.func_176462_k(worldIn, pos, state);
+    }
+
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.onBlockAdded(worldIn, pos, state);
+        worldIn.setTileEntity(pos, this.createNewTileEntity(worldIn, 0));
+    }
+
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        super.breakBlock(worldIn, pos, state);
+        worldIn.removeTileEntity(pos);
+        this.func_176400_h(worldIn, pos, state);
     }
 
     /**
-     * Ticks the block if it's been scheduled
+     * Called on both Client and Server when World#addBlockEvent is called
      */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam)
     {
-        if (this.field_149914_a)
-        {
-            int var6 = p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_);
-            p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, this.func_149898_i(), var6 | 8, 4);
-        }
-
-        this.func_149972_c(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
-    }
-
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
-    {
-        super.onBlockAdded(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
-        p_149726_1_.setTileEntity(p_149726_2_, p_149726_3_, p_149726_4_, this.createNewTileEntity(p_149726_1_, 0));
-    }
-
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
-    {
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
-        p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
-        this.func_149911_e(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_);
-    }
-
-    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_)
-    {
-        super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
-        TileEntity var7 = p_149696_1_.getTileEntity(p_149696_2_, p_149696_3_, p_149696_4_);
-        return var7 != null ? var7.receiveClientEvent(p_149696_5_, p_149696_6_) : false;
+        super.onBlockEventReceived(worldIn, pos, state, eventID, eventParam);
+        TileEntity var6 = worldIn.getTileEntity(pos);
+        return var6 == null ? false : var6.receiveClientEvent(eventID, eventParam);
     }
 
     /**
      * Returns a new instance of a block's tile entity class. Called on placing the block.
      */
-    public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_)
+    public TileEntity createNewTileEntity(World worldIn, int meta)
     {
         return new TileEntityComparator();
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(AGE, EnumFacing.getHorizontal(meta)).withProperty(field_176464_a, Boolean.valueOf((meta & 8) > 0)).withProperty(field_176463_b, (meta & 4) > 0 ? BlockRedstoneComparator.Mode.SUBTRACT : BlockRedstoneComparator.Mode.COMPARE);
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        byte var2 = 0;
+        int var3 = var2 | ((EnumFacing)state.getValue(AGE)).getHorizontalIndex();
+
+        if (((Boolean)state.getValue(field_176464_a)).booleanValue())
+        {
+            var3 |= 8;
+        }
+
+        if (state.getValue(field_176463_b) == BlockRedstoneComparator.Mode.SUBTRACT)
+        {
+            var3 |= 4;
+        }
+
+        return var3;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {AGE, field_176463_b, field_176464_a});
+    }
+
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        return this.getDefaultState().withProperty(AGE, placer.func_174811_aO().getOpposite()).withProperty(field_176464_a, Boolean.valueOf(false)).withProperty(field_176463_b, BlockRedstoneComparator.Mode.COMPARE);
+    }
+
+    public static enum Mode implements IStringSerializable
+    {
+        COMPARE("COMPARE", 0, "compare"),
+        SUBTRACT("SUBTRACT", 1, "subtract");
+        private final String field_177041_c;
+
+        private static final BlockRedstoneComparator.Mode[] $VALUES = new BlockRedstoneComparator.Mode[]{COMPARE, SUBTRACT};
+        private static final String __OBFID = "CL_00002128";
+
+        private Mode(String p_i45731_1_, int p_i45731_2_, String p_i45731_3_)
+        {
+            this.field_177041_c = p_i45731_3_;
+        }
+
+        public String toString()
+        {
+            return this.field_177041_c;
+        }
+
+        public String getName()
+        {
+            return this.field_177041_c;
+        }
     }
 }

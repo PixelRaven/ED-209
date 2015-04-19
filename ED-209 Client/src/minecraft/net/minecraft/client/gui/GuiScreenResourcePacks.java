@@ -26,6 +26,7 @@ public class GuiScreenResourcePacks extends GuiScreen
     private List field_146969_h;
     private GuiResourcePackAvailable field_146970_i;
     private GuiResourcePackSelected field_146967_r;
+    private boolean field_175289_s = false;
     private static final String __OBFID = "CL_00000820";
 
     public GuiScreenResourcePacks(GuiScreen p_i45050_1_)
@@ -40,8 +41,8 @@ public class GuiScreenResourcePacks extends GuiScreen
     {
         this.buttonList.add(new GuiOptionButton(2, this.width / 2 - 154, this.height - 48, I18n.format("resourcePack.openFolder", new Object[0])));
         this.buttonList.add(new GuiOptionButton(1, this.width / 2 + 4, this.height - 48, I18n.format("gui.done", new Object[0])));
-        this.field_146966_g = new ArrayList();
-        this.field_146969_h = new ArrayList();
+        this.field_146966_g = Lists.newArrayList();
+        this.field_146969_h = Lists.newArrayList();
         ResourcePackRepository var1 = this.mc.getResourcePackRepository();
         var1.updateRepositoryEntriesAll();
         ArrayList var2 = Lists.newArrayList(var1.getRepositoryEntriesAll());
@@ -65,21 +66,31 @@ public class GuiScreenResourcePacks extends GuiScreen
 
         this.field_146969_h.add(new ResourcePackListEntryDefault(this));
         this.field_146970_i = new GuiResourcePackAvailable(this.mc, 200, this.height, this.field_146966_g);
-        this.field_146970_i.func_148140_g(this.width / 2 - 4 - 200);
-        this.field_146970_i.func_148134_d(7, 8);
+        this.field_146970_i.setSlotXBoundsFromLeft(this.width / 2 - 4 - 200);
+        this.field_146970_i.registerScrollButtons(7, 8);
         this.field_146967_r = new GuiResourcePackSelected(this.mc, 200, this.height, this.field_146969_h);
-        this.field_146967_r.func_148140_g(this.width / 2 + 4);
-        this.field_146967_r.func_148134_d(7, 8);
+        this.field_146967_r.setSlotXBoundsFromLeft(this.width / 2 + 4);
+        this.field_146967_r.registerScrollButtons(7, 8);
     }
 
-    public boolean func_146961_a(ResourcePackListEntry p_146961_1_)
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
+    {
+        super.handleMouseInput();
+        this.field_146967_r.func_178039_p();
+        this.field_146970_i.func_178039_p();
+    }
+
+    public boolean hasResourcePackEntry(ResourcePackListEntry p_146961_1_)
     {
         return this.field_146969_h.contains(p_146961_1_);
     }
 
     public List func_146962_b(ResourcePackListEntry p_146962_1_)
     {
-        return this.func_146961_a(p_146962_1_) ? this.field_146969_h : this.field_146966_g;
+        return this.hasResourcePackEntry(p_146962_1_) ? this.field_146969_h : this.field_146966_g;
     }
 
     public List func_146964_g()
@@ -92,11 +103,11 @@ public class GuiScreenResourcePacks extends GuiScreen
         return this.field_146969_h;
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.enabled)
+        if (button.enabled)
         {
-            if (p_146284_1_.id == 2)
+            if (button.id == 2)
             {
                 File var2 = this.mc.getResourcePackRepository().getDirResourcepacks();
                 String var3 = var2.getAbsolutePath();
@@ -149,64 +160,76 @@ public class GuiScreenResourcePacks extends GuiScreen
                     Sys.openURL("file://" + var3);
                 }
             }
-            else if (p_146284_1_.id == 1)
+            else if (button.id == 1)
             {
-                ArrayList var10 = Lists.newArrayList();
-                Iterator var11 = this.field_146969_h.iterator();
-
-                while (var11.hasNext())
+                if (this.field_175289_s)
                 {
-                    ResourcePackListEntry var13 = (ResourcePackListEntry)var11.next();
+                    ArrayList var10 = Lists.newArrayList();
+                    Iterator var11 = this.field_146969_h.iterator();
 
-                    if (var13 instanceof ResourcePackListEntryFound)
+                    while (var11.hasNext())
                     {
-                        var10.add(((ResourcePackListEntryFound)var13).func_148318_i());
+                        ResourcePackListEntry var13 = (ResourcePackListEntry)var11.next();
+
+                        if (var13 instanceof ResourcePackListEntryFound)
+                        {
+                            var10.add(((ResourcePackListEntryFound)var13).func_148318_i());
+                        }
                     }
+
+                    Collections.reverse(var10);
+                    this.mc.getResourcePackRepository().func_148527_a(var10);
+                    this.mc.gameSettings.resourcePacks.clear();
+                    var11 = var10.iterator();
+
+                    while (var11.hasNext())
+                    {
+                        ResourcePackRepository.Entry var14 = (ResourcePackRepository.Entry)var11.next();
+                        this.mc.gameSettings.resourcePacks.add(var14.getResourcePackName());
+                    }
+
+                    this.mc.gameSettings.saveOptions();
+                    this.mc.refreshResources();
                 }
 
-                Collections.reverse(var10);
-                this.mc.getResourcePackRepository().func_148527_a(var10);
-                this.mc.gameSettings.resourcePacks.clear();
-                var11 = var10.iterator();
-
-                while (var11.hasNext())
-                {
-                    ResourcePackRepository.Entry var14 = (ResourcePackRepository.Entry)var11.next();
-                    this.mc.gameSettings.resourcePacks.add(var14.getResourcePackName());
-                }
-
-                this.mc.gameSettings.saveOptions();
-                this.mc.refreshResources();
                 this.mc.displayGuiScreen(this.field_146965_f);
             }
         }
     }
 
     /**
-     * Called when the mouse is clicked.
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
      */
-    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_)
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
-        super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-        this.field_146970_i.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
-        this.field_146967_r.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
-    }
-
-    protected void mouseMovedOrUp(int p_146286_1_, int p_146286_2_, int p_146286_3_)
-    {
-        super.mouseMovedOrUp(p_146286_1_, p_146286_2_, p_146286_3_);
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.field_146970_i.func_148179_a(mouseX, mouseY, mouseButton);
+        this.field_146967_r.func_148179_a(mouseX, mouseY, mouseButton);
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Called when a mouse button is released.  Args : mouseX, mouseY, releaseButton
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    protected void mouseReleased(int mouseX, int mouseY, int state)
     {
-        this.func_146278_c(0);
-        this.field_146970_i.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
-        this.field_146967_r.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.mouseReleased(mouseX, mouseY, state);
+    }
+
+    /**
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
+    {
+        this.drawBackground(0);
+        this.field_146970_i.drawScreen(mouseX, mouseY, partialTicks);
+        this.field_146967_r.drawScreen(mouseX, mouseY, partialTicks);
         this.drawCenteredString(this.fontRendererObj, I18n.format("resourcePack.title", new Object[0]), this.width / 2, 16, 16777215);
         this.drawCenteredString(this.fontRendererObj, I18n.format("resourcePack.folderInfo", new Object[0]), this.width / 2 - 77, this.height - 26, 8421504);
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    public void func_175288_g()
+    {
+        this.field_175289_s = true;
     }
 }

@@ -4,17 +4,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class EntityAgeable extends EntityCreature
 {
+    protected int field_175504_a;
+    protected int field_175502_b;
+    protected int field_175503_c;
     private float field_98056_d = -1.0F;
     private float field_98057_e;
     private static final String __OBFID = "CL_00001530";
 
-    public EntityAgeable(World p_i1578_1_)
+    public EntityAgeable(World worldIn)
     {
-        super(p_i1578_1_);
+        super(worldIn);
     }
 
     public abstract EntityAgeable createChild(EntityAgeable p_90011_1_);
@@ -28,11 +33,11 @@ public abstract class EntityAgeable extends EntityCreature
 
         if (var2 != null && var2.getItem() == Items.spawn_egg)
         {
-            if (!this.worldObj.isClient)
+            if (!this.worldObj.isRemote)
             {
-                Class var3 = EntityList.getClassFromID(var2.getItemDamage());
+                Class var3 = EntityList.getClassFromID(var2.getMetadata());
 
-                if (var3 != null && var3.isAssignableFrom(this.getClass()))
+                if (var3 != null && this.getClass() == var3)
                 {
                     EntityAgeable var4 = this.createChild(this);
 
@@ -71,7 +76,7 @@ public abstract class EntityAgeable extends EntityCreature
     protected void entityInit()
     {
         super.entityInit();
-        this.dataWatcher.addObject(12, new Integer(0));
+        this.dataWatcher.addObject(12, Byte.valueOf((byte)0));
     }
 
     /**
@@ -81,7 +86,42 @@ public abstract class EntityAgeable extends EntityCreature
      */
     public int getGrowingAge()
     {
-        return this.dataWatcher.getWatchableObjectInt(12);
+        return this.worldObj.isRemote ? this.dataWatcher.getWatchableObjectByte(12) : this.field_175504_a;
+    }
+
+    public void func_175501_a(int p_175501_1_, boolean p_175501_2_)
+    {
+        int var3 = this.getGrowingAge();
+        int var4 = var3;
+        var3 += p_175501_1_ * 20;
+
+        if (var3 > 0)
+        {
+            var3 = 0;
+
+            if (var4 < 0)
+            {
+                this.func_175500_n();
+            }
+        }
+
+        int var5 = var3 - var4;
+        this.setGrowingAge(var3);
+
+        if (p_175501_2_)
+        {
+            this.field_175502_b += var5;
+
+            if (this.field_175503_c == 0)
+            {
+                this.field_175503_c = 40;
+            }
+        }
+
+        if (this.getGrowingAge() == 0)
+        {
+            this.setGrowingAge(this.field_175502_b);
+        }
     }
 
     /**
@@ -90,15 +130,7 @@ public abstract class EntityAgeable extends EntityCreature
      */
     public void addGrowth(int p_110195_1_)
     {
-        int var2 = this.getGrowingAge();
-        var2 += p_110195_1_ * 20;
-
-        if (var2 > 0)
-        {
-            var2 = 0;
-        }
-
-        this.setGrowingAge(var2);
+        this.func_175501_a(p_110195_1_, false);
     }
 
     /**
@@ -107,26 +139,29 @@ public abstract class EntityAgeable extends EntityCreature
      */
     public void setGrowingAge(int p_70873_1_)
     {
-        this.dataWatcher.updateObject(12, Integer.valueOf(p_70873_1_));
+        this.dataWatcher.updateObject(12, Byte.valueOf((byte)MathHelper.clamp_int(p_70873_1_, -1, 1)));
+        this.field_175504_a = p_70873_1_;
         this.setScaleForAge(this.isChild());
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setInteger("Age", this.getGrowingAge());
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setInteger("Age", this.getGrowingAge());
+        tagCompound.setInteger("ForcedAge", this.field_175502_b);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.setGrowingAge(p_70037_1_.getInteger("Age"));
+        super.readEntityFromNBT(tagCompund);
+        this.setGrowingAge(tagCompund.getInteger("Age"));
+        this.field_175502_b = tagCompund.getInteger("ForcedAge");
     }
 
     /**
@@ -137,8 +172,18 @@ public abstract class EntityAgeable extends EntityCreature
     {
         super.onLivingUpdate();
 
-        if (this.worldObj.isClient)
+        if (this.worldObj.isRemote)
         {
+            if (this.field_175503_c > 0)
+            {
+                if (this.field_175503_c % 4 == 0)
+                {
+                    this.worldObj.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, 0.0D, 0.0D, 0.0D, new int[0]);
+                }
+
+                --this.field_175503_c;
+            }
+
             this.setScaleForAge(this.isChild());
         }
         else
@@ -149,6 +194,11 @@ public abstract class EntityAgeable extends EntityCreature
             {
                 ++var1;
                 this.setGrowingAge(var1);
+
+                if (var1 == 0)
+                {
+                    this.func_175500_n();
+                }
             }
             else if (var1 > 0)
             {
@@ -157,6 +207,8 @@ public abstract class EntityAgeable extends EntityCreature
             }
         }
     }
+
+    protected void func_175500_n() {}
 
     /**
      * If Animal, checks if the age timer is negative
@@ -177,11 +229,11 @@ public abstract class EntityAgeable extends EntityCreature
     /**
      * Sets the width and height of the entity. Args: width, height
      */
-    protected final void setSize(float p_70105_1_, float p_70105_2_)
+    protected final void setSize(float width, float height)
     {
         boolean var3 = this.field_98056_d > 0.0F;
-        this.field_98056_d = p_70105_1_;
-        this.field_98057_e = p_70105_2_;
+        this.field_98056_d = width;
+        this.field_98057_e = height;
 
         if (!var3)
         {

@@ -1,6 +1,7 @@
 package net.minecraft.client.particle;
 
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
@@ -16,9 +17,9 @@ public class EntityFireworkSparkFX extends EntityFX
     private boolean hasFadeColour;
     private static final String __OBFID = "CL_00000905";
 
-    public EntityFireworkSparkFX(World p_i46356_1_, double p_i46356_2_, double p_i46356_4_, double p_i46356_6_, double p_i46356_8_, double p_i46356_10_, double p_i46356_12_, EffectRenderer p_i46356_14_)
+    public EntityFireworkSparkFX(World worldIn, double p_i46356_2_, double p_i46356_4_, double p_i46356_6_, double p_i46356_8_, double p_i46356_10_, double p_i46356_12_, EffectRenderer p_i46356_14_)
     {
-        super(p_i46356_1_, p_i46356_2_, p_i46356_4_, p_i46356_6_);
+        super(worldIn, p_i46356_2_, p_i46356_4_, p_i46356_6_);
         this.motionX = p_i46356_8_;
         this.motionY = p_i46356_10_;
         this.motionZ = p_i46356_12_;
@@ -71,11 +72,11 @@ public class EntityFireworkSparkFX extends EntityFX
         return false;
     }
 
-    public void renderParticle(Tessellator p_70539_1_, float p_70539_2_, float p_70539_3_, float p_70539_4_, float p_70539_5_, float p_70539_6_, float p_70539_7_)
+    public void func_180434_a(WorldRenderer p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_)
     {
         if (!this.field_92048_ay || this.particleAge < this.particleMaxAge / 3 || (this.particleAge + this.particleMaxAge) / 3 % 2 == 0)
         {
-            super.renderParticle(p_70539_1_, p_70539_2_, p_70539_3_, p_70539_4_, p_70539_5_, p_70539_6_, p_70539_7_);
+            super.func_180434_a(p_180434_1_, p_180434_2_, p_180434_3_, p_180434_4_, p_180434_5_, p_180434_6_, p_180434_7_, p_180434_8_);
         }
     }
 
@@ -121,6 +122,7 @@ public class EntityFireworkSparkFX extends EntityFX
         if (this.field_92054_ax && this.particleAge < this.particleMaxAge / 2 && (this.particleAge + this.particleMaxAge) % 2 == 0)
         {
             EntityFireworkSparkFX var1 = new EntityFireworkSparkFX(this.worldObj, this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D, this.field_92047_az);
+            var1.setAlphaF(0.99F);
             var1.setRBGColorF(this.particleRed, this.particleGreen, this.particleBlue);
             var1.particleAge = var1.particleMaxAge / 2;
 

@@ -47,7 +47,7 @@ public class CombatEntry
 
     public IChatComponent func_151522_h()
     {
-        return this.getDamageSrc().getEntity() == null ? null : this.getDamageSrc().getEntity().func_145748_c_();
+        return this.getDamageSrc().getEntity() == null ? null : this.getDamageSrc().getEntity().getDisplayName();
     }
 
     public float func_94561_i()

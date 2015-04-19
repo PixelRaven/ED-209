@@ -1,7 +1,7 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 
 public class EntityAIMoveTowardsRestriction extends EntityAIBase
@@ -31,8 +31,8 @@ public class EntityAIMoveTowardsRestriction extends EntityAIBase
         }
         else
         {
-            ChunkCoordinates var1 = this.theEntity.getHomePosition();
-            Vec3 var2 = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 16, 7, Vec3.createVectorHelper((double)var1.posX, (double)var1.posY, (double)var1.posZ));
+            BlockPos var1 = this.theEntity.func_180486_cf();
+            Vec3 var2 = RandomPositionGenerator.findRandomTargetBlockTowards(this.theEntity, 16, 7, new Vec3((double)var1.getX(), (double)var1.getY(), (double)var1.getZ()));
 
             if (var2 == null)
             {

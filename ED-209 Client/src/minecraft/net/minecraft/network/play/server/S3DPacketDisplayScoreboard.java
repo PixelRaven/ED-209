@@ -7,7 +7,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.ScoreObjective;
 
-public class S3DPacketDisplayScoreboard extends Packet
+public class S3DPacketDisplayScoreboard implements Packet
 {
     private int field_149374_a;
     private String field_149373_b;
@@ -32,24 +32,24 @@ public class S3DPacketDisplayScoreboard extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149374_a = p_148837_1_.readByte();
-        this.field_149373_b = p_148837_1_.readStringFromBuffer(16);
+        this.field_149374_a = data.readByte();
+        this.field_149373_b = data.readStringFromBuffer(16);
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeByte(this.field_149374_a);
-        p_148840_1_.writeStringToBuffer(this.field_149373_b);
+        data.writeByte(this.field_149374_a);
+        data.writeString(this.field_149373_b);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180747_a(INetHandlerPlayClient p_180747_1_)
     {
-        p_148833_1_.handleDisplayScoreboard(this);
+        p_180747_1_.handleDisplayScoreboard(this);
     }
 
     public int func_149371_c()
@@ -62,8 +62,11 @@ public class S3DPacketDisplayScoreboard extends Packet
         return this.field_149373_b;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180747_a((INetHandlerPlayClient)handler);
     }
 }

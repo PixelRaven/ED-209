@@ -6,36 +6,36 @@ public class PositionedSoundRecord extends PositionedSound
 {
     private static final String __OBFID = "CL_00001120";
 
-    public static PositionedSoundRecord func_147674_a(ResourceLocation p_147674_0_, float p_147674_1_)
+    public static PositionedSoundRecord createPositionedSoundRecord(ResourceLocation soundResource, float pitch)
     {
-        return new PositionedSoundRecord(p_147674_0_, 0.25F, p_147674_1_, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
+        return new PositionedSoundRecord(soundResource, 0.25F, pitch, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
     }
 
-    public static PositionedSoundRecord func_147673_a(ResourceLocation p_147673_0_)
+    public static PositionedSoundRecord createPositionedSoundRecord(ResourceLocation soundResource)
     {
-        return new PositionedSoundRecord(p_147673_0_, 1.0F, 1.0F, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
+        return new PositionedSoundRecord(soundResource, 1.0F, 1.0F, false, 0, ISound.AttenuationType.NONE, 0.0F, 0.0F, 0.0F);
     }
 
-    public static PositionedSoundRecord func_147675_a(ResourceLocation p_147675_0_, float p_147675_1_, float p_147675_2_, float p_147675_3_)
+    public static PositionedSoundRecord createRecordSoundAtPosition(ResourceLocation soundResource, float xPosition, float yPosition, float zPosition)
     {
-        return new PositionedSoundRecord(p_147675_0_, 4.0F, 1.0F, false, 0, ISound.AttenuationType.LINEAR, p_147675_1_, p_147675_2_, p_147675_3_);
+        return new PositionedSoundRecord(soundResource, 4.0F, 1.0F, false, 0, ISound.AttenuationType.LINEAR, xPosition, yPosition, zPosition);
     }
 
-    public PositionedSoundRecord(ResourceLocation p_i45107_1_, float p_i45107_2_, float p_i45107_3_, float p_i45107_4_, float p_i45107_5_, float p_i45107_6_)
+    public PositionedSoundRecord(ResourceLocation soundResource, float volume, float pitch, float xPosition, float yPosition, float zPosition)
     {
-        this(p_i45107_1_, p_i45107_2_, p_i45107_3_, false, 0, ISound.AttenuationType.LINEAR, p_i45107_4_, p_i45107_5_, p_i45107_6_);
+        this(soundResource, volume, pitch, false, 0, ISound.AttenuationType.LINEAR, xPosition, yPosition, zPosition);
     }
 
-    private PositionedSoundRecord(ResourceLocation p_i45108_1_, float p_i45108_2_, float p_i45108_3_, boolean p_i45108_4_, int p_i45108_5_, ISound.AttenuationType p_i45108_6_, float p_i45108_7_, float p_i45108_8_, float p_i45108_9_)
+    private PositionedSoundRecord(ResourceLocation soundResource, float volume, float pitch, boolean repeat, int repeatDelay, ISound.AttenuationType attenuationType, float xPosition, float yPosition, float zPosition)
     {
-        super(p_i45108_1_);
-        this.field_147662_b = p_i45108_2_;
-        this.field_147663_c = p_i45108_3_;
-        this.field_147660_d = p_i45108_7_;
-        this.field_147661_e = p_i45108_8_;
-        this.field_147658_f = p_i45108_9_;
-        this.field_147659_g = p_i45108_4_;
-        this.field_147665_h = p_i45108_5_;
-        this.field_147666_i = p_i45108_6_;
+        super(soundResource);
+        this.volume = volume;
+        this.pitch = pitch;
+        this.xPosF = xPosition;
+        this.yPosF = yPosition;
+        this.zPosF = zPosition;
+        this.repeat = repeat;
+        this.repeatDelay = repeatDelay;
+        this.attenuationType = attenuationType;
     }
 }

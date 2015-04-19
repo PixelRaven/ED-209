@@ -1,7 +1,6 @@
 package net.minecraft.item;
 
 import net.minecraft.block.BlockLeaves;
-import net.minecraft.util.IIcon;
 
 public class ItemLeaves extends ItemBlock
 {
@@ -17,39 +16,25 @@ public class ItemLeaves extends ItemBlock
     }
 
     /**
-     * Returns the metadata of the block which this Item (ItemBlock) can place
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
      */
-    public int getMetadata(int p_77647_1_)
+    public int getMetadata(int damage)
     {
-        return p_77647_1_ | 4;
+        return damage | 4;
     }
 
-    /**
-     * Gets an icon index based on an item's damage value
-     */
-    public IIcon getIconFromDamage(int p_77617_1_)
+    public int getColorFromItemStack(ItemStack stack, int renderPass)
     {
-        return this.field_150940_b.getIcon(0, p_77617_1_);
-    }
-
-    public int getColorFromItemStack(ItemStack p_82790_1_, int p_82790_2_)
-    {
-        return this.field_150940_b.getRenderColor(p_82790_1_.getItemDamage());
+        return this.field_150940_b.getRenderColor(this.field_150940_b.getStateFromMeta(stack.getMetadata()));
     }
 
     /**
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        int var2 = p_77667_1_.getItemDamage();
-
-        if (var2 < 0 || var2 >= this.field_150940_b.func_150125_e().length)
-        {
-            var2 = 0;
-        }
-
-        return super.getUnlocalizedName() + "." + this.field_150940_b.func_150125_e()[var2];
+        return super.getUnlocalizedName() + "." + this.field_150940_b.func_176233_b(stack.getMetadata()).func_176840_c();
     }
 }

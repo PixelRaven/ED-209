@@ -3,6 +3,8 @@ package net.minecraft.entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.InventoryMerchant;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 
@@ -16,12 +18,14 @@ public class NpcMerchant implements IMerchant
 
     /** The MerchantRecipeList instance. */
     private MerchantRecipeList recipeList;
+    private IChatComponent field_175548_d;
     private static final String __OBFID = "CL_00001705";
 
-    public NpcMerchant(EntityPlayer p_i1746_1_)
+    public NpcMerchant(EntityPlayer p_i45817_1_, IChatComponent p_i45817_2_)
     {
-        this.customer = p_i1746_1_;
-        this.theMerchantInventory = new InventoryMerchant(p_i1746_1_, this);
+        this.customer = p_i45817_1_;
+        this.field_175548_d = p_i45817_2_;
+        this.theMerchantInventory = new InventoryMerchant(p_i45817_1_, this);
     }
 
     public EntityPlayer getCustomer()
@@ -41,7 +45,19 @@ public class NpcMerchant implements IMerchant
         this.recipeList = p_70930_1_;
     }
 
-    public void useRecipe(MerchantRecipe p_70933_1_) {}
+    public void useRecipe(MerchantRecipe p_70933_1_)
+    {
+        p_70933_1_.incrementToolUses();
+    }
 
-    public void func_110297_a_(ItemStack p_110297_1_) {}
+    /**
+     * Notifies the merchant of a possible merchantrecipe being fulfilled or not. Usually, this is just a sound byte
+     * being played depending if the suggested itemstack is not null.
+     */
+    public void verifySellingItem(ItemStack p_110297_1_) {}
+
+    public IChatComponent getDisplayName()
+    {
+        return (IChatComponent)(this.field_175548_d != null ? this.field_175548_d : new ChatComponentTranslation("entity.Villager.name", new Object[0]));
+    }
 }

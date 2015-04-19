@@ -1,7 +1,9 @@
 package net.minecraft.command;
 
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public interface ICommandSender
@@ -9,9 +11,9 @@ public interface ICommandSender
     /**
      * Gets the name of this command sender (usually username, but possibly "Rcon")
      */
-    String getCommandSenderName();
+    String getName();
 
-    IChatComponent func_145748_c_();
+    IChatComponent getDisplayName();
 
     /**
      * Notifies this sender of some sort of information.  This is for messages intended to display to the user.  Used
@@ -19,17 +21,22 @@ public interface ICommandSender
      * (like "I fetched this block for you by ID, but I'd like you to know that every time you do this, I die a little
      * inside"), and errors (like "it's not called iron_pixacke, silly").
      */
-    void addChatMessage(IChatComponent p_145747_1_);
+    void addChatMessage(IChatComponent message);
 
     /**
      * Returns true if the command sender is allowed to use the given command.
      */
-    boolean canCommandSenderUseCommand(int p_70003_1_, String p_70003_2_);
+    boolean canCommandSenderUseCommand(int permissionLevel, String command);
 
-    /**
-     * Return the position for this command sender.
-     */
-    ChunkCoordinates getPlayerCoordinates();
+    BlockPos getPosition();
+
+    Vec3 getPositionVector();
 
     World getEntityWorld();
+
+    Entity getCommandSenderEntity();
+
+    boolean sendCommandFeedback();
+
+    void func_174794_a(CommandResultStats.Type p_174794_1_, int p_174794_2_);
 }

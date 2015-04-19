@@ -4,18 +4,20 @@ import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityEndPortal;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockEndPortal extends BlockContainer
 {
-    public static boolean field_149948_a;
     private static final String __OBFID = "CL_00000236";
 
     protected BlockEndPortal(Material p_i45404_1_)
@@ -27,30 +29,35 @@ public class BlockEndPortal extends BlockContainer
     /**
      * Returns a new instance of a block's tile entity class. Called on placing the block.
      */
-    public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_)
+    public TileEntity createNewTileEntity(World worldIn, int meta)
     {
         return new TileEntityEndPortal();
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
     {
-        float var5 = 0.0625F;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, var5, 1.0F);
+        float var3 = 0.0625F;
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, var3, 1.0F);
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess p_149646_1_, int p_149646_2_, int p_149646_3_, int p_149646_4_, int p_149646_5_)
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
-        return p_149646_5_ != 0 ? false : super.shouldSideBeRendered(p_149646_1_, p_149646_2_, p_149646_3_, p_149646_4_, p_149646_5_);
+        return side == EnumFacing.DOWN ? super.shouldSideBeRendered(worldIn, pos, side) : false;
     }
 
-    public void addCollisionBoxesToList(World p_149743_1_, int p_149743_2_, int p_149743_3_, int p_149743_4_, AxisAlignedBB p_149743_5_, List p_149743_6_, Entity p_149743_7_) {}
+    /**
+     * Add all collision boxes of this Block to the list that intersect with the given mask.
+     *  
+     * @param collidingEntity the Entity colliding with this Block
+     */
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity) {}
 
     public boolean isOpaqueCube()
     {
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
@@ -58,67 +65,43 @@ public class BlockEndPortal extends BlockContainer
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }
 
-    public void onEntityCollidedWithBlock(World p_149670_1_, int p_149670_2_, int p_149670_3_, int p_149670_4_, Entity p_149670_5_)
+    /**
+     * Called When an Entity Collided with the Block
+     */
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        if (p_149670_5_.ridingEntity == null && p_149670_5_.riddenByEntity == null && !p_149670_1_.isClient)
+        if (entityIn.ridingEntity == null && entityIn.riddenByEntity == null && !worldIn.isRemote)
         {
-            p_149670_5_.travelToDimension(1);
+            entityIn.travelToDimension(1);
         }
     }
 
-    /**
-     * A randomly called display update to be able to add particles or other items for display
-     */
-    public void randomDisplayTick(World p_149734_1_, int p_149734_2_, int p_149734_3_, int p_149734_4_, Random p_149734_5_)
+    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        double var6 = (double)((float)p_149734_2_ + p_149734_5_.nextFloat());
-        double var8 = (double)((float)p_149734_3_ + 0.8F);
-        double var10 = (double)((float)p_149734_4_ + p_149734_5_.nextFloat());
-        double var12 = 0.0D;
-        double var14 = 0.0D;
-        double var16 = 0.0D;
-        p_149734_1_.spawnParticle("smoke", var6, var8, var10, var12, var14, var16);
+        double var5 = (double)((float)pos.getX() + rand.nextFloat());
+        double var7 = (double)((float)pos.getY() + 0.8F);
+        double var9 = (double)((float)pos.getZ() + rand.nextFloat());
+        double var11 = 0.0D;
+        double var13 = 0.0D;
+        double var15 = 0.0D;
+        worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var5, var7, var9, var11, var13, var15, new int[0]);
+    }
+
+    public Item getItem(World worldIn, BlockPos pos)
+    {
+        return null;
     }
 
     /**
-     * The type of render function that is called for this block
+     * Get the MapColor for this Block and the given BlockState
      */
-    public int getRenderType()
+    public MapColor getMapColor(IBlockState state)
     {
-        return -1;
-    }
-
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
-    {
-        if (!field_149948_a)
-        {
-            if (p_149726_1_.provider.dimensionId != 0)
-            {
-                p_149726_1_.setBlockToAir(p_149726_2_, p_149726_3_, p_149726_4_);
-            }
-        }
-    }
-
-    /**
-     * Gets an item for the block being called on. Args: world, x, y, z
-     */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
-    {
-        return Item.getItemById(0);
-    }
-
-    public void registerBlockIcons(IIconRegister p_149651_1_)
-    {
-        this.blockIcon = p_149651_1_.registerIcon("portal");
-    }
-
-    public MapColor getMapColor(int p_149728_1_)
-    {
-        return MapColor.field_151654_J;
+        return MapColor.obsidianColor;
     }
 }

@@ -1,11 +1,14 @@
 package net.minecraft.entity.monster;
 
+import com.google.common.base.Predicate;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.ai.EntityAIAvoidEntity;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.EnumDifficulty;
@@ -14,11 +17,23 @@ import net.minecraft.world.World;
 
 public abstract class EntityMob extends EntityCreature implements IMob
 {
+    protected final EntityAIBase field_175455_a = new EntityAIAvoidEntity(this, new Predicate()
+    {
+        private static final String __OBFID = "CL_00002208";
+        public boolean func_179911_a(Entity p_179911_1_)
+        {
+            return p_179911_1_ instanceof EntityCreeper && ((EntityCreeper)p_179911_1_).getCreeperState() > 0;
+        }
+        public boolean apply(Object p_apply_1_)
+        {
+            return this.func_179911_a((Entity)p_apply_1_);
+        }
+    }, 4.0F, 1.0D, 2.0D);
     private static final String __OBFID = "CL_00001692";
 
-    public EntityMob(World p_i1738_1_)
+    public EntityMob(World worldIn)
     {
-        super(p_i1738_1_);
+        super(worldIn);
         this.experienceValue = 5;
     }
 
@@ -46,7 +61,7 @@ public abstract class EntityMob extends EntityCreature implements IMob
     {
         super.onUpdate();
 
-        if (!this.worldObj.isClient && this.worldObj.difficultySetting == EnumDifficulty.PEACEFUL)
+        if (!this.worldObj.isRemote && this.worldObj.getDifficulty() == EnumDifficulty.PEACEFUL)
         {
             this.setDead();
         }
@@ -63,41 +78,18 @@ public abstract class EntityMob extends EntityCreature implements IMob
     }
 
     /**
-     * Finds the closest player within 16 blocks to attack, or null if this Entity isn't interested in attacking
-     * (Animals, Spiders at day, peaceful PigZombies).
-     */
-    protected Entity findPlayerToAttack()
-    {
-        EntityPlayer var1 = this.worldObj.getClosestVulnerablePlayerToEntity(this, 16.0D);
-        return var1 != null && this.canEntityBeSeen(var1) ? var1 : null;
-    }
-
-    /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource p_70097_1_, float p_70097_2_)
+    public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        if (this.isEntityInvulnerable())
+        if (this.func_180431_b(source))
         {
             return false;
         }
-        else if (super.attackEntityFrom(p_70097_1_, p_70097_2_))
+        else if (super.attackEntityFrom(source, amount))
         {
-            Entity var3 = p_70097_1_.getEntity();
-
-            if (this.riddenByEntity != var3 && this.ridingEntity != var3)
-            {
-                if (var3 != this)
-                {
-                    this.entityToAttack = var3;
-                }
-
-                return true;
-            }
-            else
-            {
-                return true;
-            }
+            Entity var3 = source.getEntity();
+            return this.riddenByEntity != var3 && this.ridingEntity != var3 ? true : true;
         }
         else
         {
@@ -133,8 +125,8 @@ public abstract class EntityMob extends EntityCreature implements IMob
 
         if (p_70652_1_ instanceof EntityLivingBase)
         {
-            var2 += EnchantmentHelper.getEnchantmentModifierLiving(this, (EntityLivingBase)p_70652_1_);
-            var3 += EnchantmentHelper.getKnockbackModifier(this, (EntityLivingBase)p_70652_1_);
+            var2 += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase)p_70652_1_).getCreatureAttribute());
+            var3 += EnchantmentHelper.getRespiration(this);
         }
 
         boolean var4 = p_70652_1_.attackEntityFrom(DamageSource.causeMobDamage(this), var2);
@@ -155,36 +147,15 @@ public abstract class EntityMob extends EntityCreature implements IMob
                 p_70652_1_.setFire(var5 * 4);
             }
 
-            if (p_70652_1_ instanceof EntityLivingBase)
-            {
-                EnchantmentHelper.func_151384_a((EntityLivingBase)p_70652_1_, this);
-            }
-
-            EnchantmentHelper.func_151385_b(this, p_70652_1_);
+            this.func_174815_a(this, p_70652_1_);
         }
 
         return var4;
     }
 
-    /**
-     * Basic mob attack. Default to touch of death in EntityCreature. Overridden by each mob to define their attack.
-     */
-    protected void attackEntity(Entity p_70785_1_, float p_70785_2_)
+    public float func_180484_a(BlockPos p_180484_1_)
     {
-        if (this.attackTime <= 0 && p_70785_2_ < 2.0F && p_70785_1_.boundingBox.maxY > this.boundingBox.minY && p_70785_1_.boundingBox.minY < this.boundingBox.maxY)
-        {
-            this.attackTime = 20;
-            this.attackEntityAsMob(p_70785_1_);
-        }
-    }
-
-    /**
-     * Takes a coordinate in and returns a weight to determine how likely this creature will try to path to the block.
-     * Args: x, y, z
-     */
-    public float getBlockPathWeight(int p_70783_1_, int p_70783_2_, int p_70783_3_)
-    {
-        return 0.5F - this.worldObj.getLightBrightness(p_70783_1_, p_70783_2_, p_70783_3_);
+        return 0.5F - this.worldObj.getLightBrightness(p_180484_1_);
     }
 
     /**
@@ -192,27 +163,25 @@ public abstract class EntityMob extends EntityCreature implements IMob
      */
     protected boolean isValidLightLevel()
     {
-        int var1 = MathHelper.floor_double(this.posX);
-        int var2 = MathHelper.floor_double(this.boundingBox.minY);
-        int var3 = MathHelper.floor_double(this.posZ);
+        BlockPos var1 = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
 
-        if (this.worldObj.getSavedLightValue(EnumSkyBlock.Sky, var1, var2, var3) > this.rand.nextInt(32))
+        if (this.worldObj.getLightFor(EnumSkyBlock.SKY, var1) > this.rand.nextInt(32))
         {
             return false;
         }
         else
         {
-            int var4 = this.worldObj.getBlockLightValue(var1, var2, var3);
+            int var2 = this.worldObj.getLightFromNeighbors(var1);
 
             if (this.worldObj.isThundering())
             {
-                int var5 = this.worldObj.skylightSubtracted;
-                this.worldObj.skylightSubtracted = 10;
-                var4 = this.worldObj.getBlockLightValue(var1, var2, var3);
-                this.worldObj.skylightSubtracted = var5;
+                int var3 = this.worldObj.getSkylightSubtracted();
+                this.worldObj.setSkylightSubtracted(10);
+                var2 = this.worldObj.getLightFromNeighbors(var1);
+                this.worldObj.setSkylightSubtracted(var3);
             }
 
-            return var4 <= this.rand.nextInt(8);
+            return var2 <= this.rand.nextInt(8);
         }
     }
 
@@ -221,7 +190,7 @@ public abstract class EntityMob extends EntityCreature implements IMob
      */
     public boolean getCanSpawnHere()
     {
-        return this.worldObj.difficultySetting != EnumDifficulty.PEACEFUL && this.isValidLightLevel() && super.getCanSpawnHere();
+        return this.worldObj.getDifficulty() != EnumDifficulty.PEACEFUL && this.isValidLightLevel() && super.getCanSpawnHere();
     }
 
     protected void applyEntityAttributes()

@@ -24,7 +24,7 @@ public class SaveHandlerMP implements ISaveHandler
     public void checkSessionLock() throws MinecraftException {}
 
     /**
-     * Returns the chunk loader with the provided world provider
+     * initializes and returns the chunk loader for the specified world provider
      */
     public IChunkLoader getChunkLoader(WorldProvider p_75763_1_)
     {
@@ -37,14 +37,11 @@ public class SaveHandlerMP implements ISaveHandler
     public void saveWorldInfoWithPlayer(WorldInfo p_75755_1_, NBTTagCompound p_75755_2_) {}
 
     /**
-     * Saves the passed in world info.
+     * used to update level.dat from old format to MCRegion format
      */
     public void saveWorldInfo(WorldInfo p_75761_1_) {}
 
-    /**
-     * returns null if no saveHandler is relevent (eg. SMP)
-     */
-    public IPlayerFileData getSaveHandler()
+    public IPlayerFileData getPlayerNBTManager()
     {
         return null;
     }

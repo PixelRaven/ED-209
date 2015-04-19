@@ -2,41 +2,41 @@ package net.minecraft.block.material;
 
 public class Material
 {
-    public static final Material air = new MaterialTransparent(MapColor.field_151660_b);
-    public static final Material grass = new Material(MapColor.field_151661_c);
-    public static final Material ground = new Material(MapColor.field_151664_l);
-    public static final Material wood = (new Material(MapColor.field_151663_o)).setBurning();
-    public static final Material rock = (new Material(MapColor.field_151665_m)).setRequiresTool();
-    public static final Material iron = (new Material(MapColor.field_151668_h)).setRequiresTool();
-    public static final Material anvil = (new Material(MapColor.field_151668_h)).setRequiresTool().setImmovableMobility();
-    public static final Material water = (new MaterialLiquid(MapColor.field_151662_n)).setNoPushMobility();
-    public static final Material lava = (new MaterialLiquid(MapColor.field_151656_f)).setNoPushMobility();
-    public static final Material leaves = (new Material(MapColor.field_151669_i)).setBurning().setTranslucent().setNoPushMobility();
-    public static final Material plants = (new MaterialLogic(MapColor.field_151669_i)).setNoPushMobility();
-    public static final Material vine = (new MaterialLogic(MapColor.field_151669_i)).setBurning().setNoPushMobility().setReplaceable();
-    public static final Material sponge = new Material(MapColor.field_151659_e);
-    public static final Material cloth = (new Material(MapColor.field_151659_e)).setBurning();
-    public static final Material fire = (new MaterialTransparent(MapColor.field_151660_b)).setNoPushMobility();
-    public static final Material sand = new Material(MapColor.field_151658_d);
-    public static final Material circuits = (new MaterialLogic(MapColor.field_151660_b)).setNoPushMobility();
-    public static final Material carpet = (new MaterialLogic(MapColor.field_151659_e)).setBurning();
-    public static final Material glass = (new Material(MapColor.field_151660_b)).setTranslucent().setAdventureModeExempt();
-    public static final Material redstoneLight = (new Material(MapColor.field_151660_b)).setAdventureModeExempt();
-    public static final Material tnt = (new Material(MapColor.field_151656_f)).setBurning().setTranslucent();
-    public static final Material coral = (new Material(MapColor.field_151669_i)).setNoPushMobility();
-    public static final Material ice = (new Material(MapColor.field_151657_g)).setTranslucent().setAdventureModeExempt();
-    public static final Material field_151598_x = (new Material(MapColor.field_151657_g)).setAdventureModeExempt();
-    public static final Material field_151597_y = (new MaterialLogic(MapColor.field_151666_j)).setReplaceable().setTranslucent().setRequiresTool().setNoPushMobility();
+    public static final Material air = new MaterialTransparent(MapColor.airColor);
+    public static final Material grass = new Material(MapColor.grassColor);
+    public static final Material ground = new Material(MapColor.dirtColor);
+    public static final Material wood = (new Material(MapColor.woodColor)).setBurning();
+    public static final Material rock = (new Material(MapColor.stoneColor)).setRequiresTool();
+    public static final Material iron = (new Material(MapColor.ironColor)).setRequiresTool();
+    public static final Material anvil = (new Material(MapColor.ironColor)).setRequiresTool().setImmovableMobility();
+    public static final Material water = (new MaterialLiquid(MapColor.waterColor)).setNoPushMobility();
+    public static final Material lava = (new MaterialLiquid(MapColor.tntColor)).setNoPushMobility();
+    public static final Material leaves = (new Material(MapColor.foliageColor)).setBurning().setTranslucent().setNoPushMobility();
+    public static final Material plants = (new MaterialLogic(MapColor.foliageColor)).setNoPushMobility();
+    public static final Material vine = (new MaterialLogic(MapColor.foliageColor)).setBurning().setNoPushMobility().setReplaceable();
+    public static final Material sponge = new Material(MapColor.clothColor);
+    public static final Material cloth = (new Material(MapColor.clothColor)).setBurning();
+    public static final Material fire = (new MaterialTransparent(MapColor.airColor)).setNoPushMobility();
+    public static final Material sand = new Material(MapColor.sandColor);
+    public static final Material circuits = (new MaterialLogic(MapColor.airColor)).setNoPushMobility();
+    public static final Material carpet = (new MaterialLogic(MapColor.clothColor)).setBurning();
+    public static final Material glass = (new Material(MapColor.airColor)).setTranslucent().setAdventureModeExempt();
+    public static final Material redstoneLight = (new Material(MapColor.airColor)).setAdventureModeExempt();
+    public static final Material tnt = (new Material(MapColor.tntColor)).setBurning().setTranslucent();
+    public static final Material coral = (new Material(MapColor.foliageColor)).setNoPushMobility();
+    public static final Material ice = (new Material(MapColor.iceColor)).setTranslucent().setAdventureModeExempt();
+    public static final Material packedIce = (new Material(MapColor.iceColor)).setAdventureModeExempt();
+    public static final Material snow = (new MaterialLogic(MapColor.snowColor)).setReplaceable().setTranslucent().setRequiresTool().setNoPushMobility();
 
     /** The material for crafted snow. */
-    public static final Material craftedSnow = (new Material(MapColor.field_151666_j)).setRequiresTool();
-    public static final Material field_151570_A = (new Material(MapColor.field_151669_i)).setTranslucent().setNoPushMobility();
-    public static final Material field_151571_B = new Material(MapColor.field_151667_k);
-    public static final Material field_151572_C = (new Material(MapColor.field_151669_i)).setNoPushMobility();
-    public static final Material dragonEgg = (new Material(MapColor.field_151669_i)).setNoPushMobility();
-    public static final Material Portal = (new MaterialPortal(MapColor.field_151660_b)).setImmovableMobility();
-    public static final Material field_151568_F = (new Material(MapColor.field_151660_b)).setNoPushMobility();
-    public static final Material field_151569_G = (new Material(MapColor.field_151659_e)
+    public static final Material craftedSnow = (new Material(MapColor.snowColor)).setRequiresTool();
+    public static final Material cactus = (new Material(MapColor.foliageColor)).setTranslucent().setNoPushMobility();
+    public static final Material clay = new Material(MapColor.clayColor);
+    public static final Material gourd = (new Material(MapColor.foliageColor)).setNoPushMobility();
+    public static final Material dragonEgg = (new Material(MapColor.foliageColor)).setNoPushMobility();
+    public static final Material portal = (new MaterialPortal(MapColor.airColor)).setImmovableMobility();
+    public static final Material cake = (new Material(MapColor.airColor)).setNoPushMobility();
+    public static final Material web = (new Material(MapColor.clothColor)
     {
         private static final String __OBFID = "CL_00000543";
         public boolean blocksMovement()
@@ -46,7 +46,8 @@ public class Material
     }).setRequiresTool().setNoPushMobility();
 
     /** Pistons' material. */
-    public static final Material piston = (new Material(MapColor.field_151665_m)).setImmovableMobility();
+    public static final Material piston = (new Material(MapColor.stoneColor)).setImmovableMobility();
+    public static final Material barrier = (new Material(MapColor.airColor)).setRequiresTool().setImmovableMobility();
 
     /** Bool defining if the block can burn or not. */
     private boolean canBurn;
@@ -97,7 +98,7 @@ public class Material
     /**
      * Will prevent grass from growing on dirt underneath and kill any grass below it if it returns true
      */
-    public boolean getCanBlockGrass()
+    public boolean blocksLight()
     {
         return true;
     }
@@ -212,14 +213,6 @@ public class Material
     {
         this.isAdventureModeExempt = true;
         return this;
-    }
-
-    /**
-     * Returns true if blocks with this material can always be mined in adventure mode.
-     */
-    public boolean isAdventureModeExempt()
-    {
-        return this.isAdventureModeExempt;
     }
 
     public MapColor getMaterialMapColor()

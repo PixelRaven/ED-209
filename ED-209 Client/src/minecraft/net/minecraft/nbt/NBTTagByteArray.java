@@ -8,31 +8,31 @@ import java.util.Arrays;
 public class NBTTagByteArray extends NBTBase
 {
     /** The byte array stored in the tag. */
-    private byte[] byteArray;
+    private byte[] data;
     private static final String __OBFID = "CL_00001213";
 
     NBTTagByteArray() {}
 
-    public NBTTagByteArray(byte[] p_i45128_1_)
+    public NBTTagByteArray(byte[] data)
     {
-        this.byteArray = p_i45128_1_;
+        this.data = data;
     }
 
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
-    void write(DataOutput p_74734_1_) throws IOException
+    void write(DataOutput output) throws IOException
     {
-        p_74734_1_.writeInt(this.byteArray.length);
-        p_74734_1_.write(this.byteArray);
+        output.writeInt(this.data.length);
+        output.write(this.data);
     }
 
-    void func_152446_a(DataInput p_152446_1_, int p_152446_2_, NBTSizeTracker p_152446_3_) throws IOException
+    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException
     {
-        int var4 = p_152446_1_.readInt();
-        p_152446_3_.func_152450_a((long)(8 * var4));
-        this.byteArray = new byte[var4];
-        p_152446_1_.readFully(this.byteArray);
+        int var4 = input.readInt();
+        sizeTracker.read((long)(8 * var4));
+        this.data = new byte[var4];
+        input.readFully(this.data);
     }
 
     /**
@@ -45,7 +45,7 @@ public class NBTTagByteArray extends NBTBase
 
     public String toString()
     {
-        return "[" + this.byteArray.length + " bytes]";
+        return "[" + this.data.length + " bytes]";
     }
 
     /**
@@ -53,23 +53,23 @@ public class NBTTagByteArray extends NBTBase
      */
     public NBTBase copy()
     {
-        byte[] var1 = new byte[this.byteArray.length];
-        System.arraycopy(this.byteArray, 0, var1, 0, this.byteArray.length);
+        byte[] var1 = new byte[this.data.length];
+        System.arraycopy(this.data, 0, var1, 0, this.data.length);
         return new NBTTagByteArray(var1);
     }
 
     public boolean equals(Object p_equals_1_)
     {
-        return super.equals(p_equals_1_) ? Arrays.equals(this.byteArray, ((NBTTagByteArray)p_equals_1_).byteArray) : false;
+        return super.equals(p_equals_1_) ? Arrays.equals(this.data, ((NBTTagByteArray)p_equals_1_).data) : false;
     }
 
     public int hashCode()
     {
-        return super.hashCode() ^ Arrays.hashCode(this.byteArray);
+        return super.hashCode() ^ Arrays.hashCode(this.data);
     }
 
-    public byte[] func_150292_c()
+    public byte[] getByteArray()
     {
-        return this.byteArray;
+        return this.data;
     }
 }

@@ -12,7 +12,7 @@ public class MapGenMineshaft extends MapGenStructure
 
     public MapGenMineshaft() {}
 
-    public String func_143025_a()
+    public String getStructureName()
     {
         return "Mineshaft";
     }

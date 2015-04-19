@@ -2,6 +2,9 @@ package net.minecraft.client.particle;
 
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -14,9 +17,9 @@ public class EntityDropParticleFX extends EntityFX
     private int bobTimer;
     private static final String __OBFID = "CL_00000901";
 
-    public EntityDropParticleFX(World p_i1203_1_, double p_i1203_2_, double p_i1203_4_, double p_i1203_6_, Material p_i1203_8_)
+    protected EntityDropParticleFX(World worldIn, double p_i1203_2_, double p_i1203_4_, double p_i1203_6_, Material p_i1203_8_)
     {
-        super(p_i1203_1_, p_i1203_2_, p_i1203_4_, p_i1203_6_, 0.0D, 0.0D, 0.0D);
+        super(worldIn, p_i1203_2_, p_i1203_4_, p_i1203_6_, 0.0D, 0.0D, 0.0D);
         this.motionX = this.motionY = this.motionZ = 0.0D;
 
         if (p_i1203_8_ == Material.water)
@@ -105,7 +108,7 @@ public class EntityDropParticleFX extends EntityFX
             if (this.materialType == Material.water)
             {
                 this.setDead();
-                this.worldObj.spawnParticle("splash", this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D);
+                this.worldObj.spawnParticle(EnumParticleTypes.WATER_SPLASH, this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
             }
             else
             {
@@ -116,16 +119,45 @@ public class EntityDropParticleFX extends EntityFX
             this.motionZ *= 0.699999988079071D;
         }
 
-        Material var1 = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial();
+        BlockPos var1 = new BlockPos(this);
+        IBlockState var2 = this.worldObj.getBlockState(var1);
+        Material var3 = var2.getBlock().getMaterial();
 
-        if (var1.isLiquid() || var1.isSolid())
+        if (var3.isLiquid() || var3.isSolid())
         {
-            double var2 = (double)((float)(MathHelper.floor_double(this.posY) + 1) - BlockLiquid.func_149801_b(this.worldObj.getBlockMetadata(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ))));
+            double var4 = 0.0D;
 
-            if (this.posY < var2)
+            if (var2.getBlock() instanceof BlockLiquid)
+            {
+                var4 = (double)BlockLiquid.getLiquidHeightPercent(((Integer)var2.getValue(BlockLiquid.LEVEL)).intValue());
+            }
+
+            double var6 = (double)(MathHelper.floor_double(this.posY) + 1) - var4;
+
+            if (this.posY < var6)
             {
                 this.setDead();
             }
+        }
+    }
+
+    public static class LavaFactory implements IParticleFactory
+    {
+        private static final String __OBFID = "CL_00002607";
+
+        public EntityFX func_178902_a(int p_178902_1_, World worldIn, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int ... p_178902_15_)
+        {
+            return new EntityDropParticleFX(worldIn, p_178902_3_, p_178902_5_, p_178902_7_, Material.lava);
+        }
+    }
+
+    public static class WaterFactory implements IParticleFactory
+    {
+        private static final String __OBFID = "CL_00002606";
+
+        public EntityFX func_178902_a(int p_178902_1_, World worldIn, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int ... p_178902_15_)
+        {
+            return new EntityDropParticleFX(worldIn, p_178902_3_, p_178902_5_, p_178902_7_, Material.water);
         }
     }
 }

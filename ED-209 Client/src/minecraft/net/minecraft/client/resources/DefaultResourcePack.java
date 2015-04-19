@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
-import javax.imageio.ImageIO;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.IMetadataSection;
 import net.minecraft.client.resources.data.IMetadataSerializer;
 import net.minecraft.util.ResourceLocation;
@@ -88,7 +88,7 @@ public class DefaultResourcePack implements IResourcePack
 
     public BufferedImage getPackImage() throws IOException
     {
-        return ImageIO.read(DefaultResourcePack.class.getResourceAsStream("/" + (new ResourceLocation("pack.png")).getResourcePath()));
+        return TextureUtil.func_177053_a(DefaultResourcePack.class.getResourceAsStream("/" + (new ResourceLocation("pack.png")).getResourcePath()));
     }
 
     public String getPackName()

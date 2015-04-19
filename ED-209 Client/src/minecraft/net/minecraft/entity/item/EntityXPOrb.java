@@ -4,6 +4,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -32,11 +33,10 @@ public class EntityXPOrb extends Entity
     private int xpTargetColor;
     private static final String __OBFID = "CL_00001544";
 
-    public EntityXPOrb(World p_i1585_1_, double p_i1585_2_, double p_i1585_4_, double p_i1585_6_, int p_i1585_8_)
+    public EntityXPOrb(World worldIn, double p_i1585_2_, double p_i1585_4_, double p_i1585_6_, int p_i1585_8_)
     {
-        super(p_i1585_1_);
+        super(worldIn);
         this.setSize(0.5F, 0.5F);
-        this.yOffset = this.height / 2.0F;
         this.setPosition(p_i1585_2_, p_i1585_4_, p_i1585_6_);
         this.rotationYaw = (float)(Math.random() * 360.0D);
         this.motionX = (double)((float)(Math.random() * 0.20000000298023224D - 0.10000000149011612D) * 2.0F);
@@ -54,11 +54,10 @@ public class EntityXPOrb extends Entity
         return false;
     }
 
-    public EntityXPOrb(World p_i1586_1_)
+    public EntityXPOrb(World worldIn)
     {
-        super(p_i1586_1_);
+        super(worldIn);
         this.setSize(0.25F, 0.25F);
-        this.yOffset = this.height / 2.0F;
     }
 
     protected void entityInit() {}
@@ -66,17 +65,7 @@ public class EntityXPOrb extends Entity
     public int getBrightnessForRender(float p_70070_1_)
     {
         float var2 = 0.5F;
-
-        if (var2 < 0.0F)
-        {
-            var2 = 0.0F;
-        }
-
-        if (var2 > 1.0F)
-        {
-            var2 = 1.0F;
-        }
-
+        var2 = MathHelper.clamp_float(var2, 0.0F, 1.0F);
         int var3 = super.getBrightnessForRender(p_70070_1_);
         int var4 = var3 & 255;
         int var5 = var3 >> 16 & 255;
@@ -107,7 +96,7 @@ public class EntityXPOrb extends Entity
         this.prevPosZ = this.posZ;
         this.motionY -= 0.029999999329447746D;
 
-        if (this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)).getMaterial() == Material.lava)
+        if (this.worldObj.getBlockState(new BlockPos(this)).getBlock().getMaterial() == Material.lava)
         {
             this.motionY = 0.20000000298023224D;
             this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F);
@@ -115,7 +104,7 @@ public class EntityXPOrb extends Entity
             this.playSound("random.fizz", 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
         }
 
-        this.func_145771_j(this.posX, (this.boundingBox.minY + this.boundingBox.maxY) / 2.0D, this.posZ);
+        this.pushOutOfBlocks(this.posX, (this.getEntityBoundingBox().minY + this.getEntityBoundingBox().maxY) / 2.0D, this.posZ);
         double var1 = 8.0D;
 
         if (this.xpTargetColor < this.xpColor - 20 + this.getEntityId() % 100)
@@ -126,6 +115,11 @@ public class EntityXPOrb extends Entity
             }
 
             this.xpTargetColor = this.xpColor;
+        }
+
+        if (this.closestPlayer != null && this.closestPlayer.func_175149_v())
+        {
+            this.closestPlayer = null;
         }
 
         if (this.closestPlayer != null)
@@ -150,7 +144,7 @@ public class EntityXPOrb extends Entity
 
         if (this.onGround)
         {
-            var13 = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).slipperiness * 0.98F;
+            var13 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(this.posZ))).getBlock().slipperiness * 0.98F;
         }
 
         this.motionX *= (double)var13;
@@ -176,31 +170,31 @@ public class EntityXPOrb extends Entity
      */
     public boolean handleWaterMovement()
     {
-        return this.worldObj.handleMaterialAcceleration(this.boundingBox, Material.water, this);
+        return this.worldObj.handleMaterialAcceleration(this.getEntityBoundingBox(), Material.water, this);
     }
 
     /**
      * Will deal the specified amount of damage to the entity if the entity isn't immune to fire damage. Args:
      * amountDamage
      */
-    protected void dealFireDamage(int p_70081_1_)
+    protected void dealFireDamage(int amount)
     {
-        this.attackEntityFrom(DamageSource.inFire, (float)p_70081_1_);
+        this.attackEntityFrom(DamageSource.inFire, (float)amount);
     }
 
     /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource p_70097_1_, float p_70097_2_)
+    public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        if (this.isEntityInvulnerable())
+        if (this.func_180431_b(source))
         {
             return false;
         }
         else
         {
             this.setBeenAttacked();
-            this.xpOrbHealth = (int)((float)this.xpOrbHealth - p_70097_2_);
+            this.xpOrbHealth = (int)((float)this.xpOrbHealth - amount);
 
             if (this.xpOrbHealth <= 0)
             {
@@ -214,36 +208,36 @@ public class EntityXPOrb extends Entity
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        p_70014_1_.setShort("Health", (short)((byte)this.xpOrbHealth));
-        p_70014_1_.setShort("Age", (short)this.xpOrbAge);
-        p_70014_1_.setShort("Value", (short)this.xpValue);
+        tagCompound.setShort("Health", (short)((byte)this.xpOrbHealth));
+        tagCompound.setShort("Age", (short)this.xpOrbAge);
+        tagCompound.setShort("Value", (short)this.xpValue);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        this.xpOrbHealth = p_70037_1_.getShort("Health") & 255;
-        this.xpOrbAge = p_70037_1_.getShort("Age");
-        this.xpValue = p_70037_1_.getShort("Value");
+        this.xpOrbHealth = tagCompund.getShort("Health") & 255;
+        this.xpOrbAge = tagCompund.getShort("Age");
+        this.xpValue = tagCompund.getShort("Value");
     }
 
     /**
      * Called by a player entity when they collide with an entity
      */
-    public void onCollideWithPlayer(EntityPlayer p_70100_1_)
+    public void onCollideWithPlayer(EntityPlayer entityIn)
     {
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
-            if (this.field_70532_c == 0 && p_70100_1_.xpCooldown == 0)
+            if (this.field_70532_c == 0 && entityIn.xpCooldown == 0)
             {
-                p_70100_1_.xpCooldown = 2;
-                this.worldObj.playSoundAtEntity(p_70100_1_, "random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
-                p_70100_1_.onItemPickup(this, 1);
-                p_70100_1_.addExperience(this.xpValue);
+                entityIn.xpCooldown = 2;
+                this.worldObj.playSoundAtEntity(entityIn, "random.orb", 0.1F, 0.5F * ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.7F + 1.8F));
+                entityIn.onItemPickup(this, 1);
+                entityIn.addExperience(this.xpValue);
                 this.setDead();
             }
         }

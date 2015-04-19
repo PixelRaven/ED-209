@@ -71,7 +71,7 @@ public class PlayerUsageSnooper
 
                         synchronized (PlayerUsageSnooper.this.syncLock)
                         {
-                            var1 = new HashMap(PlayerUsageSnooper.this.field_152774_b);
+                            var1 = Maps.newHashMap(PlayerUsageSnooper.this.field_152774_b);
 
                             if (PlayerUsageSnooper.this.selfCounter == 0)
                             {
@@ -82,7 +82,7 @@ public class PlayerUsageSnooper
                             var1.put("snooper_token", PlayerUsageSnooper.this.uniqueID);
                         }
 
-                        HttpUtil.func_151226_a(PlayerUsageSnooper.this.serverUrl, var1, true);
+                        HttpUtil.postMap(PlayerUsageSnooper.this.serverUrl, var1, true);
                     }
                 }
             }, 0L, 900000L);
@@ -92,13 +92,13 @@ public class PlayerUsageSnooper
     private void func_152766_h()
     {
         this.addJvmArgsToSnooper();
-        this.func_152768_a("snooper_token", this.uniqueID);
-        this.func_152767_b("snooper_token", this.uniqueID);
-        this.func_152767_b("os_name", System.getProperty("os.name"));
-        this.func_152767_b("os_version", System.getProperty("os.version"));
-        this.func_152767_b("os_architecture", System.getProperty("os.arch"));
-        this.func_152767_b("java_version", System.getProperty("java.version"));
-        this.func_152767_b("version", "1.7.10");
+        this.addClientStat("snooper_token", this.uniqueID);
+        this.addStatToSnooper("snooper_token", this.uniqueID);
+        this.addStatToSnooper("os_name", System.getProperty("os.name"));
+        this.addStatToSnooper("os_version", System.getProperty("os.version"));
+        this.addStatToSnooper("os_architecture", System.getProperty("os.arch"));
+        this.addStatToSnooper("java_version", System.getProperty("java.version"));
+        this.addStatToSnooper("version", "1.8");
         this.playerStatsCollector.addServerTypeToSnooper(this);
     }
 
@@ -115,23 +115,23 @@ public class PlayerUsageSnooper
 
             if (var5.startsWith("-X"))
             {
-                this.func_152768_a("jvm_arg[" + var3++ + "]", var5);
+                this.addClientStat("jvm_arg[" + var3++ + "]", var5);
             }
         }
 
-        this.func_152768_a("jvm_args", Integer.valueOf(var3));
+        this.addClientStat("jvm_args", Integer.valueOf(var3));
     }
 
     public void addMemoryStatsToSnooper()
     {
-        this.func_152767_b("memory_total", Long.valueOf(Runtime.getRuntime().totalMemory()));
-        this.func_152767_b("memory_max", Long.valueOf(Runtime.getRuntime().maxMemory()));
-        this.func_152767_b("memory_free", Long.valueOf(Runtime.getRuntime().freeMemory()));
-        this.func_152767_b("cpu_cores", Integer.valueOf(Runtime.getRuntime().availableProcessors()));
+        this.addStatToSnooper("memory_total", Long.valueOf(Runtime.getRuntime().totalMemory()));
+        this.addStatToSnooper("memory_max", Long.valueOf(Runtime.getRuntime().maxMemory()));
+        this.addStatToSnooper("memory_free", Long.valueOf(Runtime.getRuntime().freeMemory()));
+        this.addStatToSnooper("cpu_cores", Integer.valueOf(Runtime.getRuntime().availableProcessors()));
         this.playerStatsCollector.addServerStatsToSnooper(this);
     }
 
-    public void func_152768_a(String p_152768_1_, Object p_152768_2_)
+    public void addClientStat(String p_152768_1_, Object p_152768_2_)
     {
         Object var3 = this.syncLock;
 
@@ -141,7 +141,7 @@ public class PlayerUsageSnooper
         }
     }
 
-    public void func_152767_b(String p_152767_1_, Object p_152767_2_)
+    public void addStatToSnooper(String p_152767_1_, Object p_152767_2_)
     {
         Object var3 = this.syncLock;
 
@@ -153,7 +153,7 @@ public class PlayerUsageSnooper
 
     public Map getCurrentStats()
     {
-        LinkedHashMap var1 = new LinkedHashMap();
+        LinkedHashMap var1 = Maps.newLinkedHashMap();
         Object var2 = this.syncLock;
 
         synchronized (this.syncLock)

@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.shader.Framebuffer;
@@ -71,7 +72,7 @@ public class ScreenShotHelper
 
             if (OpenGlHelper.isFramebufferEnabled())
             {
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, p_148259_4_.framebufferTexture);
+                GlStateManager.func_179144_i(p_148259_4_.framebufferTexture);
                 GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, pixelBuffer);
             }
             else

@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenLiquids extends WorldGenerator
@@ -16,72 +17,70 @@ public class WorldGenLiquids extends WorldGenerator
         this.field_150521_a = p_i45465_1_;
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        if (p_76484_1_.getBlock(p_76484_3_, p_76484_4_ + 1, p_76484_5_) != Blocks.stone)
+        if (worldIn.getBlockState(p_180709_3_.offsetUp()).getBlock() != Blocks.stone)
         {
             return false;
         }
-        else if (p_76484_1_.getBlock(p_76484_3_, p_76484_4_ - 1, p_76484_5_) != Blocks.stone)
+        else if (worldIn.getBlockState(p_180709_3_.offsetDown()).getBlock() != Blocks.stone)
         {
             return false;
         }
-        else if (p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_).getMaterial() != Material.air && p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_) != Blocks.stone)
+        else if (worldIn.getBlockState(p_180709_3_).getBlock().getMaterial() != Material.air && worldIn.getBlockState(p_180709_3_).getBlock() != Blocks.stone)
         {
             return false;
         }
         else
         {
-            int var6 = 0;
+            int var4 = 0;
 
-            if (p_76484_1_.getBlock(p_76484_3_ - 1, p_76484_4_, p_76484_5_) == Blocks.stone)
+            if (worldIn.getBlockState(p_180709_3_.offsetWest()).getBlock() == Blocks.stone)
             {
-                ++var6;
+                ++var4;
             }
 
-            if (p_76484_1_.getBlock(p_76484_3_ + 1, p_76484_4_, p_76484_5_) == Blocks.stone)
+            if (worldIn.getBlockState(p_180709_3_.offsetEast()).getBlock() == Blocks.stone)
             {
-                ++var6;
+                ++var4;
             }
 
-            if (p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_ - 1) == Blocks.stone)
+            if (worldIn.getBlockState(p_180709_3_.offsetNorth()).getBlock() == Blocks.stone)
             {
-                ++var6;
+                ++var4;
             }
 
-            if (p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_ + 1) == Blocks.stone)
+            if (worldIn.getBlockState(p_180709_3_.offsetSouth()).getBlock() == Blocks.stone)
             {
-                ++var6;
+                ++var4;
             }
 
-            int var7 = 0;
+            int var5 = 0;
 
-            if (p_76484_1_.isAirBlock(p_76484_3_ - 1, p_76484_4_, p_76484_5_))
+            if (worldIn.isAirBlock(p_180709_3_.offsetWest()))
             {
-                ++var7;
+                ++var5;
             }
 
-            if (p_76484_1_.isAirBlock(p_76484_3_ + 1, p_76484_4_, p_76484_5_))
+            if (worldIn.isAirBlock(p_180709_3_.offsetEast()))
             {
-                ++var7;
+                ++var5;
             }
 
-            if (p_76484_1_.isAirBlock(p_76484_3_, p_76484_4_, p_76484_5_ - 1))
+            if (worldIn.isAirBlock(p_180709_3_.offsetNorth()))
             {
-                ++var7;
+                ++var5;
             }
 
-            if (p_76484_1_.isAirBlock(p_76484_3_, p_76484_4_, p_76484_5_ + 1))
+            if (worldIn.isAirBlock(p_180709_3_.offsetSouth()))
             {
-                ++var7;
+                ++var5;
             }
 
-            if (var6 == 3 && var7 == 1)
+            if (var4 == 3 && var5 == 1)
             {
-                p_76484_1_.setBlock(p_76484_3_, p_76484_4_, p_76484_5_, this.field_150521_a, 0, 2);
-                p_76484_1_.scheduledUpdatesAreImmediate = true;
-                this.field_150521_a.updateTick(p_76484_1_, p_76484_3_, p_76484_4_, p_76484_5_, p_76484_2_);
-                p_76484_1_.scheduledUpdatesAreImmediate = false;
+                worldIn.setBlockState(p_180709_3_, this.field_150521_a.getDefaultState(), 2);
+                worldIn.func_175637_a(this.field_150521_a, p_180709_3_, p_180709_2_);
             }
 
             return true;

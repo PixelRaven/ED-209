@@ -3,15 +3,16 @@ package net.minecraft.util;
 public class LongHashMap
 {
     /** the array of all elements in the hash */
-    private transient LongHashMap.Entry[] hashArray = new LongHashMap.Entry[16];
+    private transient LongHashMap.Entry[] hashArray = new LongHashMap.Entry[4096];
 
     /** the number of elements in the hash array */
     private transient int numHashElements;
+    private int field_180201_c;
 
     /**
      * the maximum amount of elements in the hash (probably 3/4 the size due to meh hashing function)
      */
-    private int capacity = 12;
+    private int capacity = 3072;
 
     /**
      * percent of the hasharray that can be used without hash colliding probably
@@ -21,6 +22,11 @@ public class LongHashMap
     /** count of times elements have been added/removed */
     private transient volatile int modCount;
     private static final String __OBFID = "CL_00001492";
+
+    public LongHashMap()
+    {
+        this.field_180201_c = this.hashArray.length - 1;
+    }
 
     /**
      * returns the hashed key given the original key
@@ -44,7 +50,7 @@ public class LongHashMap
      */
     private static int getHashIndex(int p_76158_0_, int p_76158_1_)
     {
-        return p_76158_0_ & p_76158_1_ - 1;
+        return p_76158_0_ & p_76158_1_;
     }
 
     public int getNumHashElements()
@@ -59,7 +65,7 @@ public class LongHashMap
     {
         int var3 = getHashedKey(p_76164_1_);
 
-        for (LongHashMap.Entry var4 = this.hashArray[getHashIndex(var3, this.hashArray.length)]; var4 != null; var4 = var4.nextEntry)
+        for (LongHashMap.Entry var4 = this.hashArray[getHashIndex(var3, this.field_180201_c)]; var4 != null; var4 = var4.nextEntry)
         {
             if (var4.key == p_76164_1_)
             {
@@ -79,7 +85,7 @@ public class LongHashMap
     {
         int var3 = getHashedKey(p_76160_1_);
 
-        for (LongHashMap.Entry var4 = this.hashArray[getHashIndex(var3, this.hashArray.length)]; var4 != null; var4 = var4.nextEntry)
+        for (LongHashMap.Entry var4 = this.hashArray[getHashIndex(var3, this.field_180201_c)]; var4 != null; var4 = var4.nextEntry)
         {
             if (var4.key == p_76160_1_)
             {
@@ -96,7 +102,7 @@ public class LongHashMap
     public void add(long p_76163_1_, Object p_76163_3_)
     {
         int var4 = getHashedKey(p_76163_1_);
-        int var5 = getHashIndex(var4, this.hashArray.length);
+        int var5 = getHashIndex(var4, this.field_180201_c);
 
         for (LongHashMap.Entry var6 = this.hashArray[var5]; var6 != null; var6 = var6.nextEntry)
         {
@@ -128,6 +134,7 @@ public class LongHashMap
             LongHashMap.Entry[] var4 = new LongHashMap.Entry[p_76153_1_];
             this.copyHashTableTo(var4);
             this.hashArray = var4;
+            this.field_180201_c = this.hashArray.length - 1;
             this.capacity = (int)((float)p_76153_1_ * this.percentUseable);
         }
     }
@@ -152,7 +159,7 @@ public class LongHashMap
                 do
                 {
                     var6 = var5.nextEntry;
-                    int var7 = getHashIndex(var5.hash, var3);
+                    int var7 = getHashIndex(var5.hash, var3 - 1);
                     var5.nextEntry = p_76154_1_[var7];
                     p_76154_1_[var7] = var5;
                     var5 = var6;
@@ -177,7 +184,7 @@ public class LongHashMap
     final LongHashMap.Entry removeKey(long p_76152_1_)
     {
         int var3 = getHashedKey(p_76152_1_);
-        int var4 = getHashIndex(var3, this.hashArray.length);
+        int var4 = getHashIndex(var3, this.field_180201_c);
         LongHashMap.Entry var5 = this.hashArray[var4];
         LongHashMap.Entry var6;
         LongHashMap.Entry var7;

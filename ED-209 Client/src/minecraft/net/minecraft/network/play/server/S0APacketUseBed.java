@@ -6,75 +6,61 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-public class S0APacketUseBed extends Packet
+public class S0APacketUseBed implements Packet
 {
-    private int field_149097_a;
-    private int field_149095_b;
-    private int field_149096_c;
-    private int field_149094_d;
+    private int playerID;
+    private BlockPos field_179799_b;
     private static final String __OBFID = "CL_00001319";
 
     public S0APacketUseBed() {}
 
-    public S0APacketUseBed(EntityPlayer p_i45210_1_, int p_i45210_2_, int p_i45210_3_, int p_i45210_4_)
+    public S0APacketUseBed(EntityPlayer p_i45964_1_, BlockPos p_i45964_2_)
     {
-        this.field_149095_b = p_i45210_2_;
-        this.field_149096_c = p_i45210_3_;
-        this.field_149094_d = p_i45210_4_;
-        this.field_149097_a = p_i45210_1_.getEntityId();
+        this.playerID = p_i45964_1_.getEntityId();
+        this.field_179799_b = p_i45964_2_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149097_a = p_148837_1_.readInt();
-        this.field_149095_b = p_148837_1_.readInt();
-        this.field_149096_c = p_148837_1_.readByte();
-        this.field_149094_d = p_148837_1_.readInt();
+        this.playerID = data.readVarIntFromBuffer();
+        this.field_179799_b = data.readBlockPos();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149097_a);
-        p_148840_1_.writeInt(this.field_149095_b);
-        p_148840_1_.writeByte(this.field_149096_c);
-        p_148840_1_.writeInt(this.field_149094_d);
+        data.writeVarIntToBuffer(this.playerID);
+        data.writeBlockPos(this.field_179799_b);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180744_a(INetHandlerPlayClient p_180744_1_)
     {
-        p_148833_1_.handleUseBed(this);
+        p_180744_1_.handleUseBed(this);
     }
 
-    public EntityPlayer func_149091_a(World p_149091_1_)
+    public EntityPlayer getPlayer(World worldIn)
     {
-        return (EntityPlayer)p_149091_1_.getEntityByID(this.field_149097_a);
+        return (EntityPlayer)worldIn.getEntityByID(this.playerID);
     }
 
-    public int func_149092_c()
+    public BlockPos func_179798_a()
     {
-        return this.field_149095_b;
+        return this.field_179799_b;
     }
 
-    public int func_149090_d()
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        return this.field_149096_c;
-    }
-
-    public int func_149089_e()
-    {
-        return this.field_149094_d;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180744_a((INetHandlerPlayClient)handler);
     }
 }

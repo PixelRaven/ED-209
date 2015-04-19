@@ -6,55 +6,49 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.status.INetHandlerStatusServer;
 
-public class C01PacketPing extends Packet
+public class C01PacketPing implements Packet
 {
-    private long field_149290_a;
+    private long clientTime;
     private static final String __OBFID = "CL_00001392";
 
     public C01PacketPing() {}
 
     public C01PacketPing(long p_i45276_1_)
     {
-        this.field_149290_a = p_i45276_1_;
+        this.clientTime = p_i45276_1_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149290_a = p_148837_1_.readLong();
+        this.clientTime = data.readLong();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeLong(this.field_149290_a);
+        data.writeLong(this.clientTime);
     }
 
-    public void processPacket(INetHandlerStatusServer p_148833_1_)
+    public void func_180774_a(INetHandlerStatusServer p_180774_1_)
     {
-        p_148833_1_.processPing(this);
+        p_180774_1_.processPing(this);
+    }
+
+    public long getClientTime()
+    {
+        return this.clientTime;
     }
 
     /**
-     * If true, the network manager will process the packet immediately when received, otherwise it will queue it for
-     * processing. Currently true for: Disconnect, LoginSuccess, KeepAlive, ServerQuery/Info, Ping/Pong
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public boolean hasPriority()
+    public void processPacket(INetHandler handler)
     {
-        return true;
-    }
-
-    public long func_149289_c()
-    {
-        return this.field_149290_a;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerStatusServer)p_148833_1_);
+        this.func_180774_a((INetHandlerStatusServer)handler);
     }
 }

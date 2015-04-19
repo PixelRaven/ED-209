@@ -6,7 +6,10 @@ import tv.twitch.chat.ChatUserInfo;
 
 public interface IStream
 {
-    void func_152923_i();
+    /**
+     * Shuts down a steam
+     */
+    void shutdownStream();
 
     void func_152935_j();
 
@@ -20,7 +23,9 @@ public interface IStream
 
     void func_152911_a(Metadata p_152911_1_, long p_152911_2_);
 
-    boolean func_152919_o();
+    void func_176026_a(Metadata p_176026_1_, long p_176026_2_, long p_176026_4_);
+
+    boolean isPaused();
 
     void func_152931_p();
 

@@ -31,9 +31,9 @@ public class FoodStats
         this.foodSaturationLevel = Math.min(this.foodSaturationLevel + (float)p_75122_1_ * p_75122_2_ * 2.0F, (float)this.foodLevel);
     }
 
-    public void func_151686_a(ItemFood p_151686_1_, ItemStack p_151686_2_)
+    public void addStats(ItemFood p_151686_1_, ItemStack p_151686_2_)
     {
-        this.addStats(p_151686_1_.func_150905_g(p_151686_2_), p_151686_1_.func_150906_h(p_151686_2_));
+        this.addStats(p_151686_1_.getHealAmount(p_151686_2_), p_151686_1_.getSaturationModifier(p_151686_2_));
     }
 
     /**
@@ -41,7 +41,7 @@ public class FoodStats
      */
     public void onUpdate(EntityPlayer p_75118_1_)
     {
-        EnumDifficulty var2 = p_75118_1_.worldObj.difficultySetting;
+        EnumDifficulty var2 = p_75118_1_.worldObj.getDifficulty();
         this.prevFoodLevel = this.foodLevel;
 
         if (this.foodExhaustionLevel > 4.0F)
@@ -90,11 +90,11 @@ public class FoodStats
     }
 
     /**
-     * Reads food stats from an NBT object.
+     * Reads the food data for the player.
      */
     public void readNBT(NBTTagCompound p_75112_1_)
     {
-        if (p_75112_1_.func_150297_b("foodLevel", 99))
+        if (p_75112_1_.hasKey("foodLevel", 99))
         {
             this.foodLevel = p_75112_1_.getInteger("foodLevel");
             this.foodTimer = p_75112_1_.getInteger("foodTickTimer");
@@ -104,7 +104,7 @@ public class FoodStats
     }
 
     /**
-     * Writes food stats to an NBT object.
+     * Writes the food data for the player.
      */
     public void writeNBT(NBTTagCompound p_75117_1_)
     {
@@ -128,7 +128,7 @@ public class FoodStats
     }
 
     /**
-     * If foodLevel is not max.
+     * Get whether the player must eat food.
      */
     public boolean needFood()
     {

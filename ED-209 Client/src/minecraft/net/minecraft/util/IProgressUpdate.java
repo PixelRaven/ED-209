@@ -3,9 +3,9 @@ package net.minecraft.util;
 public interface IProgressUpdate
 {
     /**
-     * "Saving level", or the loading,or downloading equivelent
+     * Shows the 'Saving level' string.
      */
-    void displayProgressMessage(String p_73720_1_);
+    void displaySavingString(String message);
 
     /**
      * this string, followed by "working..." and then the "% complete" are the 3 lines shown. This resets progress to 0,
@@ -14,14 +14,14 @@ public interface IProgressUpdate
     void resetProgressAndMessage(String p_73721_1_);
 
     /**
-     * This is called with "Working..." by resetProgressAndMessage
+     * Displays a string on the loading screen supposed to indicate what is being done currently.
      */
-    void resetProgresAndWorkingMessage(String p_73719_1_);
+    void displayLoadingString(String message);
 
     /**
      * Updates the progress bar on the loading screen to the specified amount. Args: loadProgress
      */
-    void setLoadingProgress(int p_73718_1_);
+    void setLoadingProgress(int progress);
 
-    void func_146586_a();
+    void setDoneWorking();
 }

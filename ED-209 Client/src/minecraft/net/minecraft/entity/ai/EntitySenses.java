@@ -1,6 +1,6 @@
 package net.minecraft.entity.ai;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -10,10 +10,10 @@ public class EntitySenses
     EntityLiving entityObj;
 
     /** Cache of entities which we can see */
-    List seenEntities = new ArrayList();
+    List seenEntities = Lists.newArrayList();
 
     /** Cache of entities which we cannot see */
-    List unseenEntities = new ArrayList();
+    List unseenEntities = Lists.newArrayList();
     private static final String __OBFID = "CL_00001628";
 
     public EntitySenses(EntityLiving p_i1672_1_)

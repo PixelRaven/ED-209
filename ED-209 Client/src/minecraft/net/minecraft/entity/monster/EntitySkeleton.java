@@ -1,5 +1,6 @@
 package net.minecraft.entity.monster;
 
+import com.google.common.base.Predicate;
 import java.util.Calendar;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
@@ -13,6 +14,7 @@ import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIArrowAttack;
 import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import net.minecraft.entity.ai.EntityAIFleeSun;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -21,6 +23,7 @@ import net.minecraft.entity.ai.EntityAIRestrictSun;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
@@ -31,8 +34,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.stats.AchievementList;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProviderHell;
 
@@ -42,19 +46,33 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
     private EntityAIAttackOnCollide aiAttackOnCollide = new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.2D, false);
     private static final String __OBFID = "CL_00001697";
 
-    public EntitySkeleton(World p_i1741_1_)
+    public EntitySkeleton(World worldIn)
     {
-        super(p_i1741_1_);
+        super(worldIn);
         this.tasks.addTask(1, new EntityAISwimming(this));
         this.tasks.addTask(2, new EntityAIRestrictSun(this));
+        this.tasks.addTask(2, this.field_175455_a);
         this.tasks.addTask(3, new EntityAIFleeSun(this, 1.0D));
-        this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(3, new EntityAIAvoidEntity(this, new Predicate()
+        {
+            private static final String __OBFID = "CL_00002203";
+            public boolean func_179945_a(Entity p_179945_1_)
+            {
+                return p_179945_1_ instanceof EntityWolf;
+            }
+            public boolean apply(Object p_apply_1_)
+            {
+                return this.func_179945_a((Entity)p_apply_1_);
+            }
+        }, 6.0F, 1.0D, 1.2D));
+        this.tasks.addTask(4, new EntityAIWander(this, 1.0D));
         this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
         this.tasks.addTask(6, new EntityAILookIdle(this));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+        this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityIronGolem.class, true));
 
-        if (p_i1741_1_ != null && !p_i1741_1_.isClient)
+        if (worldIn != null && !worldIn.isRemote)
         {
             this.setCombatTask();
         }
@@ -70,14 +88,6 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
     {
         super.entityInit();
         this.dataWatcher.addObject(13, new Byte((byte)0));
-    }
-
-    /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
-    {
-        return true;
     }
 
     /**
@@ -104,7 +114,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         return "mob.skeleton.death";
     }
 
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.skeleton.step", 0.15F, 1.0F);
     }
@@ -140,41 +150,42 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
      */
     public void onLivingUpdate()
     {
-        if (this.worldObj.isDaytime() && !this.worldObj.isClient)
+        if (this.worldObj.isDaytime() && !this.worldObj.isRemote)
         {
             float var1 = this.getBrightness(1.0F);
+            BlockPos var2 = new BlockPos(this.posX, (double)Math.round(this.posY), this.posZ);
 
-            if (var1 > 0.5F && this.rand.nextFloat() * 30.0F < (var1 - 0.4F) * 2.0F && this.worldObj.canBlockSeeTheSky(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ)))
+            if (var1 > 0.5F && this.rand.nextFloat() * 30.0F < (var1 - 0.4F) * 2.0F && this.worldObj.isAgainstSky(var2))
             {
-                boolean var2 = true;
-                ItemStack var3 = this.getEquipmentInSlot(4);
+                boolean var3 = true;
+                ItemStack var4 = this.getEquipmentInSlot(4);
 
-                if (var3 != null)
+                if (var4 != null)
                 {
-                    if (var3.isItemStackDamageable())
+                    if (var4.isItemStackDamageable())
                     {
-                        var3.setItemDamage(var3.getItemDamageForDisplay() + this.rand.nextInt(2));
+                        var4.setItemDamage(var4.getItemDamage() + this.rand.nextInt(2));
 
-                        if (var3.getItemDamageForDisplay() >= var3.getMaxDamage())
+                        if (var4.getItemDamage() >= var4.getMaxDamage())
                         {
-                            this.renderBrokenItemStack(var3);
+                            this.renderBrokenItemStack(var4);
                             this.setCurrentItemOrArmor(4, (ItemStack)null);
                         }
                     }
 
-                    var2 = false;
+                    var3 = false;
                 }
 
-                if (var2)
+                if (var3)
                 {
                     this.setFire(8);
                 }
             }
         }
 
-        if (this.worldObj.isClient && this.getSkeletonType() == 1)
+        if (this.worldObj.isRemote && this.getSkeletonType() == 1)
         {
-            this.setSize(0.72F, 2.34F);
+            this.setSize(0.72F, 2.535F);
         }
 
         super.onLivingUpdate();
@@ -197,13 +208,13 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
     /**
      * Called when the mob's health reaches 0.
      */
-    public void onDeath(DamageSource p_70645_1_)
+    public void onDeath(DamageSource cause)
     {
-        super.onDeath(p_70645_1_);
+        super.onDeath(cause);
 
-        if (p_70645_1_.getSourceOfDamage() instanceof EntityArrow && p_70645_1_.getEntity() instanceof EntityPlayer)
+        if (cause.getSourceOfDamage() instanceof EntityArrow && cause.getEntity() instanceof EntityPlayer)
         {
-            EntityPlayer var2 = (EntityPlayer)p_70645_1_.getEntity();
+            EntityPlayer var2 = (EntityPlayer)cause.getEntity();
             double var3 = var2.posX - this.posX;
             double var5 = var2.posZ - this.posZ;
 
@@ -212,9 +223,14 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
                 var2.triggerAchievement(AchievementList.snipeSkeleton);
             }
         }
+        else if (cause.getEntity() instanceof EntityCreeper && ((EntityCreeper)cause.getEntity()).getPowered() && ((EntityCreeper)cause.getEntity()).isAIEnabled())
+        {
+            ((EntityCreeper)cause.getEntity()).func_175493_co();
+            this.entityDropItem(new ItemStack(Items.skull, 1, this.getSkeletonType() == 1 ? 1 : 0), 0.0F);
+        }
     }
 
-    protected Item func_146068_u()
+    protected Item getDropItem()
     {
         return Items.arrow;
     }
@@ -233,7 +249,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
 
             for (var4 = 0; var4 < var3; ++var4)
             {
-                this.func_145779_a(Items.coal, 1);
+                this.dropItem(Items.coal, 1);
             }
         }
         else
@@ -242,7 +258,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
 
             for (var4 = 0; var4 < var3; ++var4)
             {
-                this.func_145779_a(Items.arrow, 1);
+                this.dropItem(Items.arrow, 1);
             }
         }
 
@@ -250,15 +266,7 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
 
         for (var4 = 0; var4 < var3; ++var4)
         {
-            this.func_145779_a(Items.bone, 1);
-        }
-    }
-
-    protected void dropRareDrop(int p_70600_1_)
-    {
-        if (this.getSkeletonType() == 1)
-        {
-            this.entityDropItem(new ItemStack(Items.skull, 1, 1), 0.0F);
+            this.dropItem(Items.bone, 1);
         }
     }
 
@@ -267,13 +275,21 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
      */
     protected void addRandomArmor()
     {
-        super.addRandomArmor();
+        if (this.getSkeletonType() == 1)
+        {
+            this.entityDropItem(new ItemStack(Items.skull, 1, 1), 0.0F);
+        }
+    }
+
+    protected void func_180481_a(DifficultyInstance p_180481_1_)
+    {
+        super.func_180481_a(p_180481_1_);
         this.setCurrentItemOrArmor(0, new ItemStack(Items.bow));
     }
 
-    public IEntityLivingData onSpawnWithEgg(IEntityLivingData p_110161_1_)
+    public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, IEntityLivingData p_180482_2_)
     {
-        p_110161_1_ = super.onSpawnWithEgg(p_110161_1_);
+        p_180482_2_ = super.func_180482_a(p_180482_1_, p_180482_2_);
 
         if (this.worldObj.provider instanceof WorldProviderHell && this.getRNG().nextInt(5) > 0)
         {
@@ -285,24 +301,24 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
         else
         {
             this.tasks.addTask(4, this.aiArrowAttack);
-            this.addRandomArmor();
-            this.enchantEquipment();
+            this.func_180481_a(p_180482_1_);
+            this.func_180483_b(p_180482_1_);
         }
 
-        this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * this.worldObj.func_147462_b(this.posX, this.posY, this.posZ));
+        this.setCanPickUpLoot(this.rand.nextFloat() < 0.55F * p_180482_1_.func_180170_c());
 
         if (this.getEquipmentInSlot(4) == null)
         {
-            Calendar var2 = this.worldObj.getCurrentDate();
+            Calendar var3 = this.worldObj.getCurrentDate();
 
-            if (var2.get(2) + 1 == 10 && var2.get(5) == 31 && this.rand.nextFloat() < 0.25F)
+            if (var3.get(2) + 1 == 10 && var3.get(5) == 31 && this.rand.nextFloat() < 0.25F)
             {
                 this.setCurrentItemOrArmor(4, new ItemStack(this.rand.nextFloat() < 0.1F ? Blocks.lit_pumpkin : Blocks.pumpkin));
                 this.equipmentDropChances[4] = 0.0F;
             }
         }
 
-        return p_110161_1_;
+        return p_180482_2_;
     }
 
     /**
@@ -329,10 +345,10 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
      */
     public void attackEntityWithRangedAttack(EntityLivingBase p_82196_1_, float p_82196_2_)
     {
-        EntityArrow var3 = new EntityArrow(this.worldObj, this, p_82196_1_, 1.6F, (float)(14 - this.worldObj.difficultySetting.getDifficultyId() * 4));
+        EntityArrow var3 = new EntityArrow(this.worldObj, this, p_82196_1_, 1.6F, (float)(14 - this.worldObj.getDifficulty().getDifficultyId() * 4));
         int var4 = EnchantmentHelper.getEnchantmentLevel(Enchantment.power.effectId, this.getHeldItem());
         int var5 = EnchantmentHelper.getEnchantmentLevel(Enchantment.punch.effectId, this.getHeldItem());
-        var3.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.worldObj.difficultySetting.getDifficultyId() * 0.11F));
+        var3.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.worldObj.getDifficulty().getDifficultyId() * 0.11F));
 
         if (var4 > 0)
         {
@@ -371,24 +387,24 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
 
         if (p_82201_1_ == 1)
         {
-            this.setSize(0.72F, 2.34F);
+            this.setSize(0.72F, 2.535F);
         }
         else
         {
-            this.setSize(0.6F, 1.8F);
+            this.setSize(0.6F, 1.95F);
         }
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
+        super.readEntityFromNBT(tagCompund);
 
-        if (p_70037_1_.func_150297_b("SkeletonType", 99))
+        if (tagCompund.hasKey("SkeletonType", 99))
         {
-            byte var2 = p_70037_1_.getByte("SkeletonType");
+            byte var2 = tagCompund.getByte("SkeletonType");
             this.setSkeletonType(var2);
         }
 
@@ -398,23 +414,28 @@ public class EntitySkeleton extends EntityMob implements IRangedAttackMob
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setByte("SkeletonType", (byte)this.getSkeletonType());
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setByte("SkeletonType", (byte)this.getSkeletonType());
     }
 
     /**
      * Sets the held item, or an armor slot. Slot 0 is held item. Slot 1-4 is armor. Params: Item, slot
      */
-    public void setCurrentItemOrArmor(int p_70062_1_, ItemStack p_70062_2_)
+    public void setCurrentItemOrArmor(int slotIn, ItemStack itemStackIn)
     {
-        super.setCurrentItemOrArmor(p_70062_1_, p_70062_2_);
+        super.setCurrentItemOrArmor(slotIn, itemStackIn);
 
-        if (!this.worldObj.isClient && p_70062_1_ == 0)
+        if (!this.worldObj.isRemote && slotIn == 0)
         {
             this.setCombatTask();
         }
+    }
+
+    public float getEyeHeight()
+    {
+        return this.getSkeletonType() == 1 ? super.getEyeHeight() : 1.74F;
     }
 
     /**

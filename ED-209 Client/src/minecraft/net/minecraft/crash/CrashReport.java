@@ -1,5 +1,6 @@
 package net.minecraft.crash;
 
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -7,7 +8,6 @@ import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +33,7 @@ public class CrashReport
     private final CrashReportCategory theReportCategory = new CrashReportCategory(this, "System Details");
 
     /** Holds the keys and values of all crash report sections. */
-    private final List crashReportSections = new ArrayList();
+    private final List crashReportSections = Lists.newArrayList();
 
     /** File of crash report. */
     private File crashReportFile;
@@ -41,10 +41,10 @@ public class CrashReport
     private StackTraceElement[] stacktrace = new StackTraceElement[0];
     private static final String __OBFID = "CL_00000990";
 
-    public CrashReport(String p_i1348_1_, Throwable p_i1348_2_)
+    public CrashReport(String descriptionIn, Throwable causeThrowable)
     {
-        this.description = p_i1348_1_;
-        this.cause = p_i1348_2_;
+        this.description = descriptionIn;
+        this.cause = causeThrowable;
         this.populateEnvironment();
     }
 
@@ -59,7 +59,7 @@ public class CrashReport
             private static final String __OBFID = "CL_00001197";
             public String call()
             {
-                return "1.7.10";
+                return "1.8";
             }
         });
         this.theReportCategory.addCrashSectionCallable("Operating System", new Callable()
@@ -130,24 +130,10 @@ public class CrashReport
                 return String.format("%d total; %s", new Object[] {Integer.valueOf(var3), var4.toString()});
             }
         });
-        this.theReportCategory.addCrashSectionCallable("AABB Pool Size", new Callable()
+        this.theReportCategory.addCrashSectionCallable("IntCache", new Callable()
         {
             private static final String __OBFID = "CL_00001355";
             public String call()
-            {
-                byte var1 = 0;
-                int var2 = 56 * var1;
-                int var3 = var2 / 1024 / 1024;
-                byte var4 = 0;
-                int var5 = 56 * var4;
-                int var6 = var5 / 1024 / 1024;
-                return var1 + " (" + var2 + " bytes; " + var3 + " MB) allocated, " + var4 + " (" + var5 + " bytes; " + var6 + " MB) used";
-            }
-        });
-        this.theReportCategory.addCrashSectionCallable("IntCache", new Callable()
-        {
-            private static final String __OBFID = "CL_00001382";
-            public String call() throws SecurityException, NoSuchFieldException, IllegalAccessException, IllegalArgumentException
             {
                 return IntCache.getCacheSizes();
             }
@@ -177,7 +163,7 @@ public class CrashReport
     {
         if ((this.stacktrace == null || this.stacktrace.length <= 0) && this.crashReportSections.size() > 0)
         {
-            this.stacktrace = (StackTraceElement[])ArrayUtils.subarray(((CrashReportCategory)this.crashReportSections.get(0)).func_147152_a(), 0, 1);
+            this.stacktrace = (StackTraceElement[])ArrayUtils.subarray(((CrashReportCategory)this.crashReportSections.get(0)).getStackTrace(), 0, 1);
         }
 
         if (this.stacktrace != null && this.stacktrace.length > 0)
@@ -339,13 +325,13 @@ public class CrashReport
     /**
      * Creates a CrashReportCategory for the given stack trace depth
      */
-    public CrashReportCategory makeCategoryDepth(String p_85057_1_, int p_85057_2_)
+    public CrashReportCategory makeCategoryDepth(String categoryName, int stacktraceLength)
     {
-        CrashReportCategory var3 = new CrashReportCategory(this, p_85057_1_);
+        CrashReportCategory var3 = new CrashReportCategory(this, categoryName);
 
         if (this.field_85059_f)
         {
-            int var4 = var3.getPrunedStackTrace(p_85057_2_);
+            int var4 = var3.getPrunedStackTrace(stacktraceLength);
             StackTraceElement[] var5 = this.cause.getStackTrace();
             StackTraceElement var6 = null;
             StackTraceElement var7 = null;
@@ -408,17 +394,17 @@ public class CrashReport
     /**
      * Creates a crash report for the exception
      */
-    public static CrashReport makeCrashReport(Throwable p_85055_0_, String p_85055_1_)
+    public static CrashReport makeCrashReport(Throwable causeIn, String descriptionIn)
     {
         CrashReport var2;
 
-        if (p_85055_0_ instanceof ReportedException)
+        if (causeIn instanceof ReportedException)
         {
-            var2 = ((ReportedException)p_85055_0_).getCrashReport();
+            var2 = ((ReportedException)causeIn).getCrashReport();
         }
         else
         {
-            var2 = new CrashReport(p_85055_1_, p_85055_0_);
+            var2 = new CrashReport(descriptionIn, causeIn);
         }
 
         return var2;

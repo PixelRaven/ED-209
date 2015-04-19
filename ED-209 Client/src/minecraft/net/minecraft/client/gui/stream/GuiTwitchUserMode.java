@@ -1,6 +1,7 @@
 package net.minecraft.client.gui.stream;
 
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -200,27 +201,27 @@ public class GuiTwitchUserMode extends GuiScreen
         this.field_152334_t = this.width / 2 - var3 / 2;
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.enabled)
+        if (button.enabled)
         {
-            if (p_146284_1_.id == 0)
+            if (button.id == 0)
             {
                 this.field_152333_s.func_152917_b("/ban " + this.field_152337_h.displayName);
             }
-            else if (p_146284_1_.id == 3)
+            else if (button.id == 3)
             {
                 this.field_152333_s.func_152917_b("/unban " + this.field_152337_h.displayName);
             }
-            else if (p_146284_1_.id == 2)
+            else if (button.id == 2)
             {
                 this.field_152333_s.func_152917_b("/mod " + this.field_152337_h.displayName);
             }
-            else if (p_146284_1_.id == 4)
+            else if (button.id == 4)
             {
                 this.field_152333_s.func_152917_b("/unmod " + this.field_152337_h.displayName);
             }
-            else if (p_146284_1_.id == 1)
+            else if (button.id == 1)
             {
                 this.field_152333_s.func_152917_b("/timeout " + this.field_152337_h.displayName);
             }
@@ -230,9 +231,9 @@ public class GuiTwitchUserMode extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, this.field_152338_i.getUnformattedText(), this.width / 2, 70, 16777215);
@@ -244,6 +245,6 @@ public class GuiTwitchUserMode extends GuiScreen
             this.drawString(this.fontRendererObj, var6.getFormattedText(), this.field_152334_t, var4, 16777215);
         }
 
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

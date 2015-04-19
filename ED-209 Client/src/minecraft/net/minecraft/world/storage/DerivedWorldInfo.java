@@ -1,6 +1,8 @@
 package net.minecraft.world.storage;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -27,9 +29,9 @@ public class DerivedWorldInfo extends WorldInfo
     /**
      * Creates a new NBTTagCompound for the world, with the given NBTTag as the "Player"
      */
-    public NBTTagCompound cloneNBTCompound(NBTTagCompound p_76082_1_)
+    public NBTTagCompound cloneNBTCompound(NBTTagCompound nbt)
     {
-        return this.theWorldInfo.cloneNBTCompound(p_76082_1_);
+        return this.theWorldInfo.cloneNBTCompound(nbt);
     }
 
     /**
@@ -88,15 +90,6 @@ public class DerivedWorldInfo extends WorldInfo
     public NBTTagCompound getPlayerNBTTagCompound()
     {
         return this.theWorldInfo.getPlayerNBTTagCompound();
-    }
-
-    /**
-     * Returns vanilla MC dimension (-1,0,1). For custom dimension compatibility, always prefer
-     * WorldProvider.dimensionID accessed from World.provider.dimensionID
-     */
-    public int getVanillaDimension()
-    {
-        return this.theWorldInfo.getVanillaDimension();
     }
 
     /**
@@ -185,10 +178,7 @@ public class DerivedWorldInfo extends WorldInfo
      */
     public void setWorldTime(long p_76068_1_) {}
 
-    /**
-     * Sets the spawn zone position. Args: x, y, z
-     */
-    public void setSpawnPosition(int p_76081_1_, int p_76081_2_, int p_76081_3_) {}
+    public void setSpawn(BlockPos spawnPoint) {}
 
     public void setWorldName(String p_76062_1_) {}
 
@@ -248,6 +238,8 @@ public class DerivedWorldInfo extends WorldInfo
         return this.theWorldInfo.areCommandsAllowed();
     }
 
+    public void setAllowCommands(boolean allow) {}
+
     /**
      * Returns true if the World is initialized.
      */
@@ -259,7 +251,7 @@ public class DerivedWorldInfo extends WorldInfo
     /**
      * Sets the initialization status of the World.
      */
-    public void setServerInitialized(boolean p_76091_1_) {}
+    public void setServerInitialized(boolean initializedIn) {}
 
     /**
      * Gets the GameRules class Instance.
@@ -268,4 +260,18 @@ public class DerivedWorldInfo extends WorldInfo
     {
         return this.theWorldInfo.getGameRulesInstance();
     }
+
+    public EnumDifficulty getDifficulty()
+    {
+        return this.theWorldInfo.getDifficulty();
+    }
+
+    public void setDifficulty(EnumDifficulty newDifficulty) {}
+
+    public boolean isDifficultyLocked()
+    {
+        return this.theWorldInfo.isDifficultyLocked();
+    }
+
+    public void setDifficultyLocked(boolean locked) {}
 }

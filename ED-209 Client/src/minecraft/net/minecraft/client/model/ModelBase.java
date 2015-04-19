@@ -1,7 +1,7 @@
 package net.minecraft.client.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -10,17 +10,17 @@ import net.minecraft.entity.EntityLivingBase;
 
 public abstract class ModelBase
 {
-    public float onGround;
+    public float swingProgress;
     public boolean isRiding;
+    public boolean isChild = true;
 
     /**
      * This is a list of all the boxes (ModelRenderer.class) in the current model.
      */
-    public List boxList = new ArrayList();
-    public boolean isChild = true;
+    public List boxList = Lists.newArrayList();
 
     /** A mapping for all texture offsets */
-    private Map modelTextureMap = new HashMap();
+    private Map modelTextureMap = Maps.newHashMap();
     public int textureWidth = 64;
     public int textureHeight = 32;
     private static final String __OBFID = "CL_00000845";
@@ -56,5 +56,22 @@ public abstract class ModelBase
     public TextureOffset getTextureOffset(String p_78084_1_)
     {
         return (TextureOffset)this.modelTextureMap.get(p_78084_1_);
+    }
+
+    public static void func_178685_a(ModelRenderer p_178685_0_, ModelRenderer p_178685_1_)
+    {
+        p_178685_1_.rotateAngleX = p_178685_0_.rotateAngleX;
+        p_178685_1_.rotateAngleY = p_178685_0_.rotateAngleY;
+        p_178685_1_.rotateAngleZ = p_178685_0_.rotateAngleZ;
+        p_178685_1_.rotationPointX = p_178685_0_.rotationPointX;
+        p_178685_1_.rotationPointY = p_178685_0_.rotationPointY;
+        p_178685_1_.rotationPointZ = p_178685_0_.rotationPointZ;
+    }
+
+    public void setModelAttributes(ModelBase p_178686_1_)
+    {
+        this.swingProgress = p_178686_1_.swingProgress;
+        this.isRiding = p_178686_1_.isRiding;
+        this.isChild = p_178686_1_.isChild;
     }
 }

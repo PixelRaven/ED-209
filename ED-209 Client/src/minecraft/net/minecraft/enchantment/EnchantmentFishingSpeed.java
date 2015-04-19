@@ -1,12 +1,14 @@
 package net.minecraft.enchantment;
 
+import net.minecraft.util.ResourceLocation;
+
 public class EnchantmentFishingSpeed extends Enchantment
 {
     private static final String __OBFID = "CL_00000117";
 
-    protected EnchantmentFishingSpeed(int p_i45361_1_, int p_i45361_2_, EnumEnchantmentType p_i45361_3_)
+    protected EnchantmentFishingSpeed(int p_i45769_1_, ResourceLocation p_i45769_2_, int p_i45769_3_, EnumEnchantmentType p_i45769_4_)
     {
-        super(p_i45361_1_, p_i45361_2_, p_i45361_3_);
+        super(p_i45769_1_, p_i45769_2_, p_i45769_3_, p_i45769_4_);
         this.setName("fishingSpeed");
     }
 

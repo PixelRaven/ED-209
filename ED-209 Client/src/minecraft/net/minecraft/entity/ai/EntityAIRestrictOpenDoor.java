@@ -1,7 +1,8 @@
 package net.minecraft.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.MathHelper;
+import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.util.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.village.VillageDoorInfo;
 
@@ -14,6 +15,11 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase
     public EntityAIRestrictOpenDoor(EntityCreature p_i1651_1_)
     {
         this.entityObj = p_i1651_1_;
+
+        if (!(p_i1651_1_.getNavigator() instanceof PathNavigateGround))
+        {
+            throw new IllegalArgumentException("Unsupported mob type for RestrictOpenDoorGoal");
+        }
     }
 
     /**
@@ -27,16 +33,17 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase
         }
         else
         {
-            Village var1 = this.entityObj.worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(this.entityObj.posX), MathHelper.floor_double(this.entityObj.posY), MathHelper.floor_double(this.entityObj.posZ), 16);
+            BlockPos var1 = new BlockPos(this.entityObj);
+            Village var2 = this.entityObj.worldObj.getVillageCollection().func_176056_a(var1, 16);
 
-            if (var1 == null)
+            if (var2 == null)
             {
                 return false;
             }
             else
             {
-                this.frontDoor = var1.findNearestDoor(MathHelper.floor_double(this.entityObj.posX), MathHelper.floor_double(this.entityObj.posY), MathHelper.floor_double(this.entityObj.posZ));
-                return this.frontDoor == null ? false : (double)this.frontDoor.getInsideDistanceSquare(MathHelper.floor_double(this.entityObj.posX), MathHelper.floor_double(this.entityObj.posY), MathHelper.floor_double(this.entityObj.posZ)) < 2.25D;
+                this.frontDoor = var2.func_179865_b(var1);
+                return this.frontDoor == null ? false : (double)this.frontDoor.func_179846_b(var1) < 2.25D;
             }
         }
     }
@@ -46,7 +53,7 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase
      */
     public boolean continueExecuting()
     {
-        return this.entityObj.worldObj.isDaytime() ? false : !this.frontDoor.isDetachedFromVillageFlag && this.frontDoor.isInside(MathHelper.floor_double(this.entityObj.posX), MathHelper.floor_double(this.entityObj.posZ));
+        return this.entityObj.worldObj.isDaytime() ? false : !this.frontDoor.func_179851_i() && this.frontDoor.func_179850_c(new BlockPos(this.entityObj));
     }
 
     /**
@@ -54,8 +61,8 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase
      */
     public void startExecuting()
     {
-        this.entityObj.getNavigator().setBreakDoors(false);
-        this.entityObj.getNavigator().setEnterDoors(false);
+        ((PathNavigateGround)this.entityObj.getNavigator()).func_179688_b(false);
+        ((PathNavigateGround)this.entityObj.getNavigator()).func_179691_c(false);
     }
 
     /**
@@ -63,8 +70,8 @@ public class EntityAIRestrictOpenDoor extends EntityAIBase
      */
     public void resetTask()
     {
-        this.entityObj.getNavigator().setBreakDoors(true);
-        this.entityObj.getNavigator().setEnterDoors(true);
+        ((PathNavigateGround)this.entityObj.getNavigator()).func_179688_b(true);
+        ((PathNavigateGround)this.entityObj.getNavigator()).func_179691_c(true);
         this.frontDoor = null;
     }
 

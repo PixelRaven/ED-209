@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.resources.I18n;
 
 public class GuiMemoryErrorScreen extends GuiScreen
@@ -16,27 +17,28 @@ public class GuiMemoryErrorScreen extends GuiScreen
         this.buttonList.add(new GuiOptionButton(1, this.width / 2 - 155 + 160, this.height / 4 + 120 + 12, I18n.format("menu.quit", new Object[0])));
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.id == 0)
+        if (button.id == 0)
         {
             this.mc.displayGuiScreen(new GuiMainMenu());
         }
-        else if (p_146284_1_.id == 1)
+        else if (button.id == 1)
         {
             this.mc.shutdown();
         }
     }
 
     /**
-     * Fired when a key is typed. This is the equivalent of KeyListener.keyTyped(KeyEvent e).
+     * Fired when a key is typed (except F11 who toggle full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
      */
-    protected void keyTyped(char p_73869_1_, int p_73869_2_) {}
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {}
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, "Out of memory!", this.width / 2, this.height / 4 - 60 + 20, 16777215);
@@ -48,6 +50,6 @@ public class GuiMemoryErrorScreen extends GuiScreen
         this.drawString(this.fontRendererObj, "We\'ve tried to free up enough memory to let you go back to", this.width / 2 - 140, this.height / 4 - 60 + 60 + 63, 10526880);
         this.drawString(this.fontRendererObj, "the main menu and back to playing, but this may not have worked.", this.width / 2 - 140, this.height / 4 - 60 + 60 + 72, 10526880);
         this.drawString(this.fontRendererObj, "Please restart the game if you see this message again.", this.width / 2 - 140, this.height / 4 - 60 + 60 + 81, 10526880);
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

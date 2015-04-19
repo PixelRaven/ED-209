@@ -2,6 +2,7 @@ package net.minecraft.realms;
 
 import java.util.Random;
 import net.minecraft.util.MathHelper;
+import org.apache.commons.lang3.StringUtils;
 
 public class RealmsMth
 {
@@ -54,7 +55,7 @@ public class RealmsMth
 
     public static boolean isEmpty(String p_isEmpty_0_)
     {
-        return MathHelper.stringNullOrLengthZero(p_isEmpty_0_);
+        return StringUtils.isEmpty(p_isEmpty_0_);
     }
 
     public static long lfloor(double p_lfloor_0_)
@@ -117,9 +118,9 @@ public class RealmsMth
         return MathHelper.truncateDoubleToInt(p_fastFloor_0_);
     }
 
-    public static double asbMax(double p_asbMax_0_, double p_asbMax_2_)
+    public static double absMax(double p_absMax_0_, double p_absMax_2_)
     {
-        return MathHelper.abs_max(p_asbMax_0_, p_asbMax_2_);
+        return MathHelper.abs_max(p_absMax_0_, p_absMax_2_);
     }
 
     public static float nextFloat(Random p_nextFloat_0_, float p_nextFloat_1_, float p_nextFloat_2_)

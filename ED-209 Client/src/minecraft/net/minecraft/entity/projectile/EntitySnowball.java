@@ -3,6 +3,7 @@ package net.minecraft.entity.projectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
@@ -10,19 +11,19 @@ public class EntitySnowball extends EntityThrowable
 {
     private static final String __OBFID = "CL_00001722";
 
-    public EntitySnowball(World p_i1773_1_)
+    public EntitySnowball(World worldIn)
     {
-        super(p_i1773_1_);
+        super(worldIn);
     }
 
-    public EntitySnowball(World p_i1774_1_, EntityLivingBase p_i1774_2_)
+    public EntitySnowball(World worldIn, EntityLivingBase p_i1774_2_)
     {
-        super(p_i1774_1_, p_i1774_2_);
+        super(worldIn, p_i1774_2_);
     }
 
-    public EntitySnowball(World p_i1775_1_, double p_i1775_2_, double p_i1775_4_, double p_i1775_6_)
+    public EntitySnowball(World worldIn, double p_i1775_2_, double p_i1775_4_, double p_i1775_6_)
     {
-        super(p_i1775_1_, p_i1775_2_, p_i1775_4_, p_i1775_6_);
+        super(worldIn, p_i1775_2_, p_i1775_4_, p_i1775_6_);
     }
 
     /**
@@ -44,10 +45,10 @@ public class EntitySnowball extends EntityThrowable
 
         for (int var3 = 0; var3 < 8; ++var3)
         {
-            this.worldObj.spawnParticle("snowballpoof", this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D);
+            this.worldObj.spawnParticle(EnumParticleTypes.SNOWBALL, this.posX, this.posY, this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
         }
 
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             this.setDead();
         }

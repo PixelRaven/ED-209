@@ -1,10 +1,12 @@
 package net.minecraft.potion;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class PotionHelper
 {
@@ -21,18 +23,17 @@ public class PotionHelper
     public static final String gunpowderEffect;
     public static final String goldenCarrotEffect;
     public static final String field_151423_m;
-    private static final HashMap potionRequirements = new HashMap();
-
-    /** Potion effect amplifier map */
-    private static final HashMap potionAmplifiers = new HashMap();
-    private static final HashMap field_77925_n;
+    public static final String field_179538_n;
+    private static final Map field_179539_o = Maps.newHashMap();
+    private static final Map field_179540_p = Maps.newHashMap();
+    private static final Map field_77925_n;
 
     /** An array of possible potion prefix names, as translation IDs. */
     private static final String[] potionPrefixes;
     private static final String __OBFID = "CL_00000078";
 
     /**
-     * Is the bit given set to 1?
+     * Checks if the bit at 1 << j is on in i.
      */
     public static boolean checkFlag(int p_77914_0_, int p_77914_1_)
     {
@@ -78,21 +79,32 @@ public class PotionHelper
             while (var6.hasNext())
             {
                 PotionEffect var7 = (PotionEffect)var6.next();
-                int var8 = Potion.potionTypes[var7.getPotionID()].getLiquidColor();
 
-                for (int var9 = 0; var9 <= var7.getAmplifier(); ++var9)
+                if (var7.func_180154_f())
                 {
-                    var2 += (float)(var8 >> 16 & 255) / 255.0F;
-                    var3 += (float)(var8 >> 8 & 255) / 255.0F;
-                    var4 += (float)(var8 >> 0 & 255) / 255.0F;
-                    ++var5;
+                    int var8 = Potion.potionTypes[var7.getPotionID()].getLiquidColor();
+
+                    for (int var9 = 0; var9 <= var7.getAmplifier(); ++var9)
+                    {
+                        var2 += (float)(var8 >> 16 & 255) / 255.0F;
+                        var3 += (float)(var8 >> 8 & 255) / 255.0F;
+                        var4 += (float)(var8 >> 0 & 255) / 255.0F;
+                        ++var5;
+                    }
                 }
             }
 
-            var2 = var2 / var5 * 255.0F;
-            var3 = var3 / var5 * 255.0F;
-            var4 = var4 / var5 * 255.0F;
-            return (int)var2 << 16 | (int)var3 << 8 | (int)var4;
+            if (var5 == 0.0F)
+            {
+                return 0;
+            }
+            else
+            {
+                var2 = var2 / var5 * 255.0F;
+                var3 = var3 / var5 * 255.0F;
+                var4 = var4 / var5 * 255.0F;
+                return (int)var2 << 16 | (int)var3 << 8 | (int)var4;
+            }
         }
         else
         {
@@ -136,7 +148,7 @@ public class PotionHelper
         }
         else
         {
-            return calcPotionLiquidColor(getPotionEffects(p_77915_0_, p_77915_1_));
+            return calcPotionLiquidColor(getPotionEffects(p_77915_0_, true));
         }
     }
 
@@ -188,7 +200,7 @@ public class PotionHelper
     }
 
     /**
-     * Count the number of bits in an integer set to ON.
+     * Returns the number of 1 bits in the given integer.
      */
     private static int countSetFlags(int p_77907_0_)
     {
@@ -385,7 +397,7 @@ public class PotionHelper
 
             if (var6 != null && (!var6.isUsable() || p_77917_1_))
             {
-                String var7 = (String)potionRequirements.get(Integer.valueOf(var6.getId()));
+                String var7 = (String)field_179539_o.get(Integer.valueOf(var6.getId()));
 
                 if (var7 != null)
                 {
@@ -394,7 +406,7 @@ public class PotionHelper
                     if (var8 > 0)
                     {
                         int var9 = 0;
-                        String var10 = (String)potionAmplifiers.get(Integer.valueOf(var6.getId()));
+                        String var10 = (String)field_179540_p.get(Integer.valueOf(var6.getId()));
 
                         if (var10 != null)
                         {
@@ -424,7 +436,7 @@ public class PotionHelper
 
                         if (var2 == null)
                         {
-                            var2 = new ArrayList();
+                            var2 = Lists.newArrayList();
                         }
 
                         PotionEffect var11 = new PotionEffect(var6.getId(), var8, var9);
@@ -444,9 +456,7 @@ public class PotionHelper
     }
 
     /**
-     * Does bit operations for brewPotionData, given data, the index of the bit being operated upon, whether the bit
-     * will be removed, whether the bit will be toggled (NOT), or whether the data field will be set to 0 if the bit is
-     * not present.
+     * Manipulates the specified bit of the potion damage value according to the rules passed from applyIngredient.
      */
     private static int brewBitOperations(int p_77906_0_, int p_77906_1_, boolean p_77906_2_, boolean p_77906_3_, boolean p_77906_4_)
     {
@@ -481,8 +491,7 @@ public class PotionHelper
     }
 
     /**
-     * Generate a data value for a potion, given its previous data value and the encoded string of new effects it will
-     * receive
+     * Returns the new potion damage value after the specified ingredient info is applied to the specified potion.
      */
     public static int applyIngredient(int p_77913_0_, String p_77913_1_)
     {
@@ -575,38 +584,41 @@ public class PotionHelper
 
     static
     {
-        potionRequirements.put(Integer.valueOf(Potion.regeneration.getId()), "0 & !1 & !2 & !3 & 0+6");
+        field_179539_o.put(Integer.valueOf(Potion.regeneration.getId()), "0 & !1 & !2 & !3 & 0+6");
         sugarEffect = "-0+1-2-3&4-4+13";
-        potionRequirements.put(Integer.valueOf(Potion.moveSpeed.getId()), "!0 & 1 & !2 & !3 & 1+6");
+        field_179539_o.put(Integer.valueOf(Potion.moveSpeed.getId()), "!0 & 1 & !2 & !3 & 1+6");
         magmaCreamEffect = "+0+1-2-3&4-4+13";
-        potionRequirements.put(Integer.valueOf(Potion.fireResistance.getId()), "0 & 1 & !2 & !3 & 0+6");
+        field_179539_o.put(Integer.valueOf(Potion.fireResistance.getId()), "0 & 1 & !2 & !3 & 0+6");
         speckledMelonEffect = "+0-1+2-3&4-4+13";
-        potionRequirements.put(Integer.valueOf(Potion.heal.getId()), "0 & !1 & 2 & !3");
+        field_179539_o.put(Integer.valueOf(Potion.heal.getId()), "0 & !1 & 2 & !3");
         spiderEyeEffect = "-0-1+2-3&4-4+13";
-        potionRequirements.put(Integer.valueOf(Potion.poison.getId()), "!0 & !1 & 2 & !3 & 2+6");
+        field_179539_o.put(Integer.valueOf(Potion.poison.getId()), "!0 & !1 & 2 & !3 & 2+6");
         fermentedSpiderEyeEffect = "-0+3-4+13";
-        potionRequirements.put(Integer.valueOf(Potion.weakness.getId()), "!0 & !1 & !2 & 3 & 3+6");
-        potionRequirements.put(Integer.valueOf(Potion.harm.getId()), "!0 & !1 & 2 & 3");
-        potionRequirements.put(Integer.valueOf(Potion.moveSlowdown.getId()), "!0 & 1 & !2 & 3 & 3+6");
+        field_179539_o.put(Integer.valueOf(Potion.weakness.getId()), "!0 & !1 & !2 & 3 & 3+6");
+        field_179539_o.put(Integer.valueOf(Potion.harm.getId()), "!0 & !1 & 2 & 3");
+        field_179539_o.put(Integer.valueOf(Potion.moveSlowdown.getId()), "!0 & 1 & !2 & 3 & 3+6");
         blazePowderEffect = "+0-1-2+3&4-4+13";
-        potionRequirements.put(Integer.valueOf(Potion.damageBoost.getId()), "0 & !1 & !2 & 3 & 3+6");
+        field_179539_o.put(Integer.valueOf(Potion.damageBoost.getId()), "0 & !1 & !2 & 3 & 3+6");
         goldenCarrotEffect = "-0+1+2-3+13&4-4";
-        potionRequirements.put(Integer.valueOf(Potion.nightVision.getId()), "!0 & 1 & 2 & !3 & 2+6");
-        potionRequirements.put(Integer.valueOf(Potion.invisibility.getId()), "!0 & 1 & 2 & 3 & 2+6");
+        field_179539_o.put(Integer.valueOf(Potion.nightVision.getId()), "!0 & 1 & 2 & !3 & 2+6");
+        field_179539_o.put(Integer.valueOf(Potion.invisibility.getId()), "!0 & 1 & 2 & 3 & 2+6");
         field_151423_m = "+0-1+2+3+13&4-4";
-        potionRequirements.put(Integer.valueOf(Potion.waterBreathing.getId()), "0 & !1 & 2 & 3 & 2+6");
+        field_179539_o.put(Integer.valueOf(Potion.waterBreathing.getId()), "0 & !1 & 2 & 3 & 2+6");
+        field_179538_n = "+0+1-2+3&4-4+13";
+        field_179539_o.put(Integer.valueOf(Potion.jump.getId()), "0 & 1 & !2 & 3");
         glowstoneEffect = "+5-6-7";
-        potionAmplifiers.put(Integer.valueOf(Potion.moveSpeed.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.digSpeed.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.damageBoost.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.regeneration.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.harm.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.heal.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.resistance.getId()), "5");
-        potionAmplifiers.put(Integer.valueOf(Potion.poison.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.moveSpeed.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.digSpeed.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.damageBoost.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.regeneration.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.harm.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.heal.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.resistance.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.poison.getId()), "5");
+        field_179540_p.put(Integer.valueOf(Potion.jump.getId()), "5");
         redstoneEffect = "-5+6-7";
         gunpowderEffect = "+14&13-13";
-        field_77925_n = new HashMap();
+        field_77925_n = Maps.newHashMap();
         potionPrefixes = new String[] {"potion.prefix.mundane", "potion.prefix.uninteresting", "potion.prefix.bland", "potion.prefix.clear", "potion.prefix.milky", "potion.prefix.diffuse", "potion.prefix.artless", "potion.prefix.thin", "potion.prefix.awkward", "potion.prefix.flat", "potion.prefix.bulky", "potion.prefix.bungling", "potion.prefix.buttered", "potion.prefix.smooth", "potion.prefix.suave", "potion.prefix.debonair", "potion.prefix.thick", "potion.prefix.elegant", "potion.prefix.fancy", "potion.prefix.charming", "potion.prefix.dashing", "potion.prefix.refined", "potion.prefix.cordial", "potion.prefix.sparkling", "potion.prefix.potent", "potion.prefix.foul", "potion.prefix.odorless", "potion.prefix.rank", "potion.prefix.harsh", "potion.prefix.acrid", "potion.prefix.gross", "potion.prefix.stinky"};
     }
 }

@@ -1,6 +1,6 @@
 package net.minecraft.world.biome;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.LongHashMap;
@@ -19,7 +19,7 @@ public class BiomeCache
     private LongHashMap cacheMap = new LongHashMap();
 
     /** The list of cached BiomeCacheBlocks */
-    private List cache = new ArrayList();
+    private List cache = Lists.newArrayList();
     private static final String __OBFID = "CL_00000162";
 
     public BiomeCache(WorldChunkManager p_i1973_1_)
@@ -44,16 +44,14 @@ public class BiomeCache
             this.cache.add(var5);
         }
 
-        var5.lastAccessTime = MinecraftServer.getSystemTimeMillis();
+        var5.lastAccessTime = MinecraftServer.getCurrentTimeMillis();
         return var5;
     }
 
-    /**
-     * Returns the BiomeGenBase related to the x, z position from the cache.
-     */
-    public BiomeGenBase getBiomeGenAt(int p_76837_1_, int p_76837_2_)
+    public BiomeGenBase func_180284_a(int p_180284_1_, int p_180284_2_, BiomeGenBase p_180284_3_)
     {
-        return this.getBiomeCacheBlock(p_76837_1_, p_76837_2_).getBiomeGenAt(p_76837_1_, p_76837_2_);
+        BiomeGenBase var4 = this.getBiomeCacheBlock(p_180284_1_, p_180284_2_).getBiomeGenAt(p_180284_1_, p_180284_2_);
+        return var4 == null ? p_180284_3_ : var4;
     }
 
     /**
@@ -61,7 +59,7 @@ public class BiomeCache
      */
     public void cleanupCache()
     {
-        long var1 = MinecraftServer.getSystemTimeMillis();
+        long var1 = MinecraftServer.getCurrentTimeMillis();
         long var3 = var1 - this.lastCleanupTime;
 
         if (var3 > 7500L || var3 < 0L)

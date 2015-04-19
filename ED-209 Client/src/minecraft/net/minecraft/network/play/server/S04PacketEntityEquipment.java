@@ -7,7 +7,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S04PacketEntityEquipment extends Packet
+public class S04PacketEntityEquipment implements Packet
 {
     private int field_149394_a;
     private int field_149392_b;
@@ -26,39 +26,34 @@ public class S04PacketEntityEquipment extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149394_a = p_148837_1_.readInt();
-        this.field_149392_b = p_148837_1_.readShort();
-        this.field_149393_c = p_148837_1_.readItemStackFromBuffer();
+        this.field_149394_a = data.readVarIntFromBuffer();
+        this.field_149392_b = data.readShort();
+        this.field_149393_c = data.readItemStackFromBuffer();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149394_a);
-        p_148840_1_.writeShort(this.field_149392_b);
-        p_148840_1_.writeItemStackToBuffer(this.field_149393_c);
+        data.writeVarIntToBuffer(this.field_149394_a);
+        data.writeShort(this.field_149392_b);
+        data.writeItemStackToBuffer(this.field_149393_c);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleEntityEquipment(this);
+        handler.handleEntityEquipment(this);
     }
 
     public ItemStack func_149390_c()
     {
         return this.field_149393_c;
-    }
-
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
-    {
-        return String.format("entity=%d, slot=%d, item=%s", new Object[] {Integer.valueOf(this.field_149394_a), Integer.valueOf(this.field_149392_b), this.field_149393_c});
     }
 
     public int func_149389_d()
@@ -71,8 +66,11 @@ public class S04PacketEntityEquipment extends Packet
         return this.field_149392_b;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

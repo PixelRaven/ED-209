@@ -14,18 +14,18 @@ public class UserListWhitelist extends UserList
         super(p_i1132_1_);
     }
 
-    protected UserListEntry func_152682_a(JsonObject p_152682_1_)
+    protected UserListEntry createEntry(JsonObject entryData)
     {
-        return new UserListWhitelistEntry(p_152682_1_);
+        return new UserListWhitelistEntry(entryData);
     }
 
-    public String[] func_152685_a()
+    public String[] getKeys()
     {
-        String[] var1 = new String[this.func_152688_e().size()];
+        String[] var1 = new String[this.getValues().size()];
         int var2 = 0;
         UserListWhitelistEntry var4;
 
-        for (Iterator var3 = this.func_152688_e().values().iterator(); var3.hasNext(); var1[var2++] = ((GameProfile)var4.func_152640_f()).getName())
+        for (Iterator var3 = this.getValues().values().iterator(); var3.hasNext(); var1[var2++] = ((GameProfile)var4.getValue()).getName())
         {
             var4 = (UserListWhitelistEntry)var3.next();
         }
@@ -40,7 +40,7 @@ public class UserListWhitelist extends UserList
 
     public GameProfile func_152706_a(String p_152706_1_)
     {
-        Iterator var2 = this.func_152688_e().values().iterator();
+        Iterator var2 = this.getValues().values().iterator();
         UserListWhitelistEntry var3;
 
         do
@@ -52,13 +52,16 @@ public class UserListWhitelist extends UserList
 
             var3 = (UserListWhitelistEntry)var2.next();
         }
-        while (!p_152706_1_.equalsIgnoreCase(((GameProfile)var3.func_152640_f()).getName()));
+        while (!p_152706_1_.equalsIgnoreCase(((GameProfile)var3.getValue()).getName()));
 
-        return (GameProfile)var3.func_152640_f();
+        return (GameProfile)var3.getValue();
     }
 
-    protected String func_152681_a(Object p_152681_1_)
+    /**
+     * Gets the key value for the given object
+     */
+    protected String getObjectKey(Object obj)
     {
-        return this.func_152704_b((GameProfile)p_152681_1_);
+        return this.func_152704_b((GameProfile)obj);
     }
 }

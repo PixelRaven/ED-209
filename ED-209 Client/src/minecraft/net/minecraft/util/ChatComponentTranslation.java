@@ -25,12 +25,12 @@ public class ChatComponentTranslation extends ChatComponentStyle
     public static final Pattern stringVariablePattern = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z%]|$)");
     private static final String __OBFID = "CL_00001270";
 
-    public ChatComponentTranslation(String p_i45160_1_, Object ... p_i45160_2_)
+    public ChatComponentTranslation(String translationKey, Object ... args)
     {
-        this.key = p_i45160_1_;
-        this.formatArgs = p_i45160_2_;
-        Object[] var3 = p_i45160_2_;
-        int var4 = p_i45160_2_.length;
+        this.key = translationKey;
+        this.formatArgs = args;
+        Object[] var3 = args;
+        int var4 = args.length;
 
         for (int var5 = 0; var5 < var4; ++var5)
         {
@@ -85,10 +85,10 @@ public class ChatComponentTranslation extends ChatComponentStyle
     /**
      * initializes our children from a format string, using the format args to fill in the placeholder variables.
      */
-    protected void initializeFromFormat(String p_150269_1_)
+    protected void initializeFromFormat(String format)
     {
         boolean var2 = false;
-        Matcher var3 = stringVariablePattern.matcher(p_150269_1_);
+        Matcher var3 = stringVariablePattern.matcher(format);
         int var4 = 0;
         int var5 = 0;
 
@@ -103,13 +103,13 @@ public class ChatComponentTranslation extends ChatComponentStyle
 
                 if (var6 > var5)
                 {
-                    ChatComponentText var8 = new ChatComponentText(String.format(p_150269_1_.substring(var5, var6), new Object[0]));
+                    ChatComponentText var8 = new ChatComponentText(String.format(format.substring(var5, var6), new Object[0]));
                     var8.getChatStyle().setParentStyle(this.getChatStyle());
                     this.children.add(var8);
                 }
 
                 String var14 = var3.group(2);
-                String var9 = p_150269_1_.substring(var6, var7);
+                String var9 = format.substring(var6, var7);
 
                 if ("%".equals(var14) && "%%".equals(var9))
                 {
@@ -126,13 +126,17 @@ public class ChatComponentTranslation extends ChatComponentStyle
 
                     String var10 = var3.group(1);
                     int var11 = var10 != null ? Integer.parseInt(var10) - 1 : var4++;
-                    this.children.add(this.getFormatArgumentAsComponent(var11));
+
+                    if (var11 < this.formatArgs.length)
+                    {
+                        this.children.add(this.getFormatArgumentAsComponent(var11));
+                    }
                 }
             }
 
-            if (var5 < p_150269_1_.length())
+            if (var5 < format.length())
             {
-                ChatComponentText var13 = new ChatComponentText(String.format(p_150269_1_.substring(var5), new Object[0]));
+                ChatComponentText var13 = new ChatComponentText(String.format(format.substring(var5), new Object[0]));
                 var13.getChatStyle().setParentStyle(this.getChatStyle());
                 this.children.add(var13);
             }
@@ -143,15 +147,15 @@ public class ChatComponentTranslation extends ChatComponentStyle
         }
     }
 
-    private IChatComponent getFormatArgumentAsComponent(int p_150272_1_)
+    private IChatComponent getFormatArgumentAsComponent(int index)
     {
-        if (p_150272_1_ >= this.formatArgs.length)
+        if (index >= this.formatArgs.length)
         {
-            throw new ChatComponentTranslationFormatException(this, p_150272_1_);
+            throw new ChatComponentTranslationFormatException(this, index);
         }
         else
         {
-            Object var2 = this.formatArgs[p_150272_1_];
+            Object var2 = this.formatArgs[index];
             Object var3;
 
             if (var2 instanceof IChatComponent)
@@ -168,9 +172,9 @@ public class ChatComponentTranslation extends ChatComponentStyle
         }
     }
 
-    public IChatComponent setChatStyle(ChatStyle p_150255_1_)
+    public IChatComponent setChatStyle(ChatStyle style)
     {
-        super.setChatStyle(p_150255_1_);
+        super.setChatStyle(style);
         Object[] var2 = this.formatArgs;
         int var3 = var2.length;
 
@@ -191,7 +195,7 @@ public class ChatComponentTranslation extends ChatComponentStyle
             while (var6.hasNext())
             {
                 IChatComponent var7 = (IChatComponent)var6.next();
-                var7.getChatStyle().setParentStyle(p_150255_1_);
+                var7.getChatStyle().setParentStyle(style);
             }
         }
 

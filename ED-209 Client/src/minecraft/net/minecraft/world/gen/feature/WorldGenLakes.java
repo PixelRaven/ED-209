@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -18,77 +19,75 @@ public class WorldGenLakes extends WorldGenerator
         this.field_150556_a = p_i45455_1_;
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        p_76484_3_ -= 8;
-
-        for (p_76484_5_ -= 8; p_76484_4_ > 5 && p_76484_1_.isAirBlock(p_76484_3_, p_76484_4_, p_76484_5_); --p_76484_4_)
+        for (p_180709_3_ = p_180709_3_.add(-8, 0, -8); p_180709_3_.getY() > 5 && worldIn.isAirBlock(p_180709_3_); p_180709_3_ = p_180709_3_.offsetDown())
         {
             ;
         }
 
-        if (p_76484_4_ <= 4)
+        if (p_180709_3_.getY() <= 4)
         {
             return false;
         }
         else
         {
-            p_76484_4_ -= 4;
-            boolean[] var6 = new boolean[2048];
-            int var7 = p_76484_2_.nextInt(4) + 4;
-            int var8;
+            p_180709_3_ = p_180709_3_.offsetDown(4);
+            boolean[] var4 = new boolean[2048];
+            int var5 = p_180709_2_.nextInt(4) + 4;
+            int var6;
 
-            for (var8 = 0; var8 < var7; ++var8)
+            for (var6 = 0; var6 < var5; ++var6)
             {
-                double var9 = p_76484_2_.nextDouble() * 6.0D + 3.0D;
-                double var11 = p_76484_2_.nextDouble() * 4.0D + 2.0D;
-                double var13 = p_76484_2_.nextDouble() * 6.0D + 3.0D;
-                double var15 = p_76484_2_.nextDouble() * (16.0D - var9 - 2.0D) + 1.0D + var9 / 2.0D;
-                double var17 = p_76484_2_.nextDouble() * (8.0D - var11 - 4.0D) + 2.0D + var11 / 2.0D;
-                double var19 = p_76484_2_.nextDouble() * (16.0D - var13 - 2.0D) + 1.0D + var13 / 2.0D;
+                double var7 = p_180709_2_.nextDouble() * 6.0D + 3.0D;
+                double var9 = p_180709_2_.nextDouble() * 4.0D + 2.0D;
+                double var11 = p_180709_2_.nextDouble() * 6.0D + 3.0D;
+                double var13 = p_180709_2_.nextDouble() * (16.0D - var7 - 2.0D) + 1.0D + var7 / 2.0D;
+                double var15 = p_180709_2_.nextDouble() * (8.0D - var9 - 4.0D) + 2.0D + var9 / 2.0D;
+                double var17 = p_180709_2_.nextDouble() * (16.0D - var11 - 2.0D) + 1.0D + var11 / 2.0D;
 
-                for (int var21 = 1; var21 < 15; ++var21)
+                for (int var19 = 1; var19 < 15; ++var19)
                 {
-                    for (int var22 = 1; var22 < 15; ++var22)
+                    for (int var20 = 1; var20 < 15; ++var20)
                     {
-                        for (int var23 = 1; var23 < 7; ++var23)
+                        for (int var21 = 1; var21 < 7; ++var21)
                         {
+                            double var22 = ((double)var19 - var13) / (var7 / 2.0D);
                             double var24 = ((double)var21 - var15) / (var9 / 2.0D);
-                            double var26 = ((double)var23 - var17) / (var11 / 2.0D);
-                            double var28 = ((double)var22 - var19) / (var13 / 2.0D);
-                            double var30 = var24 * var24 + var26 * var26 + var28 * var28;
+                            double var26 = ((double)var20 - var17) / (var11 / 2.0D);
+                            double var28 = var22 * var22 + var24 * var24 + var26 * var26;
 
-                            if (var30 < 1.0D)
+                            if (var28 < 1.0D)
                             {
-                                var6[(var21 * 16 + var22) * 8 + var23] = true;
+                                var4[(var19 * 16 + var20) * 8 + var21] = true;
                             }
                         }
                     }
                 }
             }
 
-            int var10;
-            int var32;
-            boolean var34;
+            int var8;
+            int var30;
+            boolean var32;
 
-            for (var8 = 0; var8 < 16; ++var8)
+            for (var6 = 0; var6 < 16; ++var6)
             {
-                for (var32 = 0; var32 < 16; ++var32)
+                for (var30 = 0; var30 < 16; ++var30)
                 {
-                    for (var10 = 0; var10 < 8; ++var10)
+                    for (var8 = 0; var8 < 8; ++var8)
                     {
-                        var34 = !var6[(var8 * 16 + var32) * 8 + var10] && (var8 < 15 && var6[((var8 + 1) * 16 + var32) * 8 + var10] || var8 > 0 && var6[((var8 - 1) * 16 + var32) * 8 + var10] || var32 < 15 && var6[(var8 * 16 + var32 + 1) * 8 + var10] || var32 > 0 && var6[(var8 * 16 + (var32 - 1)) * 8 + var10] || var10 < 7 && var6[(var8 * 16 + var32) * 8 + var10 + 1] || var10 > 0 && var6[(var8 * 16 + var32) * 8 + (var10 - 1)]);
+                        var32 = !var4[(var6 * 16 + var30) * 8 + var8] && (var6 < 15 && var4[((var6 + 1) * 16 + var30) * 8 + var8] || var6 > 0 && var4[((var6 - 1) * 16 + var30) * 8 + var8] || var30 < 15 && var4[(var6 * 16 + var30 + 1) * 8 + var8] || var30 > 0 && var4[(var6 * 16 + (var30 - 1)) * 8 + var8] || var8 < 7 && var4[(var6 * 16 + var30) * 8 + var8 + 1] || var8 > 0 && var4[(var6 * 16 + var30) * 8 + (var8 - 1)]);
 
-                        if (var34)
+                        if (var32)
                         {
-                            Material var12 = p_76484_1_.getBlock(p_76484_3_ + var8, p_76484_4_ + var10, p_76484_5_ + var32).getMaterial();
+                            Material var10 = worldIn.getBlockState(p_180709_3_.add(var6, var8, var30)).getBlock().getMaterial();
 
-                            if (var10 >= 4 && var12.isLiquid())
+                            if (var8 >= 4 && var10.isLiquid())
                             {
                                 return false;
                             }
 
-                            if (var10 < 4 && !var12.isSolid() && p_76484_1_.getBlock(p_76484_3_ + var8, p_76484_4_ + var10, p_76484_5_ + var32) != this.field_150556_a)
+                            if (var8 < 4 && !var10.isSolid() && worldIn.getBlockState(p_180709_3_.add(var6, var8, var30)).getBlock() != this.field_150556_a)
                             {
                                 return false;
                             }
@@ -97,37 +96,42 @@ public class WorldGenLakes extends WorldGenerator
                 }
             }
 
-            for (var8 = 0; var8 < 16; ++var8)
+            for (var6 = 0; var6 < 16; ++var6)
             {
-                for (var32 = 0; var32 < 16; ++var32)
+                for (var30 = 0; var30 < 16; ++var30)
                 {
-                    for (var10 = 0; var10 < 8; ++var10)
+                    for (var8 = 0; var8 < 8; ++var8)
                     {
-                        if (var6[(var8 * 16 + var32) * 8 + var10])
+                        if (var4[(var6 * 16 + var30) * 8 + var8])
                         {
-                            p_76484_1_.setBlock(p_76484_3_ + var8, p_76484_4_ + var10, p_76484_5_ + var32, var10 >= 4 ? Blocks.air : this.field_150556_a, 0, 2);
+                            worldIn.setBlockState(p_180709_3_.add(var6, var8, var30), var8 >= 4 ? Blocks.air.getDefaultState() : this.field_150556_a.getDefaultState(), 2);
                         }
                     }
                 }
             }
 
-            for (var8 = 0; var8 < 16; ++var8)
+            for (var6 = 0; var6 < 16; ++var6)
             {
-                for (var32 = 0; var32 < 16; ++var32)
+                for (var30 = 0; var30 < 16; ++var30)
                 {
-                    for (var10 = 4; var10 < 8; ++var10)
+                    for (var8 = 4; var8 < 8; ++var8)
                     {
-                        if (var6[(var8 * 16 + var32) * 8 + var10] && p_76484_1_.getBlock(p_76484_3_ + var8, p_76484_4_ + var10 - 1, p_76484_5_ + var32) == Blocks.dirt && p_76484_1_.getSavedLightValue(EnumSkyBlock.Sky, p_76484_3_ + var8, p_76484_4_ + var10, p_76484_5_ + var32) > 0)
+                        if (var4[(var6 * 16 + var30) * 8 + var8])
                         {
-                            BiomeGenBase var35 = p_76484_1_.getBiomeGenForCoords(p_76484_3_ + var8, p_76484_5_ + var32);
+                            BlockPos var33 = p_180709_3_.add(var6, var8 - 1, var30);
 
-                            if (var35.topBlock == Blocks.mycelium)
+                            if (worldIn.getBlockState(var33).getBlock() == Blocks.dirt && worldIn.getLightFor(EnumSkyBlock.SKY, p_180709_3_.add(var6, var8, var30)) > 0)
                             {
-                                p_76484_1_.setBlock(p_76484_3_ + var8, p_76484_4_ + var10 - 1, p_76484_5_ + var32, Blocks.mycelium, 0, 2);
-                            }
-                            else
-                            {
-                                p_76484_1_.setBlock(p_76484_3_ + var8, p_76484_4_ + var10 - 1, p_76484_5_ + var32, Blocks.grass, 0, 2);
+                                BiomeGenBase var34 = worldIn.getBiomeGenForCoords(var33);
+
+                                if (var34.topBlock.getBlock() == Blocks.mycelium)
+                                {
+                                    worldIn.setBlockState(var33, Blocks.mycelium.getDefaultState(), 2);
+                                }
+                                else
+                                {
+                                    worldIn.setBlockState(var33, Blocks.grass.getDefaultState(), 2);
+                                }
                             }
                         }
                     }
@@ -136,17 +140,17 @@ public class WorldGenLakes extends WorldGenerator
 
             if (this.field_150556_a.getMaterial() == Material.lava)
             {
-                for (var8 = 0; var8 < 16; ++var8)
+                for (var6 = 0; var6 < 16; ++var6)
                 {
-                    for (var32 = 0; var32 < 16; ++var32)
+                    for (var30 = 0; var30 < 16; ++var30)
                     {
-                        for (var10 = 0; var10 < 8; ++var10)
+                        for (var8 = 0; var8 < 8; ++var8)
                         {
-                            var34 = !var6[(var8 * 16 + var32) * 8 + var10] && (var8 < 15 && var6[((var8 + 1) * 16 + var32) * 8 + var10] || var8 > 0 && var6[((var8 - 1) * 16 + var32) * 8 + var10] || var32 < 15 && var6[(var8 * 16 + var32 + 1) * 8 + var10] || var32 > 0 && var6[(var8 * 16 + (var32 - 1)) * 8 + var10] || var10 < 7 && var6[(var8 * 16 + var32) * 8 + var10 + 1] || var10 > 0 && var6[(var8 * 16 + var32) * 8 + (var10 - 1)]);
+                            var32 = !var4[(var6 * 16 + var30) * 8 + var8] && (var6 < 15 && var4[((var6 + 1) * 16 + var30) * 8 + var8] || var6 > 0 && var4[((var6 - 1) * 16 + var30) * 8 + var8] || var30 < 15 && var4[(var6 * 16 + var30 + 1) * 8 + var8] || var30 > 0 && var4[(var6 * 16 + (var30 - 1)) * 8 + var8] || var8 < 7 && var4[(var6 * 16 + var30) * 8 + var8 + 1] || var8 > 0 && var4[(var6 * 16 + var30) * 8 + (var8 - 1)]);
 
-                            if (var34 && (var10 < 4 || p_76484_2_.nextInt(2) != 0) && p_76484_1_.getBlock(p_76484_3_ + var8, p_76484_4_ + var10, p_76484_5_ + var32).getMaterial().isSolid())
+                            if (var32 && (var8 < 4 || p_180709_2_.nextInt(2) != 0) && worldIn.getBlockState(p_180709_3_.add(var6, var8, var30)).getBlock().getMaterial().isSolid())
                             {
-                                p_76484_1_.setBlock(p_76484_3_ + var8, p_76484_4_ + var10, p_76484_5_ + var32, Blocks.stone, 0, 2);
+                                worldIn.setBlockState(p_180709_3_.add(var6, var8, var30), Blocks.stone.getDefaultState(), 2);
                             }
                         }
                     }
@@ -155,15 +159,15 @@ public class WorldGenLakes extends WorldGenerator
 
             if (this.field_150556_a.getMaterial() == Material.water)
             {
-                for (var8 = 0; var8 < 16; ++var8)
+                for (var6 = 0; var6 < 16; ++var6)
                 {
-                    for (var32 = 0; var32 < 16; ++var32)
+                    for (var30 = 0; var30 < 16; ++var30)
                     {
-                        byte var33 = 4;
+                        byte var31 = 4;
 
-                        if (p_76484_1_.isBlockFreezable(p_76484_3_ + var8, p_76484_4_ + var33, p_76484_5_ + var32))
+                        if (worldIn.func_175675_v(p_180709_3_.add(var6, var31, var30)))
                         {
-                            p_76484_1_.setBlock(p_76484_3_ + var8, p_76484_4_ + var33, p_76484_5_ + var32, Blocks.ice, 0, 2);
+                            worldIn.setBlockState(p_180709_3_.add(var6, var31, var30), Blocks.ice.getDefaultState(), 2);
                         }
                     }
                 }

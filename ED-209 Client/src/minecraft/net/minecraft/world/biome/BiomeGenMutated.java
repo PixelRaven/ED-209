@@ -1,25 +1,26 @@
 package net.minecraft.world.biome;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Random;
-import net.minecraft.block.Block;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 
 public class BiomeGenMutated extends BiomeGenBase
 {
-    protected BiomeGenBase field_150611_aD;
+    protected BiomeGenBase baseBiome;
     private static final String __OBFID = "CL_00000178";
 
     public BiomeGenMutated(int p_i45381_1_, BiomeGenBase p_i45381_2_)
     {
         super(p_i45381_1_);
-        this.field_150611_aD = p_i45381_2_;
+        this.baseBiome = p_i45381_2_;
         this.func_150557_a(p_i45381_2_.color, true);
         this.biomeName = p_i45381_2_.biomeName + " M";
         this.topBlock = p_i45381_2_.topBlock;
         this.fillerBlock = p_i45381_2_.fillerBlock;
-        this.field_76754_C = p_i45381_2_.field_76754_C;
+        this.fillerBlockMetadata = p_i45381_2_.fillerBlockMetadata;
         this.minHeight = p_i45381_2_.minHeight;
         this.maxHeight = p_i45381_2_.maxHeight;
         this.temperature = p_i45381_2_.temperature;
@@ -27,24 +28,24 @@ public class BiomeGenMutated extends BiomeGenBase
         this.waterColorMultiplier = p_i45381_2_.waterColorMultiplier;
         this.enableSnow = p_i45381_2_.enableSnow;
         this.enableRain = p_i45381_2_.enableRain;
-        this.spawnableCreatureList = new ArrayList(p_i45381_2_.spawnableCreatureList);
-        this.spawnableMonsterList = new ArrayList(p_i45381_2_.spawnableMonsterList);
-        this.spawnableCaveCreatureList = new ArrayList(p_i45381_2_.spawnableCaveCreatureList);
-        this.spawnableWaterCreatureList = new ArrayList(p_i45381_2_.spawnableWaterCreatureList);
+        this.spawnableCreatureList = Lists.newArrayList(p_i45381_2_.spawnableCreatureList);
+        this.spawnableMonsterList = Lists.newArrayList(p_i45381_2_.spawnableMonsterList);
+        this.spawnableCaveCreatureList = Lists.newArrayList(p_i45381_2_.spawnableCaveCreatureList);
+        this.spawnableWaterCreatureList = Lists.newArrayList(p_i45381_2_.spawnableWaterCreatureList);
         this.temperature = p_i45381_2_.temperature;
         this.rainfall = p_i45381_2_.rainfall;
         this.minHeight = p_i45381_2_.minHeight + 0.1F;
         this.maxHeight = p_i45381_2_.maxHeight + 0.2F;
     }
 
-    public void decorate(World p_76728_1_, Random p_76728_2_, int p_76728_3_, int p_76728_4_)
+    public void func_180624_a(World worldIn, Random p_180624_2_, BlockPos p_180624_3_)
     {
-        this.field_150611_aD.theBiomeDecorator.func_150512_a(p_76728_1_, p_76728_2_, this, p_76728_3_, p_76728_4_);
+        this.baseBiome.theBiomeDecorator.func_180292_a(worldIn, p_180624_2_, this, p_180624_3_);
     }
 
-    public void func_150573_a(World p_150573_1_, Random p_150573_2_, Block[] p_150573_3_, byte[] p_150573_4_, int p_150573_5_, int p_150573_6_, double p_150573_7_)
+    public void genTerrainBlocks(World worldIn, Random p_180622_2_, ChunkPrimer p_180622_3_, int p_180622_4_, int p_180622_5_, double p_180622_6_)
     {
-        this.field_150611_aD.func_150573_a(p_150573_1_, p_150573_2_, p_150573_3_, p_150573_4_, p_150573_5_, p_150573_6_, p_150573_7_);
+        this.baseBiome.genTerrainBlocks(worldIn, p_180622_2_, p_180622_3_, p_180622_4_, p_180622_5_, p_180622_6_);
     }
 
     /**
@@ -52,42 +53,39 @@ public class BiomeGenMutated extends BiomeGenBase
      */
     public float getSpawningChance()
     {
-        return this.field_150611_aD.getSpawningChance();
+        return this.baseBiome.getSpawningChance();
     }
 
-    public WorldGenAbstractTree func_150567_a(Random p_150567_1_)
+    public WorldGenAbstractTree genBigTreeChance(Random p_150567_1_)
     {
-        return this.field_150611_aD.func_150567_a(p_150567_1_);
+        return this.baseBiome.genBigTreeChance(p_150567_1_);
+    }
+
+    public int func_180625_c(BlockPos p_180625_1_)
+    {
+        return this.baseBiome.func_180625_c(p_180625_1_);
+    }
+
+    public int func_180627_b(BlockPos p_180627_1_)
+    {
+        return this.baseBiome.func_180627_b(p_180627_1_);
+    }
+
+    public Class getBiomeClass()
+    {
+        return this.baseBiome.getBiomeClass();
     }
 
     /**
-     * Provides the basic foliage color based on the biome temperature and rainfall
+     * returns true if the biome specified is equal to this biome
      */
-    public int getBiomeFoliageColor(int p_150571_1_, int p_150571_2_, int p_150571_3_)
+    public boolean isEqualTo(BiomeGenBase p_150569_1_)
     {
-        return this.field_150611_aD.getBiomeFoliageColor(p_150571_1_, p_150571_2_, p_150571_2_);
+        return this.baseBiome.isEqualTo(p_150569_1_);
     }
 
-    /**
-     * Provides the basic grass color based on the biome temperature and rainfall
-     */
-    public int getBiomeGrassColor(int p_150558_1_, int p_150558_2_, int p_150558_3_)
+    public BiomeGenBase.TempCategory getTempCategory()
     {
-        return this.field_150611_aD.getBiomeGrassColor(p_150558_1_, p_150558_2_, p_150558_2_);
-    }
-
-    public Class func_150562_l()
-    {
-        return this.field_150611_aD.func_150562_l();
-    }
-
-    public boolean func_150569_a(BiomeGenBase p_150569_1_)
-    {
-        return this.field_150611_aD.func_150569_a(p_150569_1_);
-    }
-
-    public BiomeGenBase.TempCategory func_150561_m()
-    {
-        return this.field_150611_aD.func_150561_m();
+        return this.baseBiome.getTempCategory();
     }
 }

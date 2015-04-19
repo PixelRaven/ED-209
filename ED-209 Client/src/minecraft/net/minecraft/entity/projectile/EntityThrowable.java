@@ -9,18 +9,21 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public abstract class EntityThrowable extends Entity implements IProjectile
 {
-    private int field_145788_c = -1;
-    private int field_145786_d = -1;
-    private int field_145787_e = -1;
-    private Block field_145785_f;
-    protected boolean inGround;
+    private int xTile = -1;
+    private int yTile = -1;
+    private int zTile = -1;
+    private Block field_174853_f;
+    protected boolean field_174854_a;
     public int throwableShake;
 
     /** The entity that threw this throwable item. */
@@ -30,9 +33,9 @@ public abstract class EntityThrowable extends Entity implements IProjectile
     private int ticksInAir;
     private static final String __OBFID = "CL_00001723";
 
-    public EntityThrowable(World p_i1776_1_)
+    public EntityThrowable(World worldIn)
     {
-        super(p_i1776_1_);
+        super(worldIn);
         this.setSize(0.25F, 0.25F);
     }
 
@@ -42,16 +45,16 @@ public abstract class EntityThrowable extends Entity implements IProjectile
      * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge
      * length * 64 * renderDistanceWeight Args: distance
      */
-    public boolean isInRangeToRenderDist(double p_70112_1_)
+    public boolean isInRangeToRenderDist(double distance)
     {
-        double var3 = this.boundingBox.getAverageEdgeLength() * 4.0D;
+        double var3 = this.getEntityBoundingBox().getAverageEdgeLength() * 4.0D;
         var3 *= 64.0D;
-        return p_70112_1_ < var3 * var3;
+        return distance < var3 * var3;
     }
 
-    public EntityThrowable(World p_i1777_1_, EntityLivingBase p_i1777_2_)
+    public EntityThrowable(World worldIn, EntityLivingBase p_i1777_2_)
     {
-        super(p_i1777_1_);
+        super(worldIn);
         this.thrower = p_i1777_2_;
         this.setSize(0.25F, 0.25F);
         this.setLocationAndAngles(p_i1777_2_.posX, p_i1777_2_.posY + (double)p_i1777_2_.getEyeHeight(), p_i1777_2_.posZ, p_i1777_2_.rotationYaw, p_i1777_2_.rotationPitch);
@@ -59,7 +62,6 @@ public abstract class EntityThrowable extends Entity implements IProjectile
         this.posY -= 0.10000000149011612D;
         this.posZ -= (double)(MathHelper.sin(this.rotationYaw / 180.0F * (float)Math.PI) * 0.16F);
         this.setPosition(this.posX, this.posY, this.posZ);
-        this.yOffset = 0.0F;
         float var3 = 0.4F;
         this.motionX = (double)(-MathHelper.sin(this.rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float)Math.PI) * var3);
         this.motionZ = (double)(MathHelper.cos(this.rotationYaw / 180.0F * (float)Math.PI) * MathHelper.cos(this.rotationPitch / 180.0F * (float)Math.PI) * var3);
@@ -67,13 +69,12 @@ public abstract class EntityThrowable extends Entity implements IProjectile
         this.setThrowableHeading(this.motionX, this.motionY, this.motionZ, this.func_70182_d(), 1.0F);
     }
 
-    public EntityThrowable(World p_i1778_1_, double p_i1778_2_, double p_i1778_4_, double p_i1778_6_)
+    public EntityThrowable(World worldIn, double p_i1778_2_, double p_i1778_4_, double p_i1778_6_)
     {
-        super(p_i1778_1_);
+        super(worldIn);
         this.ticksInGround = 0;
         this.setSize(0.25F, 0.25F);
         this.setPosition(p_i1778_2_, p_i1778_4_, p_i1778_6_);
-        this.yOffset = 0.0F;
     }
 
     protected float func_70182_d()
@@ -113,17 +114,17 @@ public abstract class EntityThrowable extends Entity implements IProjectile
     /**
      * Sets the velocity to the args. Args: x, y, z
      */
-    public void setVelocity(double p_70016_1_, double p_70016_3_, double p_70016_5_)
+    public void setVelocity(double x, double y, double z)
     {
-        this.motionX = p_70016_1_;
-        this.motionY = p_70016_3_;
-        this.motionZ = p_70016_5_;
+        this.motionX = x;
+        this.motionY = y;
+        this.motionZ = z;
 
         if (this.prevRotationPitch == 0.0F && this.prevRotationYaw == 0.0F)
         {
-            float var7 = MathHelper.sqrt_double(p_70016_1_ * p_70016_1_ + p_70016_5_ * p_70016_5_);
-            this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(p_70016_1_, p_70016_5_) * 180.0D / Math.PI);
-            this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(p_70016_3_, (double)var7) * 180.0D / Math.PI);
+            float var7 = MathHelper.sqrt_double(x * x + z * z);
+            this.prevRotationYaw = this.rotationYaw = (float)(Math.atan2(x, z) * 180.0D / Math.PI);
+            this.prevRotationPitch = this.rotationPitch = (float)(Math.atan2(y, (double)var7) * 180.0D / Math.PI);
         }
     }
 
@@ -142,9 +143,9 @@ public abstract class EntityThrowable extends Entity implements IProjectile
             --this.throwableShake;
         }
 
-        if (this.inGround)
+        if (this.field_174854_a)
         {
-            if (this.worldObj.getBlock(this.field_145788_c, this.field_145786_d, this.field_145787_e) == this.field_145785_f)
+            if (this.worldObj.getBlockState(new BlockPos(this.xTile, this.yTile, this.zTile)).getBlock() == this.field_174853_f)
             {
                 ++this.ticksInGround;
 
@@ -156,7 +157,7 @@ public abstract class EntityThrowable extends Entity implements IProjectile
                 return;
             }
 
-            this.inGround = false;
+            this.field_174854_a = false;
             this.motionX *= (double)(this.rand.nextFloat() * 0.2F);
             this.motionY *= (double)(this.rand.nextFloat() * 0.2F);
             this.motionZ *= (double)(this.rand.nextFloat() * 0.2F);
@@ -168,21 +169,21 @@ public abstract class EntityThrowable extends Entity implements IProjectile
             ++this.ticksInAir;
         }
 
-        Vec3 var1 = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-        Vec3 var2 = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+        Vec3 var1 = new Vec3(this.posX, this.posY, this.posZ);
+        Vec3 var2 = new Vec3(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
         MovingObjectPosition var3 = this.worldObj.rayTraceBlocks(var1, var2);
-        var1 = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-        var2 = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+        var1 = new Vec3(this.posX, this.posY, this.posZ);
+        var2 = new Vec3(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 
         if (var3 != null)
         {
-            var2 = Vec3.createVectorHelper(var3.hitVec.xCoord, var3.hitVec.yCoord, var3.hitVec.zCoord);
+            var2 = new Vec3(var3.hitVec.xCoord, var3.hitVec.yCoord, var3.hitVec.zCoord);
         }
 
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             Entity var4 = null;
-            List var5 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+            List var5 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox().addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
             double var6 = 0.0D;
             EntityLivingBase var8 = this.getThrower();
 
@@ -193,7 +194,7 @@ public abstract class EntityThrowable extends Entity implements IProjectile
                 if (var10.canBeCollidedWith() && (var10 != var8 || this.ticksInAir >= 5))
                 {
                     float var11 = 0.3F;
-                    AxisAlignedBB var12 = var10.boundingBox.expand((double)var11, (double)var11, (double)var11);
+                    AxisAlignedBB var12 = var10.getEntityBoundingBox().expand((double)var11, (double)var11, (double)var11);
                     MovingObjectPosition var13 = var12.calculateIntercept(var1, var2);
 
                     if (var13 != null)
@@ -217,7 +218,7 @@ public abstract class EntityThrowable extends Entity implements IProjectile
 
         if (var3 != null)
         {
-            if (var3.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && this.worldObj.getBlock(var3.blockX, var3.blockY, var3.blockZ) == Blocks.portal)
+            if (var3.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && this.worldObj.getBlockState(var3.func_178782_a()).getBlock() == Blocks.portal)
             {
                 this.setInPortal();
             }
@@ -263,7 +264,7 @@ public abstract class EntityThrowable extends Entity implements IProjectile
             for (int var7 = 0; var7 < 4; ++var7)
             {
                 float var19 = 0.25F;
-                this.worldObj.spawnParticle("bubble", this.posX - this.motionX * (double)var19, this.posY - this.motionY * (double)var19, this.posZ - this.motionZ * (double)var19, this.motionX, this.motionY, this.motionZ);
+                this.worldObj.spawnParticle(EnumParticleTypes.WATER_BUBBLE, this.posX - this.motionX * (double)var19, this.posY - this.motionY * (double)var19, this.posZ - this.motionZ * (double)var19, this.motionX, this.motionY, this.motionZ, new int[0]);
             }
 
             var17 = 0.8F;
@@ -292,45 +293,50 @@ public abstract class EntityThrowable extends Entity implements IProjectile
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        p_70014_1_.setShort("xTile", (short)this.field_145788_c);
-        p_70014_1_.setShort("yTile", (short)this.field_145786_d);
-        p_70014_1_.setShort("zTile", (short)this.field_145787_e);
-        p_70014_1_.setByte("inTile", (byte)Block.getIdFromBlock(this.field_145785_f));
-        p_70014_1_.setByte("shake", (byte)this.throwableShake);
-        p_70014_1_.setByte("inGround", (byte)(this.inGround ? 1 : 0));
+        tagCompound.setShort("xTile", (short)this.xTile);
+        tagCompound.setShort("yTile", (short)this.yTile);
+        tagCompound.setShort("zTile", (short)this.zTile);
+        ResourceLocation var2 = (ResourceLocation)Block.blockRegistry.getNameForObject(this.field_174853_f);
+        tagCompound.setString("inTile", var2 == null ? "" : var2.toString());
+        tagCompound.setByte("shake", (byte)this.throwableShake);
+        tagCompound.setByte("inGround", (byte)(this.field_174854_a ? 1 : 0));
 
-        if ((this.throwerName == null || this.throwerName.length() == 0) && this.thrower != null && this.thrower instanceof EntityPlayer)
+        if ((this.throwerName == null || this.throwerName.length() == 0) && this.thrower instanceof EntityPlayer)
         {
-            this.throwerName = this.thrower.getCommandSenderName();
+            this.throwerName = this.thrower.getName();
         }
 
-        p_70014_1_.setString("ownerName", this.throwerName == null ? "" : this.throwerName);
+        tagCompound.setString("ownerName", this.throwerName == null ? "" : this.throwerName);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        this.field_145788_c = p_70037_1_.getShort("xTile");
-        this.field_145786_d = p_70037_1_.getShort("yTile");
-        this.field_145787_e = p_70037_1_.getShort("zTile");
-        this.field_145785_f = Block.getBlockById(p_70037_1_.getByte("inTile") & 255);
-        this.throwableShake = p_70037_1_.getByte("shake") & 255;
-        this.inGround = p_70037_1_.getByte("inGround") == 1;
-        this.throwerName = p_70037_1_.getString("ownerName");
+        this.xTile = tagCompund.getShort("xTile");
+        this.yTile = tagCompund.getShort("yTile");
+        this.zTile = tagCompund.getShort("zTile");
+
+        if (tagCompund.hasKey("inTile", 8))
+        {
+            this.field_174853_f = Block.getBlockFromName(tagCompund.getString("inTile"));
+        }
+        else
+        {
+            this.field_174853_f = Block.getBlockById(tagCompund.getByte("inTile") & 255);
+        }
+
+        this.throwableShake = tagCompund.getByte("shake") & 255;
+        this.field_174854_a = tagCompund.getByte("inGround") == 1;
+        this.throwerName = tagCompund.getString("ownerName");
 
         if (this.throwerName != null && this.throwerName.length() == 0)
         {
             this.throwerName = null;
         }
-    }
-
-    public float getShadowSize()
-    {
-        return 0.0F;
     }
 
     public EntityLivingBase getThrower()

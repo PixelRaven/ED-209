@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class WorldGenAbstractTree extends WorldGenerator
@@ -20,5 +21,13 @@ public abstract class WorldGenAbstractTree extends WorldGenerator
         return p_150523_1_.getMaterial() == Material.air || p_150523_1_.getMaterial() == Material.leaves || p_150523_1_ == Blocks.grass || p_150523_1_ == Blocks.dirt || p_150523_1_ == Blocks.log || p_150523_1_ == Blocks.log2 || p_150523_1_ == Blocks.sapling || p_150523_1_ == Blocks.vine;
     }
 
-    public void func_150524_b(World p_150524_1_, Random p_150524_2_, int p_150524_3_, int p_150524_4_, int p_150524_5_) {}
+    public void func_180711_a(World worldIn, Random p_180711_2_, BlockPos p_180711_3_) {}
+
+    protected void func_175921_a(World worldIn, BlockPos p_175921_2_)
+    {
+        if (worldIn.getBlockState(p_175921_2_).getBlock() != Blocks.dirt)
+        {
+            this.func_175903_a(worldIn, p_175921_2_, Blocks.dirt.getDefaultState());
+        }
+    }
 }

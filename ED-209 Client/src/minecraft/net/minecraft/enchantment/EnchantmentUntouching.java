@@ -2,14 +2,15 @@ package net.minecraft.enchantment;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentUntouching extends Enchantment
 {
     private static final String __OBFID = "CL_00000123";
 
-    protected EnchantmentUntouching(int p_i1938_1_, int p_i1938_2_)
+    protected EnchantmentUntouching(int p_i45763_1_, ResourceLocation p_i45763_2_, int p_i45763_3_)
     {
-        super(p_i1938_1_, p_i1938_2_, EnumEnchantmentType.digger);
+        super(p_i45763_1_, p_i45763_2_, p_i45763_3_, EnumEnchantmentType.DIGGER);
         this.setName("untouching");
     }
 

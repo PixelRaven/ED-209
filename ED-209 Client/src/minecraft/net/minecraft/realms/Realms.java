@@ -1,8 +1,8 @@
 package net.minecraft.realms;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.util.UUIDTypeAdapter;
 import java.net.Proxy;
-import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Session;
 import net.minecraft.world.WorldSettings;
@@ -50,7 +50,7 @@ public class Realms
 
     public static String uuidToName(String p_uuidToName_0_)
     {
-        return Minecraft.getMinecraft().func_152347_ac().fillProfileProperties(new GameProfile(UUID.fromString(p_uuidToName_0_.replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5")), (String)null), false).getName();
+        return Minecraft.getMinecraft().getSessionService().fillProfileProperties(new GameProfile(UUIDTypeAdapter.fromString(p_uuidToName_0_), (String)null), false).getName();
     }
 
     public static void setScreen(RealmsScreen p_setScreen_0_)

@@ -2,7 +2,7 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
 
@@ -37,19 +37,15 @@ public class EntityAIVillagerMate extends EntityAIBase
         }
         else
         {
-            this.villageObj = this.worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(this.villagerObj.posX), MathHelper.floor_double(this.villagerObj.posY), MathHelper.floor_double(this.villagerObj.posZ), 0);
+            this.villageObj = this.worldObj.getVillageCollection().func_176056_a(new BlockPos(this.villagerObj), 0);
 
             if (this.villageObj == null)
             {
                 return false;
             }
-            else if (!this.checkSufficientDoorsPresentForNewVillager())
+            else if (this.checkSufficientDoorsPresentForNewVillager() && this.villagerObj.func_175550_n(true))
             {
-                return false;
-            }
-            else
-            {
-                Entity var1 = this.worldObj.findNearestEntityWithinAABB(EntityVillager.class, this.villagerObj.boundingBox.expand(8.0D, 3.0D, 8.0D), this.villagerObj);
+                Entity var1 = this.worldObj.findNearestEntityWithinAABB(EntityVillager.class, this.villagerObj.getEntityBoundingBox().expand(8.0D, 3.0D, 8.0D), this.villagerObj);
 
                 if (var1 == null)
                 {
@@ -58,8 +54,12 @@ public class EntityAIVillagerMate extends EntityAIBase
                 else
                 {
                     this.mate = (EntityVillager)var1;
-                    return this.mate.getGrowingAge() == 0;
+                    return this.mate.getGrowingAge() == 0 && this.mate.func_175550_n(true);
                 }
+            }
+            else
+            {
+                return false;
             }
         }
     }
@@ -88,7 +88,7 @@ public class EntityAIVillagerMate extends EntityAIBase
      */
     public boolean continueExecuting()
     {
-        return this.matingTimeout >= 0 && this.checkSufficientDoorsPresentForNewVillager() && this.villagerObj.getGrowingAge() == 0;
+        return this.matingTimeout >= 0 && this.checkSufficientDoorsPresentForNewVillager() && this.villagerObj.getGrowingAge() == 0 && this.villagerObj.func_175550_n(false);
     }
 
     /**
@@ -129,9 +129,11 @@ public class EntityAIVillagerMate extends EntityAIBase
 
     private void giveBirth()
     {
-        EntityVillager var1 = this.villagerObj.createChild(this.mate);
+        EntityVillager var1 = this.villagerObj.func_180488_b(this.mate);
         this.mate.setGrowingAge(6000);
         this.villagerObj.setGrowingAge(6000);
+        this.mate.func_175549_o(false);
+        this.villagerObj.func_175549_o(false);
         var1.setGrowingAge(-24000);
         var1.setLocationAndAngles(this.villagerObj.posX, this.villagerObj.posY, this.villagerObj.posZ, 0.0F, 0.0F);
         this.worldObj.spawnEntityInWorld(var1);

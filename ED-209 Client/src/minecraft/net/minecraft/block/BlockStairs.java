@@ -1,18 +1,24 @@
 package net.minecraft.block;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.MapColor;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.Explosion;
@@ -21,30 +27,34 @@ import net.minecraft.world.World;
 
 public class BlockStairs extends Block
 {
-    private static final int[][] field_150150_a = new int[][] {{2, 6}, {3, 7}, {2, 3}, {6, 7}, {0, 4}, {1, 5}, {0, 1}, {4, 5}};
-    private final Block field_150149_b;
-    private final int field_150151_M;
+    public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
+    public static final PropertyEnum HALF = PropertyEnum.create("half", BlockStairs.EnumHalf.class);
+    public static final PropertyEnum SHAPE = PropertyEnum.create("shape", BlockStairs.EnumShape.class);
+    private static final int[][] field_150150_a = new int[][] {{4, 5}, {5, 7}, {6, 7}, {4, 6}, {0, 1}, {1, 3}, {2, 3}, {0, 2}};
+    private final Block modelBlock;
+    private final IBlockState modelState;
     private boolean field_150152_N;
     private int field_150153_O;
     private static final String __OBFID = "CL_00000314";
 
-    protected BlockStairs(Block p_i45428_1_, int p_i45428_2_)
+    protected BlockStairs(IBlockState modelState)
     {
-        super(p_i45428_1_.blockMaterial);
-        this.field_150149_b = p_i45428_1_;
-        this.field_150151_M = p_i45428_2_;
-        this.setHardness(p_i45428_1_.blockHardness);
-        this.setResistance(p_i45428_1_.blockResistance / 3.0F);
-        this.setStepSound(p_i45428_1_.stepSound);
+        super(modelState.getBlock().blockMaterial);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(HALF, BlockStairs.EnumHalf.BOTTOM).withProperty(SHAPE, BlockStairs.EnumShape.STRAIGHT));
+        this.modelBlock = modelState.getBlock();
+        this.modelState = modelState;
+        this.setHardness(this.modelBlock.blockHardness);
+        this.setResistance(this.modelBlock.blockResistance / 3.0F);
+        this.setStepSound(this.modelBlock.stepSound);
         this.setLightOpacity(255);
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
     {
         if (this.field_150152_N)
         {
-            this.setBlockBounds(0.5F * (float)(this.field_150153_O % 2), 0.5F * (float)(this.field_150153_O / 2 % 2), 0.5F * (float)(this.field_150153_O / 4 % 2), 0.5F + 0.5F * (float)(this.field_150153_O % 2), 0.5F + 0.5F * (float)(this.field_150153_O / 2 % 2), 0.5F + 0.5F * (float)(this.field_150153_O / 4 % 2));
+            this.setBlockBounds(0.5F * (float)(this.field_150153_O % 2), 0.5F * (float)(this.field_150153_O / 4 % 2), 0.5F * (float)(this.field_150153_O / 2 % 2), 0.5F + 0.5F * (float)(this.field_150153_O % 2), 0.5F + 0.5F * (float)(this.field_150153_O / 4 % 2), 0.5F + 0.5F * (float)(this.field_150153_O / 2 % 2));
         }
         else
         {
@@ -57,24 +67,17 @@ public class BlockStairs extends Block
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
     /**
-     * The type of render function that is called for this block
+     * Set the block bounds as the collision bounds for the stairs at the given position
      */
-    public int getRenderType()
+    public void setBaseCollisionBounds(IBlockAccess worldIn, BlockPos pos)
     {
-        return 10;
-    }
-
-    public void func_150147_e(IBlockAccess p_150147_1_, int p_150147_2_, int p_150147_3_, int p_150147_4_)
-    {
-        int var5 = p_150147_1_.getBlockMetadata(p_150147_2_, p_150147_3_, p_150147_4_);
-
-        if ((var5 & 4) != 0)
+        if (worldIn.getBlockState(pos).getValue(HALF) == BlockStairs.EnumHalf.TOP)
         {
             this.setBlockBounds(0.0F, 0.5F, 0.0F, 1.0F, 1.0F, 1.0F);
         }
@@ -84,25 +87,222 @@ public class BlockStairs extends Block
         }
     }
 
-    public static boolean func_150148_a(Block p_150148_0_)
+    /**
+     * Checks if a block is stairs
+     */
+    public static boolean isBlockStairs(Block p_150148_0_)
     {
         return p_150148_0_ instanceof BlockStairs;
     }
 
-    private boolean func_150146_f(IBlockAccess p_150146_1_, int p_150146_2_, int p_150146_3_, int p_150146_4_, int p_150146_5_)
+    /**
+     * Check whether there is a stair block at the given position and it has the same properties as the given BlockState
+     */
+    public static boolean isSameStair(IBlockAccess worldIn, BlockPos pos, IBlockState state)
     {
-        Block var6 = p_150146_1_.getBlock(p_150146_2_, p_150146_3_, p_150146_4_);
-        return func_150148_a(var6) && p_150146_1_.getBlockMetadata(p_150146_2_, p_150146_3_, p_150146_4_) == p_150146_5_;
+        IBlockState var3 = worldIn.getBlockState(pos);
+        Block var4 = var3.getBlock();
+        return isBlockStairs(var4) && var3.getValue(HALF) == state.getValue(HALF) && var3.getValue(FACING) == state.getValue(FACING);
     }
 
-    public boolean func_150145_f(IBlockAccess p_150145_1_, int p_150145_2_, int p_150145_3_, int p_150145_4_)
+    public int func_176307_f(IBlockAccess p_176307_1_, BlockPos p_176307_2_)
     {
-        int var5 = p_150145_1_.getBlockMetadata(p_150145_2_, p_150145_3_, p_150145_4_);
-        int var6 = var5 & 3;
+        IBlockState var3 = p_176307_1_.getBlockState(p_176307_2_);
+        EnumFacing var4 = (EnumFacing)var3.getValue(FACING);
+        BlockStairs.EnumHalf var5 = (BlockStairs.EnumHalf)var3.getValue(HALF);
+        boolean var6 = var5 == BlockStairs.EnumHalf.TOP;
+        IBlockState var7;
+        Block var8;
+        EnumFacing var9;
+
+        if (var4 == EnumFacing.EAST)
+        {
+            var7 = p_176307_1_.getBlockState(p_176307_2_.offsetEast());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.NORTH && !isSameStair(p_176307_1_, p_176307_2_.offsetSouth(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+
+                if (var9 == EnumFacing.SOUTH && !isSameStair(p_176307_1_, p_176307_2_.offsetNorth(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+            }
+        }
+        else if (var4 == EnumFacing.WEST)
+        {
+            var7 = p_176307_1_.getBlockState(p_176307_2_.offsetWest());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.NORTH && !isSameStair(p_176307_1_, p_176307_2_.offsetSouth(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+
+                if (var9 == EnumFacing.SOUTH && !isSameStair(p_176307_1_, p_176307_2_.offsetNorth(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+            }
+        }
+        else if (var4 == EnumFacing.SOUTH)
+        {
+            var7 = p_176307_1_.getBlockState(p_176307_2_.offsetSouth());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.WEST && !isSameStair(p_176307_1_, p_176307_2_.offsetEast(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+
+                if (var9 == EnumFacing.EAST && !isSameStair(p_176307_1_, p_176307_2_.offsetWest(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+            }
+        }
+        else if (var4 == EnumFacing.NORTH)
+        {
+            var7 = p_176307_1_.getBlockState(p_176307_2_.offsetNorth());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.WEST && !isSameStair(p_176307_1_, p_176307_2_.offsetEast(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+
+                if (var9 == EnumFacing.EAST && !isSameStair(p_176307_1_, p_176307_2_.offsetWest(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public int func_176305_g(IBlockAccess p_176305_1_, BlockPos p_176305_2_)
+    {
+        IBlockState var3 = p_176305_1_.getBlockState(p_176305_2_);
+        EnumFacing var4 = (EnumFacing)var3.getValue(FACING);
+        BlockStairs.EnumHalf var5 = (BlockStairs.EnumHalf)var3.getValue(HALF);
+        boolean var6 = var5 == BlockStairs.EnumHalf.TOP;
+        IBlockState var7;
+        Block var8;
+        EnumFacing var9;
+
+        if (var4 == EnumFacing.EAST)
+        {
+            var7 = p_176305_1_.getBlockState(p_176305_2_.offsetWest());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.NORTH && !isSameStair(p_176305_1_, p_176305_2_.offsetNorth(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+
+                if (var9 == EnumFacing.SOUTH && !isSameStair(p_176305_1_, p_176305_2_.offsetSouth(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+            }
+        }
+        else if (var4 == EnumFacing.WEST)
+        {
+            var7 = p_176305_1_.getBlockState(p_176305_2_.offsetEast());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.NORTH && !isSameStair(p_176305_1_, p_176305_2_.offsetNorth(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+
+                if (var9 == EnumFacing.SOUTH && !isSameStair(p_176305_1_, p_176305_2_.offsetSouth(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+            }
+        }
+        else if (var4 == EnumFacing.SOUTH)
+        {
+            var7 = p_176305_1_.getBlockState(p_176305_2_.offsetNorth());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.WEST && !isSameStair(p_176305_1_, p_176305_2_.offsetWest(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+
+                if (var9 == EnumFacing.EAST && !isSameStair(p_176305_1_, p_176305_2_.offsetEast(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+            }
+        }
+        else if (var4 == EnumFacing.NORTH)
+        {
+            var7 = p_176305_1_.getBlockState(p_176305_2_.offsetSouth());
+            var8 = var7.getBlock();
+
+            if (isBlockStairs(var8) && var5 == var7.getValue(HALF))
+            {
+                var9 = (EnumFacing)var7.getValue(FACING);
+
+                if (var9 == EnumFacing.WEST && !isSameStair(p_176305_1_, p_176305_2_.offsetWest(), var3))
+                {
+                    return var6 ? 1 : 2;
+                }
+
+                if (var9 == EnumFacing.EAST && !isSameStair(p_176305_1_, p_176305_2_.offsetEast(), var3))
+                {
+                    return var6 ? 2 : 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public boolean func_176306_h(IBlockAccess p_176306_1_, BlockPos p_176306_2_)
+    {
+        IBlockState var3 = p_176306_1_.getBlockState(p_176306_2_);
+        EnumFacing var4 = (EnumFacing)var3.getValue(FACING);
+        BlockStairs.EnumHalf var5 = (BlockStairs.EnumHalf)var3.getValue(HALF);
+        boolean var6 = var5 == BlockStairs.EnumHalf.TOP;
         float var7 = 0.5F;
         float var8 = 1.0F;
 
-        if ((var5 & 4) != 0)
+        if (var6)
         {
             var7 = 0.0F;
             var8 = 0.5F;
@@ -113,94 +313,94 @@ public class BlockStairs extends Block
         float var11 = 0.0F;
         float var12 = 0.5F;
         boolean var13 = true;
-        Block var14;
-        int var15;
-        int var16;
+        IBlockState var14;
+        Block var15;
+        EnumFacing var16;
 
-        if (var6 == 0)
+        if (var4 == EnumFacing.EAST)
         {
             var9 = 0.5F;
             var12 = 1.0F;
-            var14 = p_150145_1_.getBlock(p_150145_2_ + 1, p_150145_3_, p_150145_4_);
-            var15 = p_150145_1_.getBlockMetadata(p_150145_2_ + 1, p_150145_3_, p_150145_4_);
+            var14 = p_176306_1_.getBlockState(p_176306_2_.offsetEast());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 3 && !this.func_150146_f(p_150145_1_, p_150145_2_, p_150145_3_, p_150145_4_ + 1, var5))
+                if (var16 == EnumFacing.NORTH && !isSameStair(p_176306_1_, p_176306_2_.offsetSouth(), var3))
                 {
                     var12 = 0.5F;
                     var13 = false;
                 }
-                else if (var16 == 2 && !this.func_150146_f(p_150145_1_, p_150145_2_, p_150145_3_, p_150145_4_ - 1, var5))
+                else if (var16 == EnumFacing.SOUTH && !isSameStair(p_176306_1_, p_176306_2_.offsetNorth(), var3))
                 {
                     var11 = 0.5F;
                     var13 = false;
                 }
             }
         }
-        else if (var6 == 1)
+        else if (var4 == EnumFacing.WEST)
         {
             var10 = 0.5F;
             var12 = 1.0F;
-            var14 = p_150145_1_.getBlock(p_150145_2_ - 1, p_150145_3_, p_150145_4_);
-            var15 = p_150145_1_.getBlockMetadata(p_150145_2_ - 1, p_150145_3_, p_150145_4_);
+            var14 = p_176306_1_.getBlockState(p_176306_2_.offsetWest());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 3 && !this.func_150146_f(p_150145_1_, p_150145_2_, p_150145_3_, p_150145_4_ + 1, var5))
+                if (var16 == EnumFacing.NORTH && !isSameStair(p_176306_1_, p_176306_2_.offsetSouth(), var3))
                 {
                     var12 = 0.5F;
                     var13 = false;
                 }
-                else if (var16 == 2 && !this.func_150146_f(p_150145_1_, p_150145_2_, p_150145_3_, p_150145_4_ - 1, var5))
+                else if (var16 == EnumFacing.SOUTH && !isSameStair(p_176306_1_, p_176306_2_.offsetNorth(), var3))
                 {
                     var11 = 0.5F;
                     var13 = false;
                 }
             }
         }
-        else if (var6 == 2)
+        else if (var4 == EnumFacing.SOUTH)
         {
             var11 = 0.5F;
             var12 = 1.0F;
-            var14 = p_150145_1_.getBlock(p_150145_2_, p_150145_3_, p_150145_4_ + 1);
-            var15 = p_150145_1_.getBlockMetadata(p_150145_2_, p_150145_3_, p_150145_4_ + 1);
+            var14 = p_176306_1_.getBlockState(p_176306_2_.offsetSouth());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 1 && !this.func_150146_f(p_150145_1_, p_150145_2_ + 1, p_150145_3_, p_150145_4_, var5))
+                if (var16 == EnumFacing.WEST && !isSameStair(p_176306_1_, p_176306_2_.offsetEast(), var3))
                 {
                     var10 = 0.5F;
                     var13 = false;
                 }
-                else if (var16 == 0 && !this.func_150146_f(p_150145_1_, p_150145_2_ - 1, p_150145_3_, p_150145_4_, var5))
+                else if (var16 == EnumFacing.EAST && !isSameStair(p_176306_1_, p_176306_2_.offsetWest(), var3))
                 {
                     var9 = 0.5F;
                     var13 = false;
                 }
             }
         }
-        else if (var6 == 3)
+        else if (var4 == EnumFacing.NORTH)
         {
-            var14 = p_150145_1_.getBlock(p_150145_2_, p_150145_3_, p_150145_4_ - 1);
-            var15 = p_150145_1_.getBlockMetadata(p_150145_2_, p_150145_3_, p_150145_4_ - 1);
+            var14 = p_176306_1_.getBlockState(p_176306_2_.offsetNorth());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 1 && !this.func_150146_f(p_150145_1_, p_150145_2_ + 1, p_150145_3_, p_150145_4_, var5))
+                if (var16 == EnumFacing.WEST && !isSameStair(p_176306_1_, p_176306_2_.offsetEast(), var3))
                 {
                     var10 = 0.5F;
                     var13 = false;
                 }
-                else if (var16 == 0 && !this.func_150146_f(p_150145_1_, p_150145_2_ - 1, p_150145_3_, p_150145_4_, var5))
+                else if (var16 == EnumFacing.EAST && !isSameStair(p_176306_1_, p_176306_2_.offsetWest(), var3))
                 {
                     var9 = 0.5F;
                     var13 = false;
@@ -212,14 +412,16 @@ public class BlockStairs extends Block
         return var13;
     }
 
-    public boolean func_150144_g(IBlockAccess p_150144_1_, int p_150144_2_, int p_150144_3_, int p_150144_4_)
+    public boolean func_176304_i(IBlockAccess p_176304_1_, BlockPos p_176304_2_)
     {
-        int var5 = p_150144_1_.getBlockMetadata(p_150144_2_, p_150144_3_, p_150144_4_);
-        int var6 = var5 & 3;
+        IBlockState var3 = p_176304_1_.getBlockState(p_176304_2_);
+        EnumFacing var4 = (EnumFacing)var3.getValue(FACING);
+        BlockStairs.EnumHalf var5 = (BlockStairs.EnumHalf)var3.getValue(HALF);
+        boolean var6 = var5 == BlockStairs.EnumHalf.TOP;
         float var7 = 0.5F;
         float var8 = 1.0F;
 
-        if ((var5 & 4) != 0)
+        if (var6)
         {
             var7 = 0.0F;
             var8 = 0.5F;
@@ -230,26 +432,26 @@ public class BlockStairs extends Block
         float var11 = 0.5F;
         float var12 = 1.0F;
         boolean var13 = false;
-        Block var14;
-        int var15;
-        int var16;
+        IBlockState var14;
+        Block var15;
+        EnumFacing var16;
 
-        if (var6 == 0)
+        if (var4 == EnumFacing.EAST)
         {
-            var14 = p_150144_1_.getBlock(p_150144_2_ - 1, p_150144_3_, p_150144_4_);
-            var15 = p_150144_1_.getBlockMetadata(p_150144_2_ - 1, p_150144_3_, p_150144_4_);
+            var14 = p_176304_1_.getBlockState(p_176304_2_.offsetWest());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 3 && !this.func_150146_f(p_150144_1_, p_150144_2_, p_150144_3_, p_150144_4_ - 1, var5))
+                if (var16 == EnumFacing.NORTH && !isSameStair(p_176304_1_, p_176304_2_.offsetNorth(), var3))
                 {
                     var11 = 0.0F;
                     var12 = 0.5F;
                     var13 = true;
                 }
-                else if (var16 == 2 && !this.func_150146_f(p_150144_1_, p_150144_2_, p_150144_3_, p_150144_4_ + 1, var5))
+                else if (var16 == EnumFacing.SOUTH && !isSameStair(p_176304_1_, p_176304_2_.offsetSouth(), var3))
                 {
                     var11 = 0.5F;
                     var12 = 1.0F;
@@ -257,24 +459,24 @@ public class BlockStairs extends Block
                 }
             }
         }
-        else if (var6 == 1)
+        else if (var4 == EnumFacing.WEST)
         {
-            var14 = p_150144_1_.getBlock(p_150144_2_ + 1, p_150144_3_, p_150144_4_);
-            var15 = p_150144_1_.getBlockMetadata(p_150144_2_ + 1, p_150144_3_, p_150144_4_);
+            var14 = p_176304_1_.getBlockState(p_176304_2_.offsetEast());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
                 var9 = 0.5F;
                 var10 = 1.0F;
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 3 && !this.func_150146_f(p_150144_1_, p_150144_2_, p_150144_3_, p_150144_4_ - 1, var5))
+                if (var16 == EnumFacing.NORTH && !isSameStair(p_176304_1_, p_176304_2_.offsetNorth(), var3))
                 {
                     var11 = 0.0F;
                     var12 = 0.5F;
                     var13 = true;
                 }
-                else if (var16 == 2 && !this.func_150146_f(p_150144_1_, p_150144_2_, p_150144_3_, p_150144_4_ + 1, var5))
+                else if (var16 == EnumFacing.SOUTH && !isSameStair(p_176304_1_, p_176304_2_.offsetSouth(), var3))
                 {
                     var11 = 0.5F;
                     var12 = 1.0F;
@@ -282,22 +484,22 @@ public class BlockStairs extends Block
                 }
             }
         }
-        else if (var6 == 2)
+        else if (var4 == EnumFacing.SOUTH)
         {
-            var14 = p_150144_1_.getBlock(p_150144_2_, p_150144_3_, p_150144_4_ - 1);
-            var15 = p_150144_1_.getBlockMetadata(p_150144_2_, p_150144_3_, p_150144_4_ - 1);
+            var14 = p_176304_1_.getBlockState(p_176304_2_.offsetNorth());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
                 var11 = 0.0F;
                 var12 = 0.5F;
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 1 && !this.func_150146_f(p_150144_1_, p_150144_2_ - 1, p_150144_3_, p_150144_4_, var5))
+                if (var16 == EnumFacing.WEST && !isSameStair(p_176304_1_, p_176304_2_.offsetWest(), var3))
                 {
                     var13 = true;
                 }
-                else if (var16 == 0 && !this.func_150146_f(p_150144_1_, p_150144_2_ + 1, p_150144_3_, p_150144_4_, var5))
+                else if (var16 == EnumFacing.EAST && !isSameStair(p_176304_1_, p_176304_2_.offsetEast(), var3))
                 {
                     var9 = 0.5F;
                     var10 = 1.0F;
@@ -305,20 +507,20 @@ public class BlockStairs extends Block
                 }
             }
         }
-        else if (var6 == 3)
+        else if (var4 == EnumFacing.NORTH)
         {
-            var14 = p_150144_1_.getBlock(p_150144_2_, p_150144_3_, p_150144_4_ + 1);
-            var15 = p_150144_1_.getBlockMetadata(p_150144_2_, p_150144_3_, p_150144_4_ + 1);
+            var14 = p_176304_1_.getBlockState(p_176304_2_.offsetSouth());
+            var15 = var14.getBlock();
 
-            if (func_150148_a(var14) && (var5 & 4) == (var15 & 4))
+            if (isBlockStairs(var15) && var5 == var14.getValue(HALF))
             {
-                var16 = var15 & 3;
+                var16 = (EnumFacing)var14.getValue(FACING);
 
-                if (var16 == 1 && !this.func_150146_f(p_150144_1_, p_150144_2_ - 1, p_150144_3_, p_150144_4_, var5))
+                if (var16 == EnumFacing.WEST && !isSameStair(p_176304_1_, p_176304_2_.offsetWest(), var3))
                 {
                     var13 = true;
                 }
-                else if (var16 == 0 && !this.func_150146_f(p_150144_1_, p_150144_2_ + 1, p_150144_3_, p_150144_4_, var5))
+                else if (var16 == EnumFacing.EAST && !isSameStair(p_176304_1_, p_176304_2_.offsetEast(), var3))
                 {
                     var9 = 0.5F;
                     var10 = 1.0F;
@@ -335,250 +537,331 @@ public class BlockStairs extends Block
         return var13;
     }
 
-    public void addCollisionBoxesToList(World p_149743_1_, int p_149743_2_, int p_149743_3_, int p_149743_4_, AxisAlignedBB p_149743_5_, List p_149743_6_, Entity p_149743_7_)
+    /**
+     * Add all collision boxes of this Block to the list that intersect with the given mask.
+     *  
+     * @param collidingEntity the Entity colliding with this Block
+     */
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
     {
-        this.func_150147_e(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-        boolean var8 = this.func_150145_f(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
+        this.setBaseCollisionBounds(worldIn, pos);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        boolean var7 = this.func_176306_h(worldIn, pos);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
 
-        if (var8 && this.func_150144_g(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_))
+        if (var7 && this.func_176304_i(worldIn, pos))
         {
-            super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
+            super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
         }
 
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    /**
-     * A randomly called display update to be able to add particles or other items for display
-     */
-    public void randomDisplayTick(World p_149734_1_, int p_149734_2_, int p_149734_3_, int p_149734_4_, Random p_149734_5_)
+    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        this.field_150149_b.randomDisplayTick(p_149734_1_, p_149734_2_, p_149734_3_, p_149734_4_, p_149734_5_);
+        this.modelBlock.randomDisplayTick(worldIn, pos, state, rand);
+    }
+
+    public void onBlockClicked(World worldIn, BlockPos pos, EntityPlayer playerIn)
+    {
+        this.modelBlock.onBlockClicked(worldIn, pos, playerIn);
     }
 
     /**
-     * Called when a player hits the block. Args: world, x, y, z, player
+     * Called when a player destroys this Block
      */
-    public void onBlockClicked(World p_149699_1_, int p_149699_2_, int p_149699_3_, int p_149699_4_, EntityPlayer p_149699_5_)
+    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
-        this.field_150149_b.onBlockClicked(p_149699_1_, p_149699_2_, p_149699_3_, p_149699_4_, p_149699_5_);
+        this.modelBlock.onBlockDestroyedByPlayer(worldIn, pos, state);
     }
 
-    public void onBlockDestroyedByPlayer(World p_149664_1_, int p_149664_2_, int p_149664_3_, int p_149664_4_, int p_149664_5_)
+    public int getMixedBrightnessForBlock(IBlockAccess worldIn, BlockPos pos)
     {
-        this.field_150149_b.onBlockDestroyedByPlayer(p_149664_1_, p_149664_2_, p_149664_3_, p_149664_4_, p_149664_5_);
-    }
-
-    public int getBlockBrightness(IBlockAccess p_149677_1_, int p_149677_2_, int p_149677_3_, int p_149677_4_)
-    {
-        return this.field_150149_b.getBlockBrightness(p_149677_1_, p_149677_2_, p_149677_3_, p_149677_4_);
+        return this.modelBlock.getMixedBrightnessForBlock(worldIn, pos);
     }
 
     /**
      * Returns how much this block can resist explosions from the passed in entity.
      */
-    public float getExplosionResistance(Entity p_149638_1_)
+    public float getExplosionResistance(Entity exploder)
     {
-        return this.field_150149_b.getExplosionResistance(p_149638_1_);
+        return this.modelBlock.getExplosionResistance(exploder);
+    }
+
+    public EnumWorldBlockLayer getBlockLayer()
+    {
+        return this.modelBlock.getBlockLayer();
     }
 
     /**
-     * Returns which pass should this block be rendered on. 0 for solids and 1 for alpha
+     * How many world ticks before ticking
      */
-    public int getRenderBlockPass()
+    public int tickRate(World worldIn)
     {
-        return this.field_150149_b.getRenderBlockPass();
+        return this.modelBlock.tickRate(worldIn);
+    }
+
+    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
+    {
+        return this.modelBlock.getSelectedBoundingBox(worldIn, pos);
+    }
+
+    public Vec3 modifyAcceleration(World worldIn, BlockPos pos, Entity entityIn, Vec3 motion)
+    {
+        return this.modelBlock.modifyAcceleration(worldIn, pos, entityIn, motion);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Returns if this block is collidable (only used by Fire). Args: x, y, z
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        return this.field_150149_b.getIcon(p_149691_1_, this.field_150151_M);
-    }
-
-    public int func_149738_a(World p_149738_1_)
-    {
-        return this.field_150149_b.func_149738_a(p_149738_1_);
-    }
-
-    /**
-     * Returns the bounding box of the wired rectangular prism to render.
-     */
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(World p_149633_1_, int p_149633_2_, int p_149633_3_, int p_149633_4_)
-    {
-        return this.field_150149_b.getSelectedBoundingBoxFromPool(p_149633_1_, p_149633_2_, p_149633_3_, p_149633_4_);
-    }
-
-    public void velocityToAddToEntity(World p_149640_1_, int p_149640_2_, int p_149640_3_, int p_149640_4_, Entity p_149640_5_, Vec3 p_149640_6_)
-    {
-        this.field_150149_b.velocityToAddToEntity(p_149640_1_, p_149640_2_, p_149640_3_, p_149640_4_, p_149640_5_, p_149640_6_);
-    }
-
     public boolean isCollidable()
     {
-        return this.field_150149_b.isCollidable();
+        return this.modelBlock.isCollidable();
+    }
+
+    public boolean canCollideCheck(IBlockState state, boolean p_176209_2_)
+    {
+        return this.modelBlock.canCollideCheck(state, p_176209_2_);
+    }
+
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+    {
+        return this.modelBlock.canPlaceBlockAt(worldIn, pos);
+    }
+
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
+    {
+        this.onNeighborBlockChange(worldIn, pos, this.modelState, Blocks.air);
+        this.modelBlock.onBlockAdded(worldIn, pos, this.modelState);
+    }
+
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        this.modelBlock.breakBlock(worldIn, pos, this.modelState);
     }
 
     /**
-     * Returns whether this block is collideable based on the arguments passed in \n@param par1 block metaData \n@param
-     * par2 whether the player right-clicked while holding a boat
+     * Triggered whenever an entity collides with this block (enters into the block)
      */
-    public boolean canCollideCheck(int p_149678_1_, boolean p_149678_2_)
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, Entity entityIn)
     {
-        return this.field_150149_b.canCollideCheck(p_149678_1_, p_149678_2_);
+        this.modelBlock.onEntityCollidedWithBlock(worldIn, pos, entityIn);
     }
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        return this.field_150149_b.canPlaceBlockAt(p_149742_1_, p_149742_2_, p_149742_3_, p_149742_4_);
+        this.modelBlock.updateTick(worldIn, pos, state, rand);
     }
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        this.onNeighborBlockChange(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_, Blocks.air);
-        this.field_150149_b.onBlockAdded(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
-    }
-
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
-    {
-        this.field_150149_b.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
-    }
-
-    public void onEntityWalking(World p_149724_1_, int p_149724_2_, int p_149724_3_, int p_149724_4_, Entity p_149724_5_)
-    {
-        this.field_150149_b.onEntityWalking(p_149724_1_, p_149724_2_, p_149724_3_, p_149724_4_, p_149724_5_);
+        return this.modelBlock.onBlockActivated(worldIn, pos, this.modelState, playerIn, EnumFacing.DOWN, 0.0F, 0.0F, 0.0F);
     }
 
     /**
-     * Ticks the block if it's been scheduled
+     * Called when this Block is destroyed by an Explosion
      */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
     {
-        this.field_150149_b.updateTick(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
+        this.modelBlock.onBlockDestroyedByExplosion(worldIn, pos, explosionIn);
     }
 
     /**
-     * Called upon block activation (right click on the block.)
+     * Get the MapColor for this Block and the given BlockState
      */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public MapColor getMapColor(IBlockState state)
     {
-        return this.field_150149_b.onBlockActivated(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, p_149727_5_, 0, 0.0F, 0.0F, 0.0F);
+        return this.modelBlock.getMapColor(this.modelState);
+    }
+
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
+    {
+        IBlockState var9 = super.onBlockPlaced(worldIn, pos, facing, hitX, hitY, hitZ, meta, placer);
+        var9 = var9.withProperty(FACING, placer.func_174811_aO()).withProperty(SHAPE, BlockStairs.EnumShape.STRAIGHT);
+        return facing != EnumFacing.DOWN && (facing == EnumFacing.UP || (double)hitY <= 0.5D) ? var9.withProperty(HALF, BlockStairs.EnumHalf.BOTTOM) : var9.withProperty(HALF, BlockStairs.EnumHalf.TOP);
     }
 
     /**
-     * Called upon the block being destroyed by an explosion
+     * Ray traces through the blocks collision from start vector to end vector returning a ray trace hit.
+     *  
+     * @param start The start vector
+     * @param end The end vector
      */
-    public void onBlockDestroyedByExplosion(World p_149723_1_, int p_149723_2_, int p_149723_3_, int p_149723_4_, Explosion p_149723_5_)
+    public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end)
     {
-        this.field_150149_b.onBlockDestroyedByExplosion(p_149723_1_, p_149723_2_, p_149723_3_, p_149723_4_, p_149723_5_);
-    }
-
-    public MapColor getMapColor(int p_149728_1_)
-    {
-        return this.field_150149_b.getMapColor(this.field_150151_M);
-    }
-
-    /**
-     * Called when the block is placed in the world.
-     */
-    public void onBlockPlacedBy(World p_149689_1_, int p_149689_2_, int p_149689_3_, int p_149689_4_, EntityLivingBase p_149689_5_, ItemStack p_149689_6_)
-    {
-        int var7 = MathHelper.floor_double((double)(p_149689_5_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-        int var8 = p_149689_1_.getBlockMetadata(p_149689_2_, p_149689_3_, p_149689_4_) & 4;
-
-        if (var7 == 0)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 2 | var8, 2);
-        }
-
-        if (var7 == 1)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 1 | var8, 2);
-        }
-
-        if (var7 == 2)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 3 | var8, 2);
-        }
-
-        if (var7 == 3)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 0 | var8, 2);
-        }
-    }
-
-    public int onBlockPlaced(World p_149660_1_, int p_149660_2_, int p_149660_3_, int p_149660_4_, int p_149660_5_, float p_149660_6_, float p_149660_7_, float p_149660_8_, int p_149660_9_)
-    {
-        return p_149660_5_ != 0 && (p_149660_5_ == 1 || (double)p_149660_7_ <= 0.5D) ? p_149660_9_ : p_149660_9_ | 4;
-    }
-
-    public MovingObjectPosition collisionRayTrace(World p_149731_1_, int p_149731_2_, int p_149731_3_, int p_149731_4_, Vec3 p_149731_5_, Vec3 p_149731_6_)
-    {
-        MovingObjectPosition[] var7 = new MovingObjectPosition[8];
-        int var8 = p_149731_1_.getBlockMetadata(p_149731_2_, p_149731_3_, p_149731_4_);
-        int var9 = var8 & 3;
-        boolean var10 = (var8 & 4) == 4;
-        int[] var11 = field_150150_a[var9 + (var10 ? 4 : 0)];
+        MovingObjectPosition[] var5 = new MovingObjectPosition[8];
+        IBlockState var6 = worldIn.getBlockState(pos);
+        int var7 = ((EnumFacing)var6.getValue(FACING)).getHorizontalIndex();
+        boolean var8 = var6.getValue(HALF) == BlockStairs.EnumHalf.TOP;
+        int[] var9 = field_150150_a[var7 + (var8 ? 4 : 0)];
         this.field_150152_N = true;
-        int var14;
-        int var15;
-        int var16;
 
-        for (int var12 = 0; var12 < 8; ++var12)
+        for (int var10 = 0; var10 < 8; ++var10)
         {
-            this.field_150153_O = var12;
-            int[] var13 = var11;
-            var14 = var11.length;
+            this.field_150153_O = var10;
 
-            for (var15 = 0; var15 < var14; ++var15)
+            if (Arrays.binarySearch(var9, var10) < 0)
             {
-                var16 = var13[var15];
-
-                if (var16 == var12)
-                {
-                    ;
-                }
+                var5[var10] = super.collisionRayTrace(worldIn, pos, start, end);
             }
-
-            var7[var12] = super.collisionRayTrace(p_149731_1_, p_149731_2_, p_149731_3_, p_149731_4_, p_149731_5_, p_149731_6_);
         }
 
-        int[] var21 = var11;
-        int var23 = var11.length;
+        int[] var19 = var9;
+        int var11 = var9.length;
 
-        for (var14 = 0; var14 < var23; ++var14)
+        for (int var12 = 0; var12 < var11; ++var12)
         {
-            var15 = var21[var14];
-            var7[var15] = null;
+            int var13 = var19[var12];
+            var5[var13] = null;
         }
 
-        MovingObjectPosition var22 = null;
-        double var24 = 0.0D;
-        MovingObjectPosition[] var25 = var7;
-        var16 = var7.length;
+        MovingObjectPosition var20 = null;
+        double var21 = 0.0D;
+        MovingObjectPosition[] var22 = var5;
+        int var14 = var5.length;
 
-        for (int var17 = 0; var17 < var16; ++var17)
+        for (int var15 = 0; var15 < var14; ++var15)
         {
-            MovingObjectPosition var18 = var25[var17];
+            MovingObjectPosition var16 = var22[var15];
 
-            if (var18 != null)
+            if (var16 != null)
             {
-                double var19 = var18.hitVec.squareDistanceTo(p_149731_6_);
+                double var17 = var16.hitVec.squareDistanceTo(end);
 
-                if (var19 > var24)
+                if (var17 > var21)
                 {
-                    var22 = var18;
-                    var24 = var19;
+                    var20 = var16;
+                    var21 = var17;
                 }
             }
         }
 
-        return var22;
+        return var20;
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_) {}
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        IBlockState var2 = this.getDefaultState().withProperty(HALF, (meta & 4) > 0 ? BlockStairs.EnumHalf.TOP : BlockStairs.EnumHalf.BOTTOM);
+        var2 = var2.withProperty(FACING, EnumFacing.getFront(5 - (meta & 3)));
+        return var2;
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        int var2 = 0;
+
+        if (state.getValue(HALF) == BlockStairs.EnumHalf.TOP)
+        {
+            var2 |= 4;
+        }
+
+        var2 |= 5 - ((EnumFacing)state.getValue(FACING)).getIndex();
+        return var2;
+    }
+
+    /**
+     * Get the actual Block state of this Block at the given position. This applies properties not visible in the
+     * metadata, such as fence connections.
+     */
+    public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos)
+    {
+        if (this.func_176306_h(worldIn, pos))
+        {
+            switch (this.func_176305_g(worldIn, pos))
+            {
+                case 0:
+                    state = state.withProperty(SHAPE, BlockStairs.EnumShape.STRAIGHT);
+                    break;
+
+                case 1:
+                    state = state.withProperty(SHAPE, BlockStairs.EnumShape.INNER_RIGHT);
+                    break;
+
+                case 2:
+                    state = state.withProperty(SHAPE, BlockStairs.EnumShape.INNER_LEFT);
+            }
+        }
+        else
+        {
+            switch (this.func_176307_f(worldIn, pos))
+            {
+                case 0:
+                    state = state.withProperty(SHAPE, BlockStairs.EnumShape.STRAIGHT);
+                    break;
+
+                case 1:
+                    state = state.withProperty(SHAPE, BlockStairs.EnumShape.OUTER_RIGHT);
+                    break;
+
+                case 2:
+                    state = state.withProperty(SHAPE, BlockStairs.EnumShape.OUTER_LEFT);
+            }
+        }
+
+        return state;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {FACING, HALF, SHAPE});
+    }
+
+    public static enum EnumHalf implements IStringSerializable
+    {
+        TOP("TOP", 0, "top"),
+        BOTTOM("BOTTOM", 1, "bottom");
+        private final String field_176709_c;
+
+        private static final BlockStairs.EnumHalf[] $VALUES = new BlockStairs.EnumHalf[]{TOP, BOTTOM};
+        private static final String __OBFID = "CL_00002062";
+
+        private EnumHalf(String p_i45683_1_, int p_i45683_2_, String p_i45683_3_)
+        {
+            this.field_176709_c = p_i45683_3_;
+        }
+
+        public String toString()
+        {
+            return this.field_176709_c;
+        }
+
+        public String getName()
+        {
+            return this.field_176709_c;
+        }
+    }
+
+    public static enum EnumShape implements IStringSerializable
+    {
+        STRAIGHT("STRAIGHT", 0, "straight"),
+        INNER_LEFT("INNER_LEFT", 1, "inner_left"),
+        INNER_RIGHT("INNER_RIGHT", 2, "inner_right"),
+        OUTER_LEFT("OUTER_LEFT", 3, "outer_left"),
+        OUTER_RIGHT("OUTER_RIGHT", 4, "outer_right");
+        private final String field_176699_f;
+
+        private static final BlockStairs.EnumShape[] $VALUES = new BlockStairs.EnumShape[]{STRAIGHT, INNER_LEFT, INNER_RIGHT, OUTER_LEFT, OUTER_RIGHT};
+        private static final String __OBFID = "CL_00002061";
+
+        private EnumShape(String p_i45682_1_, int p_i45682_2_, String p_i45682_3_)
+        {
+            this.field_176699_f = p_i45682_3_;
+        }
+
+        public String toString()
+        {
+            return this.field_176699_f;
+        }
+
+        public String getName()
+        {
+            return this.field_176699_f;
+        }
+    }
 }

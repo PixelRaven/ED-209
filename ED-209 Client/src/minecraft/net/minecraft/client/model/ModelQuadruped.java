@@ -1,8 +1,8 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
-import org.lwjgl.opengl.GL11;
 
 public class ModelQuadruped extends ModelBase
 {
@@ -12,8 +12,8 @@ public class ModelQuadruped extends ModelBase
     public ModelRenderer leg2;
     public ModelRenderer leg3;
     public ModelRenderer leg4;
-    protected float field_78145_g = 8.0F;
-    protected float field_78151_h = 4.0F;
+    protected float childYOffset = 8.0F;
+    protected float childZOffset = 4.0F;
     private static final String __OBFID = "CL_00000851";
 
     public ModelQuadruped(int p_i1154_1_, float p_i1154_2_)
@@ -47,19 +47,19 @@ public class ModelQuadruped extends ModelBase
         if (this.isChild)
         {
             float var8 = 2.0F;
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0.0F, this.field_78145_g * p_78088_7_, this.field_78151_h * p_78088_7_);
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, this.childYOffset * p_78088_7_, this.childZOffset * p_78088_7_);
             this.head.render(p_78088_7_);
-            GL11.glPopMatrix();
-            GL11.glPushMatrix();
-            GL11.glScalef(1.0F / var8, 1.0F / var8, 1.0F / var8);
-            GL11.glTranslatef(0.0F, 24.0F * p_78088_7_, 0.0F);
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(1.0F / var8, 1.0F / var8, 1.0F / var8);
+            GlStateManager.translate(0.0F, 24.0F * p_78088_7_, 0.0F);
             this.body.render(p_78088_7_);
             this.leg1.render(p_78088_7_);
             this.leg2.render(p_78088_7_);
             this.leg3.render(p_78088_7_);
             this.leg4.render(p_78088_7_);
-            GL11.glPopMatrix();
+            GlStateManager.popMatrix();
         }
         else
         {

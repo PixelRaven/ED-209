@@ -1,73 +1,127 @@
 package net.minecraft.block;
 
+import com.google.common.base.Predicate;
 import java.util.List;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockNewLeaf extends BlockLeaves
 {
-    public static final String[][] field_150132_N = new String[][] {{"leaves_acacia", "leaves_big_oak"}, {"leaves_acacia_opaque", "leaves_big_oak_opaque"}};
-    public static final String[] field_150133_O = new String[] {"acacia", "big_oak"};
+    public static final PropertyEnum field_176240_P = PropertyEnum.create("variant", BlockPlanks.EnumType.class, new Predicate()
+    {
+        private static final String __OBFID = "CL_00002090";
+        public boolean func_180195_a(BlockPlanks.EnumType p_180195_1_)
+        {
+            return p_180195_1_.func_176839_a() >= 4;
+        }
+        public boolean apply(Object p_apply_1_)
+        {
+            return this.func_180195_a((BlockPlanks.EnumType)p_apply_1_);
+        }
+    });
     private static final String __OBFID = "CL_00000276";
 
-    protected void func_150124_c(World p_150124_1_, int p_150124_2_, int p_150124_3_, int p_150124_4_, int p_150124_5_, int p_150124_6_)
+    public BlockNewLeaf()
     {
-        if ((p_150124_5_ & 3) == 1 && p_150124_1_.rand.nextInt(p_150124_6_) == 0)
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176240_P, BlockPlanks.EnumType.ACACIA).withProperty(field_176236_b, Boolean.valueOf(true)).withProperty(field_176237_a, Boolean.valueOf(true)));
+    }
+
+    protected void func_176234_a(World worldIn, BlockPos p_176234_2_, IBlockState p_176234_3_, int p_176234_4_)
+    {
+        if (p_176234_3_.getValue(field_176240_P) == BlockPlanks.EnumType.DARK_OAK && worldIn.rand.nextInt(p_176234_4_) == 0)
         {
-            this.dropBlockAsItem_do(p_150124_1_, p_150124_2_, p_150124_3_, p_150124_4_, new ItemStack(Items.apple, 1, 0));
+            spawnAsEntity(worldIn, p_176234_2_, new ItemStack(Items.apple, 1, 0));
         }
     }
 
     /**
-     * Determines the damage on the item the block drops. Used in cloth and wood.
+     * Get the damage value that this Block should drop
      */
-    public int damageDropped(int p_149692_1_)
+    public int damageDropped(IBlockState state)
     {
-        return super.damageDropped(p_149692_1_) + 4;
+        return ((BlockPlanks.EnumType)state.getValue(field_176240_P)).func_176839_a();
+    }
+
+    public int getDamageValue(World worldIn, BlockPos pos)
+    {
+        IBlockState var3 = worldIn.getBlockState(pos);
+        return var3.getBlock().getMetaFromState(var3) & 3;
     }
 
     /**
-     * Get the block's damage value (for use with pick block).
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
      */
-    public int getDamageValue(World p_149643_1_, int p_149643_2_, int p_149643_3_, int p_149643_4_)
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
     {
-        return p_149643_1_.getBlockMetadata(p_149643_2_, p_149643_3_, p_149643_4_) & 3;
+        list.add(new ItemStack(itemIn, 1, 0));
+        list.add(new ItemStack(itemIn, 1, 1));
+    }
+
+    protected ItemStack createStackedBlock(IBlockState state)
+    {
+        return new ItemStack(Item.getItemFromBlock(this), 1, ((BlockPlanks.EnumType)state.getValue(field_176240_P)).func_176839_a() - 4);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Convert the given metadata into a BlockState for this Block
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public IBlockState getStateFromMeta(int meta)
     {
-        return (p_149691_2_ & 3) == 1 ? this.field_150129_M[this.field_150127_b][1] : this.field_150129_M[this.field_150127_b][0];
+        return this.getDefaultState().withProperty(field_176240_P, this.func_176233_b(meta)).withProperty(field_176237_a, Boolean.valueOf((meta & 4) == 0)).withProperty(field_176236_b, Boolean.valueOf((meta & 8) > 0));
     }
 
-    public void getSubBlocks(Item p_149666_1_, CreativeTabs p_149666_2_, List p_149666_3_)
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
     {
-        p_149666_3_.add(new ItemStack(p_149666_1_, 1, 0));
-        p_149666_3_.add(new ItemStack(p_149666_1_, 1, 1));
-    }
+        byte var2 = 0;
+        int var3 = var2 | ((BlockPlanks.EnumType)state.getValue(field_176240_P)).func_176839_a() - 4;
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
-    {
-        for (int var2 = 0; var2 < field_150132_N.length; ++var2)
+        if (!((Boolean)state.getValue(field_176237_a)).booleanValue())
         {
-            this.field_150129_M[var2] = new IIcon[field_150132_N[var2].length];
-
-            for (int var3 = 0; var3 < field_150132_N[var2].length; ++var3)
-            {
-                this.field_150129_M[var2][var3] = p_149651_1_.registerIcon(field_150132_N[var2][var3]);
-            }
+            var3 |= 4;
         }
+
+        if (((Boolean)state.getValue(field_176236_b)).booleanValue())
+        {
+            var3 |= 8;
+        }
+
+        return var3;
     }
 
-    public String[] func_150125_e()
+    public BlockPlanks.EnumType func_176233_b(int p_176233_1_)
     {
-        return field_150133_O;
+        return BlockPlanks.EnumType.func_176837_a((p_176233_1_ & 3) + 4);
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {field_176240_P, field_176236_b, field_176237_a});
+    }
+
+    public void harvestBlock(World worldIn, EntityPlayer playerIn, BlockPos pos, IBlockState state, TileEntity te)
+    {
+        if (!worldIn.isRemote && playerIn.getCurrentEquippedItem() != null && playerIn.getCurrentEquippedItem().getItem() == Items.shears)
+        {
+            playerIn.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+            spawnAsEntity(worldIn, pos, new ItemStack(Item.getItemFromBlock(this), 1, ((BlockPlanks.EnumType)state.getValue(field_176240_P)).func_176839_a() - 4));
+        }
+        else
+        {
+            super.harvestBlock(worldIn, playerIn, pos, state, te);
+        }
     }
 }

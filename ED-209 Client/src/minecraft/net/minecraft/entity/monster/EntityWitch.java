@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -42,16 +43,18 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
     private int witchAttackTimer;
     private static final String __OBFID = "CL_00001701";
 
-    public EntityWitch(World p_i1744_1_)
+    public EntityWitch(World worldIn)
     {
-        super(p_i1744_1_);
+        super(worldIn);
+        this.setSize(0.6F, 1.95F);
         this.tasks.addTask(1, new EntityAISwimming(this));
         this.tasks.addTask(2, new EntityAIArrowAttack(this, 1.0D, 60, 10.0F));
         this.tasks.addTask(2, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(2, this.field_175455_a);
         this.tasks.addTask(3, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
         this.tasks.addTask(3, new EntityAILookIdle(this));
-        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false));
-        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, 0, true));
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
     }
 
     protected void entityInit()
@@ -65,7 +68,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
      */
     protected String getLivingSound()
     {
-        return "mob.witch.idle";
+        return null;
     }
 
     /**
@@ -73,7 +76,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
      */
     protected String getHurtSound()
     {
-        return "mob.witch.hurt";
+        return null;
     }
 
     /**
@@ -81,7 +84,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
      */
     protected String getDeathSound()
     {
-        return "mob.witch.death";
+        return null;
     }
 
     /**
@@ -108,20 +111,12 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
     }
 
     /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
-    {
-        return true;
-    }
-
-    /**
      * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
      * use this to react to sunlight and start to burn.
      */
     public void onLivingUpdate()
     {
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             if (this.getAggressive())
             {
@@ -201,7 +196,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         {
             for (int var2 = 0; var2 < this.rand.nextInt(35) + 10; ++var2)
             {
-                this.worldObj.spawnParticle("witchMagic", this.posX + this.rand.nextGaussian() * 0.12999999523162842D, this.boundingBox.maxY + 0.5D + this.rand.nextGaussian() * 0.12999999523162842D, this.posZ + this.rand.nextGaussian() * 0.12999999523162842D, 0.0D, 0.0D, 0.0D);
+                this.worldObj.spawnParticle(EnumParticleTypes.SPELL_WITCH, this.posX + this.rand.nextGaussian() * 0.12999999523162842D, this.getEntityBoundingBox().maxY + 0.5D + this.rand.nextGaussian() * 0.12999999523162842D, this.posZ + this.rand.nextGaussian() * 0.12999999523162842D, 0.0D, 0.0D, 0.0D, new int[0]);
             }
         }
         else
@@ -249,7 +244,7 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
 
             for (int var7 = 0; var7 < var5; ++var7)
             {
-                this.func_145779_a(var6, 1);
+                this.dropItem(var6, 1);
             }
         }
     }
@@ -262,13 +257,14 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
         if (!this.getAggressive())
         {
             EntityPotion var3 = new EntityPotion(this.worldObj, this, 32732);
+            double var4 = p_82196_1_.posY + (double)p_82196_1_.getEyeHeight() - 1.100000023841858D;
             var3.rotationPitch -= -20.0F;
-            double var4 = p_82196_1_.posX + p_82196_1_.motionX - this.posX;
-            double var6 = p_82196_1_.posY + (double)p_82196_1_.getEyeHeight() - 1.100000023841858D - this.posY;
-            double var8 = p_82196_1_.posZ + p_82196_1_.motionZ - this.posZ;
-            float var10 = MathHelper.sqrt_double(var4 * var4 + var8 * var8);
+            double var6 = p_82196_1_.posX + p_82196_1_.motionX - this.posX;
+            double var8 = var4 - this.posY;
+            double var10 = p_82196_1_.posZ + p_82196_1_.motionZ - this.posZ;
+            float var12 = MathHelper.sqrt_double(var6 * var6 + var10 * var10);
 
-            if (var10 >= 8.0F && !p_82196_1_.isPotionActive(Potion.moveSlowdown))
+            if (var12 >= 8.0F && !p_82196_1_.isPotionActive(Potion.moveSlowdown))
             {
                 var3.setPotionDamage(32698);
             }
@@ -276,13 +272,18 @@ public class EntityWitch extends EntityMob implements IRangedAttackMob
             {
                 var3.setPotionDamage(32660);
             }
-            else if (var10 <= 3.0F && !p_82196_1_.isPotionActive(Potion.weakness) && this.rand.nextFloat() < 0.25F)
+            else if (var12 <= 3.0F && !p_82196_1_.isPotionActive(Potion.weakness) && this.rand.nextFloat() < 0.25F)
             {
                 var3.setPotionDamage(32696);
             }
 
-            var3.setThrowableHeading(var4, var6 + (double)(var10 * 0.2F), var8, 0.75F, 8.0F);
+            var3.setThrowableHeading(var6, var8 + (double)(var12 * 0.2F), var10, 0.75F, 8.0F);
             this.worldObj.spawnEntityInWorld(var3);
         }
+    }
+
+    public float getEyeHeight()
+    {
+        return 1.62F;
     }
 }

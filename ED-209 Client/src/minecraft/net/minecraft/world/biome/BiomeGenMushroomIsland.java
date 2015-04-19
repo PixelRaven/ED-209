@@ -15,7 +15,7 @@ public class BiomeGenMushroomIsland extends BiomeGenBase
         this.theBiomeDecorator.grassPerChunk = -100;
         this.theBiomeDecorator.mushroomsPerChunk = 1;
         this.theBiomeDecorator.bigMushroomsPerChunk = 1;
-        this.topBlock = Blocks.mycelium;
+        this.topBlock = Blocks.mycelium.getDefaultState();
         this.spawnableMonsterList.clear();
         this.spawnableCreatureList.clear();
         this.spawnableWaterCreatureList.clear();

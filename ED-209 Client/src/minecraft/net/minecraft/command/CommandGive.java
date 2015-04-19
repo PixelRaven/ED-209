@@ -6,10 +6,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public class CommandGive extends CommandBase
 {
@@ -28,72 +27,79 @@ public class CommandGive extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.give.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length < 2)
+        if (args.length < 2)
         {
             throw new WrongUsageException("commands.give.usage", new Object[0]);
         }
         else
         {
-            EntityPlayerMP var3 = getPlayer(p_71515_1_, p_71515_2_[0]);
-            Item var4 = getItemByText(p_71515_1_, p_71515_2_[1]);
-            int var5 = 1;
-            int var6 = 0;
-
-            if (p_71515_2_.length >= 3)
-            {
-                var5 = parseIntBounded(p_71515_1_, p_71515_2_[2], 1, 64);
-            }
-
-            if (p_71515_2_.length >= 4)
-            {
-                var6 = parseInt(p_71515_1_, p_71515_2_[3]);
-            }
-
+            EntityPlayerMP var3 = getPlayer(sender, args[0]);
+            Item var4 = getItemByText(sender, args[1]);
+            int var5 = args.length >= 3 ? parseInt(args[2], 1, 64) : 1;
+            int var6 = args.length >= 4 ? parseInt(args[3]) : 0;
             ItemStack var7 = new ItemStack(var4, var5, var6);
 
-            if (p_71515_2_.length >= 5)
+            if (args.length >= 5)
             {
-                String var8 = func_147178_a(p_71515_1_, p_71515_2_, 4).getUnformattedText();
+                String var8 = getChatComponentFromNthArg(sender, args, 4).getUnformattedText();
 
                 try
                 {
-                    NBTBase var9 = JsonToNBT.func_150315_a(var8);
-
-                    if (!(var9 instanceof NBTTagCompound))
-                    {
-                        func_152373_a(p_71515_1_, this, "commands.give.tagError", new Object[] {"Not a valid tag"});
-                        return;
-                    }
-
-                    var7.setTagCompound((NBTTagCompound)var9);
+                    var7.setTagCompound(JsonToNBT.func_180713_a(var8));
                 }
                 catch (NBTException var10)
                 {
-                    func_152373_a(p_71515_1_, this, "commands.give.tagError", new Object[] {var10.getMessage()});
-                    return;
+                    throw new CommandException("commands.give.tagError", new Object[] {var10.getMessage()});
                 }
             }
 
-            EntityItem var11 = var3.dropPlayerItemWithRandomChoice(var7, false);
-            var11.delayBeforeCanPickup = 0;
-            var11.func_145797_a(var3.getCommandSenderName());
-            func_152373_a(p_71515_1_, this, "commands.give.success", new Object[] {var7.func_151000_E(), Integer.valueOf(var5), var3.getCommandSenderName()});
+            boolean var11 = var3.inventory.addItemStackToInventory(var7);
+
+            if (var11)
+            {
+                var3.worldObj.playSoundAtEntity(var3, "random.pop", 0.2F, ((var3.getRNG().nextFloat() - var3.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                var3.inventoryContainer.detectAndSendChanges();
+            }
+
+            EntityItem var9;
+
+            if (var11 && var7.stackSize <= 0)
+            {
+                var7.stackSize = 1;
+                sender.func_174794_a(CommandResultStats.Type.AFFECTED_ITEMS, var5);
+                var9 = var3.dropPlayerItemWithRandomChoice(var7, false);
+
+                if (var9 != null)
+                {
+                    var9.func_174870_v();
+                }
+            }
+            else
+            {
+                sender.func_174794_a(CommandResultStats.Type.AFFECTED_ITEMS, var5 - var7.stackSize);
+                var9 = var3.dropPlayerItemWithRandomChoice(var7, false);
+
+                if (var9 != null)
+                {
+                    var9.setNoPickupDelay();
+                    var9.setOwner(var3.getName());
+                }
+            }
+
+            notifyOperators(sender, this, "commands.give.success", new Object[] {var7.getChatComponent(), Integer.valueOf(var5), var3.getName()});
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, this.getPlayers()) : (p_71516_2_.length == 2 ? getListOfStringsFromIterableMatchingLastWord(p_71516_2_, Item.itemRegistry.getKeys()) : null);
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, this.getPlayers()) : (args.length == 2 ? func_175762_a(args, Item.itemRegistry.getKeys()) : null);
     }
 
     protected String[] getPlayers()
@@ -104,8 +110,8 @@ public class CommandGive extends CommandBase
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 0;
+        return index == 0;
     }
 }

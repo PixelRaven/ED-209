@@ -12,7 +12,7 @@ import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 
-public class S37PacketStatistics extends Packet
+public class S37PacketStatistics implements Packet
 {
     private Map field_148976_a;
     private static final String __OBFID = "CL_00001283";
@@ -24,23 +24,26 @@ public class S37PacketStatistics extends Packet
         this.field_148976_a = p_i45173_1_;
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleStatistics(this);
+        handler.handleStatistics(this);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        int var2 = p_148837_1_.readVarIntFromBuffer();
+        int var2 = data.readVarIntFromBuffer();
         this.field_148976_a = Maps.newHashMap();
 
         for (int var3 = 0; var3 < var2; ++var3)
         {
-            StatBase var4 = StatList.func_151177_a(p_148837_1_.readStringFromBuffer(32767));
-            int var5 = p_148837_1_.readVarIntFromBuffer();
+            StatBase var4 = StatList.getOneShotStat(data.readStringFromBuffer(32767));
+            int var5 = data.readVarIntFromBuffer();
 
             if (var4 != null)
             {
@@ -52,25 +55,17 @@ public class S37PacketStatistics extends Packet
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeVarIntToBuffer(this.field_148976_a.size());
+        data.writeVarIntToBuffer(this.field_148976_a.size());
         Iterator var2 = this.field_148976_a.entrySet().iterator();
 
         while (var2.hasNext())
         {
             Entry var3 = (Entry)var2.next();
-            p_148840_1_.writeStringToBuffer(((StatBase)var3.getKey()).statId);
-            p_148840_1_.writeVarIntToBuffer(((Integer)var3.getValue()).intValue());
+            data.writeString(((StatBase)var3.getKey()).statId);
+            data.writeVarIntToBuffer(((Integer)var3.getValue()).intValue());
         }
-    }
-
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
-    {
-        return String.format("count=%d", new Object[] {Integer.valueOf(this.field_148976_a.size())});
     }
 
     public Map func_148974_c()
@@ -78,8 +73,11 @@ public class S37PacketStatistics extends Packet
         return this.field_148976_a;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

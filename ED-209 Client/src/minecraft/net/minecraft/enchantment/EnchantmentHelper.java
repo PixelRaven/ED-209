@@ -1,5 +1,7 @@
 package net.minecraft.enchantment;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,7 +79,7 @@ public class EnchantmentHelper
      */
     public static Map getEnchantments(ItemStack p_82781_0_)
     {
-        LinkedHashMap var1 = new LinkedHashMap();
+        LinkedHashMap var1 = Maps.newLinkedHashMap();
         NBTTagList var2 = p_82781_0_.getItem() == Items.enchanted_book ? Items.enchanted_book.func_92110_g(p_82781_0_) : p_82781_0_.getEnchantmentTagList();
 
         if (var2 != null)
@@ -104,14 +106,19 @@ public class EnchantmentHelper
         while (var3.hasNext())
         {
             int var4 = ((Integer)var3.next()).intValue();
-            NBTTagCompound var5 = new NBTTagCompound();
-            var5.setShort("id", (short)var4);
-            var5.setShort("lvl", (short)((Integer)p_82782_0_.get(Integer.valueOf(var4))).intValue());
-            var2.appendTag(var5);
+            Enchantment var5 = Enchantment.func_180306_c(var4);
 
-            if (p_82782_1_.getItem() == Items.enchanted_book)
+            if (var5 != null)
             {
-                Items.enchanted_book.addEnchantment(p_82782_1_, new EnchantmentData(var4, ((Integer)p_82782_0_.get(Integer.valueOf(var4))).intValue()));
+                NBTTagCompound var6 = new NBTTagCompound();
+                var6.setShort("id", (short)var4);
+                var6.setShort("lvl", (short)((Integer)p_82782_0_.get(Integer.valueOf(var4))).intValue());
+                var2.appendTag(var6);
+
+                if (p_82782_1_.getItem() == Items.enchanted_book)
+                {
+                    Items.enchanted_book.addEnchantment(p_82782_1_, new EnchantmentData(var5, ((Integer)p_82782_0_.get(Integer.valueOf(var4))).intValue()));
+                }
             }
         }
 
@@ -174,9 +181,9 @@ public class EnchantmentHelper
                     short var4 = var2.getCompoundTagAt(var3).getShort("id");
                     short var5 = var2.getCompoundTagAt(var3).getShort("lvl");
 
-                    if (Enchantment.enchantmentsList[var4] != null)
+                    if (Enchantment.func_180306_c(var4) != null)
                     {
-                        p_77518_0_.calculateModifier(Enchantment.enchantmentsList[var4], var5);
+                        p_77518_0_.calculateModifier(Enchantment.func_180306_c(var4), var5);
                     }
                 }
             }
@@ -215,14 +222,6 @@ public class EnchantmentHelper
         return (enchantmentModifierDamage.damageModifier + 1 >> 1) + enchantmentRand.nextInt((enchantmentModifierDamage.damageModifier >> 1) + 1);
     }
 
-    /**
-     * Return the (magic) extra damage of the enchantments on player equipped item.
-     */
-    public static float getEnchantmentModifierLiving(EntityLivingBase p_77512_0_, EntityLivingBase p_77512_1_)
-    {
-        return func_152377_a(p_77512_0_.getHeldItem(), p_77512_1_.getCreatureAttribute());
-    }
-
     public static float func_152377_a(ItemStack p_152377_0_, EnumCreatureAttribute p_152377_1_)
     {
         enchantmentModifierLiving.livingModifier = 0.0F;
@@ -235,7 +234,11 @@ public class EnchantmentHelper
     {
         field_151388_d.field_151363_b = p_151384_1_;
         field_151388_d.field_151364_a = p_151384_0_;
-        applyEnchantmentModifierArray(field_151388_d, p_151384_0_.getLastActiveItems());
+
+        if (p_151384_0_ != null)
+        {
+            applyEnchantmentModifierArray(field_151388_d, p_151384_0_.getInventory());
+        }
 
         if (p_151384_1_ instanceof EntityPlayer)
         {
@@ -247,7 +250,11 @@ public class EnchantmentHelper
     {
         field_151389_e.field_151366_a = p_151385_0_;
         field_151389_e.field_151365_b = p_151385_1_;
-        applyEnchantmentModifierArray(field_151389_e, p_151385_0_.getLastActiveItems());
+
+        if (p_151385_0_ != null)
+        {
+            applyEnchantmentModifierArray(field_151389_e, p_151385_0_.getInventory());
+        }
 
         if (p_151385_0_ instanceof EntityPlayer)
         {
@@ -256,11 +263,11 @@ public class EnchantmentHelper
     }
 
     /**
-     * Returns the knockback value of enchantments on equipped player item.
+     * Returns the 'Water Breathing' modifier of enchantments on player equipped armors.
      */
-    public static int getKnockbackModifier(EntityLivingBase p_77507_0_, EntityLivingBase p_77507_1_)
+    public static int getRespiration(EntityLivingBase p_77501_0_)
     {
-        return getEnchantmentLevel(Enchantment.knockback.effectId, p_77507_0_.getHeldItem());
+        return getEnchantmentLevel(Enchantment.field_180313_o.effectId, p_77501_0_.getHeldItem());
     }
 
     public static int getFireAspectModifier(EntityLivingBase p_90036_0_)
@@ -268,12 +275,14 @@ public class EnchantmentHelper
         return getEnchantmentLevel(Enchantment.fireAspect.effectId, p_90036_0_.getHeldItem());
     }
 
-    /**
-     * Returns the 'Water Breathing' modifier of enchantments on player equipped armors.
-     */
-    public static int getRespiration(EntityLivingBase p_77501_0_)
+    public static int func_180319_a(Entity p_180319_0_)
     {
-        return getMaxEnchantmentLevel(Enchantment.respiration.effectId, p_77501_0_.getLastActiveItems());
+        return getMaxEnchantmentLevel(Enchantment.field_180317_h.effectId, p_180319_0_.getInventory());
+    }
+
+    public static int func_180318_b(Entity p_180318_0_)
+    {
+        return getMaxEnchantmentLevel(Enchantment.field_180316_k.effectId, p_180318_0_.getInventory());
     }
 
     /**
@@ -302,12 +311,12 @@ public class EnchantmentHelper
 
     public static int func_151386_g(EntityLivingBase p_151386_0_)
     {
-        return getEnchantmentLevel(Enchantment.field_151370_z.effectId, p_151386_0_.getHeldItem());
+        return getEnchantmentLevel(Enchantment.luckOfTheSea.effectId, p_151386_0_.getHeldItem());
     }
 
     public static int func_151387_h(EntityLivingBase p_151387_0_)
     {
-        return getEnchantmentLevel(Enchantment.field_151369_A.effectId, p_151387_0_.getHeldItem());
+        return getEnchantmentLevel(Enchantment.lure.effectId, p_151387_0_.getHeldItem());
     }
 
     /**
@@ -323,12 +332,12 @@ public class EnchantmentHelper
      */
     public static boolean getAquaAffinityModifier(EntityLivingBase p_77510_0_)
     {
-        return getMaxEnchantmentLevel(Enchantment.aquaAffinity.effectId, p_77510_0_.getLastActiveItems()) > 0;
+        return getMaxEnchantmentLevel(Enchantment.aquaAffinity.effectId, p_77510_0_.getInventory()) > 0;
     }
 
     public static ItemStack func_92099_a(Enchantment p_92099_0_, EntityLivingBase p_92099_1_)
     {
-        ItemStack[] var2 = p_92099_1_.getLastActiveItems();
+        ItemStack[] var2 = p_92099_1_.getInventory();
         int var3 = var2.length;
 
         for (int var4 = 0; var4 < var3; ++var4)
@@ -379,7 +388,7 @@ public class EnchantmentHelper
 
         if (var4)
         {
-            p_77504_1_.func_150996_a(Items.enchanted_book);
+            p_77504_1_.setItem(Items.enchanted_book);
         }
 
         if (var3 != null)
@@ -439,7 +448,7 @@ public class EnchantmentHelper
 
                 if (var10 != null)
                 {
-                    var8 = new ArrayList();
+                    var8 = Lists.newArrayList();
                     var8.add(var10);
 
                     for (int var11 = var7; p_77513_0_.nextInt(50) <= var11; var11 >>= 1)
@@ -458,7 +467,7 @@ public class EnchantmentHelper
                                 {
                                     EnchantmentData var16 = (EnchantmentData)var15.next();
 
-                                    if (var16.enchantmentobj.canApplyTogether(Enchantment.enchantmentsList[var13.intValue()]))
+                                    if (var16.enchantmentobj.canApplyTogether(Enchantment.func_180306_c(var13.intValue())))
                                     {
                                         continue;
                                     }
@@ -512,7 +521,7 @@ public class EnchantmentHelper
                     {
                         if (var3 == null)
                         {
-                            var3 = new HashMap();
+                            var3 = Maps.newHashMap();
                         }
 
                         var3.put(Integer.valueOf(var8.effectId), new EnchantmentData(var8, var9));

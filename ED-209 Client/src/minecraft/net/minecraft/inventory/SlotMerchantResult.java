@@ -3,6 +3,7 @@ package net.minecraft.inventory;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.stats.StatList;
 import net.minecraft.village.MerchantRecipe;
 
 public class SlotMerchantResult extends Slot
@@ -29,7 +30,7 @@ public class SlotMerchantResult extends Slot
     /**
      * Check if the stack is a valid item for this slot. Always true beside for the armor slots.
      */
-    public boolean isItemValid(ItemStack p_75214_1_)
+    public boolean isItemValid(ItemStack stack)
     {
         return false;
     }
@@ -67,9 +68,9 @@ public class SlotMerchantResult extends Slot
         this.field_75231_g = 0;
     }
 
-    public void onPickupFromSlot(EntityPlayer p_82870_1_, ItemStack p_82870_2_)
+    public void onPickupFromSlot(EntityPlayer playerIn, ItemStack stack)
     {
-        this.onCrafting(p_82870_2_);
+        this.onCrafting(stack);
         MerchantRecipe var3 = this.theMerchantInventory.getCurrentRecipe();
 
         if (var3 != null)
@@ -77,9 +78,10 @@ public class SlotMerchantResult extends Slot
             ItemStack var4 = this.theMerchantInventory.getStackInSlot(0);
             ItemStack var5 = this.theMerchantInventory.getStackInSlot(1);
 
-            if (this.func_75230_a(var3, var4, var5) || this.func_75230_a(var3, var5, var4))
+            if (this.doTrade(var3, var4, var5) || this.doTrade(var3, var5, var4))
             {
                 this.theMerchant.useRecipe(var3);
+                playerIn.triggerAchievement(StatList.timesTradedWithVillagerStat);
 
                 if (var4 != null && var4.stackSize <= 0)
                 {
@@ -97,23 +99,23 @@ public class SlotMerchantResult extends Slot
         }
     }
 
-    private boolean func_75230_a(MerchantRecipe p_75230_1_, ItemStack p_75230_2_, ItemStack p_75230_3_)
+    private boolean doTrade(MerchantRecipe trade, ItemStack firstItem, ItemStack secondItem)
     {
-        ItemStack var4 = p_75230_1_.getItemToBuy();
-        ItemStack var5 = p_75230_1_.getSecondItemToBuy();
+        ItemStack var4 = trade.getItemToBuy();
+        ItemStack var5 = trade.getSecondItemToBuy();
 
-        if (p_75230_2_ != null && p_75230_2_.getItem() == var4.getItem())
+        if (firstItem != null && firstItem.getItem() == var4.getItem())
         {
-            if (var5 != null && p_75230_3_ != null && var5.getItem() == p_75230_3_.getItem())
+            if (var5 != null && secondItem != null && var5.getItem() == secondItem.getItem())
             {
-                p_75230_2_.stackSize -= var4.stackSize;
-                p_75230_3_.stackSize -= var5.stackSize;
+                firstItem.stackSize -= var4.stackSize;
+                secondItem.stackSize -= var5.stackSize;
                 return true;
             }
 
-            if (var5 == null && p_75230_3_ == null)
+            if (var5 == null && secondItem == null)
             {
-                p_75230_2_.stackSize -= var4.stackSize;
+                firstItem.stackSize -= var4.stackSize;
                 return true;
             }
         }

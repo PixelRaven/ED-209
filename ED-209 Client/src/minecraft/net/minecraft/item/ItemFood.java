@@ -3,6 +3,7 @@ package net.minecraft.item;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.stats.StatList;
 import net.minecraft.world.World;
 
 public class ItemFood extends Item
@@ -51,18 +52,23 @@ public class ItemFood extends Item
         this(p_i45340_1_, 0.6F, p_i45340_2_);
     }
 
-    public ItemStack onEaten(ItemStack p_77654_1_, World p_77654_2_, EntityPlayer p_77654_3_)
+    /**
+     * Called when the player finishes using this Item (E.g. finishes eating.). Not called when the player stops using
+     * the Item before the action is complete.
+     */
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityPlayer playerIn)
     {
-        --p_77654_1_.stackSize;
-        p_77654_3_.getFoodStats().func_151686_a(this, p_77654_1_);
-        p_77654_2_.playSoundAtEntity(p_77654_3_, "random.burp", 0.5F, p_77654_2_.rand.nextFloat() * 0.1F + 0.9F);
-        this.onFoodEaten(p_77654_1_, p_77654_2_, p_77654_3_);
-        return p_77654_1_;
+        --stack.stackSize;
+        playerIn.getFoodStats().addStats(this, stack);
+        worldIn.playSoundAtEntity(playerIn, "random.burp", 0.5F, worldIn.rand.nextFloat() * 0.1F + 0.9F);
+        this.onFoodEaten(stack, worldIn, playerIn);
+        playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+        return stack;
     }
 
-    protected void onFoodEaten(ItemStack p_77849_1_, World p_77849_2_, EntityPlayer p_77849_3_)
+    protected void onFoodEaten(ItemStack p_77849_1_, World worldIn, EntityPlayer p_77849_3_)
     {
-        if (!p_77849_2_.isClient && this.potionId > 0 && p_77849_2_.rand.nextFloat() < this.potionEffectProbability)
+        if (!worldIn.isRemote && this.potionId > 0 && worldIn.rand.nextFloat() < this.potionEffectProbability)
         {
             p_77849_3_.addPotionEffect(new PotionEffect(this.potionId, this.potionDuration * 20, this.potionAmplifier));
         }
@@ -71,7 +77,7 @@ public class ItemFood extends Item
     /**
      * How long it takes to use or consume an item
      */
-    public int getMaxItemUseDuration(ItemStack p_77626_1_)
+    public int getMaxItemUseDuration(ItemStack stack)
     {
         return 32;
     }
@@ -79,30 +85,30 @@ public class ItemFood extends Item
     /**
      * returns the action that specifies what animation to play when the items is being used
      */
-    public EnumAction getItemUseAction(ItemStack p_77661_1_)
+    public EnumAction getItemUseAction(ItemStack stack)
     {
-        return EnumAction.eat;
+        return EnumAction.EAT;
     }
 
     /**
      * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
      */
-    public ItemStack onItemRightClick(ItemStack p_77659_1_, World p_77659_2_, EntityPlayer p_77659_3_)
+    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
     {
-        if (p_77659_3_.canEat(this.alwaysEdible))
+        if (playerIn.canEat(this.alwaysEdible))
         {
-            p_77659_3_.setItemInUse(p_77659_1_, this.getMaxItemUseDuration(p_77659_1_));
+            playerIn.setItemInUse(itemStackIn, this.getMaxItemUseDuration(itemStackIn));
         }
 
-        return p_77659_1_;
+        return itemStackIn;
     }
 
-    public int func_150905_g(ItemStack p_150905_1_)
+    public int getHealAmount(ItemStack itemStackIn)
     {
         return this.healAmount;
     }
 
-    public float func_150906_h(ItemStack p_150906_1_)
+    public float getSaturationModifier(ItemStack itemStackIn)
     {
         return this.saturationModifier;
     }
@@ -119,12 +125,12 @@ public class ItemFood extends Item
      * sets a potion effect on the item. Args: int potionId, int duration (will be multiplied by 20), int amplifier,
      * float probability of effect happening
      */
-    public ItemFood setPotionEffect(int p_77844_1_, int p_77844_2_, int p_77844_3_, float p_77844_4_)
+    public ItemFood setPotionEffect(int p_77844_1_, int duration, int amplifier, float probability)
     {
         this.potionId = p_77844_1_;
-        this.potionDuration = p_77844_2_;
-        this.potionAmplifier = p_77844_3_;
-        this.potionEffectProbability = p_77844_4_;
+        this.potionDuration = duration;
+        this.potionAmplifier = amplifier;
+        this.potionEffectProbability = probability;
         return this;
     }
 

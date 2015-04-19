@@ -1,89 +1,80 @@
 package net.minecraft.block;
 
+import java.util.Iterator;
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.World;
 
 public class BlockCactus extends Block
 {
-    private IIcon field_150041_a;
-    private IIcon field_150040_b;
+    public static final PropertyInteger AGE_PROP = PropertyInteger.create("age", 0, 15);
     private static final String __OBFID = "CL_00000210";
 
     protected BlockCactus()
     {
-        super(Material.field_151570_A);
+        super(Material.cactus);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE_PROP, Integer.valueOf(0)));
         this.setTickRandomly(true);
         this.setCreativeTab(CreativeTabs.tabDecorations);
     }
 
-    /**
-     * Ticks the block if it's been scheduled
-     */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        if (p_149674_1_.isAirBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_))
+        BlockPos var5 = pos.offsetUp();
+
+        if (worldIn.isAirBlock(var5))
         {
             int var6;
 
-            for (var6 = 1; p_149674_1_.getBlock(p_149674_2_, p_149674_3_ - var6, p_149674_4_) == this; ++var6)
+            for (var6 = 1; worldIn.getBlockState(pos.offsetDown(var6)).getBlock() == this; ++var6)
             {
                 ;
             }
 
             if (var6 < 3)
             {
-                int var7 = p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_);
+                int var7 = ((Integer)state.getValue(AGE_PROP)).intValue();
 
                 if (var7 == 15)
                 {
-                    p_149674_1_.setBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_, this);
-                    p_149674_1_.setBlockMetadataWithNotify(p_149674_2_, p_149674_3_, p_149674_4_, 0, 4);
-                    this.onNeighborBlockChange(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_, this);
+                    worldIn.setBlockState(var5, this.getDefaultState());
+                    IBlockState var8 = state.withProperty(AGE_PROP, Integer.valueOf(0));
+                    worldIn.setBlockState(pos, var8, 4);
+                    this.onNeighborBlockChange(worldIn, var5, var8, this);
                 }
                 else
                 {
-                    p_149674_1_.setBlockMetadataWithNotify(p_149674_2_, p_149674_3_, p_149674_4_, var7 + 1, 4);
+                    worldIn.setBlockState(pos, state.withProperty(AGE_PROP, Integer.valueOf(var7 + 1)), 4);
                 }
             }
         }
     }
 
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-        float var5 = 0.0625F;
-        return AxisAlignedBB.getBoundingBox((double)((float)p_149668_2_ + var5), (double)p_149668_3_, (double)((float)p_149668_4_ + var5), (double)((float)(p_149668_2_ + 1) - var5), (double)((float)(p_149668_3_ + 1) - var5), (double)((float)(p_149668_4_ + 1) - var5));
+        float var4 = 0.0625F;
+        return new AxisAlignedBB((double)((float)pos.getX() + var4), (double)pos.getY(), (double)((float)pos.getZ() + var4), (double)((float)(pos.getX() + 1) - var4), (double)((float)(pos.getY() + 1) - var4), (double)((float)(pos.getZ() + 1) - var4));
     }
 
-    /**
-     * Returns the bounding box of the wired rectangular prism to render.
-     */
-    public AxisAlignedBB getSelectedBoundingBoxFromPool(World p_149633_1_, int p_149633_2_, int p_149633_3_, int p_149633_4_)
+    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
     {
-        float var5 = 0.0625F;
-        return AxisAlignedBB.getBoundingBox((double)((float)p_149633_2_ + var5), (double)p_149633_3_, (double)((float)p_149633_4_ + var5), (double)((float)(p_149633_2_ + 1) - var5), (double)(p_149633_3_ + 1), (double)((float)(p_149633_4_ + 1) - var5));
+        float var3 = 0.0625F;
+        return new AxisAlignedBB((double)((float)pos.getX() + var3), (double)pos.getY(), (double)((float)pos.getZ() + var3), (double)((float)(pos.getX() + 1) - var3), (double)(pos.getY() + 1), (double)((float)(pos.getZ() + 1) - var3));
     }
 
-    /**
-     * Gets the block's texture. Args: side, meta
-     */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        return p_149691_1_ == 1 ? this.field_150041_a : (p_149691_1_ == 0 ? this.field_150040_b : this.blockIcon);
-    }
-
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
@@ -93,64 +84,68 @@ public class BlockCactus extends Block
         return false;
     }
 
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
+    {
+        return super.canPlaceBlockAt(worldIn, pos) ? this.canBlockStay(worldIn, pos) : false;
+    }
+
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    {
+        if (!this.canBlockStay(worldIn, pos))
+        {
+            worldIn.destroyBlock(pos, true);
+        }
+    }
+
+    public boolean canBlockStay(World worldIn, BlockPos p_176586_2_)
+    {
+        Iterator var3 = EnumFacing.Plane.HORIZONTAL.iterator();
+
+        while (var3.hasNext())
+        {
+            EnumFacing var4 = (EnumFacing)var3.next();
+
+            if (worldIn.getBlockState(p_176586_2_.offset(var4)).getBlock().getMaterial().isSolid())
+            {
+                return false;
+            }
+        }
+
+        Block var5 = worldIn.getBlockState(p_176586_2_.offsetDown()).getBlock();
+        return var5 == Blocks.cactus || var5 == Blocks.sand;
+    }
+
     /**
-     * The type of render function that is called for this block
+     * Called When an Entity Collided with the Block
      */
-    public int getRenderType()
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        return 13;
+        entityIn.attackEntityFrom(DamageSource.cactus, 1.0F);
     }
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
+    public EnumWorldBlockLayer getBlockLayer()
     {
-        return !super.canPlaceBlockAt(p_149742_1_, p_149742_2_, p_149742_3_, p_149742_4_) ? false : this.canBlockStay(p_149742_1_, p_149742_2_, p_149742_3_, p_149742_4_);
-    }
-
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
-    {
-        if (!this.canBlockStay(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_))
-        {
-            p_149695_1_.func_147480_a(p_149695_2_, p_149695_3_, p_149695_4_, true);
-        }
+        return EnumWorldBlockLayer.CUTOUT;
     }
 
     /**
-     * Can this block stay at this position.  Similar to canPlaceBlockAt except gets checked often with plants.
+     * Convert the given metadata into a BlockState for this Block
      */
-    public boolean canBlockStay(World p_149718_1_, int p_149718_2_, int p_149718_3_, int p_149718_4_)
+    public IBlockState getStateFromMeta(int meta)
     {
-        if (p_149718_1_.getBlock(p_149718_2_ - 1, p_149718_3_, p_149718_4_).getMaterial().isSolid())
-        {
-            return false;
-        }
-        else if (p_149718_1_.getBlock(p_149718_2_ + 1, p_149718_3_, p_149718_4_).getMaterial().isSolid())
-        {
-            return false;
-        }
-        else if (p_149718_1_.getBlock(p_149718_2_, p_149718_3_, p_149718_4_ - 1).getMaterial().isSolid())
-        {
-            return false;
-        }
-        else if (p_149718_1_.getBlock(p_149718_2_, p_149718_3_, p_149718_4_ + 1).getMaterial().isSolid())
-        {
-            return false;
-        }
-        else
-        {
-            Block var5 = p_149718_1_.getBlock(p_149718_2_, p_149718_3_ - 1, p_149718_4_);
-            return var5 == Blocks.cactus || var5 == Blocks.sand;
-        }
+        return this.getDefaultState().withProperty(AGE_PROP, Integer.valueOf(meta));
     }
 
-    public void onEntityCollidedWithBlock(World p_149670_1_, int p_149670_2_, int p_149670_3_, int p_149670_4_, Entity p_149670_5_)
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
     {
-        p_149670_5_.attackEntityFrom(DamageSource.cactus, 1.0F);
+        return ((Integer)state.getValue(AGE_PROP)).intValue();
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    protected BlockState createBlockState()
     {
-        this.blockIcon = p_149651_1_.registerIcon(this.getTextureName() + "_side");
-        this.field_150041_a = p_149651_1_.registerIcon(this.getTextureName() + "_top");
-        this.field_150040_b = p_149651_1_.registerIcon(this.getTextureName() + "_bottom");
+        return new BlockState(this, new IProperty[] {AGE_PROP});
     }
 }

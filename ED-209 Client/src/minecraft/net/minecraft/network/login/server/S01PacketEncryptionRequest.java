@@ -8,55 +8,58 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.login.INetHandlerLoginClient;
 import net.minecraft.util.CryptManager;
 
-public class S01PacketEncryptionRequest extends Packet
+public class S01PacketEncryptionRequest implements Packet
 {
-    private String field_149612_a;
-    private PublicKey field_149610_b;
+    private String hashedServerId;
+    private PublicKey publicKey;
     private byte[] field_149611_c;
     private static final String __OBFID = "CL_00001376";
 
     public S01PacketEncryptionRequest() {}
 
-    public S01PacketEncryptionRequest(String p_i45268_1_, PublicKey p_i45268_2_, byte[] p_i45268_3_)
+    public S01PacketEncryptionRequest(String serverId, PublicKey key, byte[] p_i45268_3_)
     {
-        this.field_149612_a = p_i45268_1_;
-        this.field_149610_b = p_i45268_2_;
+        this.hashedServerId = serverId;
+        this.publicKey = key;
         this.field_149611_c = p_i45268_3_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149612_a = p_148837_1_.readStringFromBuffer(20);
-        this.field_149610_b = CryptManager.decodePublicKey(readBlob(p_148837_1_));
-        this.field_149611_c = readBlob(p_148837_1_);
+        this.hashedServerId = data.readStringFromBuffer(20);
+        this.publicKey = CryptManager.decodePublicKey(data.readByteArray());
+        this.field_149611_c = data.readByteArray();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(this.field_149612_a);
-        writeBlob(p_148840_1_, this.field_149610_b.getEncoded());
-        writeBlob(p_148840_1_, this.field_149611_c);
+        data.writeString(this.hashedServerId);
+        data.writeByteArray(this.publicKey.getEncoded());
+        data.writeByteArray(this.field_149611_c);
     }
 
-    public void processPacket(INetHandlerLoginClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerLoginClient handler)
     {
-        p_148833_1_.handleEncryptionRequest(this);
+        handler.handleEncryptionRequest(this);
     }
 
     public String func_149609_c()
     {
-        return this.field_149612_a;
+        return this.hashedServerId;
     }
 
     public PublicKey func_149608_d()
     {
-        return this.field_149610_b;
+        return this.publicKey;
     }
 
     public byte[] func_149607_e()
@@ -64,8 +67,11 @@ public class S01PacketEncryptionRequest extends Packet
         return this.field_149611_c;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerLoginClient)p_148833_1_);
+        this.processPacket((INetHandlerLoginClient)handler);
     }
 }

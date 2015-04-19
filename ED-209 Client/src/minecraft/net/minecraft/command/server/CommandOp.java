@@ -1,5 +1,6 @@
 package net.minecraft.command.server;
 
+import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public class CommandOp extends CommandBase
 {
@@ -26,26 +28,26 @@ public class CommandOp extends CommandBase
         return 3;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.op.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length == 1 && p_71515_2_[0].length() > 0)
+        if (args.length == 1 && args[0].length() > 0)
         {
             MinecraftServer var3 = MinecraftServer.getServer();
-            GameProfile var4 = var3.func_152358_ax().func_152655_a(p_71515_2_[0]);
+            GameProfile var4 = var3.getPlayerProfileCache().getGameProfileForUsername(args[0]);
 
             if (var4 == null)
             {
-                throw new CommandException("commands.op.failed", new Object[] {p_71515_2_[0]});
+                throw new CommandException("commands.op.failed", new Object[] {args[0]});
             }
             else
             {
-                var3.getConfigurationManager().func_152605_a(var4);
-                func_152373_a(p_71515_1_, this, "commands.op.success", new Object[] {p_71515_2_[0]});
+                var3.getConfigurationManager().addOp(var4);
+                notifyOperators(sender, this, "commands.op.success", new Object[] {args[0]});
             }
         }
         else
@@ -54,29 +56,26 @@ public class CommandOp extends CommandBase
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        if (p_71516_2_.length == 1)
+        if (args.length == 1)
         {
-            String var3 = p_71516_2_[p_71516_2_.length - 1];
-            ArrayList var4 = new ArrayList();
-            GameProfile[] var5 = MinecraftServer.getServer().func_152357_F();
-            int var6 = var5.length;
+            String var4 = args[args.length - 1];
+            ArrayList var5 = Lists.newArrayList();
+            GameProfile[] var6 = MinecraftServer.getServer().getGameProfiles();
+            int var7 = var6.length;
 
-            for (int var7 = 0; var7 < var6; ++var7)
+            for (int var8 = 0; var8 < var7; ++var8)
             {
-                GameProfile var8 = var5[var7];
+                GameProfile var9 = var6[var8];
 
-                if (!MinecraftServer.getServer().getConfigurationManager().func_152596_g(var8) && doesStringStartWith(var3, var8.getName()))
+                if (!MinecraftServer.getServer().getConfigurationManager().canSendCommands(var9) && doesStringStartWith(var4, var9.getName()))
                 {
-                    var4.add(var8.getName());
+                    var5.add(var9.getName());
                 }
             }
 
-            return var4;
+            return var5;
         }
         else
         {

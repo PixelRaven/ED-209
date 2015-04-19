@@ -2,6 +2,8 @@ package net.minecraft.world.chunk.storage;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.NibbleArray;
 
@@ -9,28 +11,28 @@ public class ChunkLoader
 {
     private static final String __OBFID = "CL_00000379";
 
-    public static ChunkLoader.AnvilConverterData load(NBTTagCompound p_76691_0_)
+    public static ChunkLoader.AnvilConverterData load(NBTTagCompound nbt)
     {
-        int var1 = p_76691_0_.getInteger("xPos");
-        int var2 = p_76691_0_.getInteger("zPos");
+        int var1 = nbt.getInteger("xPos");
+        int var2 = nbt.getInteger("zPos");
         ChunkLoader.AnvilConverterData var3 = new ChunkLoader.AnvilConverterData(var1, var2);
-        var3.blocks = p_76691_0_.getByteArray("Blocks");
-        var3.data = new NibbleArrayReader(p_76691_0_.getByteArray("Data"), 7);
-        var3.skyLight = new NibbleArrayReader(p_76691_0_.getByteArray("SkyLight"), 7);
-        var3.blockLight = new NibbleArrayReader(p_76691_0_.getByteArray("BlockLight"), 7);
-        var3.heightmap = p_76691_0_.getByteArray("HeightMap");
-        var3.terrainPopulated = p_76691_0_.getBoolean("TerrainPopulated");
-        var3.entities = p_76691_0_.getTagList("Entities", 10);
-        var3.field_151564_i = p_76691_0_.getTagList("TileEntities", 10);
-        var3.field_151563_j = p_76691_0_.getTagList("TileTicks", 10);
+        var3.blocks = nbt.getByteArray("Blocks");
+        var3.data = new NibbleArrayReader(nbt.getByteArray("Data"), 7);
+        var3.skyLight = new NibbleArrayReader(nbt.getByteArray("SkyLight"), 7);
+        var3.blockLight = new NibbleArrayReader(nbt.getByteArray("BlockLight"), 7);
+        var3.heightmap = nbt.getByteArray("HeightMap");
+        var3.terrainPopulated = nbt.getBoolean("TerrainPopulated");
+        var3.entities = nbt.getTagList("Entities", 10);
+        var3.tileEntities = nbt.getTagList("TileEntities", 10);
+        var3.tileTicks = nbt.getTagList("TileTicks", 10);
 
         try
         {
-            var3.lastUpdated = p_76691_0_.getLong("LastUpdate");
+            var3.lastUpdated = nbt.getLong("LastUpdate");
         }
         catch (ClassCastException var5)
         {
-            var3.lastUpdated = (long)p_76691_0_.getInteger("LastUpdate");
+            var3.lastUpdated = (long)nbt.getInteger("LastUpdate");
         }
 
         return var3;
@@ -90,9 +92,9 @@ public class ChunkLoader
             if (!var6)
             {
                 byte[] var19 = new byte[4096];
-                NibbleArray var20 = new NibbleArray(var19.length, 4);
-                NibbleArray var21 = new NibbleArray(var19.length, 4);
-                NibbleArray var22 = new NibbleArray(var19.length, 4);
+                NibbleArray var20 = new NibbleArray();
+                NibbleArray var21 = new NibbleArray();
+                NibbleArray var22 = new NibbleArray();
 
                 for (int var23 = 0; var23 < 16; ++var23)
                 {
@@ -113,9 +115,9 @@ public class ChunkLoader
                 NBTTagCompound var24 = new NBTTagCompound();
                 var24.setByte("Y", (byte)(var5 & 255));
                 var24.setByteArray("Blocks", var19);
-                var24.setByteArray("Data", var20.data);
-                var24.setByteArray("SkyLight", var21.data);
-                var24.setByteArray("BlockLight", var22.data);
+                var24.setByteArray("Data", var20.getData());
+                var24.setByteArray("SkyLight", var21.getData());
+                var24.setByteArray("BlockLight", var22.getData());
                 var16.appendTag(var24);
             }
         }
@@ -127,17 +129,17 @@ public class ChunkLoader
         {
             for (var7 = 0; var7 < 16; ++var7)
             {
-                var17[var7 << 4 | var18] = (byte)(p_76690_2_.getBiomeGenAt(p_76690_0_.x << 4 | var18, p_76690_0_.z << 4 | var7).biomeID & 255);
+                var17[var7 << 4 | var18] = (byte)(p_76690_2_.func_180300_a(new BlockPos(p_76690_0_.x << 4 | var18, 0, p_76690_0_.z << 4 | var7), BiomeGenBase.field_180279_ad).biomeID & 255);
             }
         }
 
         p_76690_1_.setByteArray("Biomes", var17);
         p_76690_1_.setTag("Entities", p_76690_0_.entities);
-        p_76690_1_.setTag("TileEntities", p_76690_0_.field_151564_i);
+        p_76690_1_.setTag("TileEntities", p_76690_0_.tileEntities);
 
-        if (p_76690_0_.field_151563_j != null)
+        if (p_76690_0_.tileTicks != null)
         {
-            p_76690_1_.setTag("TileTicks", p_76690_0_.field_151563_j);
+            p_76690_1_.setTag("TileTicks", p_76690_0_.tileTicks);
         }
     }
 
@@ -151,8 +153,8 @@ public class ChunkLoader
         public NibbleArrayReader data;
         public byte[] blocks;
         public NBTTagList entities;
-        public NBTTagList field_151564_i;
-        public NBTTagList field_151563_j;
+        public NBTTagList tileEntities;
+        public NBTTagList tileTicks;
         public final int x;
         public final int z;
         private static final String __OBFID = "CL_00000380";

@@ -3,7 +3,7 @@ package net.minecraft.world.biome;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.world.ChunkPosition;
+import net.minecraft.util.BlockPos;
 
 public class WorldChunkManagerHell extends WorldChunkManager
 {
@@ -20,10 +20,7 @@ public class WorldChunkManagerHell extends WorldChunkManager
         this.rainfall = p_i45374_2_;
     }
 
-    /**
-     * Returns the BiomeGenBase related to the x, z position on the world.
-     */
-    public BiomeGenBase getBiomeGenAt(int p_76935_1_, int p_76935_2_)
+    public BiomeGenBase func_180631_a(BlockPos p_180631_1_)
     {
         return this.biomeGenerator;
     }
@@ -80,9 +77,9 @@ public class WorldChunkManagerHell extends WorldChunkManager
         return this.loadBlockGeneratorData(p_76931_1_, p_76931_2_, p_76931_3_, p_76931_4_, p_76931_5_);
     }
 
-    public ChunkPosition func_150795_a(int p_150795_1_, int p_150795_2_, int p_150795_3_, List p_150795_4_, Random p_150795_5_)
+    public BlockPos findBiomePosition(int x, int z, int range, List biomes, Random random)
     {
-        return p_150795_4_.contains(this.biomeGenerator) ? new ChunkPosition(p_150795_1_ - p_150795_3_ + p_150795_5_.nextInt(p_150795_3_ * 2 + 1), 0, p_150795_2_ - p_150795_3_ + p_150795_5_.nextInt(p_150795_3_ * 2 + 1)) : null;
+        return biomes.contains(this.biomeGenerator) ? new BlockPos(x - range + random.nextInt(range * 2 + 1), 0, z - range + random.nextInt(range * 2 + 1)) : null;
     }
 
     /**

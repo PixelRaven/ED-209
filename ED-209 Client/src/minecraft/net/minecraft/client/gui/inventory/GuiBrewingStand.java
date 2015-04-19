@@ -1,39 +1,46 @@
 package net.minecraft.client.gui.inventory;
 
-import net.minecraft.client.resources.I18n;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ContainerBrewingStand;
-import net.minecraft.tileentity.TileEntityBrewingStand;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class GuiBrewingStand extends GuiContainer
 {
-    private static final ResourceLocation field_147014_u = new ResourceLocation("textures/gui/container/brewing_stand.png");
-    private TileEntityBrewingStand field_147013_v;
+    private static final ResourceLocation brewingStandGuiTextures = new ResourceLocation("textures/gui/container/brewing_stand.png");
+    private final InventoryPlayer field_175384_v;
+    private IInventory tileBrewingStand;
     private static final String __OBFID = "CL_00000746";
 
-    public GuiBrewingStand(InventoryPlayer p_i1081_1_, TileEntityBrewingStand p_i1081_2_)
+    public GuiBrewingStand(InventoryPlayer p_i45506_1_, IInventory p_i45506_2_)
     {
-        super(new ContainerBrewingStand(p_i1081_1_, p_i1081_2_));
-        this.field_147013_v = p_i1081_2_;
+        super(new ContainerBrewingStand(p_i45506_1_, p_i45506_2_));
+        this.field_175384_v = p_i45506_1_;
+        this.tileBrewingStand = p_i45506_2_;
     }
 
-    protected void func_146979_b(int p_146979_1_, int p_146979_2_)
+    /**
+     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     */
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        String var3 = this.field_147013_v.isInventoryNameLocalized() ? this.field_147013_v.getInventoryName() : I18n.format(this.field_147013_v.getInventoryName(), new Object[0]);
-        this.fontRendererObj.drawString(var3, this.field_146999_f / 2 - this.fontRendererObj.getStringWidth(var3) / 2, 6, 4210752);
-        this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.field_147000_g - 96 + 2, 4210752);
+        String var3 = this.tileBrewingStand.getDisplayName().getUnformattedText();
+        this.fontRendererObj.drawString(var3, this.xSize / 2 - this.fontRendererObj.getStringWidth(var3) / 2, 6, 4210752);
+        this.fontRendererObj.drawString(this.field_175384_v.getDisplayName().getUnformattedText(), 8, this.ySize - 96 + 2, 4210752);
     }
 
-    protected void func_146976_a(float p_146976_1_, int p_146976_2_, int p_146976_3_)
+    /**
+     * Args : renderPartialTicks, mouseX, mouseY
+     */
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(field_147014_u);
-        int var4 = (this.width - this.field_146999_f) / 2;
-        int var5 = (this.height - this.field_147000_g) / 2;
-        this.drawTexturedModalRect(var4, var5, 0, 0, this.field_146999_f, this.field_147000_g);
-        int var6 = this.field_147013_v.func_145935_i();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(brewingStandGuiTextures);
+        int var4 = (this.width - this.xSize) / 2;
+        int var5 = (this.height - this.ySize) / 2;
+        this.drawTexturedModalRect(var4, var5, 0, 0, this.xSize, this.ySize);
+        int var6 = this.tileBrewingStand.getField(0);
 
         if (var6 > 0)
         {

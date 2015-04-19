@@ -3,6 +3,7 @@ package net.minecraft.client.resources.data;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
@@ -17,8 +18,16 @@ public class PackMetadataSectionSerializer extends BaseMetadataSectionSerializer
     {
         JsonObject var4 = p_deserialize_1_.getAsJsonObject();
         IChatComponent var5 = (IChatComponent)p_deserialize_3_.deserialize(var4.get("description"), IChatComponent.class);
-        int var6 = JsonUtils.getJsonObjectIntegerFieldValue(var4, "pack_format");
-        return new PackMetadataSection(var5, var6);
+
+        if (var5 == null)
+        {
+            throw new JsonParseException("Invalid/missing description!");
+        }
+        else
+        {
+            int var6 = JsonUtils.getJsonObjectIntegerFieldValue(var4, "pack_format");
+            return new PackMetadataSection(var5, var6);
+        }
     }
 
     public JsonElement serialize(PackMetadataSection p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_)

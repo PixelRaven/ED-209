@@ -8,7 +8,7 @@ public interface IHopper extends IInventory
     /**
      * Returns the worldObj for this tileEntity.
      */
-    World getWorldObj();
+    World getWorld();
 
     /**
      * Gets the world X position for this hopper entity.

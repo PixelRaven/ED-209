@@ -26,6 +26,11 @@ public class JsonUtils
         return !p_151211_0_.isJsonPrimitive() ? false : p_151211_0_.getAsJsonPrimitive().isString();
     }
 
+    public static boolean func_180199_c(JsonObject p_180199_0_, String p_180199_1_)
+    {
+        return !jsonObjectFieldTypeIsPrimitive(p_180199_0_, p_180199_1_) ? false : p_180199_0_.getAsJsonPrimitive(p_180199_1_).isBoolean();
+    }
+
     /**
      * Does the given JsonObject contain an array field with the given name?
      */
@@ -215,7 +220,7 @@ public class JsonUtils
      * Gets the given JsonElement as a JsonObject.  Expects the second parameter to be the name of the element's field
      * if an error message needs to be thrown.
      */
-    public static JsonObject getJsonElementAsJsonObject(JsonElement p_151210_0_, String p_151210_1_)
+    public static JsonObject getElementAsJsonObject(JsonElement p_151210_0_, String p_151210_1_)
     {
         if (p_151210_0_.isJsonObject())
         {
@@ -227,15 +232,15 @@ public class JsonUtils
         }
     }
 
-    public static JsonObject func_152754_s(JsonObject p_152754_0_, String p_152754_1_)
+    public static JsonObject getJsonObject(JsonObject base, String key)
     {
-        if (p_152754_0_.has(p_152754_1_))
+        if (base.has(key))
         {
-            return getJsonElementAsJsonObject(p_152754_0_.get(p_152754_1_), p_152754_1_);
+            return getElementAsJsonObject(base.get(key), key);
         }
         else
         {
-            throw new JsonSyntaxException("Missing " + p_152754_1_ + ", expected to find a JsonObject");
+            throw new JsonSyntaxException("Missing " + key + ", expected to find a JsonObject");
         }
     }
 
@@ -245,7 +250,7 @@ public class JsonUtils
      */
     public static JsonObject getJsonObjectFieldOrDefault(JsonObject p_151218_0_, String p_151218_1_, JsonObject p_151218_2_)
     {
-        return p_151218_0_.has(p_151218_1_) ? getJsonElementAsJsonObject(p_151218_0_.get(p_151218_1_), p_151218_1_) : p_151218_2_;
+        return p_151218_0_.has(p_151218_1_) ? getElementAsJsonObject(p_151218_0_.get(p_151218_1_), p_151218_1_) : p_151218_2_;
     }
 
     /**

@@ -27,12 +27,12 @@ public class IPBanEntry extends BanEntry
         return p_152647_0_.has("ip") ? p_152647_0_.get("ip").getAsString() : null;
     }
 
-    protected void func_152641_a(JsonObject p_152641_1_)
+    protected void onSerialization(JsonObject data)
     {
-        if (this.func_152640_f() != null)
+        if (this.getValue() != null)
         {
-            p_152641_1_.addProperty("ip", (String)this.func_152640_f());
-            super.func_152641_a(p_152641_1_);
+            data.addProperty("ip", (String)this.getValue());
+            super.onSerialization(data);
         }
     }
 }

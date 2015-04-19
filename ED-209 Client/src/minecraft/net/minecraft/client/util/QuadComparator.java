@@ -1,5 +1,6 @@
 package net.minecraft.client.util;
 
+import java.nio.FloatBuffer;
 import java.util.Comparator;
 
 public class QuadComparator implements Comparator
@@ -7,43 +8,45 @@ public class QuadComparator implements Comparator
     private float field_147630_a;
     private float field_147628_b;
     private float field_147629_c;
-    private int[] field_147627_d;
+    private FloatBuffer field_147627_d;
+    private int field_178079_e;
     private static final String __OBFID = "CL_00000958";
 
-    public QuadComparator(int[] p_i45077_1_, float p_i45077_2_, float p_i45077_3_, float p_i45077_4_)
+    public QuadComparator(FloatBuffer p_i46247_1_, float p_i46247_2_, float p_i46247_3_, float p_i46247_4_, int p_i46247_5_)
     {
-        this.field_147627_d = p_i45077_1_;
-        this.field_147630_a = p_i45077_2_;
-        this.field_147628_b = p_i45077_3_;
-        this.field_147629_c = p_i45077_4_;
+        this.field_147627_d = p_i46247_1_;
+        this.field_147630_a = p_i46247_2_;
+        this.field_147628_b = p_i46247_3_;
+        this.field_147629_c = p_i46247_4_;
+        this.field_178079_e = p_i46247_5_;
     }
 
     public int compare(Integer p_compare_1_, Integer p_compare_2_)
     {
-        float var3 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue()]) - this.field_147630_a;
-        float var4 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 1]) - this.field_147628_b;
-        float var5 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 2]) - this.field_147629_c;
-        float var6 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 8]) - this.field_147630_a;
-        float var7 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 9]) - this.field_147628_b;
-        float var8 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 10]) - this.field_147629_c;
-        float var9 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 16]) - this.field_147630_a;
-        float var10 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 17]) - this.field_147628_b;
-        float var11 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 18]) - this.field_147629_c;
-        float var12 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 24]) - this.field_147630_a;
-        float var13 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 25]) - this.field_147628_b;
-        float var14 = Float.intBitsToFloat(this.field_147627_d[p_compare_1_.intValue() + 26]) - this.field_147629_c;
-        float var15 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue()]) - this.field_147630_a;
-        float var16 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 1]) - this.field_147628_b;
-        float var17 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 2]) - this.field_147629_c;
-        float var18 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 8]) - this.field_147630_a;
-        float var19 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 9]) - this.field_147628_b;
-        float var20 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 10]) - this.field_147629_c;
-        float var21 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 16]) - this.field_147630_a;
-        float var22 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 17]) - this.field_147628_b;
-        float var23 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 18]) - this.field_147629_c;
-        float var24 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 24]) - this.field_147630_a;
-        float var25 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 25]) - this.field_147628_b;
-        float var26 = Float.intBitsToFloat(this.field_147627_d[p_compare_2_.intValue() + 26]) - this.field_147629_c;
+        float var3 = this.field_147627_d.get(p_compare_1_.intValue()) - this.field_147630_a;
+        float var4 = this.field_147627_d.get(p_compare_1_.intValue() + 1) - this.field_147628_b;
+        float var5 = this.field_147627_d.get(p_compare_1_.intValue() + 2) - this.field_147629_c;
+        float var6 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e + 0) - this.field_147630_a;
+        float var7 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e + 1) - this.field_147628_b;
+        float var8 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e + 2) - this.field_147629_c;
+        float var9 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e * 2 + 0) - this.field_147630_a;
+        float var10 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e * 2 + 1) - this.field_147628_b;
+        float var11 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e * 2 + 2) - this.field_147629_c;
+        float var12 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e * 3 + 0) - this.field_147630_a;
+        float var13 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e * 3 + 1) - this.field_147628_b;
+        float var14 = this.field_147627_d.get(p_compare_1_.intValue() + this.field_178079_e * 3 + 2) - this.field_147629_c;
+        float var15 = this.field_147627_d.get(p_compare_2_.intValue()) - this.field_147630_a;
+        float var16 = this.field_147627_d.get(p_compare_2_.intValue() + 1) - this.field_147628_b;
+        float var17 = this.field_147627_d.get(p_compare_2_.intValue() + 2) - this.field_147629_c;
+        float var18 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e + 0) - this.field_147630_a;
+        float var19 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e + 1) - this.field_147628_b;
+        float var20 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e + 2) - this.field_147629_c;
+        float var21 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e * 2 + 0) - this.field_147630_a;
+        float var22 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e * 2 + 1) - this.field_147628_b;
+        float var23 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e * 2 + 2) - this.field_147629_c;
+        float var24 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e * 3 + 0) - this.field_147630_a;
+        float var25 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e * 3 + 1) - this.field_147628_b;
+        float var26 = this.field_147627_d.get(p_compare_2_.intValue() + this.field_178079_e * 3 + 2) - this.field_147629_c;
         float var27 = (var3 + var6 + var9 + var12) * 0.25F;
         float var28 = (var4 + var7 + var10 + var13) * 0.25F;
         float var29 = (var5 + var8 + var11 + var14) * 0.25F;

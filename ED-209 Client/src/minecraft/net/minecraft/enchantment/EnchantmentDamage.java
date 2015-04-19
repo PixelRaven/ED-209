@@ -7,6 +7,7 @@ import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentDamage extends Enchantment
 {
@@ -35,10 +36,10 @@ public class EnchantmentDamage extends Enchantment
     public final int damageType;
     private static final String __OBFID = "CL_00000102";
 
-    public EnchantmentDamage(int p_i1923_1_, int p_i1923_2_, int p_i1923_3_)
+    public EnchantmentDamage(int p_i45774_1_, ResourceLocation p_i45774_2_, int p_i45774_3_, int p_i45774_4_)
     {
-        super(p_i1923_1_, p_i1923_2_, EnumEnchantmentType.weapon);
-        this.damageType = p_i1923_3_;
+        super(p_i45774_1_, p_i45774_2_, p_i45774_3_, EnumEnchantmentType.WEAPON);
+        this.damageType = p_i45774_4_;
     }
 
     /**

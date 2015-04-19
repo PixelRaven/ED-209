@@ -35,13 +35,13 @@ public class MessageDeserializer2 extends ByteToMessageDecoder
                 {
                     int var7 = var6.readVarIntFromBuffer();
 
-                    if (p_decode_2_.readableBytes() >= var7)
+                    if (p_decode_2_.readableBytes() < var7)
                     {
-                        p_decode_3_.add(p_decode_2_.readBytes(var7));
+                        p_decode_2_.resetReaderIndex();
                         return;
                     }
 
-                    p_decode_2_.resetReaderIndex();
+                    p_decode_3_.add(p_decode_2_.readBytes(var7));
                 }
                 finally
                 {

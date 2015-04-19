@@ -6,73 +6,91 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class C0CPacketInput extends Packet
+public class C0CPacketInput implements Packet
 {
-    private float field_149624_a;
-    private float field_149622_b;
-    private boolean field_149623_c;
-    private boolean field_149621_d;
+    /** Positive for left strafe, negative for right */
+    private float strafeSpeed;
+
+    /** Positive for forward, negative for backward */
+    private float forwardSpeed;
+    private boolean jumping;
+    private boolean sneaking;
     private static final String __OBFID = "CL_00001367";
 
     public C0CPacketInput() {}
 
     public C0CPacketInput(float p_i45261_1_, float p_i45261_2_, boolean p_i45261_3_, boolean p_i45261_4_)
     {
-        this.field_149624_a = p_i45261_1_;
-        this.field_149622_b = p_i45261_2_;
-        this.field_149623_c = p_i45261_3_;
-        this.field_149621_d = p_i45261_4_;
+        this.strafeSpeed = p_i45261_1_;
+        this.forwardSpeed = p_i45261_2_;
+        this.jumping = p_i45261_3_;
+        this.sneaking = p_i45261_4_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149624_a = p_148837_1_.readFloat();
-        this.field_149622_b = p_148837_1_.readFloat();
-        this.field_149623_c = p_148837_1_.readBoolean();
-        this.field_149621_d = p_148837_1_.readBoolean();
+        this.strafeSpeed = data.readFloat();
+        this.forwardSpeed = data.readFloat();
+        byte var2 = data.readByte();
+        this.jumping = (var2 & 1) > 0;
+        this.sneaking = (var2 & 2) > 0;
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeFloat(this.field_149624_a);
-        p_148840_1_.writeFloat(this.field_149622_b);
-        p_148840_1_.writeBoolean(this.field_149623_c);
-        p_148840_1_.writeBoolean(this.field_149621_d);
+        data.writeFloat(this.strafeSpeed);
+        data.writeFloat(this.forwardSpeed);
+        byte var2 = 0;
+
+        if (this.jumping)
+        {
+            var2 = (byte)(var2 | 1);
+        }
+
+        if (this.sneaking)
+        {
+            var2 = (byte)(var2 | 2);
+        }
+
+        data.writeByte(var2);
     }
 
-    public void processPacket(INetHandlerPlayServer p_148833_1_)
+    public void func_180766_a(INetHandlerPlayServer p_180766_1_)
     {
-        p_148833_1_.processInput(this);
+        p_180766_1_.processInput(this);
     }
 
-    public float func_149620_c()
+    public float getStrafeSpeed()
     {
-        return this.field_149624_a;
+        return this.strafeSpeed;
     }
 
-    public float func_149616_d()
+    public float getForwardSpeed()
     {
-        return this.field_149622_b;
+        return this.forwardSpeed;
     }
 
-    public boolean func_149618_e()
+    public boolean isJumping()
     {
-        return this.field_149623_c;
+        return this.jumping;
     }
 
-    public boolean func_149617_f()
+    public boolean isSneaking()
     {
-        return this.field_149621_d;
+        return this.sneaking;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayServer)p_148833_1_);
+        this.func_180766_a((INetHandlerPlayServer)handler);
     }
 }

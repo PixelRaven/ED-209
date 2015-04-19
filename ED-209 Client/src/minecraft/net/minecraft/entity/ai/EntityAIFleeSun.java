@@ -2,7 +2,7 @@ package net.minecraft.entity.ai;
 
 import java.util.Random;
 import net.minecraft.entity.EntityCreature;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -37,7 +37,7 @@ public class EntityAIFleeSun extends EntityAIBase
         {
             return false;
         }
-        else if (!this.theWorld.canBlockSeeTheSky(MathHelper.floor_double(this.theCreature.posX), (int)this.theCreature.boundingBox.minY, MathHelper.floor_double(this.theCreature.posZ)))
+        else if (!this.theWorld.isAgainstSky(new BlockPos(this.theCreature.posX, this.theCreature.getEntityBoundingBox().minY, this.theCreature.posZ)))
         {
             return false;
         }
@@ -78,16 +78,15 @@ public class EntityAIFleeSun extends EntityAIBase
     private Vec3 findPossibleShelter()
     {
         Random var1 = this.theCreature.getRNG();
+        BlockPos var2 = new BlockPos(this.theCreature.posX, this.theCreature.getEntityBoundingBox().minY, this.theCreature.posZ);
 
-        for (int var2 = 0; var2 < 10; ++var2)
+        for (int var3 = 0; var3 < 10; ++var3)
         {
-            int var3 = MathHelper.floor_double(this.theCreature.posX + (double)var1.nextInt(20) - 10.0D);
-            int var4 = MathHelper.floor_double(this.theCreature.boundingBox.minY + (double)var1.nextInt(6) - 3.0D);
-            int var5 = MathHelper.floor_double(this.theCreature.posZ + (double)var1.nextInt(20) - 10.0D);
+            BlockPos var4 = var2.add(var1.nextInt(20) - 10, var1.nextInt(6) - 3, var1.nextInt(20) - 10);
 
-            if (!this.theWorld.canBlockSeeTheSky(var3, var4, var5) && this.theCreature.getBlockPathWeight(var3, var4, var5) < 0.0F)
+            if (!this.theWorld.isAgainstSky(var4) && this.theCreature.func_180484_a(var4) < 0.0F)
             {
-                return Vec3.createVectorHelper((double)var3, (double)var4, (double)var5);
+                return new Vec3((double)var4.getX(), (double)var4.getY(), (double)var4.getZ());
             }
         }
 

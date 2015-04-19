@@ -1,6 +1,8 @@
 package net.minecraft.command.server;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
@@ -23,14 +25,16 @@ public class CommandListPlayers extends CommandBase
         return 0;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.players.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        p_71515_1_.addChatMessage(new ChatComponentTranslation("commands.players.list", new Object[] {Integer.valueOf(MinecraftServer.getServer().getCurrentPlayerCount()), Integer.valueOf(MinecraftServer.getServer().getMaxPlayers())}));
-        p_71515_1_.addChatMessage(new ChatComponentText(MinecraftServer.getServer().getConfigurationManager().func_152609_b(p_71515_2_.length > 0 && "uuids".equalsIgnoreCase(p_71515_2_[0]))));
+        int var3 = MinecraftServer.getServer().getCurrentPlayerCount();
+        sender.addChatMessage(new ChatComponentTranslation("commands.players.list", new Object[] {Integer.valueOf(var3), Integer.valueOf(MinecraftServer.getServer().getMaxPlayers())}));
+        sender.addChatMessage(new ChatComponentText(MinecraftServer.getServer().getConfigurationManager().func_180602_f()));
+        sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, var3);
     }
 }

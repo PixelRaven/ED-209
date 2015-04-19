@@ -4,18 +4,18 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -37,71 +37,73 @@ public class CommandSpreadPlayers extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.spreadplayers.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length < 6)
+        if (args.length < 6)
         {
             throw new WrongUsageException("commands.spreadplayers.usage", new Object[0]);
         }
         else
         {
             byte var3 = 0;
-            int var16 = var3 + 1;
-            double var4 = func_110666_a(p_71515_1_, Double.NaN, p_71515_2_[var3]);
-            double var6 = func_110666_a(p_71515_1_, Double.NaN, p_71515_2_[var16++]);
-            double var8 = parseDoubleWithMin(p_71515_1_, p_71515_2_[var16++], 0.0D);
-            double var10 = parseDoubleWithMin(p_71515_1_, p_71515_2_[var16++], var8 + 1.0D);
-            boolean var12 = parseBoolean(p_71515_1_, p_71515_2_[var16++]);
-            ArrayList var13 = Lists.newArrayList();
+            BlockPos var4 = sender.getPosition();
+            double var10000 = (double)var4.getX();
+            int var17 = var3 + 1;
+            double var5 = func_175761_b(var10000, args[var3], true);
+            double var7 = func_175761_b((double)var4.getZ(), args[var17++], true);
+            double var9 = parseDouble(args[var17++], 0.0D);
+            double var11 = parseDouble(args[var17++], var9 + 1.0D);
+            boolean var13 = parseBoolean(args[var17++]);
+            ArrayList var14 = Lists.newArrayList();
 
-            while (true)
+            while (var17 < args.length)
             {
-                while (var16 < p_71515_2_.length)
+                String var15 = args[var17++];
+
+                if (PlayerSelector.hasArguments(var15))
                 {
-                    String var14 = p_71515_2_[var16++];
+                    List var16 = PlayerSelector.func_179656_b(sender, var15, Entity.class);
 
-                    if (PlayerSelector.hasArguments(var14))
+                    if (var16.size() == 0)
                     {
-                        EntityPlayerMP[] var17 = PlayerSelector.matchPlayers(p_71515_1_, var14);
-
-                        if (var17 == null || var17.length == 0)
-                        {
-                            throw new PlayerNotFoundException();
-                        }
-
-                        Collections.addAll(var13, var17);
+                        throw new EntityNotFoundException();
                     }
-                    else
-                    {
-                        EntityPlayerMP var15 = MinecraftServer.getServer().getConfigurationManager().func_152612_a(var14);
 
-                        if (var15 == null)
-                        {
-                            throw new PlayerNotFoundException();
-                        }
-
-                        var13.add(var15);
-                    }
+                    var14.addAll(var16);
                 }
-
-                if (var13.isEmpty())
+                else
                 {
-                    throw new PlayerNotFoundException();
-                }
+                    EntityPlayerMP var18 = MinecraftServer.getServer().getConfigurationManager().getPlayerByUsername(var15);
 
-                p_71515_1_.addChatMessage(new ChatComponentTranslation("commands.spreadplayers.spreading." + (var12 ? "teams" : "players"), new Object[] {Integer.valueOf(var13.size()), Double.valueOf(var10), Double.valueOf(var4), Double.valueOf(var6), Double.valueOf(var8)}));
-                this.func_110669_a(p_71515_1_, var13, new CommandSpreadPlayers.Position(var4, var6), var8, var10, ((EntityLivingBase)var13.get(0)).worldObj, var12);
-                return;
+                    if (var18 == null)
+                    {
+                        throw new PlayerNotFoundException();
+                    }
+
+                    var14.add(var18);
+                }
+            }
+
+            sender.func_174794_a(CommandResultStats.Type.AFFECTED_ENTITIES, var14.size());
+
+            if (var14.isEmpty())
+            {
+                throw new EntityNotFoundException();
+            }
+            else
+            {
+                sender.addChatMessage(new ChatComponentTranslation("commands.spreadplayers.spreading." + (var13 ? "teams" : "players"), new Object[] {Integer.valueOf(var14.size()), Double.valueOf(var11), Double.valueOf(var5), Double.valueOf(var7), Double.valueOf(var9)}));
+                this.func_110669_a(sender, var14, new CommandSpreadPlayers.Position(var5, var7), var9, var11, ((Entity)var14.get(0)).worldObj, var13);
             }
         }
     }
 
-    private void func_110669_a(ICommandSender p_110669_1_, List p_110669_2_, CommandSpreadPlayers.Position p_110669_3_, double p_110669_4_, double p_110669_6_, World p_110669_8_, boolean p_110669_9_)
+    private void func_110669_a(ICommandSender p_110669_1_, List p_110669_2_, CommandSpreadPlayers.Position p_110669_3_, double p_110669_4_, double p_110669_6_, World worldIn, boolean p_110669_9_) throws CommandException
     {
         Random var10 = new Random();
         double var11 = p_110669_3_.field_111101_a - p_110669_6_;
@@ -109,9 +111,9 @@ public class CommandSpreadPlayers extends CommandBase
         double var15 = p_110669_3_.field_111101_a + p_110669_6_;
         double var17 = p_110669_3_.field_111100_b + p_110669_6_;
         CommandSpreadPlayers.Position[] var19 = this.func_110670_a(var10, p_110669_9_ ? this.func_110667_a(p_110669_2_) : p_110669_2_.size(), var11, var13, var15, var17);
-        int var20 = this.func_110668_a(p_110669_3_, p_110669_4_, p_110669_8_, var10, var11, var13, var15, var17, var19, p_110669_9_);
-        double var21 = this.func_110671_a(p_110669_2_, p_110669_8_, var19, p_110669_9_);
-        func_152373_a(p_110669_1_, this, "commands.spreadplayers.success." + (p_110669_9_ ? "teams" : "players"), new Object[] {Integer.valueOf(var19.length), Double.valueOf(p_110669_3_.field_111101_a), Double.valueOf(p_110669_3_.field_111100_b)});
+        int var20 = this.func_110668_a(p_110669_3_, p_110669_4_, worldIn, var10, var11, var13, var15, var17, var19, p_110669_9_);
+        double var21 = this.func_110671_a(p_110669_2_, worldIn, var19, p_110669_9_);
+        notifyOperators(p_110669_1_, this, "commands.spreadplayers.success." + (p_110669_9_ ? "teams" : "players"), new Object[] {Integer.valueOf(var19.length), Double.valueOf(p_110669_3_.field_111101_a), Double.valueOf(p_110669_3_.field_111100_b)});
 
         if (var19.length > 1)
         {
@@ -126,11 +128,11 @@ public class CommandSpreadPlayers extends CommandBase
 
         while (var3.hasNext())
         {
-            EntityLivingBase var4 = (EntityLivingBase)var3.next();
+            Entity var4 = (Entity)var3.next();
 
             if (var4 instanceof EntityPlayer)
             {
-                var2.add(var4.getTeam());
+                var2.add(((EntityPlayer)var4).getTeam());
             }
             else
             {
@@ -141,7 +143,7 @@ public class CommandSpreadPlayers extends CommandBase
         return var2.size();
     }
 
-    private int func_110668_a(CommandSpreadPlayers.Position p_110668_1_, double p_110668_2_, World p_110668_4_, Random p_110668_5_, double p_110668_6_, double p_110668_8_, double p_110668_10_, double p_110668_12_, CommandSpreadPlayers.Position[] p_110668_14_, boolean p_110668_15_)
+    private int func_110668_a(CommandSpreadPlayers.Position p_110668_1_, double p_110668_2_, World worldIn, Random p_110668_5_, double p_110668_6_, double p_110668_8_, double p_110668_10_, double p_110668_12_, CommandSpreadPlayers.Position[] p_110668_14_, boolean p_110668_15_) throws CommandException
     {
         boolean var16 = true;
         double var18 = 3.4028234663852886E38D;
@@ -211,7 +213,7 @@ public class CommandSpreadPlayers extends CommandBase
                 {
                     var23 = var28[var22];
 
-                    if (!var23.func_111098_b(p_110668_4_))
+                    if (!var23.func_111098_b(worldIn))
                     {
                         var23.func_111097_a(p_110668_5_, p_110668_6_, p_110668_8_, p_110668_10_, p_110668_12_);
                         var16 = true;
@@ -230,7 +232,7 @@ public class CommandSpreadPlayers extends CommandBase
         }
     }
 
-    private double func_110671_a(List p_110671_1_, World p_110671_2_, CommandSpreadPlayers.Position[] p_110671_3_, boolean p_110671_4_)
+    private double func_110671_a(List p_110671_1_, World worldIn, CommandSpreadPlayers.Position[] p_110671_3_, boolean p_110671_4_)
     {
         double var5 = 0.0D;
         int var7 = 0;
@@ -238,12 +240,12 @@ public class CommandSpreadPlayers extends CommandBase
 
         for (int var9 = 0; var9 < p_110671_1_.size(); ++var9)
         {
-            EntityLivingBase var10 = (EntityLivingBase)p_110671_1_.get(var9);
+            Entity var10 = (Entity)p_110671_1_.get(var9);
             CommandSpreadPlayers.Position var11;
 
             if (p_110671_4_)
             {
-                Team var12 = var10 instanceof EntityPlayer ? var10.getTeam() : null;
+                Team var12 = var10 instanceof EntityPlayer ? ((EntityPlayer)var10).getTeam() : null;
 
                 if (!var8.containsKey(var12))
                 {
@@ -257,7 +259,7 @@ public class CommandSpreadPlayers extends CommandBase
                 var11 = p_110671_3_[var7++];
             }
 
-            var10.setPositionAndUpdate((double)((float)MathHelper.floor_double(var11.field_111101_a) + 0.5F), (double)var11.func_111092_a(p_110671_2_), (double)MathHelper.floor_double(var11.field_111100_b) + 0.5D);
+            var10.setPositionAndUpdate((double)((float)MathHelper.floor_double(var11.field_111101_a) + 0.5F), (double)var11.func_111092_a(worldIn), (double)MathHelper.floor_double(var11.field_111100_b) + 0.5D);
             double var17 = Double.MAX_VALUE;
 
             for (int var14 = 0; var14 < p_110671_3_.length; ++var14)
@@ -358,37 +360,42 @@ public class CommandSpreadPlayers extends CommandBase
             return var9;
         }
 
-        public int func_111092_a(World p_111092_1_)
+        public int func_111092_a(World worldIn)
         {
-            int var2 = MathHelper.floor_double(this.field_111101_a);
-            int var3 = MathHelper.floor_double(this.field_111100_b);
+            BlockPos var2 = new BlockPos(this.field_111101_a, 256.0D, this.field_111100_b);
 
-            for (int var4 = 256; var4 > 0; --var4)
+            do
             {
-                if (p_111092_1_.getBlock(var2, var4, var3).getMaterial() != Material.air)
+                if (var2.getY() <= 0)
                 {
-                    return var4 + 1;
+                    return 257;
                 }
-            }
 
-            return 257;
+                var2 = var2.offsetDown();
+            }
+            while (worldIn.getBlockState(var2).getBlock().getMaterial() == Material.air);
+
+            return var2.getY() + 1;
         }
 
-        public boolean func_111098_b(World p_111098_1_)
+        public boolean func_111098_b(World worldIn)
         {
-            int var2 = MathHelper.floor_double(this.field_111101_a);
-            int var3 = MathHelper.floor_double(this.field_111100_b);
-            short var4 = 256;
+            BlockPos var2 = new BlockPos(this.field_111101_a, 256.0D, this.field_111100_b);
+            Material var3;
 
-            if (var4 <= 0)
+            do
             {
-                return false;
+                if (var2.getY() <= 0)
+                {
+                    return false;
+                }
+
+                var2 = var2.offsetDown();
+                var3 = worldIn.getBlockState(var2).getBlock().getMaterial();
             }
-            else
-            {
-                Material var5 = p_111098_1_.getBlock(var2, var4, var3).getMaterial();
-                return !var5.isLiquid() && var5 != Material.fire;
-            }
+            while (var3 == Material.air);
+
+            return !var3.isLiquid() && var3 != Material.fire;
         }
 
         public void func_111097_a(Random p_111097_1_, double p_111097_2_, double p_111097_4_, double p_111097_6_, double p_111097_8_)

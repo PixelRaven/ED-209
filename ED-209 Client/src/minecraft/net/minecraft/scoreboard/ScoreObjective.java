@@ -7,6 +7,7 @@ public class ScoreObjective
 
     /** The ScoreObjectiveCriteria for this objetive */
     private final IScoreObjectiveCriteria objectiveCriteria;
+    private IScoreObjectiveCriteria.EnumRenderType field_178768_d;
     private String displayName;
     private static final String __OBFID = "CL_00000614";
 
@@ -16,6 +17,7 @@ public class ScoreObjective
         this.name = p_i2307_2_;
         this.objectiveCriteria = p_i2307_3_;
         this.displayName = p_i2307_2_;
+        this.field_178768_d = p_i2307_3_.func_178790_c();
     }
 
     public Scoreboard getScoreboard()
@@ -41,6 +43,17 @@ public class ScoreObjective
     public void setDisplayName(String p_96681_1_)
     {
         this.displayName = p_96681_1_;
+        this.theScoreboard.func_96532_b(this);
+    }
+
+    public IScoreObjectiveCriteria.EnumRenderType func_178766_e()
+    {
+        return this.field_178768_d;
+    }
+
+    public void func_178767_a(IScoreObjectiveCriteria.EnumRenderType p_178767_1_)
+    {
+        this.field_178768_d = p_178767_1_;
         this.theScoreboard.func_96532_b(this);
     }
 }

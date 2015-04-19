@@ -3,60 +3,67 @@ package net.minecraft.block;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockPressurePlate extends BlockBasePressurePlate
 {
-    private BlockPressurePlate.Sensitivity field_150069_a;
+    public static final PropertyBool POWERED = PropertyBool.create("powered");
+    private final BlockPressurePlate.Sensitivity sensitivity;
     private static final String __OBFID = "CL_00000289";
 
-    protected BlockPressurePlate(String p_i45418_1_, Material p_i45418_2_, BlockPressurePlate.Sensitivity p_i45418_3_)
+    protected BlockPressurePlate(Material p_i45693_1_, BlockPressurePlate.Sensitivity p_i45693_2_)
     {
-        super(p_i45418_1_, p_i45418_2_);
-        this.field_150069_a = p_i45418_3_;
+        super(p_i45693_1_);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(POWERED, Boolean.valueOf(false)));
+        this.sensitivity = p_i45693_2_;
     }
 
-    protected int func_150066_d(int p_150066_1_)
+    protected int getRedstoneStrength(IBlockState p_176576_1_)
     {
-        return p_150066_1_ > 0 ? 1 : 0;
+        return ((Boolean)p_176576_1_.getValue(POWERED)).booleanValue() ? 15 : 0;
     }
 
-    protected int func_150060_c(int p_150060_1_)
+    protected IBlockState setRedstoneStrength(IBlockState p_176575_1_, int p_176575_2_)
     {
-        return p_150060_1_ == 1 ? 15 : 0;
+        return p_176575_1_.withProperty(POWERED, Boolean.valueOf(p_176575_2_ > 0));
     }
 
-    protected int func_150065_e(World p_150065_1_, int p_150065_2_, int p_150065_3_, int p_150065_4_)
+    protected int computeRedstoneStrength(World worldIn, BlockPos pos)
     {
-        List var5 = null;
+        AxisAlignedBB var3 = this.getSensitiveAABB(pos);
+        List var4;
 
-        if (this.field_150069_a == BlockPressurePlate.Sensitivity.everything)
+        switch (BlockPressurePlate.SwitchSensitivity.SENSITIVITY_ARRAY[this.sensitivity.ordinal()])
         {
-            var5 = p_150065_1_.getEntitiesWithinAABBExcludingEntity((Entity)null, this.func_150061_a(p_150065_2_, p_150065_3_, p_150065_4_));
+            case 1:
+                var4 = worldIn.getEntitiesWithinAABBExcludingEntity((Entity)null, var3);
+                break;
+
+            case 2:
+                var4 = worldIn.getEntitiesWithinAABB(EntityLivingBase.class, var3);
+                break;
+
+            default:
+                return 0;
         }
 
-        if (this.field_150069_a == BlockPressurePlate.Sensitivity.mobs)
+        if (!var4.isEmpty())
         {
-            var5 = p_150065_1_.getEntitiesWithinAABB(EntityLivingBase.class, this.func_150061_a(p_150065_2_, p_150065_3_, p_150065_4_));
-        }
+            Iterator var5 = var4.iterator();
 
-        if (this.field_150069_a == BlockPressurePlate.Sensitivity.players)
-        {
-            var5 = p_150065_1_.getEntitiesWithinAABB(EntityPlayer.class, this.func_150061_a(p_150065_2_, p_150065_3_, p_150065_4_));
-        }
-
-        if (var5 != null && !var5.isEmpty())
-        {
-            Iterator var6 = var5.iterator();
-
-            while (var6.hasNext())
+            while (var5.hasNext())
             {
-                Entity var7 = (Entity)var6.next();
+                Entity var6 = (Entity)var5.next();
 
-                if (!var7.doesEntityNotTriggerPressurePlate())
+                if (!var6.doesEntityNotTriggerPressurePlate())
                 {
                     return 15;
                 }
@@ -66,15 +73,62 @@ public class BlockPressurePlate extends BlockBasePressurePlate
         return 0;
     }
 
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(POWERED, Boolean.valueOf(meta == 1));
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((Boolean)state.getValue(POWERED)).booleanValue() ? 1 : 0;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {POWERED});
+    }
+
     public static enum Sensitivity
     {
-        everything("everything", 0),
-        mobs("mobs", 1),
-        players("players", 2);
+        EVERYTHING("EVERYTHING", 0),
+        MOBS("MOBS", 1);
 
-        private static final BlockPressurePlate.Sensitivity[] $VALUES = new BlockPressurePlate.Sensitivity[]{everything, mobs, players};
+        private static final BlockPressurePlate.Sensitivity[] $VALUES = new BlockPressurePlate.Sensitivity[]{EVERYTHING, MOBS};
         private static final String __OBFID = "CL_00000290";
 
         private Sensitivity(String p_i45417_1_, int p_i45417_2_) {}
+    }
+
+    static final class SwitchSensitivity
+    {
+        static final int[] SENSITIVITY_ARRAY = new int[BlockPressurePlate.Sensitivity.values().length];
+        private static final String __OBFID = "CL_00002078";
+
+        static
+        {
+            try
+            {
+                SENSITIVITY_ARRAY[BlockPressurePlate.Sensitivity.EVERYTHING.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                SENSITIVITY_ARRAY[BlockPressurePlate.Sensitivity.MOBS.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,43 +31,61 @@ public class CommandDebug extends CommandBase
         return 3;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.debug.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length == 1)
+        if (args.length < 1)
         {
-            if (p_71515_2_[0].equals("start"))
+            throw new WrongUsageException("commands.debug.usage", new Object[0]);
+        }
+        else
+        {
+            if (args[0].equals("start"))
             {
-                func_152373_a(p_71515_1_, this, "commands.debug.start", new Object[0]);
-                MinecraftServer.getServer().enableProfiling();
-                this.field_147206_b = MinecraftServer.getSystemTimeMillis();
-                this.field_147207_c = MinecraftServer.getServer().getTickCounter();
-                return;
-            }
+                if (args.length != 1)
+                {
+                    throw new WrongUsageException("commands.debug.usage", new Object[0]);
+                }
 
-            if (p_71515_2_[0].equals("stop"))
+                notifyOperators(sender, this, "commands.debug.start", new Object[0]);
+                MinecraftServer.getServer().enableProfiling();
+                this.field_147206_b = MinecraftServer.getCurrentTimeMillis();
+                this.field_147207_c = MinecraftServer.getServer().getTickCounter();
+            }
+            else if (args[0].equals("stop"))
             {
+                if (args.length != 1)
+                {
+                    throw new WrongUsageException("commands.debug.usage", new Object[0]);
+                }
+
                 if (!MinecraftServer.getServer().theProfiler.profilingEnabled)
                 {
                     throw new CommandException("commands.debug.notStarted", new Object[0]);
                 }
 
-                long var3 = MinecraftServer.getSystemTimeMillis();
+                long var3 = MinecraftServer.getCurrentTimeMillis();
                 int var5 = MinecraftServer.getServer().getTickCounter();
                 long var6 = var3 - this.field_147206_b;
                 int var8 = var5 - this.field_147207_c;
                 this.func_147205_a(var6, var8);
                 MinecraftServer.getServer().theProfiler.profilingEnabled = false;
-                func_152373_a(p_71515_1_, this, "commands.debug.stop", new Object[] {Float.valueOf((float)var6 / 1000.0F), Integer.valueOf(var8)});
-                return;
+                notifyOperators(sender, this, "commands.debug.stop", new Object[] {Float.valueOf((float)var6 / 1000.0F), Integer.valueOf(var8)});
+            }
+            else if (args[0].equals("chunk"))
+            {
+                if (args.length != 4)
+                {
+                    throw new WrongUsageException("commands.debug.usage", new Object[0]);
+                }
+
+                func_175757_a(sender, args, 1, true);
             }
         }
-
-        throw new WrongUsageException("commands.debug.usage", new Object[0]);
     }
 
     private void func_147205_a(long p_147205_1_, int p_147205_3_)
@@ -118,12 +137,7 @@ public class CommandDebug extends CommandBase
                     p_147202_3_.append(" ");
                 }
 
-                p_147202_3_.append(var6.field_76331_c);
-                p_147202_3_.append(" - ");
-                p_147202_3_.append(String.format("%.2f", new Object[] {Double.valueOf(var6.field_76332_a)}));
-                p_147202_3_.append("%/");
-                p_147202_3_.append(String.format("%.2f", new Object[] {Double.valueOf(var6.field_76330_b)}));
-                p_147202_3_.append("%\n");
+                p_147202_3_.append(var6.field_76331_c).append(" - ").append(String.format("%.2f", new Object[] {Double.valueOf(var6.field_76332_a)})).append("%/").append(String.format("%.2f", new Object[] {Double.valueOf(var6.field_76330_b)})).append("%\n");
 
                 if (!var6.field_76331_c.equals("unspecified"))
                 {
@@ -133,7 +147,7 @@ public class CommandDebug extends CommandBase
                     }
                     catch (Exception var8)
                     {
-                        p_147202_3_.append("[[ EXCEPTION " + var8 + " ]]");
+                        p_147202_3_.append("[[ EXCEPTION ").append(var8).append(" ]]");
                     }
                 }
             }
@@ -154,11 +168,8 @@ public class CommandDebug extends CommandBase
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, new String[] {"start", "stop"}): null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"start", "stop"}): null;
     }
 }

@@ -2,7 +2,6 @@ package net.minecraft.network;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -14,6 +13,7 @@ import net.minecraft.network.login.client.C01PacketEncryptionResponse;
 import net.minecraft.network.login.server.S00PacketDisconnect;
 import net.minecraft.network.login.server.S01PacketEncryptionRequest;
 import net.minecraft.network.login.server.S02PacketLoginSuccess;
+import net.minecraft.network.login.server.S03PacketEnableCompression;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
 import net.minecraft.network.play.client.C01PacketChatMessage;
 import net.minecraft.network.play.client.C02PacketUseEntity;
@@ -35,6 +35,8 @@ import net.minecraft.network.play.client.C14PacketTabComplete;
 import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.network.play.client.C18PacketSpectate;
+import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S00PacketKeepAlive;
 import net.minecraft.network.play.server.S01PacketJoinGame;
 import net.minecraft.network.play.server.S02PacketChat;
@@ -97,6 +99,15 @@ import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.network.play.server.S40PacketDisconnect;
+import net.minecraft.network.play.server.S41PacketServerDifficulty;
+import net.minecraft.network.play.server.S42PacketCombatEvent;
+import net.minecraft.network.play.server.S43PacketCamera;
+import net.minecraft.network.play.server.S44PacketWorldBorder;
+import net.minecraft.network.play.server.S45PacketTitle;
+import net.minecraft.network.play.server.S46PacketSetCompressionLevel;
+import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
+import net.minecraft.network.play.server.S48PacketResourcePackSend;
+import net.minecraft.network.play.server.S49PacketUpdateEntityNBT;
 import net.minecraft.network.status.client.C00PacketServerQuery;
 import net.minecraft.network.status.client.C01PacketPing;
 import net.minecraft.network.status.server.S00PacketServerInfo;
@@ -107,225 +118,202 @@ public enum EnumConnectionState
 {
     HANDSHAKING("HANDSHAKING", 0, -1, null)
     {
-        private static final String __OBFID = "CL_00001247";
+        private static final String __OBFID = "CL_00001246";
         {
-            this.func_150751_a(0, C00Handshake.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C00Handshake.class);
         }
     },
     PLAY("PLAY", 1, 0, null)
     {
         private static final String __OBFID = "CL_00001250";
         {
-            this.func_150756_b(0, S00PacketKeepAlive.class);
-            this.func_150756_b(1, S01PacketJoinGame.class);
-            this.func_150756_b(2, S02PacketChat.class);
-            this.func_150756_b(3, S03PacketTimeUpdate.class);
-            this.func_150756_b(4, S04PacketEntityEquipment.class);
-            this.func_150756_b(5, S05PacketSpawnPosition.class);
-            this.func_150756_b(6, S06PacketUpdateHealth.class);
-            this.func_150756_b(7, S07PacketRespawn.class);
-            this.func_150756_b(8, S08PacketPlayerPosLook.class);
-            this.func_150756_b(9, S09PacketHeldItemChange.class);
-            this.func_150756_b(10, S0APacketUseBed.class);
-            this.func_150756_b(11, S0BPacketAnimation.class);
-            this.func_150756_b(12, S0CPacketSpawnPlayer.class);
-            this.func_150756_b(13, S0DPacketCollectItem.class);
-            this.func_150756_b(14, S0EPacketSpawnObject.class);
-            this.func_150756_b(15, S0FPacketSpawnMob.class);
-            this.func_150756_b(16, S10PacketSpawnPainting.class);
-            this.func_150756_b(17, S11PacketSpawnExperienceOrb.class);
-            this.func_150756_b(18, S12PacketEntityVelocity.class);
-            this.func_150756_b(19, S13PacketDestroyEntities.class);
-            this.func_150756_b(20, S14PacketEntity.class);
-            this.func_150756_b(21, S14PacketEntity.S15PacketEntityRelMove.class);
-            this.func_150756_b(22, S14PacketEntity.S16PacketEntityLook.class);
-            this.func_150756_b(23, S14PacketEntity.S17PacketEntityLookMove.class);
-            this.func_150756_b(24, S18PacketEntityTeleport.class);
-            this.func_150756_b(25, S19PacketEntityHeadLook.class);
-            this.func_150756_b(26, S19PacketEntityStatus.class);
-            this.func_150756_b(27, S1BPacketEntityAttach.class);
-            this.func_150756_b(28, S1CPacketEntityMetadata.class);
-            this.func_150756_b(29, S1DPacketEntityEffect.class);
-            this.func_150756_b(30, S1EPacketRemoveEntityEffect.class);
-            this.func_150756_b(31, S1FPacketSetExperience.class);
-            this.func_150756_b(32, S20PacketEntityProperties.class);
-            this.func_150756_b(33, S21PacketChunkData.class);
-            this.func_150756_b(34, S22PacketMultiBlockChange.class);
-            this.func_150756_b(35, S23PacketBlockChange.class);
-            this.func_150756_b(36, S24PacketBlockAction.class);
-            this.func_150756_b(37, S25PacketBlockBreakAnim.class);
-            this.func_150756_b(38, S26PacketMapChunkBulk.class);
-            this.func_150756_b(39, S27PacketExplosion.class);
-            this.func_150756_b(40, S28PacketEffect.class);
-            this.func_150756_b(41, S29PacketSoundEffect.class);
-            this.func_150756_b(42, S2APacketParticles.class);
-            this.func_150756_b(43, S2BPacketChangeGameState.class);
-            this.func_150756_b(44, S2CPacketSpawnGlobalEntity.class);
-            this.func_150756_b(45, S2DPacketOpenWindow.class);
-            this.func_150756_b(46, S2EPacketCloseWindow.class);
-            this.func_150756_b(47, S2FPacketSetSlot.class);
-            this.func_150756_b(48, S30PacketWindowItems.class);
-            this.func_150756_b(49, S31PacketWindowProperty.class);
-            this.func_150756_b(50, S32PacketConfirmTransaction.class);
-            this.func_150756_b(51, S33PacketUpdateSign.class);
-            this.func_150756_b(52, S34PacketMaps.class);
-            this.func_150756_b(53, S35PacketUpdateTileEntity.class);
-            this.func_150756_b(54, S36PacketSignEditorOpen.class);
-            this.func_150756_b(55, S37PacketStatistics.class);
-            this.func_150756_b(56, S38PacketPlayerListItem.class);
-            this.func_150756_b(57, S39PacketPlayerAbilities.class);
-            this.func_150756_b(58, S3APacketTabComplete.class);
-            this.func_150756_b(59, S3BPacketScoreboardObjective.class);
-            this.func_150756_b(60, S3CPacketUpdateScore.class);
-            this.func_150756_b(61, S3DPacketDisplayScoreboard.class);
-            this.func_150756_b(62, S3EPacketTeams.class);
-            this.func_150756_b(63, S3FPacketCustomPayload.class);
-            this.func_150756_b(64, S40PacketDisconnect.class);
-            this.func_150751_a(0, C00PacketKeepAlive.class);
-            this.func_150751_a(1, C01PacketChatMessage.class);
-            this.func_150751_a(2, C02PacketUseEntity.class);
-            this.func_150751_a(3, C03PacketPlayer.class);
-            this.func_150751_a(4, C03PacketPlayer.C04PacketPlayerPosition.class);
-            this.func_150751_a(5, C03PacketPlayer.C05PacketPlayerLook.class);
-            this.func_150751_a(6, C03PacketPlayer.C06PacketPlayerPosLook.class);
-            this.func_150751_a(7, C07PacketPlayerDigging.class);
-            this.func_150751_a(8, C08PacketPlayerBlockPlacement.class);
-            this.func_150751_a(9, C09PacketHeldItemChange.class);
-            this.func_150751_a(10, C0APacketAnimation.class);
-            this.func_150751_a(11, C0BPacketEntityAction.class);
-            this.func_150751_a(12, C0CPacketInput.class);
-            this.func_150751_a(13, C0DPacketCloseWindow.class);
-            this.func_150751_a(14, C0EPacketClickWindow.class);
-            this.func_150751_a(15, C0FPacketConfirmTransaction.class);
-            this.func_150751_a(16, C10PacketCreativeInventoryAction.class);
-            this.func_150751_a(17, C11PacketEnchantItem.class);
-            this.func_150751_a(18, C12PacketUpdateSign.class);
-            this.func_150751_a(19, C13PacketPlayerAbilities.class);
-            this.func_150751_a(20, C14PacketTabComplete.class);
-            this.func_150751_a(21, C15PacketClientSettings.class);
-            this.func_150751_a(22, C16PacketClientStatus.class);
-            this.func_150751_a(23, C17PacketCustomPayload.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S00PacketKeepAlive.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S01PacketJoinGame.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S02PacketChat.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S03PacketTimeUpdate.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S04PacketEntityEquipment.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S05PacketSpawnPosition.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S06PacketUpdateHealth.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S07PacketRespawn.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S08PacketPlayerPosLook.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S09PacketHeldItemChange.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S0APacketUseBed.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S0BPacketAnimation.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S0CPacketSpawnPlayer.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S0DPacketCollectItem.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S0EPacketSpawnObject.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S0FPacketSpawnMob.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S10PacketSpawnPainting.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S11PacketSpawnExperienceOrb.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S12PacketEntityVelocity.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S13PacketDestroyEntities.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S14PacketEntity.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S14PacketEntity.S15PacketEntityRelMove.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S14PacketEntity.S16PacketEntityLook.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S14PacketEntity.S17PacketEntityLookMove.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S18PacketEntityTeleport.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S19PacketEntityHeadLook.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S19PacketEntityStatus.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S1BPacketEntityAttach.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S1CPacketEntityMetadata.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S1DPacketEntityEffect.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S1EPacketRemoveEntityEffect.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S1FPacketSetExperience.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S20PacketEntityProperties.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S21PacketChunkData.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S22PacketMultiBlockChange.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S23PacketBlockChange.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S24PacketBlockAction.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S25PacketBlockBreakAnim.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S26PacketMapChunkBulk.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S27PacketExplosion.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S28PacketEffect.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S29PacketSoundEffect.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S2APacketParticles.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S2BPacketChangeGameState.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S2CPacketSpawnGlobalEntity.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S2DPacketOpenWindow.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S2EPacketCloseWindow.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S2FPacketSetSlot.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S30PacketWindowItems.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S31PacketWindowProperty.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S32PacketConfirmTransaction.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S33PacketUpdateSign.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S34PacketMaps.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S35PacketUpdateTileEntity.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S36PacketSignEditorOpen.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S37PacketStatistics.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S38PacketPlayerListItem.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S39PacketPlayerAbilities.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S3APacketTabComplete.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S3BPacketScoreboardObjective.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S3CPacketUpdateScore.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S3DPacketDisplayScoreboard.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S3EPacketTeams.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S3FPacketCustomPayload.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S40PacketDisconnect.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S41PacketServerDifficulty.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S42PacketCombatEvent.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S43PacketCamera.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S44PacketWorldBorder.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S45PacketTitle.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S46PacketSetCompressionLevel.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S47PacketPlayerListHeaderFooter.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S48PacketResourcePackSend.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S49PacketUpdateEntityNBT.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C00PacketKeepAlive.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C01PacketChatMessage.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C02PacketUseEntity.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C03PacketPlayer.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C03PacketPlayer.C04PacketPlayerPosition.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C03PacketPlayer.C05PacketPlayerLook.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C03PacketPlayer.C06PacketPlayerPosLook.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C07PacketPlayerDigging.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C08PacketPlayerBlockPlacement.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C09PacketHeldItemChange.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C0APacketAnimation.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C0BPacketEntityAction.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C0CPacketInput.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C0DPacketCloseWindow.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C0EPacketClickWindow.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C0FPacketConfirmTransaction.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C10PacketCreativeInventoryAction.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C11PacketEnchantItem.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C12PacketUpdateSign.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C13PacketPlayerAbilities.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C14PacketTabComplete.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C15PacketClientSettings.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C16PacketClientStatus.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C17PacketCustomPayload.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C18PacketSpectate.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C19PacketResourcePackStatus.class);
         }
     },
     STATUS("STATUS", 2, 1, null)
     {
-        private static final String __OBFID = "CL_00001246";
+        private static final String __OBFID = "CL_00001247";
         {
-            this.func_150751_a(0, C00PacketServerQuery.class);
-            this.func_150756_b(0, S00PacketServerInfo.class);
-            this.func_150751_a(1, C01PacketPing.class);
-            this.func_150756_b(1, S01PacketPong.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C00PacketServerQuery.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S00PacketServerInfo.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C01PacketPing.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S01PacketPong.class);
         }
     },
     LOGIN("LOGIN", 3, 2, null)
     {
         private static final String __OBFID = "CL_00001249";
         {
-            this.func_150756_b(0, S00PacketDisconnect.class);
-            this.func_150756_b(1, S01PacketEncryptionRequest.class);
-            this.func_150756_b(2, S02PacketLoginSuccess.class);
-            this.func_150751_a(0, C00PacketLoginStart.class);
-            this.func_150751_a(1, C01PacketEncryptionResponse.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S00PacketDisconnect.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S01PacketEncryptionRequest.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S02PacketLoginSuccess.class);
+            this.registerPacket(EnumPacketDirection.CLIENTBOUND, S03PacketEnableCompression.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C00PacketLoginStart.class);
+            this.registerPacket(EnumPacketDirection.SERVERBOUND, C01PacketEncryptionResponse.class);
         }
     };
-    private static final TIntObjectMap field_150764_e = new TIntObjectHashMap();
-    private static final Map field_150761_f = Maps.newHashMap();
-    private final int field_150762_g;
-    private final BiMap field_150769_h;
-    private final BiMap field_150770_i;
+    private static final TIntObjectMap STATES_BY_ID = new TIntObjectHashMap();
+    private static final Map STATES_BY_CLASS = Maps.newHashMap();
+    private final int id;
+    private final Map directionMaps;
     private static final String __OBFID = "CL_00001245";
 
-    private EnumConnectionState(int p_i45152_3_)
+    private EnumConnectionState(int protocolId)
     {
-        this.field_150769_h = HashBiMap.create();
-        this.field_150770_i = HashBiMap.create();
-        this.field_150762_g = p_i45152_3_;
+        this.directionMaps = Maps.newEnumMap(EnumPacketDirection.class);
+        this.id = protocolId;
     }
 
-    protected EnumConnectionState func_150751_a(int p_150751_1_, Class p_150751_2_)
+    protected EnumConnectionState registerPacket(EnumPacketDirection direction, Class packetClass)
     {
-        String var3;
+        Object var3 = (BiMap)this.directionMaps.get(direction);
 
-        if (this.field_150769_h.containsKey(Integer.valueOf(p_150751_1_)))
+        if (var3 == null)
         {
-            var3 = "Serverbound packet ID " + p_150751_1_ + " is already assigned to " + this.field_150769_h.get(Integer.valueOf(p_150751_1_)) + "; cannot re-assign to " + p_150751_2_;
-            LogManager.getLogger().fatal(var3);
-            throw new IllegalArgumentException(var3);
+            var3 = HashBiMap.create();
+            this.directionMaps.put(direction, var3);
         }
-        else if (this.field_150769_h.containsValue(p_150751_2_))
+
+        if (((BiMap)var3).containsValue(packetClass))
         {
-            var3 = "Serverbound packet " + p_150751_2_ + " is already assigned to ID " + this.field_150769_h.inverse().get(p_150751_2_) + "; cannot re-assign to " + p_150751_1_;
-            LogManager.getLogger().fatal(var3);
-            throw new IllegalArgumentException(var3);
+            String var4 = direction + " packet " + packetClass + " is already known to ID " + ((BiMap)var3).inverse().get(packetClass);
+            LogManager.getLogger().fatal(var4);
+            throw new IllegalArgumentException(var4);
         }
         else
         {
-            this.field_150769_h.put(Integer.valueOf(p_150751_1_), p_150751_2_);
+            ((BiMap)var3).put(Integer.valueOf(((BiMap)var3).size()), packetClass);
             return this;
         }
     }
 
-    protected EnumConnectionState func_150756_b(int p_150756_1_, Class p_150756_2_)
+    public Integer getPacketId(EnumPacketDirection direction, Packet packetIn)
     {
-        String var3;
-
-        if (this.field_150770_i.containsKey(Integer.valueOf(p_150756_1_)))
-        {
-            var3 = "Clientbound packet ID " + p_150756_1_ + " is already assigned to " + this.field_150770_i.get(Integer.valueOf(p_150756_1_)) + "; cannot re-assign to " + p_150756_2_;
-            LogManager.getLogger().fatal(var3);
-            throw new IllegalArgumentException(var3);
-        }
-        else if (this.field_150770_i.containsValue(p_150756_2_))
-        {
-            var3 = "Clientbound packet " + p_150756_2_ + " is already assigned to ID " + this.field_150770_i.inverse().get(p_150756_2_) + "; cannot re-assign to " + p_150756_1_;
-            LogManager.getLogger().fatal(var3);
-            throw new IllegalArgumentException(var3);
-        }
-        else
-        {
-            this.field_150770_i.put(Integer.valueOf(p_150756_1_), p_150756_2_);
-            return this;
-        }
+        return (Integer)((BiMap)this.directionMaps.get(direction)).inverse().get(packetIn.getClass());
     }
 
-    public BiMap func_150753_a()
-    {
-        return this.field_150769_h;
+    public Packet getPacket(EnumPacketDirection direction, int packetId) throws InstantiationException, IllegalAccessException {
+        Class var3 = (Class)((BiMap)this.directionMaps.get(direction)).get(Integer.valueOf(packetId));
+        return var3 == null ? null : (Packet)var3.newInstance();
     }
 
-    public BiMap func_150755_b()
+    public int getId()
     {
-        return this.field_150770_i;
+        return this.id;
     }
 
-    public BiMap func_150757_a(boolean p_150757_1_)
+    public static EnumConnectionState getById(int stateId)
     {
-        return p_150757_1_ ? this.func_150755_b() : this.func_150753_a();
+        return (EnumConnectionState)STATES_BY_ID.get(stateId);
     }
 
-    public BiMap func_150754_b(boolean p_150754_1_)
+    public static EnumConnectionState getFromPacket(Packet packetIn)
     {
-        return p_150754_1_ ? this.func_150753_a() : this.func_150755_b();
+        return (EnumConnectionState)STATES_BY_CLASS.get(packetIn.getClass());
     }
 
-    public int func_150759_c()
+    EnumConnectionState(String ignore1, int ignore2, int p_i46000_3_, Object p_i46000_4_)
     {
-        return this.field_150762_g;
-    }
-
-    public static EnumConnectionState func_150760_a(int p_150760_0_)
-    {
-        return (EnumConnectionState)field_150764_e.get(p_150760_0_);
-    }
-
-    public static EnumConnectionState func_150752_a(Packet p_150752_0_)
-    {
-        return (EnumConnectionState)field_150761_f.get(p_150752_0_.getClass());
-    }
-
-    EnumConnectionState(String ignore1, int ignore2, int p_i1197_3_, Object p_i1197_4_)
-    {
-        this(p_i1197_3_);
+        this(p_i46000_3_);
     }
 
     static {
@@ -335,19 +323,32 @@ public enum EnumConnectionState
         for (int var2 = 0; var2 < var1; ++var2)
         {
             EnumConnectionState var3 = var0[var2];
-            field_150764_e.put(var3.func_150759_c(), var3);
-            Iterator var4 = Iterables.concat(var3.func_150755_b().values(), var3.func_150753_a().values()).iterator();
+            STATES_BY_ID.put(var3.getId(), var3);
+            Iterator var4 = var3.directionMaps.keySet().iterator();
 
             while (var4.hasNext())
             {
-                Class var5 = (Class)var4.next();
+                EnumPacketDirection var5 = (EnumPacketDirection)var4.next();
+                Class var7;
 
-                if (field_150761_f.containsKey(var5) && field_150761_f.get(var5) != var3)
+                for (Iterator var6 = ((BiMap)var3.directionMaps.get(var5)).values().iterator(); var6.hasNext(); STATES_BY_CLASS.put(var7, var3))
                 {
-                    throw new Error("Packet " + var5 + " is already assigned to protocol " + field_150761_f.get(var5) + " - can\'t reassign to " + var3);
-                }
+                    var7 = (Class)var6.next();
 
-                field_150761_f.put(var5, var3);
+                    if (STATES_BY_CLASS.containsKey(var7) && STATES_BY_CLASS.get(var7) != var3)
+                    {
+                        throw new Error("Packet " + var7 + " is already assigned to protocol " + STATES_BY_CLASS.get(var7) + " - can\'t reassign to " + var3);
+                    }
+
+                    try
+                    {
+                        var7.newInstance();
+                    }
+                    catch (Throwable var9)
+                    {
+                        throw new Error("Packet " + var7 + " fails instantiation checks! " + var7);
+                    }
+                }
             }
         }
     }

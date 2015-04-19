@@ -1,17 +1,21 @@
 package net.minecraft.client.gui;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
@@ -19,8 +23,9 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.boss.BossStatus;
-import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
@@ -28,30 +33,28 @@ import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.Direction;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.FoodStats;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.chunk.Chunk;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
+import net.minecraft.world.border.WorldBorder;
 
 public class GuiIngame extends Gui
 {
     private static final ResourceLocation vignetteTexPath = new ResourceLocation("textures/misc/vignette.png");
     private static final ResourceLocation widgetsTexPath = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation pumpkinBlurTexPath = new ResourceLocation("textures/misc/pumpkinblur.png");
-    private static final RenderItem itemRenderer = new RenderItem();
     private final Random rand = new Random();
     private final Minecraft mc;
+    private final RenderItem itemRenderer;
 
     /** ChatGUI instance that retains all previous chat data */
     private final GuiNewChat persistantChatGUI;
-    private final GuiStreamIndicator field_152127_m;
+    private final GuiStreamIndicator streamIndicator;
     private int updateCounter;
 
     /** The string specifying which record music is playing */
@@ -69,762 +72,829 @@ public class GuiIngame extends Gui
 
     /** The ItemStack that is currently being highlighted */
     private ItemStack highlightingItemStack;
+    private final GuiOverlayDebug overlayDebug;
+    private final GuiSpectator field_175197_u;
+    private final GuiPlayerTabOverlay overlayPlayerList;
+    private int field_175195_w;
+    private String field_175201_x = "";
+    private String field_175200_y = "";
+    private int field_175199_z;
+    private int field_175192_A;
+    private int field_175193_B;
+    private int field_175194_C = 0;
+    private int field_175189_D = 0;
+    private long field_175190_E = 0L;
+    private long field_175191_F = 0L;
     private static final String __OBFID = "CL_00000661";
 
-    public GuiIngame(Minecraft p_i46379_1_)
+    public GuiIngame(Minecraft mcIn)
     {
-        this.mc = p_i46379_1_;
-        this.persistantChatGUI = new GuiNewChat(p_i46379_1_);
-        this.field_152127_m = new GuiStreamIndicator(this.mc);
+        this.mc = mcIn;
+        this.itemRenderer = mcIn.getRenderItem();
+        this.overlayDebug = new GuiOverlayDebug(mcIn);
+        this.field_175197_u = new GuiSpectator(mcIn);
+        this.persistantChatGUI = new GuiNewChat(mcIn);
+        this.streamIndicator = new GuiStreamIndicator(mcIn);
+        this.overlayPlayerList = new GuiPlayerTabOverlay(mcIn, this);
+        this.func_175177_a();
     }
 
-    /**
-     * Render the ingame overlay with quick icon bar, ...
-     */
-    public void renderGameOverlay(float p_73830_1_, boolean p_73830_2_, int p_73830_3_, int p_73830_4_)
+    public void func_175177_a()
     {
-        ScaledResolution var5 = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
-        int var6 = var5.getScaledWidth();
-        int var7 = var5.getScaledHeight();
-        FontRenderer var8 = this.mc.fontRenderer;
+        this.field_175199_z = 10;
+        this.field_175192_A = 70;
+        this.field_175193_B = 20;
+    }
+
+    public void func_175180_a(float p_175180_1_)
+    {
+        ScaledResolution var2 = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
+        int var3 = var2.getScaledWidth();
+        int var4 = var2.getScaledHeight();
         this.mc.entityRenderer.setupOverlayRendering();
-        GL11.glEnable(GL11.GL_BLEND);
+        GlStateManager.enableBlend();
 
         if (Minecraft.isFancyGraphicsEnabled())
         {
-            this.renderVignette(this.mc.thePlayer.getBrightness(p_73830_1_), var6, var7);
+            this.func_180480_a(this.mc.thePlayer.getBrightness(p_175180_1_), var2);
         }
         else
         {
-            OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
         }
 
-        ItemStack var9 = this.mc.thePlayer.inventory.armorItemInSlot(3);
+        ItemStack var5 = this.mc.thePlayer.inventory.armorItemInSlot(3);
 
-        if (this.mc.gameSettings.thirdPersonView == 0 && var9 != null && var9.getItem() == Item.getItemFromBlock(Blocks.pumpkin))
+        if (this.mc.gameSettings.thirdPersonView == 0 && var5 != null && var5.getItem() == Item.getItemFromBlock(Blocks.pumpkin))
         {
-            this.renderPumpkinBlur(var6, var7);
+            this.func_180476_e(var2);
         }
 
         if (!this.mc.thePlayer.isPotionActive(Potion.confusion))
         {
-            float var10 = this.mc.thePlayer.prevTimeInPortal + (this.mc.thePlayer.timeInPortal - this.mc.thePlayer.prevTimeInPortal) * p_73830_1_;
+            float var6 = this.mc.thePlayer.prevTimeInPortal + (this.mc.thePlayer.timeInPortal - this.mc.thePlayer.prevTimeInPortal) * p_175180_1_;
 
-            if (var10 > 0.0F)
+            if (var6 > 0.0F)
             {
-                this.func_130015_b(var10, var6, var7);
+                this.func_180474_b(var6, var2);
             }
         }
 
-        int var11;
-        int var12;
-        int var13;
-
-        if (!this.mc.playerController.enableEverythingIsScrewedUpMode())
+        if (this.mc.playerController.enableEverythingIsScrewedUpMode())
         {
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            this.mc.getTextureManager().bindTexture(widgetsTexPath);
-            InventoryPlayer var31 = this.mc.thePlayer.inventory;
-            this.zLevel = -90.0F;
-            this.drawTexturedModalRect(var6 / 2 - 91, var7 - 22, 0, 0, 182, 22);
-            this.drawTexturedModalRect(var6 / 2 - 91 - 1 + var31.currentItem * 20, var7 - 22 - 1, 0, 22, 24, 22);
-            this.mc.getTextureManager().bindTexture(icons);
-            GL11.glEnable(GL11.GL_BLEND);
-            OpenGlHelper.glBlendFunc(775, 769, 1, 0);
-            this.drawTexturedModalRect(var6 / 2 - 7, var7 / 2 - 7, 0, 0, 16, 16);
-            OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-            this.mc.mcProfiler.startSection("bossHealth");
-            this.renderBossHealth();
-            this.mc.mcProfiler.endSection();
-
-            if (this.mc.playerController.shouldDrawHUD())
-            {
-                this.func_110327_a(var6, var7);
-            }
-
-            this.mc.mcProfiler.startSection("actionBar");
-            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-            RenderHelper.enableGUIStandardItemLighting();
-
-            for (var11 = 0; var11 < 9; ++var11)
-            {
-                var12 = var6 / 2 - 90 + var11 * 20 + 2;
-                var13 = var7 - 16 - 3;
-                this.renderInventorySlot(var11, var12, var13, p_73830_1_);
-            }
-
-            RenderHelper.disableStandardItemLighting();
-            GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-            this.mc.mcProfiler.endSection();
-            GL11.glDisable(GL11.GL_BLEND);
+            this.field_175197_u.func_175264_a(var2, p_175180_1_);
+        }
+        else
+        {
+            this.func_180479_a(var2, p_175180_1_);
         }
 
-        int var32;
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(icons);
+        GlStateManager.enableBlend();
+
+        if (this.func_175183_b())
+        {
+            GlStateManager.tryBlendFuncSeparate(775, 769, 1, 0);
+            GlStateManager.enableAlpha();
+            this.drawTexturedModalRect(var3 / 2 - 7, var4 / 2 - 7, 0, 0, 16, 16);
+        }
+
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        this.mc.mcProfiler.startSection("bossHealth");
+        this.renderBossHealth();
+        this.mc.mcProfiler.endSection();
+
+        if (this.mc.playerController.shouldDrawHUD())
+        {
+            this.func_180477_d(var2);
+        }
+
+        GlStateManager.disableBlend();
+        float var7;
+        int var8;
+        int var11;
 
         if (this.mc.thePlayer.getSleepTimer() > 0)
         {
             this.mc.mcProfiler.startSection("sleep");
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            var32 = this.mc.thePlayer.getSleepTimer();
-            float var33 = (float)var32 / 100.0F;
+            GlStateManager.disableDepth();
+            GlStateManager.disableAlpha();
+            var11 = this.mc.thePlayer.getSleepTimer();
+            var7 = (float)var11 / 100.0F;
 
-            if (var33 > 1.0F)
+            if (var7 > 1.0F)
             {
-                var33 = 1.0F - (float)(var32 - 100) / 10.0F;
+                var7 = 1.0F - (float)(var11 - 100) / 10.0F;
             }
 
-            var12 = (int)(220.0F * var33) << 24 | 1052704;
-            drawRect(0, 0, var6, var7, var12);
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            var8 = (int)(220.0F * var7) << 24 | 1052704;
+            drawRect(0, 0, var3, var4, var8);
+            GlStateManager.enableAlpha();
+            GlStateManager.enableDepth();
             this.mc.mcProfiler.endSection();
         }
 
-        var32 = 16777215;
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        var11 = var6 / 2 - 91;
-        int var14;
-        int var15;
-        int var16;
-        int var17;
-        float var34;
-        short var38;
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        var11 = var3 / 2 - 91;
 
         if (this.mc.thePlayer.isRidingHorse())
         {
-            this.mc.mcProfiler.startSection("jumpBar");
-            this.mc.getTextureManager().bindTexture(Gui.icons);
-            var34 = this.mc.thePlayer.getHorseJumpPower();
-            var38 = 182;
-            var14 = (int)(var34 * (float)(var38 + 1));
-            var15 = var7 - 32 + 3;
-            this.drawTexturedModalRect(var11, var15, 0, 84, var38, 5);
-
-            if (var14 > 0)
-            {
-                this.drawTexturedModalRect(var11, var15, 0, 89, var14, 5);
-            }
-
-            this.mc.mcProfiler.endSection();
+            this.func_175186_a(var2, var11);
         }
         else if (this.mc.playerController.gameIsSurvivalOrAdventure())
         {
-            this.mc.mcProfiler.startSection("expBar");
-            this.mc.getTextureManager().bindTexture(Gui.icons);
-            var12 = this.mc.thePlayer.xpBarCap();
-
-            if (var12 > 0)
-            {
-                var38 = 182;
-                var14 = (int)(this.mc.thePlayer.experience * (float)(var38 + 1));
-                var15 = var7 - 32 + 3;
-                this.drawTexturedModalRect(var11, var15, 0, 64, var38, 5);
-
-                if (var14 > 0)
-                {
-                    this.drawTexturedModalRect(var11, var15, 0, 69, var14, 5);
-                }
-            }
-
-            this.mc.mcProfiler.endSection();
-
-            if (this.mc.thePlayer.experienceLevel > 0)
-            {
-                this.mc.mcProfiler.startSection("expLevel");
-                boolean var39 = false;
-                var14 = var39 ? 16777215 : 8453920;
-                String var43 = "" + this.mc.thePlayer.experienceLevel;
-                var16 = (var6 - var8.getStringWidth(var43)) / 2;
-                var17 = var7 - 31 - 4;
-                boolean var18 = false;
-                var8.drawString(var43, var16 + 1, var17, 0);
-                var8.drawString(var43, var16 - 1, var17, 0);
-                var8.drawString(var43, var16, var17 + 1, 0);
-                var8.drawString(var43, var16, var17 - 1, 0);
-                var8.drawString(var43, var16, var17, var14);
-                this.mc.mcProfiler.endSection();
-            }
+            this.func_175176_b(var2, var11);
         }
 
-        String var35;
-
-        if (this.mc.gameSettings.heldItemTooltips)
+        if (this.mc.gameSettings.heldItemTooltips && !this.mc.playerController.enableEverythingIsScrewedUpMode())
         {
-            this.mc.mcProfiler.startSection("toolHighlight");
-
-            if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null)
-            {
-                var35 = this.highlightingItemStack.getDisplayName();
-                var13 = (var6 - var8.getStringWidth(var35)) / 2;
-                var14 = var7 - 59;
-
-                if (!this.mc.playerController.shouldDrawHUD())
-                {
-                    var14 += 14;
-                }
-
-                var15 = (int)((float)this.remainingHighlightTicks * 256.0F / 10.0F);
-
-                if (var15 > 255)
-                {
-                    var15 = 255;
-                }
-
-                if (var15 > 0)
-                {
-                    GL11.glPushMatrix();
-                    GL11.glEnable(GL11.GL_BLEND);
-                    OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-                    var8.drawStringWithShadow(var35, var13, var14, 16777215 + (var15 << 24));
-                    GL11.glDisable(GL11.GL_BLEND);
-                    GL11.glPopMatrix();
-                }
-            }
-
-            this.mc.mcProfiler.endSection();
+            this.func_175182_a(var2);
+        }
+        else if (this.mc.thePlayer.func_175149_v())
+        {
+            this.field_175197_u.func_175263_a(var2);
         }
 
         if (this.mc.isDemo())
         {
-            this.mc.mcProfiler.startSection("demo");
-            var35 = "";
-
-            if (this.mc.theWorld.getTotalWorldTime() >= 120500L)
-            {
-                var35 = I18n.format("demo.demoExpired", new Object[0]);
-            }
-            else
-            {
-                var35 = I18n.format("demo.remainingTime", new Object[] {StringUtils.ticksToElapsedTime((int)(120500L - this.mc.theWorld.getTotalWorldTime()))});
-            }
-
-            var13 = var8.getStringWidth(var35);
-            var8.drawStringWithShadow(var35, var6 - var13 - 10, 5, 16777215);
-            this.mc.mcProfiler.endSection();
+            this.func_175185_b(var2);
         }
-
-        int var21;
-        int var22;
-        int var23;
 
         if (this.mc.gameSettings.showDebugInfo)
         {
-            this.mc.mcProfiler.startSection("debug");
-            GL11.glPushMatrix();
-            var8.drawStringWithShadow("Minecraft 1.7.10 (" + this.mc.debug + ")", 2, 2, 16777215);
-            var8.drawStringWithShadow(this.mc.debugInfoRenders(), 2, 12, 16777215);
-            var8.drawStringWithShadow(this.mc.getEntityDebug(), 2, 22, 16777215);
-            var8.drawStringWithShadow(this.mc.debugInfoEntities(), 2, 32, 16777215);
-            var8.drawStringWithShadow(this.mc.getWorldProviderName(), 2, 42, 16777215);
-            long var36 = Runtime.getRuntime().maxMemory();
-            long var41 = Runtime.getRuntime().totalMemory();
-            long var44 = Runtime.getRuntime().freeMemory();
-            long var45 = var41 - var44;
-            String var20 = "Used memory: " + var45 * 100L / var36 + "% (" + var45 / 1024L / 1024L + "MB) of " + var36 / 1024L / 1024L + "MB";
-            var21 = 14737632;
-            this.drawString(var8, var20, var6 - var8.getStringWidth(var20) - 2, 2, 14737632);
-            var20 = "Allocated memory: " + var41 * 100L / var36 + "% (" + var41 / 1024L / 1024L + "MB)";
-            this.drawString(var8, var20, var6 - var8.getStringWidth(var20) - 2, 12, 14737632);
-            var22 = MathHelper.floor_double(this.mc.thePlayer.posX);
-            var23 = MathHelper.floor_double(this.mc.thePlayer.posY);
-            int var24 = MathHelper.floor_double(this.mc.thePlayer.posZ);
-            this.drawString(var8, String.format("x: %.5f (%d) // c: %d (%d)", new Object[] {Double.valueOf(this.mc.thePlayer.posX), Integer.valueOf(var22), Integer.valueOf(var22 >> 4), Integer.valueOf(var22 & 15)}), 2, 64, 14737632);
-            this.drawString(var8, String.format("y: %.3f (feet pos, %.3f eyes pos)", new Object[] {Double.valueOf(this.mc.thePlayer.boundingBox.minY), Double.valueOf(this.mc.thePlayer.posY)}), 2, 72, 14737632);
-            this.drawString(var8, String.format("z: %.5f (%d) // c: %d (%d)", new Object[] {Double.valueOf(this.mc.thePlayer.posZ), Integer.valueOf(var24), Integer.valueOf(var24 >> 4), Integer.valueOf(var24 & 15)}), 2, 80, 14737632);
-            int var25 = MathHelper.floor_double((double)(this.mc.thePlayer.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-            this.drawString(var8, "f: " + var25 + " (" + Direction.directions[var25] + ") / " + MathHelper.wrapAngleTo180_float(this.mc.thePlayer.rotationYaw), 2, 88, 14737632);
-
-            if (this.mc.theWorld != null && this.mc.theWorld.blockExists(var22, var23, var24))
-            {
-                Chunk var26 = this.mc.theWorld.getChunkFromBlockCoords(var22, var24);
-                this.drawString(var8, "lc: " + (var26.getTopFilledSegment() + 15) + " b: " + var26.getBiomeGenForWorldCoords(var22 & 15, var24 & 15, this.mc.theWorld.getWorldChunkManager()).biomeName + " bl: " + var26.getSavedLightValue(EnumSkyBlock.Block, var22 & 15, var23, var24 & 15) + " sl: " + var26.getSavedLightValue(EnumSkyBlock.Sky, var22 & 15, var23, var24 & 15) + " rl: " + var26.getBlockLightValue(var22 & 15, var23, var24 & 15, 0), 2, 96, 14737632);
-            }
-
-            this.drawString(var8, String.format("ws: %.3f, fs: %.3f, g: %b, fl: %d", new Object[] {Float.valueOf(this.mc.thePlayer.capabilities.getWalkSpeed()), Float.valueOf(this.mc.thePlayer.capabilities.getFlySpeed()), Boolean.valueOf(this.mc.thePlayer.onGround), Integer.valueOf(this.mc.theWorld.getHeightValue(var22, var24))}), 2, 104, 14737632);
-
-            if (this.mc.entityRenderer != null && this.mc.entityRenderer.isShaderActive())
-            {
-                this.drawString(var8, String.format("shader: %s", new Object[] {this.mc.entityRenderer.getShaderGroup().getShaderGroupName()}), 2, 112, 14737632);
-            }
-
-            GL11.glPopMatrix();
-            this.mc.mcProfiler.endSection();
+            this.overlayDebug.func_175237_a(var2);
         }
+
+        int var9;
 
         if (this.recordPlayingUpFor > 0)
         {
             this.mc.mcProfiler.startSection("overlayMessage");
-            var34 = (float)this.recordPlayingUpFor - p_73830_1_;
-            var13 = (int)(var34 * 255.0F / 20.0F);
+            var7 = (float)this.recordPlayingUpFor - p_175180_1_;
+            var8 = (int)(var7 * 255.0F / 20.0F);
 
-            if (var13 > 255)
+            if (var8 > 255)
             {
-                var13 = 255;
+                var8 = 255;
             }
 
-            if (var13 > 8)
+            if (var8 > 8)
             {
-                GL11.glPushMatrix();
-                GL11.glTranslatef((float)(var6 / 2), (float)(var7 - 68), 0.0F);
-                GL11.glEnable(GL11.GL_BLEND);
-                OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-                var14 = 16777215;
+                GlStateManager.pushMatrix();
+                GlStateManager.translate((float)(var3 / 2), (float)(var4 - 68), 0.0F);
+                GlStateManager.enableBlend();
+                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                var9 = 16777215;
 
                 if (this.recordIsPlaying)
                 {
-                    var14 = Color.HSBtoRGB(var34 / 50.0F, 0.7F, 0.6F) & 16777215;
+                    var9 = Color.HSBtoRGB(var7 / 50.0F, 0.7F, 0.6F) & 16777215;
                 }
 
-                var8.drawString(this.recordPlaying, -var8.getStringWidth(this.recordPlaying) / 2, -4, var14 + (var13 << 24 & -16777216));
-                GL11.glDisable(GL11.GL_BLEND);
-                GL11.glPopMatrix();
+                this.func_175179_f().drawString(this.recordPlaying, -this.func_175179_f().getStringWidth(this.recordPlaying) / 2, -4, var9 + (var8 << 24 & -16777216));
+                GlStateManager.disableBlend();
+                GlStateManager.popMatrix();
             }
 
             this.mc.mcProfiler.endSection();
         }
 
-        ScoreObjective var37 = this.mc.theWorld.getScoreboard().func_96539_a(1);
-
-        if (var37 != null)
+        if (this.field_175195_w > 0)
         {
-            this.func_96136_a(var37, var7, var6, var8);
+            this.mc.mcProfiler.startSection("titleAndSubtitle");
+            var7 = (float)this.field_175195_w - p_175180_1_;
+            var8 = 255;
+
+            if (this.field_175195_w > this.field_175193_B + this.field_175192_A)
+            {
+                float var14 = (float)(this.field_175199_z + this.field_175192_A + this.field_175193_B) - var7;
+                var8 = (int)(var14 * 255.0F / (float)this.field_175199_z);
+            }
+
+            if (this.field_175195_w <= this.field_175193_B)
+            {
+                var8 = (int)(var7 * 255.0F / (float)this.field_175193_B);
+            }
+
+            var8 = MathHelper.clamp_int(var8, 0, 255);
+
+            if (var8 > 8)
+            {
+                GlStateManager.pushMatrix();
+                GlStateManager.translate((float)(var3 / 2), (float)(var4 / 2), 0.0F);
+                GlStateManager.enableBlend();
+                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(4.0F, 4.0F, 4.0F);
+                var9 = var8 << 24 & -16777216;
+                this.func_175179_f().func_175065_a(this.field_175201_x, (float)(-this.func_175179_f().getStringWidth(this.field_175201_x) / 2), -10.0F, 16777215 | var9, true);
+                GlStateManager.popMatrix();
+                GlStateManager.pushMatrix();
+                GlStateManager.scale(2.0F, 2.0F, 2.0F);
+                this.func_175179_f().func_175065_a(this.field_175200_y, (float)(-this.func_175179_f().getStringWidth(this.field_175200_y) / 2), 5.0F, 16777215 | var9, true);
+                GlStateManager.popMatrix();
+                GlStateManager.disableBlend();
+                GlStateManager.popMatrix();
+            }
+
+            this.mc.mcProfiler.endSection();
         }
 
-        GL11.glEnable(GL11.GL_BLEND);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-        GL11.glDisable(GL11.GL_ALPHA_TEST);
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0.0F, (float)(var7 - 48), 0.0F);
+        Scoreboard var12 = this.mc.theWorld.getScoreboard();
+        ScoreObjective var13 = null;
+        ScorePlayerTeam var15 = var12.getPlayersTeam(this.mc.thePlayer.getName());
+
+        if (var15 != null)
+        {
+            int var10 = var15.func_178775_l().func_175746_b();
+
+            if (var10 >= 0)
+            {
+                var13 = var12.getObjectiveInDisplaySlot(3 + var10);
+            }
+        }
+
+        ScoreObjective var16 = var13 != null ? var13 : var12.getObjectiveInDisplaySlot(1);
+
+        if (var16 != null)
+        {
+            this.func_180475_a(var16, var2);
+        }
+
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.disableAlpha();
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0.0F, (float)(var4 - 48), 0.0F);
         this.mc.mcProfiler.startSection("chat");
-        this.persistantChatGUI.func_146230_a(this.updateCounter);
+        this.persistantChatGUI.drawChat(this.updateCounter);
         this.mc.mcProfiler.endSection();
-        GL11.glPopMatrix();
-        var37 = this.mc.theWorld.getScoreboard().func_96539_a(0);
+        GlStateManager.popMatrix();
+        var16 = var12.getObjectiveInDisplaySlot(0);
 
-        if (this.mc.gameSettings.keyBindPlayerList.getIsKeyPressed() && (!this.mc.isIntegratedServerRunning() || this.mc.thePlayer.sendQueue.playerInfoList.size() > 1 || var37 != null))
+        if (this.mc.gameSettings.keyBindPlayerList.getIsKeyPressed() && (!this.mc.isIntegratedServerRunning() || this.mc.thePlayer.sendQueue.func_175106_d().size() > 1 || var16 != null))
         {
-            this.mc.mcProfiler.startSection("playerList");
-            NetHandlerPlayClient var40 = this.mc.thePlayer.sendQueue;
-            List var42 = var40.playerInfoList;
-            var15 = var40.currentServerMaxPlayers;
-            var16 = var15;
-
-            for (var17 = 1; var16 > 20; var16 = (var15 + var17 - 1) / var17)
-            {
-                ++var17;
-            }
-
-            int var46 = 300 / var17;
-
-            if (var46 > 150)
-            {
-                var46 = 150;
-            }
-
-            int var19 = (var6 - var17 * var46) / 2;
-            byte var47 = 10;
-            drawRect(var19 - 1, var47 - 1, var19 + var46 * var17, var47 + 9 * var16, Integer.MIN_VALUE);
-
-            for (var21 = 0; var21 < var15; ++var21)
-            {
-                var22 = var19 + var21 % var17 * var46;
-                var23 = var47 + var21 / var17 * 9;
-                drawRect(var22, var23, var22 + var46 - 1, var23 + 8, 553648127);
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                GL11.glEnable(GL11.GL_ALPHA_TEST);
-
-                if (var21 < var42.size())
-                {
-                    GuiPlayerInfo var48 = (GuiPlayerInfo)var42.get(var21);
-                    ScorePlayerTeam var49 = this.mc.theWorld.getScoreboard().getPlayersTeam(var48.name);
-                    String var50 = ScorePlayerTeam.formatPlayerName(var49, var48.name);
-                    var8.drawStringWithShadow(var50, var22, var23, 16777215);
-
-                    if (var37 != null)
-                    {
-                        int var27 = var22 + var8.getStringWidth(var50) + 5;
-                        int var28 = var22 + var46 - 12 - 5;
-
-                        if (var28 - var27 > 5)
-                        {
-                            Score var29 = var37.getScoreboard().func_96529_a(var48.name, var37);
-                            String var30 = EnumChatFormatting.YELLOW + "" + var29.getScorePoints();
-                            var8.drawStringWithShadow(var30, var28 - var8.getStringWidth(var30), var23, 16777215);
-                        }
-                    }
-
-                    GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                    this.mc.getTextureManager().bindTexture(icons);
-                    byte var51 = 0;
-                    boolean var52 = false;
-                    byte var53;
-
-                    if (var48.responseTime < 0)
-                    {
-                        var53 = 5;
-                    }
-                    else if (var48.responseTime < 150)
-                    {
-                        var53 = 0;
-                    }
-                    else if (var48.responseTime < 300)
-                    {
-                        var53 = 1;
-                    }
-                    else if (var48.responseTime < 600)
-                    {
-                        var53 = 2;
-                    }
-                    else if (var48.responseTime < 1000)
-                    {
-                        var53 = 3;
-                    }
-                    else
-                    {
-                        var53 = 4;
-                    }
-
-                    this.zLevel += 100.0F;
-                    this.drawTexturedModalRect(var22 + var46 - 12, var23, 0 + var51 * 10, 176 + var53 * 8, 10, 8);
-                    this.zLevel -= 100.0F;
-                }
-            }
+            this.overlayPlayerList.func_175246_a(true);
+            this.overlayPlayerList.func_175249_a(var3, var12, var16);
+        }
+        else
+        {
+            this.overlayPlayerList.func_175246_a(false);
         }
 
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableLighting();
+        GlStateManager.enableAlpha();
     }
 
-    public void func_152126_a(float p_152126_1_, float p_152126_2_)
+    protected void func_180479_a(ScaledResolution p_180479_1_, float p_180479_2_)
     {
-        this.field_152127_m.func_152437_a((int)(p_152126_1_ - 10.0F), 10);
-    }
-
-    private void func_96136_a(ScoreObjective p_96136_1_, int p_96136_2_, int p_96136_3_, FontRenderer p_96136_4_)
-    {
-        Scoreboard var5 = p_96136_1_.getScoreboard();
-        Collection var6 = var5.func_96534_i(p_96136_1_);
-
-        if (var6.size() <= 15)
+        if (this.mc.func_175606_aa() instanceof EntityPlayer)
         {
-            int var7 = p_96136_4_.getStringWidth(p_96136_1_.getDisplayName());
-            String var11;
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            this.mc.getTextureManager().bindTexture(widgetsTexPath);
+            EntityPlayer var3 = (EntityPlayer)this.mc.func_175606_aa();
+            int var4 = p_180479_1_.getScaledWidth() / 2;
+            float var5 = this.zLevel;
+            this.zLevel = -90.0F;
+            this.drawTexturedModalRect(var4 - 91, p_180479_1_.getScaledHeight() - 22, 0, 0, 182, 22);
+            this.drawTexturedModalRect(var4 - 91 - 1 + var3.inventory.currentItem * 20, p_180479_1_.getScaledHeight() - 22 - 1, 0, 22, 24, 22);
+            this.zLevel = var5;
+            GlStateManager.enableRescaleNormal();
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+            RenderHelper.enableGUIStandardItemLighting();
 
-            for (Iterator var8 = var6.iterator(); var8.hasNext(); var7 = Math.max(var7, p_96136_4_.getStringWidth(var11)))
+            for (int var6 = 0; var6 < 9; ++var6)
             {
-                Score var9 = (Score)var8.next();
-                ScorePlayerTeam var10 = var5.getPlayersTeam(var9.getPlayerName());
-                var11 = ScorePlayerTeam.formatPlayerName(var10, var9.getPlayerName()) + ": " + EnumChatFormatting.RED + var9.getScorePoints();
+                int var7 = p_180479_1_.getScaledWidth() / 2 - 90 + var6 * 20 + 2;
+                int var8 = p_180479_1_.getScaledHeight() - 16 - 3;
+                this.func_175184_a(var6, var7, var8, p_180479_2_, var3);
             }
 
-            int var22 = var6.size() * p_96136_4_.FONT_HEIGHT;
-            int var23 = p_96136_2_ / 2 + var22 / 3;
-            byte var24 = 3;
-            int var25 = p_96136_3_ - var7 - var24;
-            int var12 = 0;
-            Iterator var13 = var6.iterator();
-
-            while (var13.hasNext())
-            {
-                Score var14 = (Score)var13.next();
-                ++var12;
-                ScorePlayerTeam var15 = var5.getPlayersTeam(var14.getPlayerName());
-                String var16 = ScorePlayerTeam.formatPlayerName(var15, var14.getPlayerName());
-                String var17 = EnumChatFormatting.RED + "" + var14.getScorePoints();
-                int var19 = var23 - var12 * p_96136_4_.FONT_HEIGHT;
-                int var20 = p_96136_3_ - var24 + 2;
-                drawRect(var25 - 2, var19, var20, var19 + p_96136_4_.FONT_HEIGHT, 1342177280);
-                p_96136_4_.drawString(var16, var25, var19, 553648127);
-                p_96136_4_.drawString(var17, var20 - p_96136_4_.getStringWidth(var17), var19, 553648127);
-
-                if (var12 == var6.size())
-                {
-                    String var21 = p_96136_1_.getDisplayName();
-                    drawRect(var25 - 2, var19 - p_96136_4_.FONT_HEIGHT - 1, var20, var19 - 1, 1610612736);
-                    drawRect(var25 - 2, var19 - 1, var20, var19, 1342177280);
-                    p_96136_4_.drawString(var21, var25 + var7 / 2 - p_96136_4_.getStringWidth(var21) / 2, var19 - p_96136_4_.FONT_HEIGHT, 553648127);
-                }
-            }
+            RenderHelper.disableStandardItemLighting();
+            GlStateManager.disableRescaleNormal();
+            GlStateManager.disableBlend();
         }
     }
 
-    private void func_110327_a(int p_110327_1_, int p_110327_2_)
+    public void func_175186_a(ScaledResolution p_175186_1_, int p_175186_2_)
     {
-        boolean var3 = this.mc.thePlayer.hurtResistantTime / 3 % 2 == 1;
+        this.mc.mcProfiler.startSection("jumpBar");
+        this.mc.getTextureManager().bindTexture(Gui.icons);
+        float var3 = this.mc.thePlayer.getHorseJumpPower();
+        short var4 = 182;
+        int var5 = (int)(var3 * (float)(var4 + 1));
+        int var6 = p_175186_1_.getScaledHeight() - 32 + 3;
+        this.drawTexturedModalRect(p_175186_2_, var6, 0, 84, var4, 5);
 
-        if (this.mc.thePlayer.hurtResistantTime < 10)
+        if (var5 > 0)
         {
-            var3 = false;
+            this.drawTexturedModalRect(p_175186_2_, var6, 0, 89, var5, 5);
         }
 
-        int var4 = MathHelper.ceiling_float_int(this.mc.thePlayer.getHealth());
-        int var5 = MathHelper.ceiling_float_int(this.mc.thePlayer.prevHealth);
-        this.rand.setSeed((long)(this.updateCounter * 312871));
-        boolean var6 = false;
-        FoodStats var7 = this.mc.thePlayer.getFoodStats();
-        int var8 = var7.getFoodLevel();
-        int var9 = var7.getPrevFoodLevel();
-        IAttributeInstance var10 = this.mc.thePlayer.getEntityAttribute(SharedMonsterAttributes.maxHealth);
-        int var11 = p_110327_1_ / 2 - 91;
-        int var12 = p_110327_1_ / 2 + 91;
-        int var13 = p_110327_2_ - 39;
-        float var14 = (float)var10.getAttributeValue();
-        float var15 = this.mc.thePlayer.getAbsorptionAmount();
-        int var16 = MathHelper.ceiling_float_int((var14 + var15) / 2.0F / 10.0F);
-        int var17 = Math.max(10 - (var16 - 2), 3);
-        int var18 = var13 - (var16 - 1) * var17 - 10;
-        float var19 = var15;
-        int var20 = this.mc.thePlayer.getTotalArmorValue();
-        int var21 = -1;
+        this.mc.mcProfiler.endSection();
+    }
 
-        if (this.mc.thePlayer.isPotionActive(Potion.regeneration))
+    public void func_175176_b(ScaledResolution p_175176_1_, int p_175176_2_)
+    {
+        this.mc.mcProfiler.startSection("expBar");
+        this.mc.getTextureManager().bindTexture(Gui.icons);
+        int var3 = this.mc.thePlayer.xpBarCap();
+        int var6;
+
+        if (var3 > 0)
         {
-            var21 = this.updateCounter % MathHelper.ceiling_float_int(var14 + 5.0F);
-        }
+            short var4 = 182;
+            int var5 = (int)(this.mc.thePlayer.experience * (float)(var4 + 1));
+            var6 = p_175176_1_.getScaledHeight() - 32 + 3;
+            this.drawTexturedModalRect(p_175176_2_, var6, 0, 64, var4, 5);
 
-        this.mc.mcProfiler.startSection("armor");
-        int var22;
-        int var23;
-
-        for (var22 = 0; var22 < 10; ++var22)
-        {
-            if (var20 > 0)
+            if (var5 > 0)
             {
-                var23 = var11 + var22 * 8;
-
-                if (var22 * 2 + 1 < var20)
-                {
-                    this.drawTexturedModalRect(var23, var18, 34, 9, 9, 9);
-                }
-
-                if (var22 * 2 + 1 == var20)
-                {
-                    this.drawTexturedModalRect(var23, var18, 25, 9, 9, 9);
-                }
-
-                if (var22 * 2 + 1 > var20)
-                {
-                    this.drawTexturedModalRect(var23, var18, 16, 9, 9, 9);
-                }
+                this.drawTexturedModalRect(p_175176_2_, var6, 0, 69, var5, 5);
             }
         }
 
-        this.mc.mcProfiler.endStartSection("health");
-        int var25;
-        int var26;
-        int var27;
+        this.mc.mcProfiler.endSection();
 
-        for (var22 = MathHelper.ceiling_float_int((var14 + var15) / 2.0F) - 1; var22 >= 0; --var22)
+        if (this.mc.thePlayer.experienceLevel > 0)
         {
-            var23 = 16;
+            this.mc.mcProfiler.startSection("expLevel");
+            int var9 = 8453920;
+            String var10 = "" + this.mc.thePlayer.experienceLevel;
+            var6 = (p_175176_1_.getScaledWidth() - this.func_175179_f().getStringWidth(var10)) / 2;
+            int var7 = p_175176_1_.getScaledHeight() - 31 - 4;
+            boolean var8 = false;
+            this.func_175179_f().drawString(var10, var6 + 1, var7, 0);
+            this.func_175179_f().drawString(var10, var6 - 1, var7, 0);
+            this.func_175179_f().drawString(var10, var6, var7 + 1, 0);
+            this.func_175179_f().drawString(var10, var6, var7 - 1, 0);
+            this.func_175179_f().drawString(var10, var6, var7, var9);
+            this.mc.mcProfiler.endSection();
+        }
+    }
 
-            if (this.mc.thePlayer.isPotionActive(Potion.poison))
+    public void func_175182_a(ScaledResolution p_175182_1_)
+    {
+        this.mc.mcProfiler.startSection("toolHighlight");
+
+        if (this.remainingHighlightTicks > 0 && this.highlightingItemStack != null)
+        {
+            String var2 = this.highlightingItemStack.getDisplayName();
+
+            if (this.highlightingItemStack.hasDisplayName())
             {
-                var23 += 36;
-            }
-            else if (this.mc.thePlayer.isPotionActive(Potion.wither))
-            {
-                var23 += 72;
-            }
-
-            byte var24 = 0;
-
-            if (var3)
-            {
-                var24 = 1;
-            }
-
-            var25 = MathHelper.ceiling_float_int((float)(var22 + 1) / 10.0F) - 1;
-            var26 = var11 + var22 % 10 * 8;
-            var27 = var13 - var25 * var17;
-
-            if (var4 <= 4)
-            {
-                var27 += this.rand.nextInt(2);
-            }
-
-            if (var22 == var21)
-            {
-                var27 -= 2;
+                var2 = EnumChatFormatting.ITALIC + var2;
             }
 
-            byte var28 = 0;
+            int var3 = (p_175182_1_.getScaledWidth() - this.func_175179_f().getStringWidth(var2)) / 2;
+            int var4 = p_175182_1_.getScaledHeight() - 59;
 
-            if (this.mc.theWorld.getWorldInfo().isHardcoreModeEnabled())
+            if (!this.mc.playerController.shouldDrawHUD())
             {
-                var28 = 5;
+                var4 += 14;
             }
 
-            this.drawTexturedModalRect(var26, var27, 16 + var24 * 9, 9 * var28, 9, 9);
+            int var5 = (int)((float)this.remainingHighlightTicks * 256.0F / 10.0F);
 
-            if (var3)
+            if (var5 > 255)
             {
-                if (var22 * 2 + 1 < var5)
-                {
-                    this.drawTexturedModalRect(var26, var27, var23 + 54, 9 * var28, 9, 9);
-                }
-
-                if (var22 * 2 + 1 == var5)
-                {
-                    this.drawTexturedModalRect(var26, var27, var23 + 63, 9 * var28, 9, 9);
-                }
+                var5 = 255;
             }
 
-            if (var19 > 0.0F)
+            if (var5 > 0)
             {
-                if (var19 == var15 && var15 % 2.0F == 1.0F)
-                {
-                    this.drawTexturedModalRect(var26, var27, var23 + 153, 9 * var28, 9, 9);
-                }
-                else
-                {
-                    this.drawTexturedModalRect(var26, var27, var23 + 144, 9 * var28, 9, 9);
-                }
+                GlStateManager.pushMatrix();
+                GlStateManager.enableBlend();
+                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                this.func_175179_f().func_175063_a(var2, (float)var3, (float)var4, 16777215 + (var5 << 24));
+                GlStateManager.disableBlend();
+                GlStateManager.popMatrix();
+            }
+        }
 
-                var19 -= 2.0F;
+        this.mc.mcProfiler.endSection();
+    }
+
+    public void func_175185_b(ScaledResolution p_175185_1_)
+    {
+        this.mc.mcProfiler.startSection("demo");
+        String var2 = "";
+
+        if (this.mc.theWorld.getTotalWorldTime() >= 120500L)
+        {
+            var2 = I18n.format("demo.demoExpired", new Object[0]);
+        }
+        else
+        {
+            var2 = I18n.format("demo.remainingTime", new Object[] {StringUtils.ticksToElapsedTime((int)(120500L - this.mc.theWorld.getTotalWorldTime()))});
+        }
+
+        int var3 = this.func_175179_f().getStringWidth(var2);
+        this.func_175179_f().func_175063_a(var2, (float)(p_175185_1_.getScaledWidth() - var3 - 10), 5.0F, 16777215);
+        this.mc.mcProfiler.endSection();
+    }
+
+    protected boolean func_175183_b()
+    {
+        if (this.mc.gameSettings.showDebugInfo && !this.mc.thePlayer.func_175140_cp() && !this.mc.gameSettings.field_178879_v)
+        {
+            return false;
+        }
+        else if (this.mc.playerController.enableEverythingIsScrewedUpMode())
+        {
+            if (this.mc.pointedEntity != null)
+            {
+                return true;
             }
             else
             {
-                if (var22 * 2 + 1 < var4)
+                if (this.mc.objectMouseOver != null && this.mc.objectMouseOver.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
                 {
-                    this.drawTexturedModalRect(var26, var27, var23 + 36, 9 * var28, 9, 9);
+                    BlockPos var1 = this.mc.objectMouseOver.func_178782_a();
+
+                    if (this.mc.theWorld.getTileEntity(var1) instanceof IInventory)
+                    {
+                        return true;
+                    }
                 }
 
-                if (var22 * 2 + 1 == var4)
-                {
-                    this.drawTexturedModalRect(var26, var27, var23 + 45, 9 * var28, 9, 9);
-                }
+                return false;
             }
         }
-
-        Entity var34 = this.mc.thePlayer.ridingEntity;
-        int var36;
-
-        if (var34 == null)
+        else
         {
-            this.mc.mcProfiler.endStartSection("food");
-
-            for (var23 = 0; var23 < 10; ++var23)
-            {
-                var36 = var13;
-                var25 = 16;
-                byte var38 = 0;
-
-                if (this.mc.thePlayer.isPotionActive(Potion.hunger))
-                {
-                    var25 += 36;
-                    var38 = 13;
-                }
-
-                if (this.mc.thePlayer.getFoodStats().getSaturationLevel() <= 0.0F && this.updateCounter % (var8 * 3 + 1) == 0)
-                {
-                    var36 = var13 + (this.rand.nextInt(3) - 1);
-                }
-
-                if (var6)
-                {
-                    var38 = 1;
-                }
-
-                var27 = var12 - var23 * 8 - 9;
-                this.drawTexturedModalRect(var27, var36, 16 + var38 * 9, 27, 9, 9);
-
-                if (var6)
-                {
-                    if (var23 * 2 + 1 < var9)
-                    {
-                        this.drawTexturedModalRect(var27, var36, var25 + 54, 27, 9, 9);
-                    }
-
-                    if (var23 * 2 + 1 == var9)
-                    {
-                        this.drawTexturedModalRect(var27, var36, var25 + 63, 27, 9, 9);
-                    }
-                }
-
-                if (var23 * 2 + 1 < var8)
-                {
-                    this.drawTexturedModalRect(var27, var36, var25 + 36, 27, 9, 9);
-                }
-
-                if (var23 * 2 + 1 == var8)
-                {
-                    this.drawTexturedModalRect(var27, var36, var25 + 45, 27, 9, 9);
-                }
-            }
+            return true;
         }
-        else if (var34 instanceof EntityLivingBase)
+    }
+
+    public void func_180478_c(ScaledResolution p_180478_1_)
+    {
+        this.streamIndicator.render(p_180478_1_.getScaledWidth() - 10, 10);
+    }
+
+    private void func_180475_a(ScoreObjective p_180475_1_, ScaledResolution p_180475_2_)
+    {
+        Scoreboard var3 = p_180475_1_.getScoreboard();
+        Collection var4 = var3.getSortedScores(p_180475_1_);
+        ArrayList var5 = Lists.newArrayList(Iterables.filter(var4, new Predicate()
         {
-            this.mc.mcProfiler.endStartSection("mountHealth");
-            EntityLivingBase var35 = (EntityLivingBase)var34;
-            var36 = (int)Math.ceil((double)var35.getHealth());
-            float var37 = var35.getMaxHealth();
-            var26 = (int)(var37 + 0.5F) / 2;
-
-            if (var26 > 30)
+            private static final String __OBFID = "CL_00001958";
+            public boolean func_178903_a(Score p_178903_1_)
             {
-                var26 = 30;
+                return p_178903_1_.getPlayerName() != null && !p_178903_1_.getPlayerName().startsWith("#");
             }
-
-            var27 = var13;
-
-            for (int var39 = 0; var26 > 0; var39 += 20)
+            public boolean apply(Object p_apply_1_)
             {
-                int var29 = Math.min(var26, 10);
-                var26 -= var29;
-
-                for (int var30 = 0; var30 < var29; ++var30)
-                {
-                    byte var31 = 52;
-                    byte var32 = 0;
-
-                    if (var6)
-                    {
-                        var32 = 1;
-                    }
-
-                    int var33 = var12 - var30 * 8 - 9;
-                    this.drawTexturedModalRect(var33, var27, var31 + var32 * 9, 9, 9, 9);
-
-                    if (var30 * 2 + 1 + var39 < var36)
-                    {
-                        this.drawTexturedModalRect(var33, var27, var31 + 36, 9, 9, 9);
-                    }
-
-                    if (var30 * 2 + 1 + var39 == var36)
-                    {
-                        this.drawTexturedModalRect(var33, var27, var31 + 45, 9, 9, 9);
-                    }
-                }
-
-                var27 -= 10;
+                return this.func_178903_a((Score)p_apply_1_);
             }
+        }));
+        ArrayList var21;
+
+        if (var5.size() > 15)
+        {
+            var21 = Lists.newArrayList(Iterables.skip(var5, var4.size() - 15));
+        }
+        else
+        {
+            var21 = var5;
         }
 
-        this.mc.mcProfiler.endStartSection("air");
+        int var6 = this.func_175179_f().getStringWidth(p_180475_1_.getDisplayName());
+        String var10;
 
-        if (this.mc.thePlayer.isInsideOfMaterial(Material.water))
+        for (Iterator var7 = var21.iterator(); var7.hasNext(); var6 = Math.max(var6, this.func_175179_f().getStringWidth(var10)))
         {
-            var23 = this.mc.thePlayer.getAir();
-            var36 = MathHelper.ceiling_double_int((double)(var23 - 2) * 10.0D / 300.0D);
-            var25 = MathHelper.ceiling_double_int((double)var23 * 10.0D / 300.0D) - var36;
+            Score var8 = (Score)var7.next();
+            ScorePlayerTeam var9 = var3.getPlayersTeam(var8.getPlayerName());
+            var10 = ScorePlayerTeam.formatPlayerName(var9, var8.getPlayerName()) + ": " + EnumChatFormatting.RED + var8.getScorePoints();
+        }
 
-            for (var26 = 0; var26 < var36 + var25; ++var26)
+        int var22 = var21.size() * this.func_175179_f().FONT_HEIGHT;
+        int var23 = p_180475_2_.getScaledHeight() / 2 + var22 / 3;
+        byte var24 = 3;
+        int var25 = p_180475_2_.getScaledWidth() - var6 - var24;
+        int var11 = 0;
+        Iterator var12 = var21.iterator();
+
+        while (var12.hasNext())
+        {
+            Score var13 = (Score)var12.next();
+            ++var11;
+            ScorePlayerTeam var14 = var3.getPlayersTeam(var13.getPlayerName());
+            String var15 = ScorePlayerTeam.formatPlayerName(var14, var13.getPlayerName());
+            String var16 = EnumChatFormatting.RED + "" + var13.getScorePoints();
+            int var18 = var23 - var11 * this.func_175179_f().FONT_HEIGHT;
+            int var19 = p_180475_2_.getScaledWidth() - var24 + 2;
+            drawRect(var25 - 2, var18, var19, var18 + this.func_175179_f().FONT_HEIGHT, 1342177280);
+            this.func_175179_f().drawString(var15, var25, var18, 553648127);
+            this.func_175179_f().drawString(var16, var19 - this.func_175179_f().getStringWidth(var16), var18, 553648127);
+
+            if (var11 == var21.size())
             {
-                if (var26 < var36)
+                String var20 = p_180475_1_.getDisplayName();
+                drawRect(var25 - 2, var18 - this.func_175179_f().FONT_HEIGHT - 1, var19, var18 - 1, 1610612736);
+                drawRect(var25 - 2, var18 - 1, var19, var18, 1342177280);
+                this.func_175179_f().drawString(var20, var25 + var6 / 2 - this.func_175179_f().getStringWidth(var20) / 2, var18 - this.func_175179_f().FONT_HEIGHT, 553648127);
+            }
+        }
+    }
+
+    private void func_180477_d(ScaledResolution p_180477_1_)
+    {
+        if (this.mc.func_175606_aa() instanceof EntityPlayer)
+        {
+            EntityPlayer var2 = (EntityPlayer)this.mc.func_175606_aa();
+            int var3 = MathHelper.ceiling_float_int(var2.getHealth());
+            boolean var4 = this.field_175191_F > (long)this.updateCounter && (this.field_175191_F - (long)this.updateCounter) / 3L % 2L == 1L;
+
+            if (var3 < this.field_175194_C && var2.hurtResistantTime > 0)
+            {
+                this.field_175190_E = Minecraft.getSystemTime();
+                this.field_175191_F = (long)(this.updateCounter + 20);
+            }
+            else if (var3 > this.field_175194_C && var2.hurtResistantTime > 0)
+            {
+                this.field_175190_E = Minecraft.getSystemTime();
+                this.field_175191_F = (long)(this.updateCounter + 10);
+            }
+
+            if (Minecraft.getSystemTime() - this.field_175190_E > 1000L)
+            {
+                this.field_175194_C = var3;
+                this.field_175189_D = var3;
+                this.field_175190_E = Minecraft.getSystemTime();
+            }
+
+            this.field_175194_C = var3;
+            int var5 = this.field_175189_D;
+            this.rand.setSeed((long)(this.updateCounter * 312871));
+            boolean var6 = false;
+            FoodStats var7 = var2.getFoodStats();
+            int var8 = var7.getFoodLevel();
+            int var9 = var7.getPrevFoodLevel();
+            IAttributeInstance var10 = var2.getEntityAttribute(SharedMonsterAttributes.maxHealth);
+            int var11 = p_180477_1_.getScaledWidth() / 2 - 91;
+            int var12 = p_180477_1_.getScaledWidth() / 2 + 91;
+            int var13 = p_180477_1_.getScaledHeight() - 39;
+            float var14 = (float)var10.getAttributeValue();
+            float var15 = var2.getAbsorptionAmount();
+            int var16 = MathHelper.ceiling_float_int((var14 + var15) / 2.0F / 10.0F);
+            int var17 = Math.max(10 - (var16 - 2), 3);
+            int var18 = var13 - (var16 - 1) * var17 - 10;
+            float var19 = var15;
+            int var20 = var2.getTotalArmorValue();
+            int var21 = -1;
+
+            if (var2.isPotionActive(Potion.regeneration))
+            {
+                var21 = this.updateCounter % MathHelper.ceiling_float_int(var14 + 5.0F);
+            }
+
+            this.mc.mcProfiler.startSection("armor");
+            int var22;
+            int var23;
+
+            for (var22 = 0; var22 < 10; ++var22)
+            {
+                if (var20 > 0)
                 {
-                    this.drawTexturedModalRect(var12 - var26 * 8 - 9, var18, 16, 18, 9, 9);
+                    var23 = var11 + var22 * 8;
+
+                    if (var22 * 2 + 1 < var20)
+                    {
+                        this.drawTexturedModalRect(var23, var18, 34, 9, 9, 9);
+                    }
+
+                    if (var22 * 2 + 1 == var20)
+                    {
+                        this.drawTexturedModalRect(var23, var18, 25, 9, 9, 9);
+                    }
+
+                    if (var22 * 2 + 1 > var20)
+                    {
+                        this.drawTexturedModalRect(var23, var18, 16, 9, 9, 9);
+                    }
+                }
+            }
+
+            this.mc.mcProfiler.endStartSection("health");
+            int var25;
+            int var26;
+            int var27;
+
+            for (var22 = MathHelper.ceiling_float_int((var14 + var15) / 2.0F) - 1; var22 >= 0; --var22)
+            {
+                var23 = 16;
+
+                if (var2.isPotionActive(Potion.poison))
+                {
+                    var23 += 36;
+                }
+                else if (var2.isPotionActive(Potion.wither))
+                {
+                    var23 += 72;
+                }
+
+                byte var24 = 0;
+
+                if (var4)
+                {
+                    var24 = 1;
+                }
+
+                var25 = MathHelper.ceiling_float_int((float)(var22 + 1) / 10.0F) - 1;
+                var26 = var11 + var22 % 10 * 8;
+                var27 = var13 - var25 * var17;
+
+                if (var3 <= 4)
+                {
+                    var27 += this.rand.nextInt(2);
+                }
+
+                if (var22 == var21)
+                {
+                    var27 -= 2;
+                }
+
+                byte var28 = 0;
+
+                if (var2.worldObj.getWorldInfo().isHardcoreModeEnabled())
+                {
+                    var28 = 5;
+                }
+
+                this.drawTexturedModalRect(var26, var27, 16 + var24 * 9, 9 * var28, 9, 9);
+
+                if (var4)
+                {
+                    if (var22 * 2 + 1 < var5)
+                    {
+                        this.drawTexturedModalRect(var26, var27, var23 + 54, 9 * var28, 9, 9);
+                    }
+
+                    if (var22 * 2 + 1 == var5)
+                    {
+                        this.drawTexturedModalRect(var26, var27, var23 + 63, 9 * var28, 9, 9);
+                    }
+                }
+
+                if (var19 > 0.0F)
+                {
+                    if (var19 == var15 && var15 % 2.0F == 1.0F)
+                    {
+                        this.drawTexturedModalRect(var26, var27, var23 + 153, 9 * var28, 9, 9);
+                    }
+                    else
+                    {
+                        this.drawTexturedModalRect(var26, var27, var23 + 144, 9 * var28, 9, 9);
+                    }
+
+                    var19 -= 2.0F;
                 }
                 else
                 {
-                    this.drawTexturedModalRect(var12 - var26 * 8 - 9, var18, 25, 18, 9, 9);
+                    if (var22 * 2 + 1 < var3)
+                    {
+                        this.drawTexturedModalRect(var26, var27, var23 + 36, 9 * var28, 9, 9);
+                    }
+
+                    if (var22 * 2 + 1 == var3)
+                    {
+                        this.drawTexturedModalRect(var26, var27, var23 + 45, 9 * var28, 9, 9);
+                    }
                 }
             }
-        }
 
-        this.mc.mcProfiler.endSection();
+            Entity var34 = var2.ridingEntity;
+            int var36;
+
+            if (var34 == null)
+            {
+                this.mc.mcProfiler.endStartSection("food");
+
+                for (var23 = 0; var23 < 10; ++var23)
+                {
+                    var36 = var13;
+                    var25 = 16;
+                    byte var38 = 0;
+
+                    if (var2.isPotionActive(Potion.hunger))
+                    {
+                        var25 += 36;
+                        var38 = 13;
+                    }
+
+                    if (var2.getFoodStats().getSaturationLevel() <= 0.0F && this.updateCounter % (var8 * 3 + 1) == 0)
+                    {
+                        var36 = var13 + (this.rand.nextInt(3) - 1);
+                    }
+
+                    if (var6)
+                    {
+                        var38 = 1;
+                    }
+
+                    var27 = var12 - var23 * 8 - 9;
+                    this.drawTexturedModalRect(var27, var36, 16 + var38 * 9, 27, 9, 9);
+
+                    if (var6)
+                    {
+                        if (var23 * 2 + 1 < var9)
+                        {
+                            this.drawTexturedModalRect(var27, var36, var25 + 54, 27, 9, 9);
+                        }
+
+                        if (var23 * 2 + 1 == var9)
+                        {
+                            this.drawTexturedModalRect(var27, var36, var25 + 63, 27, 9, 9);
+                        }
+                    }
+
+                    if (var23 * 2 + 1 < var8)
+                    {
+                        this.drawTexturedModalRect(var27, var36, var25 + 36, 27, 9, 9);
+                    }
+
+                    if (var23 * 2 + 1 == var8)
+                    {
+                        this.drawTexturedModalRect(var27, var36, var25 + 45, 27, 9, 9);
+                    }
+                }
+            }
+            else if (var34 instanceof EntityLivingBase)
+            {
+                this.mc.mcProfiler.endStartSection("mountHealth");
+                EntityLivingBase var35 = (EntityLivingBase)var34;
+                var36 = (int)Math.ceil((double)var35.getHealth());
+                float var37 = var35.getMaxHealth();
+                var26 = (int)(var37 + 0.5F) / 2;
+
+                if (var26 > 30)
+                {
+                    var26 = 30;
+                }
+
+                var27 = var13;
+
+                for (int var39 = 0; var26 > 0; var39 += 20)
+                {
+                    int var29 = Math.min(var26, 10);
+                    var26 -= var29;
+
+                    for (int var30 = 0; var30 < var29; ++var30)
+                    {
+                        byte var31 = 52;
+                        byte var32 = 0;
+
+                        if (var6)
+                        {
+                            var32 = 1;
+                        }
+
+                        int var33 = var12 - var30 * 8 - 9;
+                        this.drawTexturedModalRect(var33, var27, var31 + var32 * 9, 9, 9, 9);
+
+                        if (var30 * 2 + 1 + var39 < var36)
+                        {
+                            this.drawTexturedModalRect(var33, var27, var31 + 36, 9, 9, 9);
+                        }
+
+                        if (var30 * 2 + 1 + var39 == var36)
+                        {
+                            this.drawTexturedModalRect(var33, var27, var31 + 45, 9, 9, 9);
+                        }
+                    }
+
+                    var27 -= 10;
+                }
+            }
+
+            this.mc.mcProfiler.endStartSection("air");
+
+            if (var2.isInsideOfMaterial(Material.water))
+            {
+                var23 = this.mc.thePlayer.getAir();
+                var36 = MathHelper.ceiling_double_int((double)(var23 - 2) * 10.0D / 300.0D);
+                var25 = MathHelper.ceiling_double_int((double)var23 * 10.0D / 300.0D) - var36;
+
+                for (var26 = 0; var26 < var36 + var25; ++var26)
+                {
+                    if (var26 < var36)
+                    {
+                        this.drawTexturedModalRect(var12 - var26 * 8 - 9, var18, 16, 18, 9, 9);
+                    }
+                    else
+                    {
+                        this.drawTexturedModalRect(var12 - var26 * 8 - 9, var18, 25, 18, 9, 9);
+                    }
+                }
+            }
+
+            this.mc.mcProfiler.endSection();
+        }
     }
 
     /**
@@ -835,7 +905,7 @@ public class GuiIngame extends Gui
         if (BossStatus.bossName != null && BossStatus.statusBarTime > 0)
         {
             --BossStatus.statusBarTime;
-            FontRenderer var1 = this.mc.fontRenderer;
+            FontRenderer var1 = this.mc.fontRendererObj;
             ScaledResolution var2 = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
             int var3 = var2.getScaledWidth();
             short var4 = 182;
@@ -851,130 +921,140 @@ public class GuiIngame extends Gui
             }
 
             String var8 = BossStatus.bossName;
-            var1.drawStringWithShadow(var8, var3 / 2 - var1.getStringWidth(var8) / 2, var7 - 10, 16777215);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+            this.func_175179_f().func_175063_a(var8, (float)(var3 / 2 - this.func_175179_f().getStringWidth(var8) / 2), (float)(var7 - 10), 16777215);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             this.mc.getTextureManager().bindTexture(icons);
         }
     }
 
-    private void renderPumpkinBlur(int p_73836_1_, int p_73836_2_)
+    private void func_180476_e(ScaledResolution p_180476_1_)
     {
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableAlpha();
         this.mc.getTextureManager().bindTexture(pumpkinBlurTexPath);
-        Tessellator var3 = Tessellator.instance;
+        Tessellator var2 = Tessellator.getInstance();
+        WorldRenderer var3 = var2.getWorldRenderer();
         var3.startDrawingQuads();
-        var3.addVertexWithUV(0.0D, (double)p_73836_2_, -90.0D, 0.0D, 1.0D);
-        var3.addVertexWithUV((double)p_73836_1_, (double)p_73836_2_, -90.0D, 1.0D, 1.0D);
-        var3.addVertexWithUV((double)p_73836_1_, 0.0D, -90.0D, 1.0D, 0.0D);
+        var3.addVertexWithUV(0.0D, (double)p_180476_1_.getScaledHeight(), -90.0D, 0.0D, 1.0D);
+        var3.addVertexWithUV((double)p_180476_1_.getScaledWidth(), (double)p_180476_1_.getScaledHeight(), -90.0D, 1.0D, 1.0D);
+        var3.addVertexWithUV((double)p_180476_1_.getScaledWidth(), 0.0D, -90.0D, 1.0D, 0.0D);
         var3.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);
-        var3.draw();
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        var2.draw();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableAlpha();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    /**
-     * Renders the vignette. Args: vignetteBrightness, width, height
-     */
-    private void renderVignette(float p_73829_1_, int p_73829_2_, int p_73829_3_)
+    private void func_180480_a(float p_180480_1_, ScaledResolution p_180480_2_)
     {
-        p_73829_1_ = 1.0F - p_73829_1_;
+        p_180480_1_ = 1.0F - p_180480_1_;
+        p_180480_1_ = MathHelper.clamp_float(p_180480_1_, 0.0F, 1.0F);
+        WorldBorder var3 = this.mc.theWorld.getWorldBorder();
+        float var4 = (float)var3.getClosestDistance(this.mc.thePlayer);
+        double var5 = Math.min(var3.func_177749_o() * (double)var3.getWarningTime() * 1000.0D, Math.abs(var3.getTargetSize() - var3.getDiameter()));
+        double var7 = Math.max((double)var3.getWarningDistance(), var5);
 
-        if (p_73829_1_ < 0.0F)
+        if ((double)var4 < var7)
         {
-            p_73829_1_ = 0.0F;
+            var4 = 1.0F - (float)((double)var4 / var7);
+        }
+        else
+        {
+            var4 = 0.0F;
         }
 
-        if (p_73829_1_ > 1.0F)
+        this.prevVignetteBrightness = (float)((double)this.prevVignetteBrightness + (double)(p_180480_1_ - this.prevVignetteBrightness) * 0.01D);
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(0, 769, 1, 0);
+
+        if (var4 > 0.0F)
         {
-            p_73829_1_ = 1.0F;
+            GlStateManager.color(0.0F, var4, var4, 1.0F);
+        }
+        else
+        {
+            GlStateManager.color(this.prevVignetteBrightness, this.prevVignetteBrightness, this.prevVignetteBrightness, 1.0F);
         }
 
-        this.prevVignetteBrightness = (float)((double)this.prevVignetteBrightness + (double)(p_73829_1_ - this.prevVignetteBrightness) * 0.01D);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        OpenGlHelper.glBlendFunc(0, 769, 1, 0);
-        GL11.glColor4f(this.prevVignetteBrightness, this.prevVignetteBrightness, this.prevVignetteBrightness, 1.0F);
         this.mc.getTextureManager().bindTexture(vignetteTexPath);
-        Tessellator var4 = Tessellator.instance;
-        var4.startDrawingQuads();
-        var4.addVertexWithUV(0.0D, (double)p_73829_3_, -90.0D, 0.0D, 1.0D);
-        var4.addVertexWithUV((double)p_73829_2_, (double)p_73829_3_, -90.0D, 1.0D, 1.0D);
-        var4.addVertexWithUV((double)p_73829_2_, 0.0D, -90.0D, 1.0D, 0.0D);
-        var4.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);
-        var4.draw();
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+        Tessellator var9 = Tessellator.getInstance();
+        WorldRenderer var10 = var9.getWorldRenderer();
+        var10.startDrawingQuads();
+        var10.addVertexWithUV(0.0D, (double)p_180480_2_.getScaledHeight(), -90.0D, 0.0D, 1.0D);
+        var10.addVertexWithUV((double)p_180480_2_.getScaledWidth(), (double)p_180480_2_.getScaledHeight(), -90.0D, 1.0D, 1.0D);
+        var10.addVertexWithUV((double)p_180480_2_.getScaledWidth(), 0.0D, -90.0D, 1.0D, 0.0D);
+        var10.addVertexWithUV(0.0D, 0.0D, -90.0D, 0.0D, 0.0D);
+        var9.draw();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
     }
 
-    private void func_130015_b(float p_130015_1_, int p_130015_2_, int p_130015_3_)
+    private void func_180474_b(float p_180474_1_, ScaledResolution p_180474_2_)
     {
-        if (p_130015_1_ < 1.0F)
+        if (p_180474_1_ < 1.0F)
         {
-            p_130015_1_ *= p_130015_1_;
-            p_130015_1_ *= p_130015_1_;
-            p_130015_1_ = p_130015_1_ * 0.8F + 0.2F;
+            p_180474_1_ *= p_180474_1_;
+            p_180474_1_ *= p_180474_1_;
+            p_180474_1_ = p_180474_1_ * 0.8F + 0.2F;
         }
 
-        GL11.glDisable(GL11.GL_ALPHA_TEST);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glDepthMask(false);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, p_130015_1_);
-        IIcon var4 = Blocks.portal.getBlockTextureFromSide(1);
+        GlStateManager.disableAlpha();
+        GlStateManager.disableDepth();
+        GlStateManager.depthMask(false);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, p_180474_1_);
         this.mc.getTextureManager().bindTexture(TextureMap.locationBlocksTexture);
-        float var5 = var4.getMinU();
-        float var6 = var4.getMinV();
-        float var7 = var4.getMaxU();
-        float var8 = var4.getMaxV();
-        Tessellator var9 = Tessellator.instance;
+        TextureAtlasSprite var3 = this.mc.getBlockRendererDispatcher().func_175023_a().func_178122_a(Blocks.portal.getDefaultState());
+        float var4 = var3.getMinU();
+        float var5 = var3.getMinV();
+        float var6 = var3.getMaxU();
+        float var7 = var3.getMaxV();
+        Tessellator var8 = Tessellator.getInstance();
+        WorldRenderer var9 = var8.getWorldRenderer();
         var9.startDrawingQuads();
-        var9.addVertexWithUV(0.0D, (double)p_130015_3_, -90.0D, (double)var5, (double)var8);
-        var9.addVertexWithUV((double)p_130015_2_, (double)p_130015_3_, -90.0D, (double)var7, (double)var8);
-        var9.addVertexWithUV((double)p_130015_2_, 0.0D, -90.0D, (double)var7, (double)var6);
-        var9.addVertexWithUV(0.0D, 0.0D, -90.0D, (double)var5, (double)var6);
-        var9.draw();
-        GL11.glDepthMask(true);
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        var9.addVertexWithUV(0.0D, (double)p_180474_2_.getScaledHeight(), -90.0D, (double)var4, (double)var7);
+        var9.addVertexWithUV((double)p_180474_2_.getScaledWidth(), (double)p_180474_2_.getScaledHeight(), -90.0D, (double)var6, (double)var7);
+        var9.addVertexWithUV((double)p_180474_2_.getScaledWidth(), 0.0D, -90.0D, (double)var6, (double)var5);
+        var9.addVertexWithUV(0.0D, 0.0D, -90.0D, (double)var4, (double)var5);
+        var8.draw();
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepth();
+        GlStateManager.enableAlpha();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    /**
-     * Renders the specified item of the inventory slot at the specified location. Args: slot, x, y, partialTick
-     */
-    private void renderInventorySlot(int p_73832_1_, int p_73832_2_, int p_73832_3_, float p_73832_4_)
+    private void func_175184_a(int p_175184_1_, int p_175184_2_, int p_175184_3_, float p_175184_4_, EntityPlayer p_175184_5_)
     {
-        ItemStack var5 = this.mc.thePlayer.inventory.mainInventory[p_73832_1_];
+        ItemStack var6 = p_175184_5_.inventory.mainInventory[p_175184_1_];
 
-        if (var5 != null)
+        if (var6 != null)
         {
-            float var6 = (float)var5.animationsToGo - p_73832_4_;
+            float var7 = (float)var6.animationsToGo - p_175184_4_;
 
-            if (var6 > 0.0F)
+            if (var7 > 0.0F)
             {
-                GL11.glPushMatrix();
-                float var7 = 1.0F + var6 / 5.0F;
-                GL11.glTranslatef((float)(p_73832_2_ + 8), (float)(p_73832_3_ + 12), 0.0F);
-                GL11.glScalef(1.0F / var7, (var7 + 1.0F) / 2.0F, 1.0F);
-                GL11.glTranslatef((float)(-(p_73832_2_ + 8)), (float)(-(p_73832_3_ + 12)), 0.0F);
+                GlStateManager.pushMatrix();
+                float var8 = 1.0F + var7 / 5.0F;
+                GlStateManager.translate((float)(p_175184_2_ + 8), (float)(p_175184_3_ + 12), 0.0F);
+                GlStateManager.scale(1.0F / var8, (var8 + 1.0F) / 2.0F, 1.0F);
+                GlStateManager.translate((float)(-(p_175184_2_ + 8)), (float)(-(p_175184_3_ + 12)), 0.0F);
             }
 
-            itemRenderer.renderItemAndEffectIntoGUI(this.mc.fontRenderer, this.mc.getTextureManager(), var5, p_73832_2_, p_73832_3_);
+            this.itemRenderer.func_180450_b(var6, p_175184_2_, p_175184_3_);
 
-            if (var6 > 0.0F)
+            if (var7 > 0.0F)
             {
-                GL11.glPopMatrix();
+                GlStateManager.popMatrix();
             }
 
-            itemRenderer.renderItemOverlayIntoGUI(this.mc.fontRenderer, this.mc.getTextureManager(), var5, p_73832_2_, p_73832_3_);
+            this.itemRenderer.func_175030_a(this.mc.fontRendererObj, var6, p_175184_2_, p_175184_3_);
         }
     }
 
@@ -988,8 +1068,19 @@ public class GuiIngame extends Gui
             --this.recordPlayingUpFor;
         }
 
+        if (this.field_175195_w > 0)
+        {
+            --this.field_175195_w;
+
+            if (this.field_175195_w <= 0)
+            {
+                this.field_175201_x = "";
+                this.field_175200_y = "";
+            }
+        }
+
         ++this.updateCounter;
-        this.field_152127_m.func_152439_a();
+        this.streamIndicator.func_152439_a();
 
         if (this.mc.thePlayer != null)
         {
@@ -999,7 +1090,7 @@ public class GuiIngame extends Gui
             {
                 this.remainingHighlightTicks = 0;
             }
-            else if (this.highlightingItemStack != null && var1.getItem() == this.highlightingItemStack.getItem() && ItemStack.areItemStackTagsEqual(var1, this.highlightingItemStack) && (var1.isItemStackDamageable() || var1.getItemDamage() == this.highlightingItemStack.getItemDamage()))
+            else if (this.highlightingItemStack != null && var1.getItem() == this.highlightingItemStack.getItem() && ItemStack.areItemStackTagsEqual(var1, this.highlightingItemStack) && (var1.isItemStackDamageable() || var1.getMetadata() == this.highlightingItemStack.getMetadata()))
             {
                 if (this.remainingHighlightTicks > 0)
                 {
@@ -1017,16 +1108,65 @@ public class GuiIngame extends Gui
 
     public void setRecordPlayingMessage(String p_73833_1_)
     {
-        this.func_110326_a(I18n.format("record.nowPlaying", new Object[] {p_73833_1_}), true);
+        this.setRecordPlaying(I18n.format("record.nowPlaying", new Object[] {p_73833_1_}), true);
     }
 
-    public void func_110326_a(String p_110326_1_, boolean p_110326_2_)
+    public void setRecordPlaying(String p_110326_1_, boolean p_110326_2_)
     {
         this.recordPlaying = p_110326_1_;
         this.recordPlayingUpFor = 60;
         this.recordIsPlaying = p_110326_2_;
     }
 
+    public void func_175178_a(String p_175178_1_, String p_175178_2_, int p_175178_3_, int p_175178_4_, int p_175178_5_)
+    {
+        if (p_175178_1_ == null && p_175178_2_ == null && p_175178_3_ < 0 && p_175178_4_ < 0 && p_175178_5_ < 0)
+        {
+            this.field_175201_x = "";
+            this.field_175200_y = "";
+            this.field_175195_w = 0;
+        }
+        else if (p_175178_1_ != null)
+        {
+            this.field_175201_x = p_175178_1_;
+            this.field_175195_w = this.field_175199_z + this.field_175192_A + this.field_175193_B;
+        }
+        else if (p_175178_2_ != null)
+        {
+            this.field_175200_y = p_175178_2_;
+        }
+        else
+        {
+            if (p_175178_3_ >= 0)
+            {
+                this.field_175199_z = p_175178_3_;
+            }
+
+            if (p_175178_4_ >= 0)
+            {
+                this.field_175192_A = p_175178_4_;
+            }
+
+            if (p_175178_5_ >= 0)
+            {
+                this.field_175193_B = p_175178_5_;
+            }
+
+            if (this.field_175195_w > 0)
+            {
+                this.field_175195_w = this.field_175199_z + this.field_175192_A + this.field_175193_B;
+            }
+        }
+    }
+
+    public void func_175188_a(IChatComponent p_175188_1_, boolean p_175188_2_)
+    {
+        this.setRecordPlaying(p_175188_1_.getUnformattedText(), p_175188_2_);
+    }
+
+    /**
+     * returns a pointer to the persistant Chat GUI, containing all previous chat messages and such
+     */
     public GuiNewChat getChatGUI()
     {
         return this.persistantChatGUI;
@@ -1035,5 +1175,20 @@ public class GuiIngame extends Gui
     public int getUpdateCounter()
     {
         return this.updateCounter;
+    }
+
+    public FontRenderer func_175179_f()
+    {
+        return this.mc.fontRendererObj;
+    }
+
+    public GuiSpectator func_175187_g()
+    {
+        return this.field_175197_u;
+    }
+
+    public GuiPlayerTabOverlay getTabList()
+    {
+        return this.overlayPlayerList;
     }
 }

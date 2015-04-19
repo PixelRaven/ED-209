@@ -16,11 +16,11 @@ import org.apache.logging.log4j.Logger;
 public class SharedMonsterAttributes
 {
     private static final Logger logger = LogManager.getLogger();
-    public static final IAttribute maxHealth = (new RangedAttribute("generic.maxHealth", 20.0D, 0.0D, Double.MAX_VALUE)).setDescription("Max Health").setShouldWatch(true);
-    public static final IAttribute followRange = (new RangedAttribute("generic.followRange", 32.0D, 0.0D, 2048.0D)).setDescription("Follow Range");
-    public static final IAttribute knockbackResistance = (new RangedAttribute("generic.knockbackResistance", 0.0D, 0.0D, 1.0D)).setDescription("Knockback Resistance");
-    public static final IAttribute movementSpeed = (new RangedAttribute("generic.movementSpeed", 0.699999988079071D, 0.0D, Double.MAX_VALUE)).setDescription("Movement Speed").setShouldWatch(true);
-    public static final IAttribute attackDamage = new RangedAttribute("generic.attackDamage", 2.0D, 0.0D, Double.MAX_VALUE);
+    public static final IAttribute maxHealth = (new RangedAttribute((IAttribute)null, "generic.maxHealth", 20.0D, 0.0D, Double.MAX_VALUE)).setDescription("Max Health").setShouldWatch(true);
+    public static final IAttribute followRange = (new RangedAttribute((IAttribute)null, "generic.followRange", 32.0D, 0.0D, 2048.0D)).setDescription("Follow Range");
+    public static final IAttribute knockbackResistance = (new RangedAttribute((IAttribute)null, "generic.knockbackResistance", 0.0D, 0.0D, 1.0D)).setDescription("Knockback Resistance");
+    public static final IAttribute movementSpeed = (new RangedAttribute((IAttribute)null, "generic.movementSpeed", 0.699999988079071D, 0.0D, Double.MAX_VALUE)).setDescription("Movement Speed").setShouldWatch(true);
+    public static final IAttribute attackDamage = new RangedAttribute((IAttribute)null, "generic.attackDamage", 2.0D, 0.0D, Double.MAX_VALUE);
     private static final String __OBFID = "CL_00001695";
 
     /**
@@ -108,21 +108,25 @@ public class SharedMonsterAttributes
     {
         p_111258_0_.setBaseValue(p_111258_1_.getDouble("Base"));
 
-        if (p_111258_1_.func_150297_b("Modifiers", 9))
+        if (p_111258_1_.hasKey("Modifiers", 9))
         {
             NBTTagList var2 = p_111258_1_.getTagList("Modifiers", 10);
 
             for (int var3 = 0; var3 < var2.tagCount(); ++var3)
             {
                 AttributeModifier var4 = readAttributeModifierFromNBT(var2.getCompoundTagAt(var3));
-                AttributeModifier var5 = p_111258_0_.getModifier(var4.getID());
 
-                if (var5 != null)
+                if (var4 != null)
                 {
-                    p_111258_0_.removeModifier(var5);
-                }
+                    AttributeModifier var5 = p_111258_0_.getModifier(var4.getID());
 
-                p_111258_0_.applyModifier(var4);
+                    if (var5 != null)
+                    {
+                        p_111258_0_.removeModifier(var5);
+                    }
+
+                    p_111258_0_.applyModifier(var4);
+                }
             }
         }
     }
@@ -133,6 +137,15 @@ public class SharedMonsterAttributes
     public static AttributeModifier readAttributeModifierFromNBT(NBTTagCompound p_111259_0_)
     {
         UUID var1 = new UUID(p_111259_0_.getLong("UUIDMost"), p_111259_0_.getLong("UUIDLeast"));
-        return new AttributeModifier(var1, p_111259_0_.getString("Name"), p_111259_0_.getDouble("Amount"), p_111259_0_.getInteger("Operation"));
+
+        try
+        {
+            return new AttributeModifier(var1, p_111259_0_.getString("Name"), p_111259_0_.getDouble("Amount"), p_111259_0_.getInteger("Operation"));
+        }
+        catch (Exception var3)
+        {
+            logger.warn("Unable to create attribute: " + var3.getMessage());
+            return null;
+        }
     }
 }

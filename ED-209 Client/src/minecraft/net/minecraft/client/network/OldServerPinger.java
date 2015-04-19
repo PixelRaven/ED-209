@@ -3,6 +3,7 @@ package net.minecraft.client.network;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -14,12 +15,11 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.concurrent.GenericFutureListener;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -45,55 +45,58 @@ import org.apache.logging.log4j.Logger;
 
 public class OldServerPinger
 {
-    private static final Splitter field_147230_a = Splitter.on('\u0000').limit(6);
+    private static final Splitter PING_RESPONSE_SPLITTER = Splitter.on('\u0000').limit(6);
     private static final Logger logger = LogManager.getLogger();
-    private final List field_147229_c = Collections.synchronizedList(new ArrayList());
+
+    /** A list of NetworkManagers that have pending pings */
+    private final List pingDestinations = Collections.synchronizedList(Lists.newArrayList());
     private static final String __OBFID = "CL_00000892";
 
-    public void func_147224_a(final ServerData p_147224_1_) throws UnknownHostException
+    public void ping(final ServerData server) throws UnknownHostException
     {
-        ServerAddress var2 = ServerAddress.func_78860_a(p_147224_1_.serverIP);
+        ServerAddress var2 = ServerAddress.func_78860_a(server.serverIP);
         final NetworkManager var3 = NetworkManager.provideLanClient(InetAddress.getByName(var2.getIP()), var2.getPort());
-        this.field_147229_c.add(var3);
-        p_147224_1_.serverMOTD = "Pinging...";
-        p_147224_1_.pingToServer = -1L;
-        p_147224_1_.field_147412_i = null;
+        this.pingDestinations.add(var3);
+        server.serverMOTD = "Pinging...";
+        server.pingToServer = -1L;
+        server.playerList = null;
         var3.setNetHandler(new INetHandlerStatusClient()
         {
             private boolean field_147403_d = false;
+            private long field_175092_e = 0L;
             private static final String __OBFID = "CL_00000893";
-            public void handleServerInfo(S00PacketServerInfo p_147397_1_)
+            public void handleServerInfo(S00PacketServerInfo packetIn)
             {
-                ServerStatusResponse var2 = p_147397_1_.func_149294_c();
+                ServerStatusResponse var2 = packetIn.func_149294_c();
 
-                if (var2.func_151317_a() != null)
+                if (var2.getServerDescription() != null)
                 {
-                    p_147224_1_.serverMOTD = var2.func_151317_a().getFormattedText();
+                    server.serverMOTD = var2.getServerDescription().getFormattedText();
                 }
                 else
                 {
-                    p_147224_1_.serverMOTD = "";
+                    server.serverMOTD = "";
                 }
 
-                if (var2.func_151322_c() != null)
+                if (var2.getProtocolVersionInfo() != null)
                 {
-                    p_147224_1_.gameVersion = var2.func_151322_c().func_151303_a();
-                    p_147224_1_.field_82821_f = var2.func_151322_c().func_151304_b();
+                    server.gameVersion = var2.getProtocolVersionInfo().getName();
+                    server.version = var2.getProtocolVersionInfo().getProtocol();
                 }
                 else
                 {
-                    p_147224_1_.gameVersion = "Old";
-                    p_147224_1_.field_82821_f = 0;
+                    server.gameVersion = "Old";
+                    server.version = 0;
                 }
 
-                if (var2.func_151318_b() != null)
+                if (var2.getPlayerCountData() != null)
                 {
-                    p_147224_1_.populationInfo = EnumChatFormatting.GRAY + "" + var2.func_151318_b().func_151333_b() + "" + EnumChatFormatting.DARK_GRAY + "/" + EnumChatFormatting.GRAY + var2.func_151318_b().func_151332_a();
+                    server.populationInfo = EnumChatFormatting.GRAY + "" + var2.getPlayerCountData().getOnlinePlayerCount() + "" + EnumChatFormatting.DARK_GRAY + "/" + EnumChatFormatting.GRAY + var2.getPlayerCountData().getMaxPlayers();
 
-                    if (ArrayUtils.isNotEmpty(var2.func_151318_b().func_151331_c()))
+                    if (ArrayUtils.isNotEmpty(var2.getPlayerCountData().getPlayers()))
                     {
                         StringBuilder var3x = new StringBuilder();
-                        GameProfile[] var4 = var2.func_151318_b().func_151331_c();
+                        GameProfile[] var4 = var2.getPlayerCountData().getPlayers();
                         int var5 = var4.length;
 
                         for (int var6 = 0; var6 < var5; ++var6)
@@ -108,31 +111,31 @@ public class OldServerPinger
                             var3x.append(var7.getName());
                         }
 
-                        if (var2.func_151318_b().func_151331_c().length < var2.func_151318_b().func_151333_b())
+                        if (var2.getPlayerCountData().getPlayers().length < var2.getPlayerCountData().getOnlinePlayerCount())
                         {
                             if (var3x.length() > 0)
                             {
                                 var3x.append("\n");
                             }
 
-                            var3x.append("... and ").append(var2.func_151318_b().func_151333_b() - var2.func_151318_b().func_151331_c().length).append(" more ...");
+                            var3x.append("... and ").append(var2.getPlayerCountData().getOnlinePlayerCount() - var2.getPlayerCountData().getPlayers().length).append(" more ...");
                         }
 
-                        p_147224_1_.field_147412_i = var3x.toString();
+                        server.playerList = var3x.toString();
                     }
                 }
                 else
                 {
-                    p_147224_1_.populationInfo = EnumChatFormatting.DARK_GRAY + "???";
+                    server.populationInfo = EnumChatFormatting.DARK_GRAY + "???";
                 }
 
-                if (var2.func_151316_d() != null)
+                if (var2.getFavicon() != null)
                 {
-                    String var8 = var2.func_151316_d();
+                    String var8 = var2.getFavicon();
 
                     if (var8.startsWith("data:image/png;base64,"))
                     {
-                        p_147224_1_.func_147407_a(var8.substring("data:image/png;base64,".length()));
+                        server.setBase64EncodedIconData(var8.substring("data:image/png;base64,".length()));
                     }
                     else
                     {
@@ -141,43 +144,36 @@ public class OldServerPinger
                 }
                 else
                 {
-                    p_147224_1_.func_147407_a((String)null);
+                    server.setBase64EncodedIconData((String)null);
                 }
 
-                var3.scheduleOutboundPacket(new C01PacketPing(Minecraft.getSystemTime()), new GenericFutureListener[0]);
+                this.field_175092_e = Minecraft.getSystemTime();
+                var3.sendPacket(new C01PacketPing(this.field_175092_e));
                 this.field_147403_d = true;
             }
-            public void handlePong(S01PacketPong p_147398_1_)
+            public void handlePong(S01PacketPong packetIn)
             {
-                long var2 = p_147398_1_.func_149292_c();
+                long var2 = this.field_175092_e;
                 long var4 = Minecraft.getSystemTime();
-                p_147224_1_.pingToServer = var4 - var2;
+                server.pingToServer = var4 - var2;
                 var3.closeChannel(new ChatComponentText("Finished"));
             }
-            public void onDisconnect(IChatComponent p_147231_1_)
+            public void onDisconnect(IChatComponent reason)
             {
                 if (!this.field_147403_d)
                 {
-                    OldServerPinger.logger.error("Can\'t ping " + p_147224_1_.serverIP + ": " + p_147231_1_.getUnformattedText());
-                    p_147224_1_.serverMOTD = EnumChatFormatting.DARK_RED + "Can\'t connect to server.";
-                    p_147224_1_.populationInfo = "";
-                    OldServerPinger.this.func_147225_b(p_147224_1_);
+                    OldServerPinger.logger.error("Can\'t ping " + server.serverIP + ": " + reason.getUnformattedText());
+                    server.serverMOTD = EnumChatFormatting.DARK_RED + "Can\'t connect to server.";
+                    server.populationInfo = "";
+                    OldServerPinger.this.tryCompatibilityPing(server);
                 }
             }
-            public void onConnectionStateTransition(EnumConnectionState p_147232_1_, EnumConnectionState p_147232_2_)
-            {
-                if (p_147232_2_ != EnumConnectionState.STATUS)
-                {
-                    throw new UnsupportedOperationException("Unexpected change in protocol to " + p_147232_2_);
-                }
-            }
-            public void onNetworkTick() {}
         });
 
         try
         {
-            var3.scheduleOutboundPacket(new C00Handshake(5, var2.getIP(), var2.getPort(), EnumConnectionState.STATUS), new GenericFutureListener[0]);
-            var3.scheduleOutboundPacket(new C00PacketServerQuery(), new GenericFutureListener[0]);
+            var3.sendPacket(new C00Handshake(47, var2.getIP(), var2.getPort(), EnumConnectionState.STATUS));
+            var3.sendPacket(new C00PacketServerQuery());
         }
         catch (Throwable var5)
         {
@@ -185,10 +181,10 @@ public class OldServerPinger
         }
     }
 
-    private void func_147225_b(final ServerData p_147225_1_)
+    private void tryCompatibilityPing(final ServerData server)
     {
-        final ServerAddress var2 = ServerAddress.func_78860_a(p_147225_1_.serverIP);
-        ((Bootstrap)((Bootstrap)((Bootstrap)(new Bootstrap()).group(NetworkManager.eventLoops)).handler(new ChannelInitializer()
+        final ServerAddress var2 = ServerAddress.func_78860_a(server.serverIP);
+        ((Bootstrap)((Bootstrap)((Bootstrap)(new Bootstrap()).group((EventLoopGroup)NetworkManager.CLIENT_NIO_EVENTLOOP.getValue())).handler(new ChannelInitializer()
         {
             private static final String __OBFID = "CL_00000894";
             protected void initChannel(Channel p_initChannel_1_)
@@ -265,7 +261,7 @@ public class OldServerPinger
                             if (var3 == 255)
                             {
                                 String var4 = new String(p_channelRead0_2_.readBytes(p_channelRead0_2_.readShort() * 2).array(), Charsets.UTF_16BE);
-                                String[] var5 = (String[])Iterables.toArray(OldServerPinger.field_147230_a.split(var4), String.class);
+                                String[] var5 = (String[])Iterables.toArray(OldServerPinger.PING_RESPONSE_SPLITTER.split(var4), String.class);
 
                                 if ("\u00a71".equals(var5[0]))
                                 {
@@ -274,10 +270,10 @@ public class OldServerPinger
                                     String var8 = var5[3];
                                     int var9 = MathHelper.parseIntWithDefault(var5[4], -1);
                                     int var10 = MathHelper.parseIntWithDefault(var5[5], -1);
-                                    p_147225_1_.field_82821_f = -1;
-                                    p_147225_1_.gameVersion = var7;
-                                    p_147225_1_.serverMOTD = var8;
-                                    p_147225_1_.populationInfo = EnumChatFormatting.GRAY + "" + var9 + "" + EnumChatFormatting.DARK_GRAY + "/" + EnumChatFormatting.GRAY + var10;
+                                    server.version = -1;
+                                    server.gameVersion = var7;
+                                    server.serverMOTD = var8;
+                                    server.populationInfo = EnumChatFormatting.GRAY + "" + var9 + "" + EnumChatFormatting.DARK_GRAY + "/" + EnumChatFormatting.GRAY + var10;
                                 }
                             }
 
@@ -297,13 +293,13 @@ public class OldServerPinger
         })).channel(NioSocketChannel.class)).connect(var2.getIP(), var2.getPort());
     }
 
-    public void func_147223_a()
+    public void pingPendingNetworks()
     {
-        List var1 = this.field_147229_c;
+        List var1 = this.pingDestinations;
 
-        synchronized (this.field_147229_c)
+        synchronized (this.pingDestinations)
         {
-            Iterator var2 = this.field_147229_c.iterator();
+            Iterator var2 = this.pingDestinations.iterator();
 
             while (var2.hasNext())
             {
@@ -316,23 +312,19 @@ public class OldServerPinger
                 else
                 {
                     var2.remove();
-
-                    if (var3.getExitMessage() != null)
-                    {
-                        var3.getNetHandler().onDisconnect(var3.getExitMessage());
-                    }
+                    var3.checkDisconnected();
                 }
             }
         }
     }
 
-    public void func_147226_b()
+    public void clearPendingNetworks()
     {
-        List var1 = this.field_147229_c;
+        List var1 = this.pingDestinations;
 
-        synchronized (this.field_147229_c)
+        synchronized (this.pingDestinations)
         {
-            Iterator var2 = this.field_147229_c.iterator();
+            Iterator var2 = this.pingDestinations.iterator();
 
             while (var2.hasNext())
             {

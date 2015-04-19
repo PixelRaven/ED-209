@@ -36,4 +36,9 @@ public class ScoreHealthCriteria extends ScoreDummyCriteria
     {
         return true;
     }
+
+    public IScoreObjectiveCriteria.EnumRenderType func_178790_c()
+    {
+        return IScoreObjectiveCriteria.EnumRenderType.HEARTS;
+    }
 }

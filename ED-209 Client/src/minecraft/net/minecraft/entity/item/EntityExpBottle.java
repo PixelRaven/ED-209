@@ -2,6 +2,7 @@ package net.minecraft.entity.item;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 
@@ -9,19 +10,19 @@ public class EntityExpBottle extends EntityThrowable
 {
     private static final String __OBFID = "CL_00001726";
 
-    public EntityExpBottle(World p_i1785_1_)
+    public EntityExpBottle(World worldIn)
     {
-        super(p_i1785_1_);
+        super(worldIn);
     }
 
-    public EntityExpBottle(World p_i1786_1_, EntityLivingBase p_i1786_2_)
+    public EntityExpBottle(World worldIn, EntityLivingBase p_i1786_2_)
     {
-        super(p_i1786_1_, p_i1786_2_);
+        super(worldIn, p_i1786_2_);
     }
 
-    public EntityExpBottle(World p_i1787_1_, double p_i1787_2_, double p_i1787_4_, double p_i1787_6_)
+    public EntityExpBottle(World worldIn, double p_i1787_2_, double p_i1787_4_, double p_i1787_6_)
     {
-        super(p_i1787_1_, p_i1787_2_, p_i1787_4_, p_i1787_6_);
+        super(worldIn, p_i1787_2_, p_i1787_4_, p_i1787_6_);
     }
 
     /**
@@ -47,9 +48,9 @@ public class EntityExpBottle extends EntityThrowable
      */
     protected void onImpact(MovingObjectPosition p_70184_1_)
     {
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
-            this.worldObj.playAuxSFX(2002, (int)Math.round(this.posX), (int)Math.round(this.posY), (int)Math.round(this.posZ), 0);
+            this.worldObj.playAuxSFX(2002, new BlockPos(this), 0);
             int var2 = 3 + this.worldObj.rand.nextInt(5) + this.worldObj.rand.nextInt(5);
 
             while (var2 > 0)

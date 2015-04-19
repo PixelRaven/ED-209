@@ -7,7 +7,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S2FPacketSetSlot extends Packet
+public class S2FPacketSetSlot implements Packet
 {
     private int field_149179_a;
     private int field_149177_b;
@@ -23,29 +23,32 @@ public class S2FPacketSetSlot extends Packet
         this.field_149178_c = p_i45188_3_ == null ? null : p_i45188_3_.copy();
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleSetSlot(this);
+        handler.handleSetSlot(this);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149179_a = p_148837_1_.readByte();
-        this.field_149177_b = p_148837_1_.readShort();
-        this.field_149178_c = p_148837_1_.readItemStackFromBuffer();
+        this.field_149179_a = data.readByte();
+        this.field_149177_b = data.readShort();
+        this.field_149178_c = data.readItemStackFromBuffer();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeByte(this.field_149179_a);
-        p_148840_1_.writeShort(this.field_149177_b);
-        p_148840_1_.writeItemStackToBuffer(this.field_149178_c);
+        data.writeByte(this.field_149179_a);
+        data.writeShort(this.field_149177_b);
+        data.writeItemStackToBuffer(this.field_149178_c);
     }
 
     public int func_149175_c()
@@ -63,8 +66,11 @@ public class S2FPacketSetSlot extends Packet
         return this.field_149178_c;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

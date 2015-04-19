@@ -3,67 +3,55 @@ package net.minecraft.block;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemBanner;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public class BlockCauldron extends Block
 {
-    private IIcon field_150029_a;
-    private IIcon field_150028_b;
-    private IIcon field_150030_M;
+    public static final PropertyInteger field_176591_a = PropertyInteger.create("level", 0, 3);
     private static final String __OBFID = "CL_00000213";
 
     public BlockCauldron()
     {
         super(Material.iron);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176591_a, Integer.valueOf(0)));
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Add all collision boxes of this Block to the list that intersect with the given mask.
+     *  
+     * @param collidingEntity the Entity colliding with this Block
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        return p_149691_1_ == 1 ? this.field_150028_b : (p_149691_1_ == 0 ? this.field_150030_M : this.blockIcon);
-    }
-
-    public void registerBlockIcons(IIconRegister p_149651_1_)
-    {
-        this.field_150029_a = p_149651_1_.registerIcon(this.getTextureName() + "_" + "inner");
-        this.field_150028_b = p_149651_1_.registerIcon(this.getTextureName() + "_top");
-        this.field_150030_M = p_149651_1_.registerIcon(this.getTextureName() + "_" + "bottom");
-        this.blockIcon = p_149651_1_.registerIcon(this.getTextureName() + "_side");
-    }
-
-    public static IIcon func_150026_e(String p_150026_0_)
-    {
-        return p_150026_0_.equals("inner") ? Blocks.cauldron.field_150029_a : (p_150026_0_.equals("bottom") ? Blocks.cauldron.field_150030_M : null);
-    }
-
-    public void addCollisionBoxesToList(World p_149743_1_, int p_149743_2_, int p_149743_3_, int p_149743_4_, AxisAlignedBB p_149743_5_, List p_149743_6_, Entity p_149743_7_)
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
     {
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.3125F, 1.0F);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-        float var8 = 0.125F;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, var8, 1.0F, 1.0F);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, var8);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-        this.setBlockBounds(1.0F - var8, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-        this.setBlockBounds(0.0F, 0.0F, 1.0F - var8, 1.0F, 1.0F, 1.0F);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        float var7 = 0.125F;
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, var7, 1.0F, 1.0F);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, var7);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        this.setBlockBounds(1.0F - var7, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        this.setBlockBounds(0.0F, 0.0F, 1.0F - var7, 1.0F, 1.0F, 1.0F);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
         this.setBlockBoundsForItemRender();
     }
 
@@ -80,142 +68,184 @@ public class BlockCauldron extends Block
         return false;
     }
 
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
-    {
-        return 24;
-    }
-
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
-    public void onEntityCollidedWithBlock(World p_149670_1_, int p_149670_2_, int p_149670_3_, int p_149670_4_, Entity p_149670_5_)
+    /**
+     * Called When an Entity Collided with the Block
+     */
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        int var6 = func_150027_b(p_149670_1_.getBlockMetadata(p_149670_2_, p_149670_3_, p_149670_4_));
-        float var7 = (float)p_149670_3_ + (6.0F + (float)(3 * var6)) / 16.0F;
+        int var5 = ((Integer)state.getValue(field_176591_a)).intValue();
+        float var6 = (float)pos.getY() + (6.0F + (float)(3 * var5)) / 16.0F;
 
-        if (!p_149670_1_.isClient && p_149670_5_.isBurning() && var6 > 0 && p_149670_5_.boundingBox.minY <= (double)var7)
+        if (!worldIn.isRemote && entityIn.isBurning() && var5 > 0 && entityIn.getEntityBoundingBox().minY <= (double)var6)
         {
-            p_149670_5_.extinguish();
-            this.func_150024_a(p_149670_1_, p_149670_2_, p_149670_3_, p_149670_4_, var6 - 1);
+            entityIn.extinguish();
+            this.func_176590_a(worldIn, pos, state, var5 - 1);
         }
     }
 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_149727_1_.isClient)
+        if (worldIn.isRemote)
         {
             return true;
         }
         else
         {
-            ItemStack var10 = p_149727_5_.inventory.getCurrentItem();
+            ItemStack var9 = playerIn.inventory.getCurrentItem();
 
-            if (var10 == null)
+            if (var9 == null)
             {
                 return true;
             }
             else
             {
-                int var11 = p_149727_1_.getBlockMetadata(p_149727_2_, p_149727_3_, p_149727_4_);
-                int var12 = func_150027_b(var11);
+                int var10 = ((Integer)state.getValue(field_176591_a)).intValue();
+                Item var11 = var9.getItem();
 
-                if (var10.getItem() == Items.water_bucket)
+                if (var11 == Items.water_bucket)
                 {
-                    if (var12 < 3)
+                    if (var10 < 3)
                     {
-                        if (!p_149727_5_.capabilities.isCreativeMode)
+                        if (!playerIn.capabilities.isCreativeMode)
                         {
-                            p_149727_5_.inventory.setInventorySlotContents(p_149727_5_.inventory.currentItem, new ItemStack(Items.bucket));
+                            playerIn.inventory.setInventorySlotContents(playerIn.inventory.currentItem, new ItemStack(Items.bucket));
                         }
 
-                        this.func_150024_a(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, 3);
+                        this.func_176590_a(worldIn, pos, state, 3);
                     }
 
                     return true;
                 }
                 else
                 {
-                    if (var10.getItem() == Items.glass_bottle)
+                    ItemStack var13;
+
+                    if (var11 == Items.glass_bottle)
                     {
-                        if (var12 > 0)
+                        if (var10 > 0)
                         {
-                            if (!p_149727_5_.capabilities.isCreativeMode)
+                            if (!playerIn.capabilities.isCreativeMode)
                             {
-                                ItemStack var13 = new ItemStack(Items.potionitem, 1, 0);
+                                var13 = new ItemStack(Items.potionitem, 1, 0);
 
-                                if (!p_149727_5_.inventory.addItemStackToInventory(var13))
+                                if (!playerIn.inventory.addItemStackToInventory(var13))
                                 {
-                                    p_149727_1_.spawnEntityInWorld(new EntityItem(p_149727_1_, (double)p_149727_2_ + 0.5D, (double)p_149727_3_ + 1.5D, (double)p_149727_4_ + 0.5D, var13));
+                                    worldIn.spawnEntityInWorld(new EntityItem(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.5D, (double)pos.getZ() + 0.5D, var13));
                                 }
-                                else if (p_149727_5_ instanceof EntityPlayerMP)
+                                else if (playerIn instanceof EntityPlayerMP)
                                 {
-                                    ((EntityPlayerMP)p_149727_5_).sendContainerToPlayer(p_149727_5_.inventoryContainer);
+                                    ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
                                 }
 
-                                --var10.stackSize;
+                                --var9.stackSize;
 
-                                if (var10.stackSize <= 0)
+                                if (var9.stackSize <= 0)
                                 {
-                                    p_149727_5_.inventory.setInventorySlotContents(p_149727_5_.inventory.currentItem, (ItemStack)null);
+                                    playerIn.inventory.setInventorySlotContents(playerIn.inventory.currentItem, (ItemStack)null);
                                 }
                             }
 
-                            this.func_150024_a(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, var12 - 1);
+                            this.func_176590_a(worldIn, pos, state, var10 - 1);
                         }
-                    }
-                    else if (var12 > 0 && var10.getItem() instanceof ItemArmor && ((ItemArmor)var10.getItem()).getArmorMaterial() == ItemArmor.ArmorMaterial.CLOTH)
-                    {
-                        ItemArmor var14 = (ItemArmor)var10.getItem();
-                        var14.removeColor(var10);
-                        this.func_150024_a(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, var12 - 1);
+
                         return true;
                     }
+                    else
+                    {
+                        if (var10 > 0 && var11 instanceof ItemArmor)
+                        {
+                            ItemArmor var12 = (ItemArmor)var11;
 
-                    return false;
+                            if (var12.getArmorMaterial() == ItemArmor.ArmorMaterial.LEATHER && var12.hasColor(var9))
+                            {
+                                var12.removeColor(var9);
+                                this.func_176590_a(worldIn, pos, state, var10 - 1);
+                                return true;
+                            }
+                        }
+
+                        if (var10 > 0 && var11 instanceof ItemBanner && TileEntityBanner.func_175113_c(var9) > 0)
+                        {
+                            var13 = var9.copy();
+                            var13.stackSize = 1;
+                            TileEntityBanner.func_175117_e(var13);
+
+                            if (var9.stackSize <= 1 && !playerIn.capabilities.isCreativeMode)
+                            {
+                                playerIn.inventory.setInventorySlotContents(playerIn.inventory.currentItem, var13);
+                            }
+                            else
+                            {
+                                if (!playerIn.inventory.addItemStackToInventory(var13))
+                                {
+                                    worldIn.spawnEntityInWorld(new EntityItem(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 1.5D, (double)pos.getZ() + 0.5D, var13));
+                                }
+                                else if (playerIn instanceof EntityPlayerMP)
+                                {
+                                    ((EntityPlayerMP)playerIn).sendContainerToPlayer(playerIn.inventoryContainer);
+                                }
+
+                                if (!playerIn.capabilities.isCreativeMode)
+                                {
+                                    --var9.stackSize;
+                                }
+                            }
+
+                            if (!playerIn.capabilities.isCreativeMode)
+                            {
+                                this.func_176590_a(worldIn, pos, state, var10 - 1);
+                            }
+
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
         }
     }
 
-    public void func_150024_a(World p_150024_1_, int p_150024_2_, int p_150024_3_, int p_150024_4_, int p_150024_5_)
+    public void func_176590_a(World worldIn, BlockPos p_176590_2_, IBlockState p_176590_3_, int p_176590_4_)
     {
-        p_150024_1_.setBlockMetadataWithNotify(p_150024_2_, p_150024_3_, p_150024_4_, MathHelper.clamp_int(p_150024_5_, 0, 3), 2);
-        p_150024_1_.func_147453_f(p_150024_2_, p_150024_3_, p_150024_4_, this);
+        worldIn.setBlockState(p_176590_2_, p_176590_3_.withProperty(field_176591_a, Integer.valueOf(MathHelper.clamp_int(p_176590_4_, 0, 3))), 2);
+        worldIn.updateComparatorOutputLevel(p_176590_2_, this);
     }
 
     /**
-     * currently only used by BlockCauldron to incrament meta-data during rain
+     * Called similar to random ticks, but only when it is raining.
      */
-    public void fillWithRain(World p_149639_1_, int p_149639_2_, int p_149639_3_, int p_149639_4_)
+    public void fillWithRain(World worldIn, BlockPos pos)
     {
-        if (p_149639_1_.rand.nextInt(20) == 1)
+        if (worldIn.rand.nextInt(20) == 1)
         {
-            int var5 = p_149639_1_.getBlockMetadata(p_149639_2_, p_149639_3_, p_149639_4_);
+            IBlockState var3 = worldIn.getBlockState(pos);
 
-            if (var5 < 3)
+            if (((Integer)var3.getValue(field_176591_a)).intValue() < 3)
             {
-                p_149639_1_.setBlockMetadataWithNotify(p_149639_2_, p_149639_3_, p_149639_4_, var5 + 1, 2);
+                worldIn.setBlockState(pos, var3.cycleProperty(field_176591_a), 2);
             }
         }
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.cauldron;
     }
 
-    /**
-     * Gets an item for the block being called on. Args: world, x, y, z
-     */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public Item getItem(World worldIn, BlockPos pos)
     {
         return Items.cauldron;
     }
@@ -225,20 +255,29 @@ public class BlockCauldron extends Block
         return true;
     }
 
-    public int getComparatorInputOverride(World p_149736_1_, int p_149736_2_, int p_149736_3_, int p_149736_4_, int p_149736_5_)
+    public int getComparatorInputOverride(World worldIn, BlockPos pos)
     {
-        int var6 = p_149736_1_.getBlockMetadata(p_149736_2_, p_149736_3_, p_149736_4_);
-        return func_150027_b(var6);
+        return ((Integer)worldIn.getBlockState(pos).getValue(field_176591_a)).intValue();
     }
 
-    public static int func_150027_b(int p_150027_0_)
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
     {
-        return p_150027_0_;
+        return this.getDefaultState().withProperty(field_176591_a, Integer.valueOf(meta));
     }
 
-    public static float func_150025_c(int p_150025_0_)
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
     {
-        int var1 = MathHelper.clamp_int(p_150025_0_, 0, 3);
-        return (float)(6 + 3 * var1) / 16.0F;
+        return ((Integer)state.getValue(field_176591_a)).intValue();
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {field_176591_a});
     }
 }

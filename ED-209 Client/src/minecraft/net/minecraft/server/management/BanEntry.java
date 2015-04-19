@@ -69,11 +69,11 @@ public abstract class BanEntry extends UserListEntry
         return this.banEndDate == null ? false : this.banEndDate.before(new Date());
     }
 
-    protected void func_152641_a(JsonObject p_152641_1_)
+    protected void onSerialization(JsonObject data)
     {
-        p_152641_1_.addProperty("created", dateFormat.format(this.banStartDate));
-        p_152641_1_.addProperty("source", this.bannedBy);
-        p_152641_1_.addProperty("expires", this.banEndDate == null ? "forever" : dateFormat.format(this.banEndDate));
-        p_152641_1_.addProperty("reason", this.reason);
+        data.addProperty("created", dateFormat.format(this.banStartDate));
+        data.addProperty("source", this.bannedBy);
+        data.addProperty("expires", this.banEndDate == null ? "forever" : dateFormat.format(this.banEndDate));
+        data.addProperty("reason", this.reason);
     }
 }

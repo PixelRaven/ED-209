@@ -6,16 +6,18 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public class EntityMooshroom extends EntityCow
 {
     private static final String __OBFID = "CL_00001645";
 
-    public EntityMooshroom(World p_i1687_1_)
+    public EntityMooshroom(World worldIn)
     {
-        super(p_i1687_1_);
+        super(worldIn);
         this.setSize(0.9F, 1.3F);
+        this.field_175506_bl = Blocks.mycelium;
     }
 
     /**
@@ -43,14 +45,20 @@ public class EntityMooshroom extends EntityCow
         if (var2 != null && var2.getItem() == Items.shears && this.getGrowingAge() >= 0)
         {
             this.setDead();
-            this.worldObj.spawnParticle("largeexplode", this.posX, this.posY + (double)(this.height / 2.0F), this.posZ, 0.0D, 0.0D, 0.0D);
+            this.worldObj.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE, this.posX, this.posY + (double)(this.height / 2.0F), this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
 
-            if (!this.worldObj.isClient)
+            if (!this.worldObj.isRemote)
             {
                 EntityCow var3 = new EntityCow(this.worldObj);
                 var3.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
                 var3.setHealth(this.getHealth());
                 var3.renderYawOffset = this.renderYawOffset;
+
+                if (this.hasCustomName())
+                {
+                    var3.setCustomNameTag(this.getCustomNameTag());
+                }
+
                 this.worldObj.spawnEntityInWorld(var3);
 
                 for (int var4 = 0; var4 < 5; ++var4)

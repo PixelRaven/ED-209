@@ -10,6 +10,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.util.BlockPos;
 
 public class CommandBanPlayer extends CommandBase
 {
@@ -28,7 +29,7 @@ public class CommandBanPlayer extends CommandBase
         return 3;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.ban.usage";
     }
@@ -36,41 +37,41 @@ public class CommandBanPlayer extends CommandBase
     /**
      * Returns true if the given command sender is allowed to use this command.
      */
-    public boolean canCommandSenderUseCommand(ICommandSender p_71519_1_)
+    public boolean canCommandSenderUseCommand(ICommandSender sender)
     {
-        return MinecraftServer.getServer().getConfigurationManager().func_152608_h().func_152689_b() && super.canCommandSenderUseCommand(p_71519_1_);
+        return MinecraftServer.getServer().getConfigurationManager().getBannedPlayers().isLanServer() && super.canCommandSenderUseCommand(sender);
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length >= 1 && p_71515_2_[0].length() > 0)
+        if (args.length >= 1 && args[0].length() > 0)
         {
             MinecraftServer var3 = MinecraftServer.getServer();
-            GameProfile var4 = var3.func_152358_ax().func_152655_a(p_71515_2_[0]);
+            GameProfile var4 = var3.getPlayerProfileCache().getGameProfileForUsername(args[0]);
 
             if (var4 == null)
             {
-                throw new CommandException("commands.ban.failed", new Object[] {p_71515_2_[0]});
+                throw new CommandException("commands.ban.failed", new Object[] {args[0]});
             }
             else
             {
                 String var5 = null;
 
-                if (p_71515_2_.length >= 2)
+                if (args.length >= 2)
                 {
-                    var5 = func_147178_a(p_71515_1_, p_71515_2_, 1).getUnformattedText();
+                    var5 = getChatComponentFromNthArg(sender, args, 1).getUnformattedText();
                 }
 
-                UserListBansEntry var6 = new UserListBansEntry(var4, (Date)null, p_71515_1_.getCommandSenderName(), (Date)null, var5);
-                var3.getConfigurationManager().func_152608_h().func_152687_a(var6);
-                EntityPlayerMP var7 = var3.getConfigurationManager().func_152612_a(p_71515_2_[0]);
+                UserListBansEntry var6 = new UserListBansEntry(var4, (Date)null, sender.getName(), (Date)null, var5);
+                var3.getConfigurationManager().getBannedPlayers().addEntry(var6);
+                EntityPlayerMP var7 = var3.getConfigurationManager().getPlayerByUsername(args[0]);
 
                 if (var7 != null)
                 {
                     var7.playerNetServerHandler.kickPlayerFromServer("You are banned from this server.");
                 }
 
-                func_152373_a(p_71515_1_, this, "commands.ban.success", new Object[] {p_71515_2_[0]});
+                notifyOperators(sender, this, "commands.ban.success", new Object[] {args[0]});
             }
         }
         else
@@ -79,11 +80,8 @@ public class CommandBanPlayer extends CommandBase
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length >= 1 ? getListOfStringsMatchingLastWord(p_71516_2_, MinecraftServer.getServer().getAllUsernames()) : null;
+        return args.length >= 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
     }
 }

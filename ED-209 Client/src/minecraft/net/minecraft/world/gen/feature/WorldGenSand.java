@@ -4,6 +4,7 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenSand extends WorldGenerator
@@ -20,33 +21,34 @@ public class WorldGenSand extends WorldGenerator
         this.radius = p_i45462_2_;
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        if (p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_).getMaterial() != Material.water)
+        if (worldIn.getBlockState(p_180709_3_).getBlock().getMaterial() != Material.water)
         {
             return false;
         }
         else
         {
-            int var6 = p_76484_2_.nextInt(this.radius - 2) + 2;
-            byte var7 = 2;
+            int var4 = p_180709_2_.nextInt(this.radius - 2) + 2;
+            byte var5 = 2;
 
-            for (int var8 = p_76484_3_ - var6; var8 <= p_76484_3_ + var6; ++var8)
+            for (int var6 = p_180709_3_.getX() - var4; var6 <= p_180709_3_.getX() + var4; ++var6)
             {
-                for (int var9 = p_76484_5_ - var6; var9 <= p_76484_5_ + var6; ++var9)
+                for (int var7 = p_180709_3_.getZ() - var4; var7 <= p_180709_3_.getZ() + var4; ++var7)
                 {
-                    int var10 = var8 - p_76484_3_;
-                    int var11 = var9 - p_76484_5_;
+                    int var8 = var6 - p_180709_3_.getX();
+                    int var9 = var7 - p_180709_3_.getZ();
 
-                    if (var10 * var10 + var11 * var11 <= var6 * var6)
+                    if (var8 * var8 + var9 * var9 <= var4 * var4)
                     {
-                        for (int var12 = p_76484_4_ - var7; var12 <= p_76484_4_ + var7; ++var12)
+                        for (int var10 = p_180709_3_.getY() - var5; var10 <= p_180709_3_.getY() + var5; ++var10)
                         {
-                            Block var13 = p_76484_1_.getBlock(var8, var12, var9);
+                            BlockPos var11 = new BlockPos(var6, var10, var7);
+                            Block var12 = worldIn.getBlockState(var11).getBlock();
 
-                            if (var13 == Blocks.dirt || var13 == Blocks.grass)
+                            if (var12 == Blocks.dirt || var12 == Blocks.grass)
                             {
-                                p_76484_1_.setBlock(var8, var12, var9, this.field_150517_a, 0, 2);
+                                worldIn.setBlockState(var11, this.field_150517_a.getDefaultState(), 2);
                             }
                         }
                     }

@@ -6,14 +6,14 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
-public class S10PacketSpawnPainting extends Packet
+public class S10PacketSpawnPainting implements Packet
 {
     private int field_148973_a;
-    private int field_148971_b;
-    private int field_148972_c;
-    private int field_148969_d;
-    private int field_148970_e;
+    private BlockPos field_179838_b;
+    private EnumFacing field_179839_c;
     private String field_148968_f;
     private static final String __OBFID = "CL_00001280";
 
@@ -22,50 +22,36 @@ public class S10PacketSpawnPainting extends Packet
     public S10PacketSpawnPainting(EntityPainting p_i45170_1_)
     {
         this.field_148973_a = p_i45170_1_.getEntityId();
-        this.field_148971_b = p_i45170_1_.field_146063_b;
-        this.field_148972_c = p_i45170_1_.field_146064_c;
-        this.field_148969_d = p_i45170_1_.field_146062_d;
-        this.field_148970_e = p_i45170_1_.hangingDirection;
+        this.field_179838_b = p_i45170_1_.func_174857_n();
+        this.field_179839_c = p_i45170_1_.field_174860_b;
         this.field_148968_f = p_i45170_1_.art.title;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_148973_a = p_148837_1_.readVarIntFromBuffer();
-        this.field_148968_f = p_148837_1_.readStringFromBuffer(EntityPainting.EnumArt.maxArtTitleLength);
-        this.field_148971_b = p_148837_1_.readInt();
-        this.field_148972_c = p_148837_1_.readInt();
-        this.field_148969_d = p_148837_1_.readInt();
-        this.field_148970_e = p_148837_1_.readInt();
+        this.field_148973_a = data.readVarIntFromBuffer();
+        this.field_148968_f = data.readStringFromBuffer(EntityPainting.EnumArt.field_180001_A);
+        this.field_179838_b = data.readBlockPos();
+        this.field_179839_c = EnumFacing.getHorizontal(data.readUnsignedByte());
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeVarIntToBuffer(this.field_148973_a);
-        p_148840_1_.writeStringToBuffer(this.field_148968_f);
-        p_148840_1_.writeInt(this.field_148971_b);
-        p_148840_1_.writeInt(this.field_148972_c);
-        p_148840_1_.writeInt(this.field_148969_d);
-        p_148840_1_.writeInt(this.field_148970_e);
+        data.writeVarIntToBuffer(this.field_148973_a);
+        data.writeString(this.field_148968_f);
+        data.writeBlockPos(this.field_179838_b);
+        data.writeByte(this.field_179839_c.getHorizontalIndex());
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180722_a(INetHandlerPlayClient p_180722_1_)
     {
-        p_148833_1_.handleSpawnPainting(this);
-    }
-
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
-    {
-        return String.format("id=%d, type=%s, x=%d, y=%d, z=%d", new Object[] {Integer.valueOf(this.field_148973_a), this.field_148968_f, Integer.valueOf(this.field_148971_b), Integer.valueOf(this.field_148972_c), Integer.valueOf(this.field_148969_d)});
+        p_180722_1_.handleSpawnPainting(this);
     }
 
     public int func_148965_c()
@@ -73,24 +59,14 @@ public class S10PacketSpawnPainting extends Packet
         return this.field_148973_a;
     }
 
-    public int func_148964_d()
+    public BlockPos func_179837_b()
     {
-        return this.field_148971_b;
+        return this.field_179838_b;
     }
 
-    public int func_148963_e()
+    public EnumFacing func_179836_c()
     {
-        return this.field_148972_c;
-    }
-
-    public int func_148962_f()
-    {
-        return this.field_148969_d;
-    }
-
-    public int func_148966_g()
-    {
-        return this.field_148970_e;
+        return this.field_179839_c;
     }
 
     public String func_148961_h()
@@ -98,8 +74,11 @@ public class S10PacketSpawnPainting extends Packet
         return this.field_148968_f;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180722_a((INetHandlerPlayClient)handler);
     }
 }

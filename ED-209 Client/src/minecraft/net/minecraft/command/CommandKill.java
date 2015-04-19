@@ -1,8 +1,7 @@
 package net.minecraft.command;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.DamageSource;
 
 public class CommandKill extends CommandBase
 {
@@ -18,18 +17,35 @@ public class CommandKill extends CommandBase
      */
     public int getRequiredPermissionLevel()
     {
-        return 0;
+        return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.kill.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        EntityPlayerMP var3 = getCommandSenderAsPlayer(p_71515_1_);
-        var3.attackEntityFrom(DamageSource.outOfWorld, Float.MAX_VALUE);
-        p_71515_1_.addChatMessage(new ChatComponentTranslation("commands.kill.success", new Object[0]));
+        if (args.length == 0)
+        {
+            EntityPlayerMP var4 = getCommandSenderAsPlayer(sender);
+            var4.func_174812_G();
+            notifyOperators(sender, this, "commands.kill.successful", new Object[] {var4.getDisplayName()});
+        }
+        else
+        {
+            Entity var3 = func_175768_b(sender, args[0]);
+            var3.func_174812_G();
+            notifyOperators(sender, this, "commands.kill.successful", new Object[] {var3.getDisplayName()});
+        }
+    }
+
+    /**
+     * Return whether the specified command parameter index is a username parameter.
+     */
+    public boolean isUsernameIndex(String[] args, int index)
+    {
+        return index == 0;
     }
 }

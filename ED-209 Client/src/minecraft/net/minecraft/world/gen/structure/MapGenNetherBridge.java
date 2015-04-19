@@ -1,6 +1,6 @@
 package net.minecraft.world.gen.structure;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.entity.monster.EntityBlaze;
@@ -12,7 +12,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 public class MapGenNetherBridge extends MapGenStructure
 {
-    private List spawnList = new ArrayList();
+    private List spawnList = Lists.newArrayList();
     private static final String __OBFID = "CL_00000451";
 
     public MapGenNetherBridge()
@@ -23,7 +23,7 @@ public class MapGenNetherBridge extends MapGenStructure
         this.spawnList.add(new BiomeGenBase.SpawnListEntry(EntityMagmaCube.class, 3, 4, 4));
     }
 
-    public String func_143025_a()
+    public String getStructureName()
     {
         return "Fortress";
     }
@@ -53,13 +53,13 @@ public class MapGenNetherBridge extends MapGenStructure
 
         public Start() {}
 
-        public Start(World p_i2040_1_, Random p_i2040_2_, int p_i2040_3_, int p_i2040_4_)
+        public Start(World worldIn, Random p_i2040_2_, int p_i2040_3_, int p_i2040_4_)
         {
             super(p_i2040_3_, p_i2040_4_);
             StructureNetherBridgePieces.Start var5 = new StructureNetherBridgePieces.Start(p_i2040_2_, (p_i2040_3_ << 4) + 2, (p_i2040_4_ << 4) + 2);
             this.components.add(var5);
             var5.buildComponent(var5, this.components, p_i2040_2_);
-            ArrayList var6 = var5.field_74967_d;
+            List var6 = var5.field_74967_d;
 
             while (!var6.isEmpty())
             {
@@ -69,7 +69,7 @@ public class MapGenNetherBridge extends MapGenStructure
             }
 
             this.updateBoundingBox();
-            this.setRandomHeight(p_i2040_1_, p_i2040_2_, 48, 70);
+            this.setRandomHeight(worldIn, p_i2040_2_, 48, 70);
         }
     }
 }

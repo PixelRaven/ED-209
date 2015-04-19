@@ -1,14 +1,16 @@
 package net.minecraft.command;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import org.apache.logging.log4j.LogManager;
@@ -19,108 +21,108 @@ public class CommandHandler implements ICommandManager
     private static final Logger logger = LogManager.getLogger();
 
     /** Map of Strings to the ICommand objects they represent */
-    private final Map commandMap = new HashMap();
+    private final Map commandMap = Maps.newHashMap();
 
     /** The set of ICommand objects currently loaded. */
-    private final Set commandSet = new HashSet();
+    private final Set commandSet = Sets.newHashSet();
     private static final String __OBFID = "CL_00001765";
 
-    public int executeCommand(ICommandSender p_71556_1_, String p_71556_2_)
+    public int executeCommand(ICommandSender sender, String command)
     {
-        p_71556_2_ = p_71556_2_.trim();
+        command = command.trim();
 
-        if (p_71556_2_.startsWith("/"))
+        if (command.startsWith("/"))
         {
-            p_71556_2_ = p_71556_2_.substring(1);
+            command = command.substring(1);
         }
 
-        String[] var3 = p_71556_2_.split(" ");
+        String[] var3 = command.split(" ");
         String var4 = var3[0];
         var3 = dropFirstString(var3);
         ICommand var5 = (ICommand)this.commandMap.get(var4);
         int var6 = this.getUsernameIndex(var5, var3);
         int var7 = 0;
-        ChatComponentTranslation var9;
+        ChatComponentTranslation var8;
 
-        try
+        if (var5 == null)
         {
-            if (var5 == null)
+            var8 = new ChatComponentTranslation("commands.generic.notFound", new Object[0]);
+            var8.getChatStyle().setColor(EnumChatFormatting.RED);
+            sender.addChatMessage(var8);
+        }
+        else if (var5.canCommandSenderUseCommand(sender))
+        {
+            if (var6 > -1)
             {
-                throw new CommandNotFoundException();
-            }
+                List var12 = PlayerSelector.func_179656_b(sender, var3[var6], Entity.class);
+                String var9 = var3[var6];
+                sender.func_174794_a(CommandResultStats.Type.AFFECTED_ENTITIES, var12.size());
+                Iterator var10 = var12.iterator();
 
-            if (var5.canCommandSenderUseCommand(p_71556_1_))
-            {
-                if (var6 > -1)
+                while (var10.hasNext())
                 {
-                    EntityPlayerMP[] var8 = PlayerSelector.matchPlayers(p_71556_1_, var3[var6]);
-                    String var22 = var3[var6];
-                    EntityPlayerMP[] var10 = var8;
-                    int var11 = var8.length;
+                    Entity var11 = (Entity)var10.next();
+                    var3[var6] = var11.getUniqueID().toString();
 
-                    for (int var12 = 0; var12 < var11; ++var12)
+                    if (this.func_175786_a(sender, var3, var5, command))
                     {
-                        EntityPlayerMP var13 = var10[var12];
-                        var3[var6] = var13.getCommandSenderName();
-
-                        try
-                        {
-                            var5.processCommand(p_71556_1_, var3);
-                            ++var7;
-                        }
-                        catch (CommandException var17)
-                        {
-                            ChatComponentTranslation var15 = new ChatComponentTranslation(var17.getMessage(), var17.getErrorOjbects());
-                            var15.getChatStyle().setColor(EnumChatFormatting.RED);
-                            p_71556_1_.addChatMessage(var15);
-                        }
-                    }
-
-                    var3[var6] = var22;
-                }
-                else
-                {
-                    try
-                    {
-                        var5.processCommand(p_71556_1_, var3);
                         ++var7;
                     }
-                    catch (CommandException var16)
-                    {
-                        var9 = new ChatComponentTranslation(var16.getMessage(), var16.getErrorOjbects());
-                        var9.getChatStyle().setColor(EnumChatFormatting.RED);
-                        p_71556_1_.addChatMessage(var9);
-                    }
                 }
+
+                var3[var6] = var9;
             }
             else
             {
-                ChatComponentTranslation var21 = new ChatComponentTranslation("commands.generic.permission", new Object[0]);
-                var21.getChatStyle().setColor(EnumChatFormatting.RED);
-                p_71556_1_.addChatMessage(var21);
+                sender.func_174794_a(CommandResultStats.Type.AFFECTED_ENTITIES, 1);
+
+                if (this.func_175786_a(sender, var3, var5, command))
+                {
+                    ++var7;
+                }
             }
         }
-        catch (WrongUsageException var18)
+        else
         {
-            var9 = new ChatComponentTranslation("commands.generic.usage", new Object[] {new ChatComponentTranslation(var18.getMessage(), var18.getErrorOjbects())});
-            var9.getChatStyle().setColor(EnumChatFormatting.RED);
-            p_71556_1_.addChatMessage(var9);
-        }
-        catch (CommandException var19)
-        {
-            var9 = new ChatComponentTranslation(var19.getMessage(), var19.getErrorOjbects());
-            var9.getChatStyle().setColor(EnumChatFormatting.RED);
-            p_71556_1_.addChatMessage(var9);
-        }
-        catch (Throwable var20)
-        {
-            var9 = new ChatComponentTranslation("commands.generic.exception", new Object[0]);
-            var9.getChatStyle().setColor(EnumChatFormatting.RED);
-            p_71556_1_.addChatMessage(var9);
-            logger.error("Couldn\'t process command: \'" + p_71556_2_ + "\'", var20);
+            var8 = new ChatComponentTranslation("commands.generic.permission", new Object[0]);
+            var8.getChatStyle().setColor(EnumChatFormatting.RED);
+            sender.addChatMessage(var8);
         }
 
+        sender.func_174794_a(CommandResultStats.Type.SUCCESS_COUNT, var7);
         return var7;
+    }
+
+    protected boolean func_175786_a(ICommandSender p_175786_1_, String[] p_175786_2_, ICommand p_175786_3_, String p_175786_4_)
+    {
+        ChatComponentTranslation var6;
+
+        try
+        {
+            p_175786_3_.processCommand(p_175786_1_, p_175786_2_);
+            return true;
+        }
+        catch (WrongUsageException var7)
+        {
+            var6 = new ChatComponentTranslation("commands.generic.usage", new Object[] {new ChatComponentTranslation(var7.getMessage(), var7.getErrorOjbects())});
+            var6.getChatStyle().setColor(EnumChatFormatting.RED);
+            p_175786_1_.addChatMessage(var6);
+        }
+        catch (CommandException var8)
+        {
+            var6 = new ChatComponentTranslation(var8.getMessage(), var8.getErrorOjbects());
+            var6.getChatStyle().setColor(EnumChatFormatting.RED);
+            p_175786_1_.addChatMessage(var6);
+        }
+        catch (Throwable var9)
+        {
+            var6 = new ChatComponentTranslation("commands.generic.exception", new Object[0]);
+            var6.getChatStyle().setColor(EnumChatFormatting.RED);
+            p_175786_1_.addChatMessage(var6);
+            logger.error("Couldn\'t process command: \'" + p_175786_4_ + "\'", var9);
+        }
+
+        return false;
     }
 
     /**
@@ -128,23 +130,18 @@ public class CommandHandler implements ICommandManager
      */
     public ICommand registerCommand(ICommand p_71560_1_)
     {
-        List var2 = p_71560_1_.getCommandAliases();
         this.commandMap.put(p_71560_1_.getCommandName(), p_71560_1_);
         this.commandSet.add(p_71560_1_);
+        Iterator var2 = p_71560_1_.getCommandAliases().iterator();
 
-        if (var2 != null)
+        while (var2.hasNext())
         {
-            Iterator var3 = var2.iterator();
+            String var3 = (String)var2.next();
+            ICommand var4 = (ICommand)this.commandMap.get(var3);
 
-            while (var3.hasNext())
+            if (var4 == null || !var4.getCommandName().equals(var3))
             {
-                String var4 = (String)var3.next();
-                ICommand var5 = (ICommand)this.commandMap.get(var4);
-
-                if (var5 == null || !var5.getCommandName().equals(var4))
-                {
-                    this.commandMap.put(var4, p_71560_1_);
-                }
+                this.commandMap.put(var3, p_71560_1_);
             }
         }
 
@@ -157,49 +154,41 @@ public class CommandHandler implements ICommandManager
     private static String[] dropFirstString(String[] p_71559_0_)
     {
         String[] var1 = new String[p_71559_0_.length - 1];
-
-        for (int var2 = 1; var2 < p_71559_0_.length; ++var2)
-        {
-            var1[var2 - 1] = p_71559_0_[var2];
-        }
-
+        System.arraycopy(p_71559_0_, 1, var1, 0, p_71559_0_.length - 1);
         return var1;
     }
 
-    /**
-     * Performs a "begins with" string match on each token in par2. Only returns commands that par1 can use.
-     */
-    public List getPossibleCommands(ICommandSender p_71558_1_, String p_71558_2_)
+    public List getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos)
     {
-        String[] var3 = p_71558_2_.split(" ", -1);
-        String var4 = var3[0];
+        String[] var4 = input.split(" ", -1);
+        String var5 = var4[0];
 
-        if (var3.length == 1)
+        if (var4.length == 1)
         {
-            ArrayList var8 = new ArrayList();
-            Iterator var6 = this.commandMap.entrySet().iterator();
+            ArrayList var9 = Lists.newArrayList();
+            Iterator var7 = this.commandMap.entrySet().iterator();
 
-            while (var6.hasNext())
+            while (var7.hasNext())
             {
-                Entry var7 = (Entry)var6.next();
+                Entry var8 = (Entry)var7.next();
 
-                if (CommandBase.doesStringStartWith(var4, (String)var7.getKey()) && ((ICommand)var7.getValue()).canCommandSenderUseCommand(p_71558_1_))
+                if (CommandBase.doesStringStartWith(var5, (String)var8.getKey()) && ((ICommand)var8.getValue()).canCommandSenderUseCommand(sender))
                 {
-                    var8.add(var7.getKey());
+                    var9.add(var8.getKey());
                 }
             }
 
-            return var8;
+            return var9;
         }
         else
         {
-            if (var3.length > 1)
+            if (var4.length > 1)
             {
-                ICommand var5 = (ICommand)this.commandMap.get(var4);
+                ICommand var6 = (ICommand)this.commandMap.get(var5);
 
-                if (var5 != null)
+                if (var6 != null && var6.canCommandSenderUseCommand(sender))
                 {
-                    return var5.addTabCompletionOptions(p_71558_1_, dropFirstString(var3));
+                    return var6.addTabCompletionOptions(sender, dropFirstString(var4), pos);
                 }
             }
 
@@ -210,16 +199,16 @@ public class CommandHandler implements ICommandManager
     /**
      * returns all commands that the commandSender can use
      */
-    public List getPossibleCommands(ICommandSender p_71557_1_)
+    public List getPossibleCommands(ICommandSender sender)
     {
-        ArrayList var2 = new ArrayList();
+        ArrayList var2 = Lists.newArrayList();
         Iterator var3 = this.commandSet.iterator();
 
         while (var3.hasNext())
         {
             ICommand var4 = (ICommand)var3.next();
 
-            if (var4.canCommandSenderUseCommand(p_71557_1_))
+            if (var4.canCommandSenderUseCommand(sender))
             {
                 var2.add(var4);
             }

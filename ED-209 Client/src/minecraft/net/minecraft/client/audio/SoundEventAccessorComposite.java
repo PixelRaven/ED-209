@@ -8,28 +8,29 @@ import net.minecraft.util.ResourceLocation;
 
 public class SoundEventAccessorComposite implements ISoundEventAccessor
 {
-    private final List field_148736_a = Lists.newArrayList();
-    private final Random field_148734_b = new Random();
-    private final ResourceLocation field_148735_c;
-    private final SoundCategory field_148732_d;
-    private double field_148733_e;
-    private double field_148731_f;
+    /** A composite (List) of ISoundEventAccessors */
+    private final List soundPool = Lists.newArrayList();
+    private final Random rnd = new Random();
+    private final ResourceLocation soundLocation;
+    private final SoundCategory category;
+    private double eventPitch;
+    private double eventVolume;
     private static final String __OBFID = "CL_00001146";
 
-    public SoundEventAccessorComposite(ResourceLocation p_i45120_1_, double p_i45120_2_, double p_i45120_4_, SoundCategory p_i45120_6_)
+    public SoundEventAccessorComposite(ResourceLocation soundLocation, double pitch, double volume, SoundCategory category)
     {
-        this.field_148735_c = p_i45120_1_;
-        this.field_148731_f = p_i45120_4_;
-        this.field_148733_e = p_i45120_2_;
-        this.field_148732_d = p_i45120_6_;
+        this.soundLocation = soundLocation;
+        this.eventVolume = volume;
+        this.eventPitch = pitch;
+        this.category = category;
     }
 
-    public int func_148721_a()
+    public int getWeight()
     {
         int var1 = 0;
         ISoundEventAccessor var3;
 
-        for (Iterator var2 = this.field_148736_a.iterator(); var2.hasNext(); var1 += var3.func_148721_a())
+        for (Iterator var2 = this.soundPool.iterator(); var2.hasNext(); var1 += var3.getWeight())
         {
             var3 = (ISoundEventAccessor)var2.next();
         }
@@ -37,51 +38,51 @@ public class SoundEventAccessorComposite implements ISoundEventAccessor
         return var1;
     }
 
-    public SoundPoolEntry func_148720_g()
+    public SoundPoolEntry cloneEntry()
     {
-        int var1 = this.func_148721_a();
+        int var1 = this.getWeight();
 
-        if (!this.field_148736_a.isEmpty() && var1 != 0)
+        if (!this.soundPool.isEmpty() && var1 != 0)
         {
-            int var2 = this.field_148734_b.nextInt(var1);
-            Iterator var3 = this.field_148736_a.iterator();
+            int var2 = this.rnd.nextInt(var1);
+            Iterator var3 = this.soundPool.iterator();
             ISoundEventAccessor var4;
 
             do
             {
                 if (!var3.hasNext())
                 {
-                    return SoundHandler.field_147700_a;
+                    return SoundHandler.missing_sound;
                 }
 
                 var4 = (ISoundEventAccessor)var3.next();
-                var2 -= var4.func_148721_a();
+                var2 -= var4.getWeight();
             }
             while (var2 >= 0);
 
-            SoundPoolEntry var5 = (SoundPoolEntry)var4.func_148720_g();
-            var5.func_148651_a(var5.func_148650_b() * this.field_148733_e);
-            var5.func_148647_b(var5.func_148649_c() * this.field_148731_f);
+            SoundPoolEntry var5 = (SoundPoolEntry)var4.cloneEntry();
+            var5.setPitch(var5.getPitch() * this.eventPitch);
+            var5.setVolume(var5.getVolume() * this.eventVolume);
             return var5;
         }
         else
         {
-            return SoundHandler.field_147700_a;
+            return SoundHandler.missing_sound;
         }
     }
 
-    public void func_148727_a(ISoundEventAccessor p_148727_1_)
+    public void addSoundToEventPool(ISoundEventAccessor p_148727_1_)
     {
-        this.field_148736_a.add(p_148727_1_);
+        this.soundPool.add(p_148727_1_);
     }
 
-    public ResourceLocation func_148729_c()
+    public ResourceLocation getSoundEventLocation()
     {
-        return this.field_148735_c;
+        return this.soundLocation;
     }
 
-    public SoundCategory func_148728_d()
+    public SoundCategory getSoundCategory()
     {
-        return this.field_148732_d;
+        return this.category;
     }
 }

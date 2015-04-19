@@ -1,13 +1,15 @@
 package net.minecraft.world;
 
 import net.minecraft.init.Blocks;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.biome.WorldChunkManagerHell;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderDebug;
 import net.minecraft.world.gen.ChunkProviderFlat;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.FlatGeneratorInfo;
@@ -17,41 +19,41 @@ public abstract class WorldProvider
     public static final float[] moonPhaseFactors = new float[] {1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
 
     /** world object being used */
-    public World worldObj;
-    public WorldType terrainType;
-    public String field_82913_c;
+    protected World worldObj;
+    private WorldType terrainType;
+    private String generatorSettings;
 
     /** World chunk manager being used to generate chunks */
-    public WorldChunkManager worldChunkMgr;
+    protected WorldChunkManager worldChunkMgr;
 
     /**
      * States whether the Hell world provider is used(true) or if the normal world provider is used(false)
      */
-    public boolean isHellWorld;
+    protected boolean isHellWorld;
 
     /**
      * A boolean that tells if a world does not have a sky. Used in calculating weather and skylight
      */
-    public boolean hasNoSky;
+    protected boolean hasNoSky;
 
     /** Light to brightness conversion table */
-    public float[] lightBrightnessTable = new float[16];
+    protected final float[] lightBrightnessTable = new float[16];
 
     /** The id for the dimension (ex. -1: Nether, 0: Overworld, 1: The End) */
-    public int dimensionId;
+    protected int dimensionId;
 
     /** Array for sunrise/sunset colors (RGBA) */
-    private float[] colorsSunriseSunset = new float[4];
+    private final float[] colorsSunriseSunset = new float[4];
     private static final String __OBFID = "CL_00000386";
 
     /**
      * associate an existing world with a World provider, and setup its lightbrightness table
      */
-    public final void registerWorld(World p_76558_1_)
+    public final void registerWorld(World worldIn)
     {
-        this.worldObj = p_76558_1_;
-        this.terrainType = p_76558_1_.getWorldInfo().getTerrainType();
-        this.field_82913_c = p_76558_1_.getWorldInfo().getGeneratorOptions();
+        this.worldObj = worldIn;
+        this.terrainType = worldIn.getWorldInfo().getTerrainType();
+        this.generatorSettings = worldIn.getWorldInfo().getGeneratorOptions();
         this.registerWorldChunkManager();
         this.generateLightBrightnessTable();
     }
@@ -75,10 +77,16 @@ public abstract class WorldProvider
      */
     protected void registerWorldChunkManager()
     {
-        if (this.worldObj.getWorldInfo().getTerrainType() == WorldType.FLAT)
+        WorldType var1 = this.worldObj.getWorldInfo().getTerrainType();
+
+        if (var1 == WorldType.FLAT)
         {
-            FlatGeneratorInfo var1 = FlatGeneratorInfo.createFlatGeneratorFromString(this.worldObj.getWorldInfo().getGeneratorOptions());
-            this.worldChunkMgr = new WorldChunkManagerHell(BiomeGenBase.func_150568_d(var1.getBiome()), 0.5F);
+            FlatGeneratorInfo var2 = FlatGeneratorInfo.createFlatGeneratorFromString(this.worldObj.getWorldInfo().getGeneratorOptions());
+            this.worldChunkMgr = new WorldChunkManagerHell(BiomeGenBase.getBiomeFromBiomeList(var2.getBiome(), BiomeGenBase.field_180279_ad), 0.5F);
+        }
+        else if (var1 == WorldType.DEBUG_WORLD)
+        {
+            this.worldChunkMgr = new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
         }
         else
         {
@@ -91,15 +99,15 @@ public abstract class WorldProvider
      */
     public IChunkProvider createChunkGenerator()
     {
-        return (IChunkProvider)(this.terrainType == WorldType.FLAT ? new ChunkProviderFlat(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.field_82913_c) : new ChunkProviderGenerate(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled()));
+        return (IChunkProvider)(this.terrainType == WorldType.FLAT ? new ChunkProviderFlat(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings) : (this.terrainType == WorldType.DEBUG_WORLD ? new ChunkProviderDebug(this.worldObj) : (this.terrainType == WorldType.CUSTOMIZED ? new ChunkProviderGenerate(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings) : new ChunkProviderGenerate(this.worldObj, this.worldObj.getSeed(), this.worldObj.getWorldInfo().isMapFeaturesEnabled(), this.generatorSettings))));
     }
 
     /**
      * Will check if the x, z position specified is alright to be set as the map spawn point
      */
-    public boolean canCoordinateBeSpawn(int p_76566_1_, int p_76566_2_)
+    public boolean canCoordinateBeSpawn(int x, int z)
     {
-        return this.worldObj.getTopBlock(p_76566_1_, p_76566_2_) == Blocks.grass;
+        return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)) == Blocks.grass;
     }
 
     /**
@@ -171,24 +179,14 @@ public abstract class WorldProvider
     public Vec3 getFogColor(float p_76562_1_, float p_76562_2_)
     {
         float var3 = MathHelper.cos(p_76562_1_ * (float)Math.PI * 2.0F) * 2.0F + 0.5F;
-
-        if (var3 < 0.0F)
-        {
-            var3 = 0.0F;
-        }
-
-        if (var3 > 1.0F)
-        {
-            var3 = 1.0F;
-        }
-
+        var3 = MathHelper.clamp_float(var3, 0.0F, 1.0F);
         float var4 = 0.7529412F;
         float var5 = 0.84705883F;
         float var6 = 1.0F;
         var4 *= var3 * 0.94F + 0.06F;
         var5 *= var3 * 0.94F + 0.06F;
         var6 *= var3 * 0.91F + 0.09F;
-        return Vec3.createVectorHelper((double)var4, (double)var5, (double)var6);
+        return new Vec3((double)var4, (double)var5, (double)var6);
     }
 
     /**
@@ -199,9 +197,9 @@ public abstract class WorldProvider
         return true;
     }
 
-    public static WorldProvider getProviderForDimension(int p_76570_0_)
+    public static WorldProvider getProviderForDimension(int dimension)
     {
-        return (WorldProvider)(p_76570_0_ == -1 ? new WorldProviderHell() : (p_76570_0_ == 0 ? new WorldProviderSurface() : (p_76570_0_ == 1 ? new WorldProviderEnd() : null)));
+        return (WorldProvider)(dimension == -1 ? new WorldProviderHell() : (dimension == 0 ? new WorldProviderSurface() : (dimension == 1 ? new WorldProviderEnd() : null)));
     }
 
     /**
@@ -217,10 +215,7 @@ public abstract class WorldProvider
         return true;
     }
 
-    /**
-     * Gets the hard-coded portal location to use when entering this dimension.
-     */
-    public ChunkCoordinates getEntrancePortalLocation()
+    public BlockPos func_177496_h()
     {
         return null;
     }
@@ -228,15 +223,6 @@ public abstract class WorldProvider
     public int getAverageGroundLevel()
     {
         return this.terrainType == WorldType.FLAT ? 4 : 64;
-    }
-
-    /**
-     * returns true if this dimension is supposed to display void particles and pull in the far plane based on the
-     * user's Y offset.
-     */
-    public boolean getWorldHasVoidParticles()
-    {
-        return this.terrainType != WorldType.FLAT && !this.hasNoSky;
     }
 
     /**
@@ -261,4 +247,36 @@ public abstract class WorldProvider
      * Returns the dimension's name, e.g. "The End", "Nether", or "Overworld".
      */
     public abstract String getDimensionName();
+
+    public abstract String getInternalNameSuffix();
+
+    public WorldChunkManager getWorldChunkManager()
+    {
+        return this.worldChunkMgr;
+    }
+
+    public boolean func_177500_n()
+    {
+        return this.isHellWorld;
+    }
+
+    public boolean getHasNoSky()
+    {
+        return this.hasNoSky;
+    }
+
+    public float[] getLightBrightnessTable()
+    {
+        return this.lightBrightnessTable;
+    }
+
+    public int getDimensionId()
+    {
+        return this.dimensionId;
+    }
+
+    public WorldBorder getWorldBorder()
+    {
+        return new WorldBorder();
+    }
 }

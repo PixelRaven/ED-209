@@ -1,12 +1,14 @@
 package net.minecraft.enchantment;
 
+import net.minecraft.util.ResourceLocation;
+
 public class EnchantmentKnockback extends Enchantment
 {
     private static final String __OBFID = "CL_00000118";
 
-    protected EnchantmentKnockback(int p_i1933_1_, int p_i1933_2_)
+    protected EnchantmentKnockback(int p_i45768_1_, ResourceLocation p_i45768_2_, int p_i45768_3_)
     {
-        super(p_i1933_1_, p_i1933_2_, EnumEnchantmentType.weapon);
+        super(p_i45768_1_, p_i45768_2_, p_i45768_3_, EnumEnchantmentType.WEAPON);
         this.setName("knockback");
     }
 

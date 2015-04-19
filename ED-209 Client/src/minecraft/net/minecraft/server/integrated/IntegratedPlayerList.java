@@ -18,29 +18,32 @@ public class IntegratedPlayerList extends ServerConfigurationManager
     public IntegratedPlayerList(IntegratedServer p_i1314_1_)
     {
         super(p_i1314_1_);
-        this.func_152611_a(10);
+        this.setViewDistance(10);
     }
 
     /**
      * also stores the NBTTags if this is an intergratedPlayerList
      */
-    protected void writePlayerData(EntityPlayerMP p_72391_1_)
+    protected void writePlayerData(EntityPlayerMP playerIn)
     {
-        if (p_72391_1_.getCommandSenderName().equals(this.getServerInstance().getServerOwner()))
+        if (playerIn.getName().equals(this.func_180603_b().getServerOwner()))
         {
             this.hostPlayerData = new NBTTagCompound();
-            p_72391_1_.writeToNBT(this.hostPlayerData);
+            playerIn.writeToNBT(this.hostPlayerData);
         }
 
-        super.writePlayerData(p_72391_1_);
+        super.writePlayerData(playerIn);
     }
 
-    public String func_148542_a(SocketAddress p_148542_1_, GameProfile p_148542_2_)
+    /**
+     * checks ban-lists, then white-lists, then space for the server. Returns null on success, or an error message
+     */
+    public String allowUserToConnect(SocketAddress address, GameProfile profile)
     {
-        return p_148542_2_.getName().equalsIgnoreCase(this.getServerInstance().getServerOwner()) && this.func_152612_a(p_148542_2_.getName()) != null ? "That name is already taken." : super.func_148542_a(p_148542_1_, p_148542_2_);
+        return profile.getName().equalsIgnoreCase(this.func_180603_b().getServerOwner()) && this.getPlayerByUsername(profile.getName()) != null ? "That name is already taken." : super.allowUserToConnect(address, profile);
     }
 
-    public IntegratedServer getServerInstance()
+    public IntegratedServer func_180603_b()
     {
         return (IntegratedServer)super.getServerInstance();
     }
@@ -51,5 +54,10 @@ public class IntegratedPlayerList extends ServerConfigurationManager
     public NBTTagCompound getHostPlayerData()
     {
         return this.hostPlayerData;
+    }
+
+    public MinecraftServer getServerInstance()
+    {
+        return this.func_180603_b();
     }
 }

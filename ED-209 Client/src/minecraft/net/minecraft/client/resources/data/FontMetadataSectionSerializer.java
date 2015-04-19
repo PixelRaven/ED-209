@@ -40,11 +40,11 @@ public class FontMetadataSectionSerializer extends BaseMetadataSectionSerializer
 
                 JsonObject var12 = var11.getAsJsonObject("default");
                 var8 = JsonUtils.getJsonObjectFloatFieldValueOrDefault(var12, "width", var8);
-                Validate.inclusiveBetween(Float.valueOf(0.0F), Float.valueOf(Float.MAX_VALUE), Float.valueOf(var8), "Invalid default width", new Object[0]);
+                Validate.inclusiveBetween(0.0D, 3.4028234663852886E38D, (double)var8, "Invalid default width");
                 var9 = JsonUtils.getJsonObjectFloatFieldValueOrDefault(var12, "spacing", var9);
-                Validate.inclusiveBetween(Float.valueOf(0.0F), Float.valueOf(Float.MAX_VALUE), Float.valueOf(var9), "Invalid default spacing", new Object[0]);
+                Validate.inclusiveBetween(0.0D, 3.4028234663852886E38D, (double)var9, "Invalid default spacing");
                 var10 = JsonUtils.getJsonObjectFloatFieldValueOrDefault(var12, "left", var9);
-                Validate.inclusiveBetween(Float.valueOf(0.0F), Float.valueOf(Float.MAX_VALUE), Float.valueOf(var10), "Invalid default left", new Object[0]);
+                Validate.inclusiveBetween(0.0D, 3.4028234663852886E38D, (double)var10, "Invalid default left");
             }
 
             for (int var18 = 0; var18 < 256; ++var18)
@@ -56,13 +56,13 @@ public class FontMetadataSectionSerializer extends BaseMetadataSectionSerializer
 
                 if (var13 != null)
                 {
-                    JsonObject var17 = JsonUtils.getJsonElementAsJsonObject(var13, "characters[" + var18 + "]");
+                    JsonObject var17 = JsonUtils.getElementAsJsonObject(var13, "characters[" + var18 + "]");
                     var14 = JsonUtils.getJsonObjectFloatFieldValueOrDefault(var17, "width", var8);
-                    Validate.inclusiveBetween(Float.valueOf(0.0F), Float.valueOf(Float.MAX_VALUE), Float.valueOf(var14), "Invalid width", new Object[0]);
+                    Validate.inclusiveBetween(0.0D, 3.4028234663852886E38D, (double)var14, "Invalid width");
                     var15 = JsonUtils.getJsonObjectFloatFieldValueOrDefault(var17, "spacing", var9);
-                    Validate.inclusiveBetween(Float.valueOf(0.0F), Float.valueOf(Float.MAX_VALUE), Float.valueOf(var15), "Invalid spacing", new Object[0]);
+                    Validate.inclusiveBetween(0.0D, 3.4028234663852886E38D, (double)var15, "Invalid spacing");
                     var16 = JsonUtils.getJsonObjectFloatFieldValueOrDefault(var17, "left", var10);
-                    Validate.inclusiveBetween(Float.valueOf(0.0F), Float.valueOf(Float.MAX_VALUE), Float.valueOf(var16), "Invalid left", new Object[0]);
+                    Validate.inclusiveBetween(0.0D, 3.4028234663852886E38D, (double)var16, "Invalid left");
                 }
 
                 var5[var18] = var14;

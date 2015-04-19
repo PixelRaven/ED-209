@@ -5,82 +5,51 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.BlockPos;
 
-public class S05PacketSpawnPosition extends Packet
+public class S05PacketSpawnPosition implements Packet
 {
-    private int field_149364_a;
-    private int field_149362_b;
-    private int field_149363_c;
+    private BlockPos field_179801_a;
     private static final String __OBFID = "CL_00001336";
 
     public S05PacketSpawnPosition() {}
 
-    public S05PacketSpawnPosition(int p_i45229_1_, int p_i45229_2_, int p_i45229_3_)
+    public S05PacketSpawnPosition(BlockPos p_i45956_1_)
     {
-        this.field_149364_a = p_i45229_1_;
-        this.field_149362_b = p_i45229_2_;
-        this.field_149363_c = p_i45229_3_;
+        this.field_179801_a = p_i45956_1_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149364_a = p_148837_1_.readInt();
-        this.field_149362_b = p_148837_1_.readInt();
-        this.field_149363_c = p_148837_1_.readInt();
+        this.field_179801_a = data.readBlockPos();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149364_a);
-        p_148840_1_.writeInt(this.field_149362_b);
-        p_148840_1_.writeInt(this.field_149363_c);
+        data.writeBlockPos(this.field_179801_a);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180752_a(INetHandlerPlayClient p_180752_1_)
     {
-        p_148833_1_.handleSpawnPosition(this);
+        p_180752_1_.handleSpawnPosition(this);
     }
 
-    /**
-     * If true, the network manager will process the packet immediately when received, otherwise it will queue it for
-     * processing. Currently true for: Disconnect, LoginSuccess, KeepAlive, ServerQuery/Info, Ping/Pong
-     */
-    public boolean hasPriority()
+    public BlockPos func_179800_a()
     {
-        return false;
+        return this.field_179801_a;
     }
 
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandler handler)
     {
-        return String.format("x=%d, y=%d, z=%d", new Object[] {Integer.valueOf(this.field_149364_a), Integer.valueOf(this.field_149362_b), Integer.valueOf(this.field_149363_c)});
-    }
-
-    public int func_149360_c()
-    {
-        return this.field_149364_a;
-    }
-
-    public int func_149359_d()
-    {
-        return this.field_149362_b;
-    }
-
-    public int func_149358_e()
-    {
-        return this.field_149363_c;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180752_a((INetHandlerPlayClient)handler);
     }
 }

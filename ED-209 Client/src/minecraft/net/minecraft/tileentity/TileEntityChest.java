@@ -5,38 +5,61 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
-public class TileEntityChest extends TileEntity implements IInventory
+public class TileEntityChest extends TileEntityLockable implements IUpdatePlayerListBox, IInventory
 {
-    private ItemStack[] field_145985_p = new ItemStack[36];
-    public boolean field_145984_a;
-    public TileEntityChest field_145992_i;
-    public TileEntityChest field_145990_j;
-    public TileEntityChest field_145991_k;
-    public TileEntityChest field_145988_l;
-    public float field_145989_m;
-    public float field_145986_n;
-    public int field_145987_o;
-    private int field_145983_q;
-    private int field_145982_r;
-    private String field_145981_s;
+    private ItemStack[] chestContents = new ItemStack[27];
+
+    /** Determines if the check for adjacent chests has taken place. */
+    public boolean adjacentChestChecked;
+
+    /** Contains the chest tile located adjacent to this one (if any) */
+    public TileEntityChest adjacentChestZNeg;
+
+    /** Contains the chest tile located adjacent to this one (if any) */
+    public TileEntityChest adjacentChestXPos;
+
+    /** Contains the chest tile located adjacent to this one (if any) */
+    public TileEntityChest adjacentChestXNeg;
+
+    /** Contains the chest tile located adjacent to this one (if any) */
+    public TileEntityChest adjacentChestZPos;
+
+    /** The current angle of the lid (between 0 and 1) */
+    public float lidAngle;
+
+    /** The angle of the lid last tick */
+    public float prevLidAngle;
+
+    /** The number of players currently using this chest */
+    public int numPlayersUsing;
+
+    /** Server sync counter (once per 20 ticks) */
+    private int ticksSinceSync;
+    private int cachedChestType;
+    private String customName;
     private static final String __OBFID = "CL_00000346";
 
     public TileEntityChest()
     {
-        this.field_145982_r = -1;
+        this.cachedChestType = -1;
     }
 
     public TileEntityChest(int p_i2350_1_)
     {
-        this.field_145982_r = p_i2350_1_;
+        this.cachedChestType = p_i2350_1_;
     }
 
     /**
@@ -50,38 +73,38 @@ public class TileEntityChest extends TileEntity implements IInventory
     /**
      * Returns the stack in slot i
      */
-    public ItemStack getStackInSlot(int p_70301_1_)
+    public ItemStack getStackInSlot(int slotIn)
     {
-        return this.field_145985_p[p_70301_1_];
+        return this.chestContents[slotIn];
     }
 
     /**
      * Removes from an inventory slot (first arg) up to a specified number (second arg) of items and returns them in a
      * new stack.
      */
-    public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
+    public ItemStack decrStackSize(int index, int count)
     {
-        if (this.field_145985_p[p_70298_1_] != null)
+        if (this.chestContents[index] != null)
         {
             ItemStack var3;
 
-            if (this.field_145985_p[p_70298_1_].stackSize <= p_70298_2_)
+            if (this.chestContents[index].stackSize <= count)
             {
-                var3 = this.field_145985_p[p_70298_1_];
-                this.field_145985_p[p_70298_1_] = null;
-                this.onInventoryChanged();
+                var3 = this.chestContents[index];
+                this.chestContents[index] = null;
+                this.markDirty();
                 return var3;
             }
             else
             {
-                var3 = this.field_145985_p[p_70298_1_].splitStack(p_70298_2_);
+                var3 = this.chestContents[index].splitStack(count);
 
-                if (this.field_145985_p[p_70298_1_].stackSize == 0)
+                if (this.chestContents[index].stackSize == 0)
                 {
-                    this.field_145985_p[p_70298_1_] = null;
+                    this.chestContents[index] = null;
                 }
 
-                this.onInventoryChanged();
+                this.markDirty();
                 return var3;
             }
         }
@@ -95,12 +118,12 @@ public class TileEntityChest extends TileEntity implements IInventory
      * When some containers are closed they call this on each slot, then drop whatever it returns as an EntityItem -
      * like when you close a workbench GUI.
      */
-    public ItemStack getStackInSlotOnClosing(int p_70304_1_)
+    public ItemStack getStackInSlotOnClosing(int index)
     {
-        if (this.field_145985_p[p_70304_1_] != null)
+        if (this.chestContents[index] != null)
         {
-            ItemStack var2 = this.field_145985_p[p_70304_1_];
-            this.field_145985_p[p_70304_1_] = null;
+            ItemStack var2 = this.chestContents[index];
+            this.chestContents[index] = null;
             return var2;
         }
         else
@@ -112,48 +135,48 @@ public class TileEntityChest extends TileEntity implements IInventory
     /**
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
-    public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_)
+    public void setInventorySlotContents(int index, ItemStack stack)
     {
-        this.field_145985_p[p_70299_1_] = p_70299_2_;
+        this.chestContents[index] = stack;
 
-        if (p_70299_2_ != null && p_70299_2_.stackSize > this.getInventoryStackLimit())
+        if (stack != null && stack.stackSize > this.getInventoryStackLimit())
         {
-            p_70299_2_.stackSize = this.getInventoryStackLimit();
+            stack.stackSize = this.getInventoryStackLimit();
         }
 
-        this.onInventoryChanged();
+        this.markDirty();
     }
 
     /**
-     * Returns the name of the inventory
+     * Gets the name of this command sender (usually username, but possibly "Rcon")
      */
-    public String getInventoryName()
+    public String getName()
     {
-        return this.isInventoryNameLocalized() ? this.field_145981_s : "container.chest";
+        return this.hasCustomName() ? this.customName : "container.chest";
     }
 
     /**
-     * Returns if the inventory name is localized
+     * Returns true if this thing is named
      */
-    public boolean isInventoryNameLocalized()
+    public boolean hasCustomName()
     {
-        return this.field_145981_s != null && this.field_145981_s.length() > 0;
+        return this.customName != null && this.customName.length() > 0;
     }
 
-    public void func_145976_a(String p_145976_1_)
+    public void setCustomName(String p_145976_1_)
     {
-        this.field_145981_s = p_145976_1_;
+        this.customName = p_145976_1_;
     }
 
-    public void readFromNBT(NBTTagCompound p_145839_1_)
+    public void readFromNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(p_145839_1_);
-        NBTTagList var2 = p_145839_1_.getTagList("Items", 10);
-        this.field_145985_p = new ItemStack[this.getSizeInventory()];
+        super.readFromNBT(compound);
+        NBTTagList var2 = compound.getTagList("Items", 10);
+        this.chestContents = new ItemStack[this.getSizeInventory()];
 
-        if (p_145839_1_.func_150297_b("CustomName", 8))
+        if (compound.hasKey("CustomName", 8))
         {
-            this.field_145981_s = p_145839_1_.getString("CustomName");
+            this.customName = compound.getString("CustomName");
         }
 
         for (int var3 = 0; var3 < var2.tagCount(); ++var3)
@@ -161,39 +184,40 @@ public class TileEntityChest extends TileEntity implements IInventory
             NBTTagCompound var4 = var2.getCompoundTagAt(var3);
             int var5 = var4.getByte("Slot") & 255;
 
-            if (var5 >= 0 && var5 < this.field_145985_p.length)
+            if (var5 >= 0 && var5 < this.chestContents.length)
             {
-                this.field_145985_p[var5] = ItemStack.loadItemStackFromNBT(var4);
+                this.chestContents[var5] = ItemStack.loadItemStackFromNBT(var4);
             }
         }
     }
 
-    public void writeToNBT(NBTTagCompound p_145841_1_)
+    public void writeToNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(p_145841_1_);
+        super.writeToNBT(compound);
         NBTTagList var2 = new NBTTagList();
 
-        for (int var3 = 0; var3 < this.field_145985_p.length; ++var3)
+        for (int var3 = 0; var3 < this.chestContents.length; ++var3)
         {
-            if (this.field_145985_p[var3] != null)
+            if (this.chestContents[var3] != null)
             {
                 NBTTagCompound var4 = new NBTTagCompound();
                 var4.setByte("Slot", (byte)var3);
-                this.field_145985_p[var3].writeToNBT(var4);
+                this.chestContents[var3].writeToNBT(var4);
                 var2.appendTag(var4);
             }
         }
 
-        p_145841_1_.setTag("Items", var2);
+        compound.setTag("Items", var2);
 
-        if (this.isInventoryNameLocalized())
+        if (this.hasCustomName())
         {
-            p_145841_1_.setString("CustomName", this.field_145981_s);
+            compound.setString("CustomName", this.customName);
         }
     }
 
     /**
-     * Returns the maximum stack size for a inventory slot.
+     * Returns the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended. *Isn't
+     * this more of a set than a get?*
      */
     public int getInventoryStackLimit()
     {
@@ -203,113 +227,95 @@ public class TileEntityChest extends TileEntity implements IInventory
     /**
      * Do not make give this method the name canInteractWith because it clashes with Container
      */
-    public boolean isUseableByPlayer(EntityPlayer p_70300_1_)
+    public boolean isUseableByPlayer(EntityPlayer playerIn)
     {
-        return this.worldObj.getTileEntity(this.field_145851_c, this.field_145848_d, this.field_145849_e) != this ? false : p_70300_1_.getDistanceSq((double)this.field_145851_c + 0.5D, (double)this.field_145848_d + 0.5D, (double)this.field_145849_e + 0.5D) <= 64.0D;
+        return this.worldObj.getTileEntity(this.pos) != this ? false : playerIn.getDistanceSq((double)this.pos.getX() + 0.5D, (double)this.pos.getY() + 0.5D, (double)this.pos.getZ() + 0.5D) <= 64.0D;
     }
 
     public void updateContainingBlockInfo()
     {
         super.updateContainingBlockInfo();
-        this.field_145984_a = false;
+        this.adjacentChestChecked = false;
     }
 
-    private void func_145978_a(TileEntityChest p_145978_1_, int p_145978_2_)
+    private void func_174910_a(TileEntityChest p_174910_1_, EnumFacing p_174910_2_)
     {
-        if (p_145978_1_.isInvalid())
+        if (p_174910_1_.isInvalid())
         {
-            this.field_145984_a = false;
+            this.adjacentChestChecked = false;
         }
-        else if (this.field_145984_a)
+        else if (this.adjacentChestChecked)
         {
-            switch (p_145978_2_)
+            switch (TileEntityChest.SwitchEnumFacing.field_177366_a[p_174910_2_.ordinal()])
             {
-                case 0:
-                    if (this.field_145988_l != p_145978_1_)
-                    {
-                        this.field_145984_a = false;
-                    }
-
-                    break;
-
                 case 1:
-                    if (this.field_145991_k != p_145978_1_)
+                    if (this.adjacentChestZNeg != p_174910_1_)
                     {
-                        this.field_145984_a = false;
+                        this.adjacentChestChecked = false;
                     }
 
                     break;
 
                 case 2:
-                    if (this.field_145992_i != p_145978_1_)
+                    if (this.adjacentChestZPos != p_174910_1_)
                     {
-                        this.field_145984_a = false;
+                        this.adjacentChestChecked = false;
                     }
 
                     break;
 
                 case 3:
-                    if (this.field_145990_j != p_145978_1_)
+                    if (this.adjacentChestXPos != p_174910_1_)
                     {
-                        this.field_145984_a = false;
+                        this.adjacentChestChecked = false;
+                    }
+
+                    break;
+
+                case 4:
+                    if (this.adjacentChestXNeg != p_174910_1_)
+                    {
+                        this.adjacentChestChecked = false;
                     }
             }
         }
     }
 
-    public void func_145979_i()
+    /**
+     * Performs the check for adjacent chests to determine if this chest is double or not.
+     */
+    public void checkForAdjacentChests()
     {
-        if (!this.field_145984_a)
+        if (!this.adjacentChestChecked)
         {
-            this.field_145984_a = true;
-            this.field_145992_i = null;
-            this.field_145990_j = null;
-            this.field_145991_k = null;
-            this.field_145988_l = null;
-
-            if (this.func_145977_a(this.field_145851_c - 1, this.field_145848_d, this.field_145849_e))
-            {
-                this.field_145991_k = (TileEntityChest)this.worldObj.getTileEntity(this.field_145851_c - 1, this.field_145848_d, this.field_145849_e);
-            }
-
-            if (this.func_145977_a(this.field_145851_c + 1, this.field_145848_d, this.field_145849_e))
-            {
-                this.field_145990_j = (TileEntityChest)this.worldObj.getTileEntity(this.field_145851_c + 1, this.field_145848_d, this.field_145849_e);
-            }
-
-            if (this.func_145977_a(this.field_145851_c, this.field_145848_d, this.field_145849_e - 1))
-            {
-                this.field_145992_i = (TileEntityChest)this.worldObj.getTileEntity(this.field_145851_c, this.field_145848_d, this.field_145849_e - 1);
-            }
-
-            if (this.func_145977_a(this.field_145851_c, this.field_145848_d, this.field_145849_e + 1))
-            {
-                this.field_145988_l = (TileEntityChest)this.worldObj.getTileEntity(this.field_145851_c, this.field_145848_d, this.field_145849_e + 1);
-            }
-
-            if (this.field_145992_i != null)
-            {
-                this.field_145992_i.func_145978_a(this, 0);
-            }
-
-            if (this.field_145988_l != null)
-            {
-                this.field_145988_l.func_145978_a(this, 2);
-            }
-
-            if (this.field_145990_j != null)
-            {
-                this.field_145990_j.func_145978_a(this, 1);
-            }
-
-            if (this.field_145991_k != null)
-            {
-                this.field_145991_k.func_145978_a(this, 3);
-            }
+            this.adjacentChestChecked = true;
+            this.adjacentChestXNeg = this.func_174911_a(EnumFacing.WEST);
+            this.adjacentChestXPos = this.func_174911_a(EnumFacing.EAST);
+            this.adjacentChestZNeg = this.func_174911_a(EnumFacing.NORTH);
+            this.adjacentChestZPos = this.func_174911_a(EnumFacing.SOUTH);
         }
     }
 
-    private boolean func_145977_a(int p_145977_1_, int p_145977_2_, int p_145977_3_)
+    protected TileEntityChest func_174911_a(EnumFacing p_174911_1_)
+    {
+        BlockPos var2 = this.pos.offset(p_174911_1_);
+
+        if (this.func_174912_b(var2))
+        {
+            TileEntity var3 = this.worldObj.getTileEntity(var2);
+
+            if (var3 instanceof TileEntityChest)
+            {
+                TileEntityChest var4 = (TileEntityChest)var3;
+                var4.func_174910_a(this, p_174911_1_.getOpposite());
+                return var4;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean func_174912_b(BlockPos p_174912_1_)
     {
         if (this.worldObj == null)
         {
@@ -317,149 +323,157 @@ public class TileEntityChest extends TileEntity implements IInventory
         }
         else
         {
-            Block var4 = this.worldObj.getBlock(p_145977_1_, p_145977_2_, p_145977_3_);
-            return var4 instanceof BlockChest && ((BlockChest)var4).field_149956_a == this.func_145980_j();
+            Block var2 = this.worldObj.getBlockState(p_174912_1_).getBlock();
+            return var2 instanceof BlockChest && ((BlockChest)var2).chestType == this.getChestType();
         }
     }
 
-    public void updateEntity()
+    /**
+     * Updates the JList with a new model.
+     */
+    public void update()
     {
-        super.updateEntity();
-        this.func_145979_i();
-        ++this.field_145983_q;
-        float var1;
+        this.checkForAdjacentChests();
+        int var1 = this.pos.getX();
+        int var2 = this.pos.getY();
+        int var3 = this.pos.getZ();
+        ++this.ticksSinceSync;
+        float var4;
 
-        if (!this.worldObj.isClient && this.field_145987_o != 0 && (this.field_145983_q + this.field_145851_c + this.field_145848_d + this.field_145849_e) % 200 == 0)
+        if (!this.worldObj.isRemote && this.numPlayersUsing != 0 && (this.ticksSinceSync + var1 + var2 + var3) % 200 == 0)
         {
-            this.field_145987_o = 0;
-            var1 = 5.0F;
-            List var2 = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox((double)((float)this.field_145851_c - var1), (double)((float)this.field_145848_d - var1), (double)((float)this.field_145849_e - var1), (double)((float)(this.field_145851_c + 1) + var1), (double)((float)(this.field_145848_d + 1) + var1), (double)((float)(this.field_145849_e + 1) + var1)));
-            Iterator var3 = var2.iterator();
+            this.numPlayersUsing = 0;
+            var4 = 5.0F;
+            List var5 = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, new AxisAlignedBB((double)((float)var1 - var4), (double)((float)var2 - var4), (double)((float)var3 - var4), (double)((float)(var1 + 1) + var4), (double)((float)(var2 + 1) + var4), (double)((float)(var3 + 1) + var4)));
+            Iterator var6 = var5.iterator();
 
-            while (var3.hasNext())
+            while (var6.hasNext())
             {
-                EntityPlayer var4 = (EntityPlayer)var3.next();
+                EntityPlayer var7 = (EntityPlayer)var6.next();
 
-                if (var4.openContainer instanceof ContainerChest)
+                if (var7.openContainer instanceof ContainerChest)
                 {
-                    IInventory var5 = ((ContainerChest)var4.openContainer).getLowerChestInventory();
+                    IInventory var8 = ((ContainerChest)var7.openContainer).getLowerChestInventory();
 
-                    if (var5 == this || var5 instanceof InventoryLargeChest && ((InventoryLargeChest)var5).isPartOfLargeChest(this))
+                    if (var8 == this || var8 instanceof InventoryLargeChest && ((InventoryLargeChest)var8).isPartOfLargeChest(this))
                     {
-                        ++this.field_145987_o;
+                        ++this.numPlayersUsing;
                     }
                 }
             }
         }
 
-        this.field_145986_n = this.field_145989_m;
-        var1 = 0.1F;
-        double var11;
+        this.prevLidAngle = this.lidAngle;
+        var4 = 0.1F;
+        double var14;
 
-        if (this.field_145987_o > 0 && this.field_145989_m == 0.0F && this.field_145992_i == null && this.field_145991_k == null)
+        if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null)
         {
-            double var8 = (double)this.field_145851_c + 0.5D;
-            var11 = (double)this.field_145849_e + 0.5D;
+            double var11 = (double)var1 + 0.5D;
+            var14 = (double)var3 + 0.5D;
 
-            if (this.field_145988_l != null)
+            if (this.adjacentChestZPos != null)
+            {
+                var14 += 0.5D;
+            }
+
+            if (this.adjacentChestXPos != null)
             {
                 var11 += 0.5D;
             }
 
-            if (this.field_145990_j != null)
-            {
-                var8 += 0.5D;
-            }
-
-            this.worldObj.playSoundEffect(var8, (double)this.field_145848_d + 0.5D, var11, "random.chestopen", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.worldObj.playSoundEffect(var11, (double)var2 + 0.5D, var14, "random.chestopen", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
         }
 
-        if (this.field_145987_o == 0 && this.field_145989_m > 0.0F || this.field_145987_o > 0 && this.field_145989_m < 1.0F)
+        if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F)
         {
-            float var9 = this.field_145989_m;
+            float var12 = this.lidAngle;
 
-            if (this.field_145987_o > 0)
+            if (this.numPlayersUsing > 0)
             {
-                this.field_145989_m += var1;
+                this.lidAngle += var4;
             }
             else
             {
-                this.field_145989_m -= var1;
+                this.lidAngle -= var4;
             }
 
-            if (this.field_145989_m > 1.0F)
+            if (this.lidAngle > 1.0F)
             {
-                this.field_145989_m = 1.0F;
+                this.lidAngle = 1.0F;
             }
 
-            float var10 = 0.5F;
+            float var13 = 0.5F;
 
-            if (this.field_145989_m < var10 && var9 >= var10 && this.field_145992_i == null && this.field_145991_k == null)
+            if (this.lidAngle < var13 && var12 >= var13 && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null)
             {
-                var11 = (double)this.field_145851_c + 0.5D;
-                double var6 = (double)this.field_145849_e + 0.5D;
+                var14 = (double)var1 + 0.5D;
+                double var9 = (double)var3 + 0.5D;
 
-                if (this.field_145988_l != null)
+                if (this.adjacentChestZPos != null)
                 {
-                    var6 += 0.5D;
+                    var9 += 0.5D;
                 }
 
-                if (this.field_145990_j != null)
+                if (this.adjacentChestXPos != null)
                 {
-                    var11 += 0.5D;
+                    var14 += 0.5D;
                 }
 
-                this.worldObj.playSoundEffect(var11, (double)this.field_145848_d + 0.5D, var6, "random.chestclosed", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                this.worldObj.playSoundEffect(var14, (double)var2 + 0.5D, var9, "random.chestclosed", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
             }
 
-            if (this.field_145989_m < 0.0F)
+            if (this.lidAngle < 0.0F)
             {
-                this.field_145989_m = 0.0F;
+                this.lidAngle = 0.0F;
             }
         }
     }
 
-    public boolean receiveClientEvent(int p_145842_1_, int p_145842_2_)
+    public boolean receiveClientEvent(int id, int type)
     {
-        if (p_145842_1_ == 1)
+        if (id == 1)
         {
-            this.field_145987_o = p_145842_2_;
+            this.numPlayersUsing = type;
             return true;
         }
         else
         {
-            return super.receiveClientEvent(p_145842_1_, p_145842_2_);
+            return super.receiveClientEvent(id, type);
         }
     }
 
-    public void openInventory()
+    public void openInventory(EntityPlayer playerIn)
     {
-        if (this.field_145987_o < 0)
+        if (!playerIn.func_175149_v())
         {
-            this.field_145987_o = 0;
-        }
+            if (this.numPlayersUsing < 0)
+            {
+                this.numPlayersUsing = 0;
+            }
 
-        ++this.field_145987_o;
-        this.worldObj.func_147452_c(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.getBlockType(), 1, this.field_145987_o);
-        this.worldObj.notifyBlocksOfNeighborChange(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.getBlockType());
-        this.worldObj.notifyBlocksOfNeighborChange(this.field_145851_c, this.field_145848_d - 1, this.field_145849_e, this.getBlockType());
+            ++this.numPlayersUsing;
+            this.worldObj.addBlockEvent(this.pos, this.getBlockType(), 1, this.numPlayersUsing);
+            this.worldObj.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
+            this.worldObj.notifyNeighborsOfStateChange(this.pos.offsetDown(), this.getBlockType());
+        }
     }
 
-    public void closeInventory()
+    public void closeInventory(EntityPlayer playerIn)
     {
-        if (this.getBlockType() instanceof BlockChest)
+        if (!playerIn.func_175149_v() && this.getBlockType() instanceof BlockChest)
         {
-            --this.field_145987_o;
-            this.worldObj.func_147452_c(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.getBlockType(), 1, this.field_145987_o);
-            this.worldObj.notifyBlocksOfNeighborChange(this.field_145851_c, this.field_145848_d, this.field_145849_e, this.getBlockType());
-            this.worldObj.notifyBlocksOfNeighborChange(this.field_145851_c, this.field_145848_d - 1, this.field_145849_e, this.getBlockType());
+            --this.numPlayersUsing;
+            this.worldObj.addBlockEvent(this.pos, this.getBlockType(), 1, this.numPlayersUsing);
+            this.worldObj.notifyNeighborsOfStateChange(this.pos, this.getBlockType());
+            this.worldObj.notifyNeighborsOfStateChange(this.pos.offsetDown(), this.getBlockType());
         }
     }
 
     /**
      * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
      */
-    public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
+    public boolean isItemValidForSlot(int index, ItemStack stack)
     {
         return true;
     }
@@ -471,21 +485,96 @@ public class TileEntityChest extends TileEntity implements IInventory
     {
         super.invalidate();
         this.updateContainingBlockInfo();
-        this.func_145979_i();
+        this.checkForAdjacentChests();
     }
 
-    public int func_145980_j()
+    public int getChestType()
     {
-        if (this.field_145982_r == -1)
+        if (this.cachedChestType == -1)
         {
             if (this.worldObj == null || !(this.getBlockType() instanceof BlockChest))
             {
                 return 0;
             }
 
-            this.field_145982_r = ((BlockChest)this.getBlockType()).field_149956_a;
+            this.cachedChestType = ((BlockChest)this.getBlockType()).chestType;
         }
 
-        return this.field_145982_r;
+        return this.cachedChestType;
+    }
+
+    public String getGuiID()
+    {
+        return "minecraft:chest";
+    }
+
+    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
+    {
+        return new ContainerChest(playerInventory, this, playerIn);
+    }
+
+    public int getField(int id)
+    {
+        return 0;
+    }
+
+    public void setField(int id, int value) {}
+
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    public void clearInventory()
+    {
+        for (int var1 = 0; var1 < this.chestContents.length; ++var1)
+        {
+            this.chestContents[var1] = null;
+        }
+    }
+
+    static final class SwitchEnumFacing
+    {
+        static final int[] field_177366_a = new int[EnumFacing.values().length];
+        private static final String __OBFID = "CL_00002041";
+
+        static
+        {
+            try
+            {
+                field_177366_a[EnumFacing.NORTH.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177366_a[EnumFacing.SOUTH.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177366_a[EnumFacing.EAST.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177366_a[EnumFacing.WEST.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
+        }
     }
 }

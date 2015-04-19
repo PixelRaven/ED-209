@@ -1,15 +1,15 @@
 package net.minecraft.server.management;
 
+import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
 public class LowerStringMap implements Map
 {
-    private final Map internalMap = new LinkedHashMap();
+    private final Map internalMap = Maps.newLinkedHashMap();
     private static final String __OBFID = "CL_00001488";
 
     public int size()

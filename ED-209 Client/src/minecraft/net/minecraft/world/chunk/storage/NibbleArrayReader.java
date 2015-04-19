@@ -7,11 +7,11 @@ public class NibbleArrayReader
     private final int depthBitsPlusFour;
     private static final String __OBFID = "CL_00000376";
 
-    public NibbleArrayReader(byte[] p_i1998_1_, int p_i1998_2_)
+    public NibbleArrayReader(byte[] dataIn, int depthBitsIn)
     {
-        this.data = p_i1998_1_;
-        this.depthBits = p_i1998_2_;
-        this.depthBitsPlusFour = p_i1998_2_ + 4;
+        this.data = dataIn;
+        this.depthBits = depthBitsIn;
+        this.depthBitsPlusFour = depthBitsIn + 4;
     }
 
     public int get(int p_76686_1_, int p_76686_2_, int p_76686_3_)

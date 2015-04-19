@@ -1,5 +1,6 @@
 package net.minecraft.client.multiplayer;
 
+import java.net.IDN;
 import java.util.Hashtable;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.InitialDirContext;
@@ -10,7 +11,7 @@ public class ServerAddress
     private final int serverPort;
     private static final String __OBFID = "CL_00000889";
 
-    protected ServerAddress(String p_i1192_1_, int p_i1192_2_)
+    private ServerAddress(String p_i1192_1_, int p_i1192_2_)
     {
         this.ipAddress = p_i1192_1_;
         this.serverPort = p_i1192_2_;
@@ -18,7 +19,7 @@ public class ServerAddress
 
     public String getIP()
     {
-        return this.ipAddress;
+        return IDN.toASCII(this.ipAddress);
     }
 
     public int getPort()

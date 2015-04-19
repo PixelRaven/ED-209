@@ -8,16 +8,16 @@ import net.minecraft.world.World;
 public class ShapedRecipes implements IRecipe
 {
     /** How many horizontal slots this recipe is wide. */
-    private int recipeWidth;
+    private final int recipeWidth;
 
     /** How many vertical slots this recipe uses. */
-    private int recipeHeight;
+    private final int recipeHeight;
 
     /** Is a array of ItemStack that composes the recipe. */
-    private ItemStack[] recipeItems;
+    private final ItemStack[] recipeItems;
 
     /** Is the ItemStack that you get when craft the recipe. */
-    private ItemStack recipeOutput;
+    private final ItemStack recipeOutput;
     private boolean field_92101_f;
     private static final String __OBFID = "CL_00000093";
 
@@ -34,10 +34,27 @@ public class ShapedRecipes implements IRecipe
         return this.recipeOutput;
     }
 
+    public ItemStack[] func_179532_b(InventoryCrafting p_179532_1_)
+    {
+        ItemStack[] var2 = new ItemStack[p_179532_1_.getSizeInventory()];
+
+        for (int var3 = 0; var3 < var2.length; ++var3)
+        {
+            ItemStack var4 = p_179532_1_.getStackInSlot(var3);
+
+            if (var4 != null && var4.getItem().hasContainerItem())
+            {
+                var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+            }
+        }
+
+        return var2;
+    }
+
     /**
      * Used to check if a recipe matches current crafting inventory
      */
-    public boolean matches(InventoryCrafting p_77569_1_, World p_77569_2_)
+    public boolean matches(InventoryCrafting p_77569_1_, World worldIn)
     {
         for (int var3 = 0; var3 <= 3 - this.recipeWidth; ++var3)
         {
@@ -97,7 +114,7 @@ public class ShapedRecipes implements IRecipe
                         return false;
                     }
 
-                    if (var9.getItemDamage() != 32767 && var9.getItemDamage() != var10.getItemDamage())
+                    if (var9.getMetadata() != 32767 && var9.getMetadata() != var10.getMetadata())
                     {
                         return false;
                     }
@@ -123,7 +140,7 @@ public class ShapedRecipes implements IRecipe
 
                 if (var4 != null && var4.hasTagCompound())
                 {
-                    var2.setTagCompound((NBTTagCompound)var4.stackTagCompound.copy());
+                    var2.setTagCompound((NBTTagCompound)var4.getTagCompound().copy());
                 }
             }
         }

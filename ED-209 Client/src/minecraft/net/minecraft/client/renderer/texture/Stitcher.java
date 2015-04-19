@@ -1,9 +1,9 @@
 package net.minecraft.client.renderer.texture;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -13,8 +13,8 @@ import net.minecraft.util.MathHelper;
 public class Stitcher
 {
     private final int mipmapLevelStitcher;
-    private final Set setStitchHolders = new HashSet(256);
-    private final List stitchSlots = new ArrayList(256);
+    private final Set setStitchHolders = Sets.newHashSetWithExpectedSize(256);
+    private final List stitchSlots = Lists.newArrayListWithCapacity(256);
     private int currentWidth;
     private int currentHeight;
     private final int maxWidth;
@@ -107,7 +107,7 @@ public class Stitcher
         return var7;
     }
 
-    private static int func_147969_b(int p_147969_0_, int p_147969_1_)
+    private static int getMipmapDimension(int p_147969_0_, int p_147969_1_)
     {
         return (p_147969_0_ >> p_147969_1_) + ((p_147969_0_ & (1 << p_147969_1_) - 1) == 0 ? 0 : 1) << p_147969_1_;
     }
@@ -239,7 +239,7 @@ public class Stitcher
             this.width = p_i45094_1_.getIconWidth();
             this.height = p_i45094_1_.getIconHeight();
             this.mipmapLevelHolder = p_i45094_2_;
-            this.rotated = Stitcher.func_147969_b(this.height, p_i45094_2_) > Stitcher.func_147969_b(this.width, p_i45094_2_);
+            this.rotated = Stitcher.getMipmapDimension(this.height, p_i45094_2_) > Stitcher.getMipmapDimension(this.width, p_i45094_2_);
         }
 
         public TextureAtlasSprite getAtlasSprite()
@@ -249,12 +249,12 @@ public class Stitcher
 
         public int getWidth()
         {
-            return this.rotated ? Stitcher.func_147969_b((int)((float)this.height * this.scaleFactor), this.mipmapLevelHolder) : Stitcher.func_147969_b((int)((float)this.width * this.scaleFactor), this.mipmapLevelHolder);
+            return this.rotated ? Stitcher.getMipmapDimension((int)((float)this.height * this.scaleFactor), this.mipmapLevelHolder) : Stitcher.getMipmapDimension((int)((float)this.width * this.scaleFactor), this.mipmapLevelHolder);
         }
 
         public int getHeight()
         {
-            return this.rotated ? Stitcher.func_147969_b((int)((float)this.width * this.scaleFactor), this.mipmapLevelHolder) : Stitcher.func_147969_b((int)((float)this.height * this.scaleFactor), this.mipmapLevelHolder);
+            return this.rotated ? Stitcher.getMipmapDimension((int)((float)this.width * this.scaleFactor), this.mipmapLevelHolder) : Stitcher.getMipmapDimension((int)((float)this.height * this.scaleFactor), this.mipmapLevelHolder);
         }
 
         public void rotate()
@@ -367,7 +367,7 @@ public class Stitcher
                     {
                         if (this.subSlots == null)
                         {
-                            this.subSlots = new ArrayList(1);
+                            this.subSlots = Lists.newArrayListWithCapacity(1);
                             this.subSlots.add(new Stitcher.Slot(this.originX, this.originY, var2, var3));
                             int var4 = this.width - var2;
                             int var5 = this.height - var3;

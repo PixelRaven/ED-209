@@ -4,15 +4,20 @@ import net.minecraft.entity.EntityLiving;
 
 public class EntityAIOpenDoor extends EntityAIDoorInteract
 {
-    boolean field_75361_i;
-    int field_75360_j;
+    /** If the entity close the door */
+    boolean closeDoor;
+
+    /**
+     * The temporisation before the entity close the door (in ticks, always 20 = 1 second)
+     */
+    int closeDoorTemporisation;
     private static final String __OBFID = "CL_00001603";
 
     public EntityAIOpenDoor(EntityLiving p_i1644_1_, boolean p_i1644_2_)
     {
         super(p_i1644_1_);
         this.theEntity = p_i1644_1_;
-        this.field_75361_i = p_i1644_2_;
+        this.closeDoor = p_i1644_2_;
     }
 
     /**
@@ -20,7 +25,7 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract
      */
     public boolean continueExecuting()
     {
-        return this.field_75361_i && this.field_75360_j > 0 && super.continueExecuting();
+        return this.closeDoor && this.closeDoorTemporisation > 0 && super.continueExecuting();
     }
 
     /**
@@ -28,8 +33,8 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract
      */
     public void startExecuting()
     {
-        this.field_75360_j = 20;
-        this.field_151504_e.func_150014_a(this.theEntity.worldObj, this.entityPosX, this.entityPosY, this.entityPosZ, true);
+        this.closeDoorTemporisation = 20;
+        this.doorBlock.func_176512_a(this.theEntity.worldObj, this.field_179507_b, true);
     }
 
     /**
@@ -37,9 +42,9 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract
      */
     public void resetTask()
     {
-        if (this.field_75361_i)
+        if (this.closeDoor)
         {
-            this.field_151504_e.func_150014_a(this.theEntity.worldObj, this.entityPosX, this.entityPosY, this.entityPosZ, false);
+            this.doorBlock.func_176512_a(this.theEntity.worldObj, this.field_179507_b, false);
         }
     }
 
@@ -48,7 +53,7 @@ public class EntityAIOpenDoor extends EntityAIDoorInteract
      */
     public void updateTask()
     {
-        --this.field_75360_j;
+        --this.closeDoorTemporisation;
         super.updateTask();
     }
 }

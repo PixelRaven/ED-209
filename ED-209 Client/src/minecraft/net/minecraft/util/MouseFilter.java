@@ -24,4 +24,11 @@ public class MouseFilter
         this.field_76334_b += p_76333_1_;
         return p_76333_1_;
     }
+
+    public void func_180179_a()
+    {
+        this.field_76336_a = 0.0F;
+        this.field_76334_b = 0.0F;
+        this.field_76335_c = 0.0F;
+    }
 }

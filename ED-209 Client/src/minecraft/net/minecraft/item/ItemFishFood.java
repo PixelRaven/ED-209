@@ -3,58 +3,45 @@ package net.minecraft.item;
 import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionHelper;
-import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
 public class ItemFishFood extends ItemFood
 {
-    private final boolean field_150907_b;
+    /** Indicates whether this fish is "cooked" or not. */
+    private final boolean cooked;
     private static final String __OBFID = "CL_00000032";
 
     public ItemFishFood(boolean p_i45338_1_)
     {
         super(0, 0.0F, false);
-        this.field_150907_b = p_i45338_1_;
+        this.cooked = p_i45338_1_;
     }
 
-    public int func_150905_g(ItemStack p_150905_1_)
+    public int getHealAmount(ItemStack itemStackIn)
     {
-        ItemFishFood.FishType var2 = ItemFishFood.FishType.func_150978_a(p_150905_1_);
-        return this.field_150907_b && var2.func_150973_i() ? var2.func_150970_e() : var2.func_150975_c();
+        ItemFishFood.FishType var2 = ItemFishFood.FishType.getFishTypeForItemStack(itemStackIn);
+        return this.cooked && var2.getCookable() ? var2.getCookedHealAmount() : var2.getUncookedHealAmount();
     }
 
-    public float func_150906_h(ItemStack p_150906_1_)
+    public float getSaturationModifier(ItemStack itemStackIn)
     {
-        ItemFishFood.FishType var2 = ItemFishFood.FishType.func_150978_a(p_150906_1_);
-        return this.field_150907_b && var2.func_150973_i() ? var2.func_150977_f() : var2.func_150967_d();
+        ItemFishFood.FishType var2 = ItemFishFood.FishType.getFishTypeForItemStack(itemStackIn);
+        return this.cooked && var2.getCookable() ? var2.getCookedSaturationModifier() : var2.getUncookedSaturationModifier();
     }
 
-    public String getPotionEffect(ItemStack p_150896_1_)
+    public String getPotionEffect(ItemStack stack)
     {
-        return ItemFishFood.FishType.func_150978_a(p_150896_1_) == ItemFishFood.FishType.PUFFERFISH ? PotionHelper.field_151423_m : null;
+        return ItemFishFood.FishType.getFishTypeForItemStack(stack) == ItemFishFood.FishType.PUFFERFISH ? PotionHelper.field_151423_m : null;
     }
 
-    public void registerIcons(IIconRegister p_94581_1_)
+    protected void onFoodEaten(ItemStack p_77849_1_, World worldIn, EntityPlayer p_77849_3_)
     {
-        ItemFishFood.FishType[] var2 = ItemFishFood.FishType.values();
-        int var3 = var2.length;
-
-        for (int var4 = 0; var4 < var3; ++var4)
-        {
-            ItemFishFood.FishType var5 = var2[var4];
-            var5.func_150968_a(p_94581_1_);
-        }
-    }
-
-    protected void onFoodEaten(ItemStack p_77849_1_, World p_77849_2_, EntityPlayer p_77849_3_)
-    {
-        ItemFishFood.FishType var4 = ItemFishFood.FishType.func_150978_a(p_77849_1_);
+        ItemFishFood.FishType var4 = ItemFishFood.FishType.getFishTypeForItemStack(p_77849_1_);
 
         if (var4 == ItemFishFood.FishType.PUFFERFISH)
         {
@@ -63,22 +50,15 @@ public class ItemFishFood extends ItemFood
             p_77849_3_.addPotionEffect(new PotionEffect(Potion.confusion.id, 300, 1));
         }
 
-        super.onFoodEaten(p_77849_1_, p_77849_2_, p_77849_3_);
+        super.onFoodEaten(p_77849_1_, worldIn, p_77849_3_);
     }
 
     /**
-     * Gets an icon index based on an item's damage value
+     * returns a list of items with the same ID, but different meta (eg: dye returns 16 items)
+     *  
+     * @param subItems The List of sub-items. This is a List of ItemStacks.
      */
-    public IIcon getIconFromDamage(int p_77617_1_)
-    {
-        ItemFishFood.FishType var2 = ItemFishFood.FishType.func_150974_a(p_77617_1_);
-        return this.field_150907_b && var2.func_150973_i() ? var2.func_150979_h() : var2.func_150971_g();
-    }
-
-    /**
-     * This returns the sub items
-     */
-    public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List p_150895_3_)
+    public void getSubItems(Item itemIn, CreativeTabs tab, List subItems)
     {
         ItemFishFood.FishType[] var4 = ItemFishFood.FishType.values();
         int var5 = var4.length;
@@ -87,9 +67,9 @@ public class ItemFishFood extends ItemFood
         {
             ItemFishFood.FishType var7 = var4[var6];
 
-            if (!this.field_150907_b || var7.func_150973_i())
+            if (!this.cooked || var7.getCookable())
             {
-                p_150895_3_.add(new ItemStack(this, 1, var7.func_150976_a()));
+                subItems.add(new ItemStack(this, 1, var7.getItemDamage()));
             }
         }
     }
@@ -98,10 +78,10 @@ public class ItemFishFood extends ItemFood
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        ItemFishFood.FishType var2 = ItemFishFood.FishType.func_150978_a(p_77667_1_);
-        return this.getUnlocalizedName() + "." + var2.func_150972_b() + "." + (this.field_150907_b && var2.func_150973_i() ? "cooked" : "raw");
+        ItemFishFood.FishType var2 = ItemFishFood.FishType.getFishTypeForItemStack(stack);
+        return this.getUnlocalizedName() + "." + var2.getUnlocalizedNamePart() + "." + (this.cooked && var2.getCookable() ? "cooked" : "raw");
     }
 
     public static enum FishType
@@ -110,106 +90,84 @@ public class ItemFishFood extends ItemFood
         SALMON("SALMON", 1, 1, "salmon", 2, 0.1F, 6, 0.8F),
         CLOWNFISH("CLOWNFISH", 2, 2, "clownfish", 1, 0.1F),
         PUFFERFISH("PUFFERFISH", 3, 3, "pufferfish", 1, 0.1F);
-        private static final Map field_150983_e = Maps.newHashMap();
-        private final int field_150980_f;
-        private final String field_150981_g;
-        private IIcon field_150993_h;
-        private IIcon field_150994_i;
-        private final int field_150991_j;
-        private final float field_150992_k;
-        private final int field_150989_l;
-        private final float field_150990_m;
-        private boolean field_150987_n = false;
+        private static final Map itemDamageToFishTypeMap = Maps.newHashMap();
+        private final int itemDamage;
+        private final String unlocalizedNamePart;
+        private final int uncookedHealAmount;
+        private final float uncookedSaturationModifier;
+        private final int cookedHealAmount;
+        private final float cookedSaturationModifier;
+        private boolean cookable = false;
 
         private static final ItemFishFood.FishType[] $VALUES = new ItemFishFood.FishType[]{COD, SALMON, CLOWNFISH, PUFFERFISH};
         private static final String __OBFID = "CL_00000033";
 
         private FishType(String p_i45336_1_, int p_i45336_2_, int p_i45336_3_, String p_i45336_4_, int p_i45336_5_, float p_i45336_6_, int p_i45336_7_, float p_i45336_8_)
         {
-            this.field_150980_f = p_i45336_3_;
-            this.field_150981_g = p_i45336_4_;
-            this.field_150991_j = p_i45336_5_;
-            this.field_150992_k = p_i45336_6_;
-            this.field_150989_l = p_i45336_7_;
-            this.field_150990_m = p_i45336_8_;
-            this.field_150987_n = true;
+            this.itemDamage = p_i45336_3_;
+            this.unlocalizedNamePart = p_i45336_4_;
+            this.uncookedHealAmount = p_i45336_5_;
+            this.uncookedSaturationModifier = p_i45336_6_;
+            this.cookedHealAmount = p_i45336_7_;
+            this.cookedSaturationModifier = p_i45336_8_;
+            this.cookable = true;
         }
 
         private FishType(String p_i45337_1_, int p_i45337_2_, int p_i45337_3_, String p_i45337_4_, int p_i45337_5_, float p_i45337_6_)
         {
-            this.field_150980_f = p_i45337_3_;
-            this.field_150981_g = p_i45337_4_;
-            this.field_150991_j = p_i45337_5_;
-            this.field_150992_k = p_i45337_6_;
-            this.field_150989_l = 0;
-            this.field_150990_m = 0.0F;
-            this.field_150987_n = false;
+            this.itemDamage = p_i45337_3_;
+            this.unlocalizedNamePart = p_i45337_4_;
+            this.uncookedHealAmount = p_i45337_5_;
+            this.uncookedSaturationModifier = p_i45337_6_;
+            this.cookedHealAmount = 0;
+            this.cookedSaturationModifier = 0.0F;
+            this.cookable = false;
         }
 
-        public int func_150976_a()
+        public int getItemDamage()
         {
-            return this.field_150980_f;
+            return this.itemDamage;
         }
 
-        public String func_150972_b()
+        public String getUnlocalizedNamePart()
         {
-            return this.field_150981_g;
+            return this.unlocalizedNamePart;
         }
 
-        public int func_150975_c()
+        public int getUncookedHealAmount()
         {
-            return this.field_150991_j;
+            return this.uncookedHealAmount;
         }
 
-        public float func_150967_d()
+        public float getUncookedSaturationModifier()
         {
-            return this.field_150992_k;
+            return this.uncookedSaturationModifier;
         }
 
-        public int func_150970_e()
+        public int getCookedHealAmount()
         {
-            return this.field_150989_l;
+            return this.cookedHealAmount;
         }
 
-        public float func_150977_f()
+        public float getCookedSaturationModifier()
         {
-            return this.field_150990_m;
+            return this.cookedSaturationModifier;
         }
 
-        public void func_150968_a(IIconRegister p_150968_1_)
+        public boolean getCookable()
         {
-            this.field_150993_h = p_150968_1_.registerIcon("fish_" + this.field_150981_g + "_raw");
-
-            if (this.field_150987_n)
-            {
-                this.field_150994_i = p_150968_1_.registerIcon("fish_" + this.field_150981_g + "_cooked");
-            }
+            return this.cookable;
         }
 
-        public IIcon func_150971_g()
+        public static ItemFishFood.FishType getFishTypeForItemDamage(int p_150974_0_)
         {
-            return this.field_150993_h;
-        }
-
-        public IIcon func_150979_h()
-        {
-            return this.field_150994_i;
-        }
-
-        public boolean func_150973_i()
-        {
-            return this.field_150987_n;
-        }
-
-        public static ItemFishFood.FishType func_150974_a(int p_150974_0_)
-        {
-            ItemFishFood.FishType var1 = (ItemFishFood.FishType)field_150983_e.get(Integer.valueOf(p_150974_0_));
+            ItemFishFood.FishType var1 = (ItemFishFood.FishType)itemDamageToFishTypeMap.get(Integer.valueOf(p_150974_0_));
             return var1 == null ? COD : var1;
         }
 
-        public static ItemFishFood.FishType func_150978_a(ItemStack p_150978_0_)
+        public static ItemFishFood.FishType getFishTypeForItemStack(ItemStack p_150978_0_)
         {
-            return p_150978_0_.getItem() instanceof ItemFishFood ? func_150974_a(p_150978_0_.getItemDamage()) : COD;
+            return p_150978_0_.getItem() instanceof ItemFishFood ? getFishTypeForItemDamage(p_150978_0_.getMetadata()) : COD;
         }
 
         static {
@@ -219,7 +177,7 @@ public class ItemFishFood extends ItemFood
             for (int var2 = 0; var2 < var1; ++var2)
             {
                 ItemFishFood.FishType var3 = var0[var2];
-                field_150983_e.put(Integer.valueOf(var3.func_150976_a()), var3);
+                itemDamageToFishTypeMap.put(Integer.valueOf(var3.getItemDamage()), var3);
             }
         }
     }

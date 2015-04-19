@@ -1,30 +1,36 @@
 package net.minecraft.world.gen;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.ResourceLocation;
 
 public class FlatLayerInfo
 {
-    private Block field_151537_a;
+    private final int field_175902_a;
+    private IBlockState field_175901_b;
 
     /** Amount of layers for this set of layers. */
     private int layerCount;
-
-    /** Block metadata used on this set of laeyrs. */
-    private int layerFillBlockMeta;
     private int layerMinimumY;
     private static final String __OBFID = "CL_00000441";
 
     public FlatLayerInfo(int p_i45467_1_, Block p_i45467_2_)
     {
-        this.layerCount = 1;
-        this.layerCount = p_i45467_1_;
-        this.field_151537_a = p_i45467_2_;
+        this(3, p_i45467_1_, p_i45467_2_);
     }
 
-    public FlatLayerInfo(int p_i45468_1_, Block p_i45468_2_, int p_i45468_3_)
+    public FlatLayerInfo(int p_i45627_1_, int p_i45627_2_, Block p_i45627_3_)
     {
-        this(p_i45468_1_, p_i45468_2_);
-        this.layerFillBlockMeta = p_i45468_3_;
+        this.layerCount = 1;
+        this.field_175902_a = p_i45627_1_;
+        this.layerCount = p_i45627_2_;
+        this.field_175901_b = p_i45627_3_.getDefaultState();
+    }
+
+    public FlatLayerInfo(int p_i45628_1_, int p_i45628_2_, Block p_i45628_3_, int p_i45628_4_)
+    {
+        this(p_i45628_1_, p_i45628_2_, p_i45628_3_);
+        this.field_175901_b = p_i45628_3_.getStateFromMeta(p_i45628_4_);
     }
 
     /**
@@ -35,17 +41,22 @@ public class FlatLayerInfo
         return this.layerCount;
     }
 
-    public Block func_151536_b()
+    public IBlockState func_175900_c()
     {
-        return this.field_151537_a;
+        return this.field_175901_b;
+    }
+
+    private Block func_151536_b()
+    {
+        return this.field_175901_b.getBlock();
     }
 
     /**
      * Return the block metadata used on this set of layers.
      */
-    public int getFillBlockMeta()
+    private int getFillBlockMeta()
     {
-        return this.layerFillBlockMeta;
+        return this.field_175901_b.getBlock().getMetaFromState(this.field_175901_b);
     }
 
     /**
@@ -66,16 +77,33 @@ public class FlatLayerInfo
 
     public String toString()
     {
-        String var1 = Integer.toString(Block.getIdFromBlock(this.field_151537_a));
+        String var1;
 
-        if (this.layerCount > 1)
+        if (this.field_175902_a >= 3)
         {
-            var1 = this.layerCount + "x" + var1;
+            ResourceLocation var2 = (ResourceLocation)Block.blockRegistry.getNameForObject(this.func_151536_b());
+            var1 = var2 == null ? "null" : var2.toString();
+
+            if (this.layerCount > 1)
+            {
+                var1 = this.layerCount + "*" + var1;
+            }
+        }
+        else
+        {
+            var1 = Integer.toString(Block.getIdFromBlock(this.func_151536_b()));
+
+            if (this.layerCount > 1)
+            {
+                var1 = this.layerCount + "x" + var1;
+            }
         }
 
-        if (this.layerFillBlockMeta > 0)
+        int var3 = this.getFillBlockMeta();
+
+        if (var3 > 0)
         {
-            var1 = var1 + ":" + this.layerFillBlockMeta;
+            var1 = var1 + ":" + var3;
         }
 
         return var1;

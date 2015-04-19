@@ -1,11 +1,14 @@
 package net.minecraft.entity.item;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Iterator;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAnvil;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
@@ -13,54 +16,43 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 public class EntityFallingBlock extends Entity
 {
-    private Block field_145811_e;
-    public int field_145814_a;
-    public int field_145812_b;
-    public boolean field_145813_c;
+    private IBlockState field_175132_d;
+    public int fallTime;
+    public boolean shouldDropItem = true;
     private boolean field_145808_f;
-    private boolean field_145809_g;
-    private int field_145815_h;
-    private float field_145816_i;
-    public NBTTagCompound field_145810_d;
+    private boolean hurtEntities;
+    private int fallHurtMax = 40;
+    private float fallHurtAmount = 2.0F;
+    public NBTTagCompound tileEntityData;
     private static final String __OBFID = "CL_00001668";
 
-    public EntityFallingBlock(World p_i1706_1_)
+    public EntityFallingBlock(World worldIn)
     {
-        super(p_i1706_1_);
-        this.field_145813_c = true;
-        this.field_145815_h = 40;
-        this.field_145816_i = 2.0F;
+        super(worldIn);
     }
 
-    public EntityFallingBlock(World p_i45318_1_, double p_i45318_2_, double p_i45318_4_, double p_i45318_6_, Block p_i45318_8_)
+    public EntityFallingBlock(World worldIn, double p_i45848_2_, double p_i45848_4_, double p_i45848_6_, IBlockState p_i45848_8_)
     {
-        this(p_i45318_1_, p_i45318_2_, p_i45318_4_, p_i45318_6_, p_i45318_8_, 0);
-    }
-
-    public EntityFallingBlock(World p_i45319_1_, double p_i45319_2_, double p_i45319_4_, double p_i45319_6_, Block p_i45319_8_, int p_i45319_9_)
-    {
-        super(p_i45319_1_);
-        this.field_145813_c = true;
-        this.field_145815_h = 40;
-        this.field_145816_i = 2.0F;
-        this.field_145811_e = p_i45319_8_;
-        this.field_145814_a = p_i45319_9_;
+        super(worldIn);
+        this.field_175132_d = p_i45848_8_;
         this.preventEntitySpawning = true;
         this.setSize(0.98F, 0.98F);
-        this.yOffset = this.height / 2.0F;
-        this.setPosition(p_i45319_2_, p_i45319_4_, p_i45319_6_);
+        this.setPosition(p_i45848_2_, p_i45848_4_, p_i45848_6_);
         this.motionX = 0.0D;
         this.motionY = 0.0D;
         this.motionZ = 0.0D;
-        this.prevPosX = p_i45319_2_;
-        this.prevPosY = p_i45319_4_;
-        this.prevPosZ = p_i45319_6_;
+        this.prevPosX = p_i45848_2_;
+        this.prevPosY = p_i45848_4_;
+        this.prevPosZ = p_i45848_6_;
     }
 
     /**
@@ -87,7 +79,9 @@ public class EntityFallingBlock extends Entity
      */
     public void onUpdate()
     {
-        if (this.field_145811_e.getMaterial() == Material.air)
+        Block var1 = this.field_175132_d.getBlock();
+
+        if (var1.getMaterial() == Material.air)
         {
             this.setDead();
         }
@@ -96,29 +90,32 @@ public class EntityFallingBlock extends Entity
             this.prevPosX = this.posX;
             this.prevPosY = this.posY;
             this.prevPosZ = this.posZ;
-            ++this.field_145812_b;
+            BlockPos var2;
+
+            if (this.fallTime++ == 0)
+            {
+                var2 = new BlockPos(this);
+
+                if (this.worldObj.getBlockState(var2).getBlock() == var1)
+                {
+                    this.worldObj.setBlockToAir(var2);
+                }
+                else if (!this.worldObj.isRemote)
+                {
+                    this.setDead();
+                    return;
+                }
+            }
+
             this.motionY -= 0.03999999910593033D;
             this.moveEntity(this.motionX, this.motionY, this.motionZ);
             this.motionX *= 0.9800000190734863D;
             this.motionY *= 0.9800000190734863D;
             this.motionZ *= 0.9800000190734863D;
 
-            if (!this.worldObj.isClient)
+            if (!this.worldObj.isRemote)
             {
-                int var1 = MathHelper.floor_double(this.posX);
-                int var2 = MathHelper.floor_double(this.posY);
-                int var3 = MathHelper.floor_double(this.posZ);
-
-                if (this.field_145812_b == 1)
-                {
-                    if (this.worldObj.getBlock(var1, var2, var3) != this.field_145811_e)
-                    {
-                        this.setDead();
-                        return;
-                    }
-
-                    this.worldObj.setBlockToAir(var1, var2, var3);
-                }
+                var2 = new BlockPos(this);
 
                 if (this.onGround)
                 {
@@ -126,54 +123,54 @@ public class EntityFallingBlock extends Entity
                     this.motionZ *= 0.699999988079071D;
                     this.motionY *= -0.5D;
 
-                    if (this.worldObj.getBlock(var1, var2, var3) != Blocks.piston_extension)
+                    if (this.worldObj.getBlockState(var2).getBlock() != Blocks.piston_extension)
                     {
                         this.setDead();
 
-                        if (!this.field_145808_f && this.worldObj.canPlaceEntityOnSide(this.field_145811_e, var1, var2, var3, true, 1, (Entity)null, (ItemStack)null) && !BlockFalling.func_149831_e(this.worldObj, var1, var2 - 1, var3) && this.worldObj.setBlock(var1, var2, var3, this.field_145811_e, this.field_145814_a, 3))
+                        if (!this.field_145808_f && this.worldObj.canBlockBePlaced(var1, var2, true, EnumFacing.UP, (Entity)null, (ItemStack)null) && !BlockFalling.canFallInto(this.worldObj, var2.offsetDown()) && this.worldObj.setBlockState(var2, this.field_175132_d, 3))
                         {
-                            if (this.field_145811_e instanceof BlockFalling)
+                            if (var1 instanceof BlockFalling)
                             {
-                                ((BlockFalling)this.field_145811_e).func_149828_a(this.worldObj, var1, var2, var3, this.field_145814_a);
+                                ((BlockFalling)var1).onEndFalling(this.worldObj, var2);
                             }
 
-                            if (this.field_145810_d != null && this.field_145811_e instanceof ITileEntityProvider)
+                            if (this.tileEntityData != null && var1 instanceof ITileEntityProvider)
                             {
-                                TileEntity var4 = this.worldObj.getTileEntity(var1, var2, var3);
+                                TileEntity var3 = this.worldObj.getTileEntity(var2);
 
-                                if (var4 != null)
+                                if (var3 != null)
                                 {
-                                    NBTTagCompound var5 = new NBTTagCompound();
-                                    var4.writeToNBT(var5);
-                                    Iterator var6 = this.field_145810_d.func_150296_c().iterator();
+                                    NBTTagCompound var4 = new NBTTagCompound();
+                                    var3.writeToNBT(var4);
+                                    Iterator var5 = this.tileEntityData.getKeySet().iterator();
 
-                                    while (var6.hasNext())
+                                    while (var5.hasNext())
                                     {
-                                        String var7 = (String)var6.next();
-                                        NBTBase var8 = this.field_145810_d.getTag(var7);
+                                        String var6 = (String)var5.next();
+                                        NBTBase var7 = this.tileEntityData.getTag(var6);
 
-                                        if (!var7.equals("x") && !var7.equals("y") && !var7.equals("z"))
+                                        if (!var6.equals("x") && !var6.equals("y") && !var6.equals("z"))
                                         {
-                                            var5.setTag(var7, var8.copy());
+                                            var4.setTag(var6, var7.copy());
                                         }
                                     }
 
-                                    var4.readFromNBT(var5);
-                                    var4.onInventoryChanged();
+                                    var3.readFromNBT(var4);
+                                    var3.markDirty();
                                 }
                             }
                         }
-                        else if (this.field_145813_c && !this.field_145808_f)
+                        else if (this.shouldDropItem && !this.field_145808_f && this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops"))
                         {
-                            this.entityDropItem(new ItemStack(this.field_145811_e, 1, this.field_145811_e.damageDropped(this.field_145814_a)), 0.0F);
+                            this.entityDropItem(new ItemStack(var1, 1, var1.damageDropped(this.field_175132_d)), 0.0F);
                         }
                     }
                 }
-                else if (this.field_145812_b > 100 && !this.worldObj.isClient && (var2 < 1 || var2 > 256) || this.field_145812_b > 600)
+                else if (this.fallTime > 100 && !this.worldObj.isRemote && (var2.getY() < 1 || var2.getY() > 256) || this.fallTime > 600)
                 {
-                    if (this.field_145813_c)
+                    if (this.shouldDropItem && this.worldObj.getGameRules().getGameRuleBooleanValue("doTileDrops"))
                     {
-                        this.entityDropItem(new ItemStack(this.field_145811_e, 1, this.field_145811_e.damageDropped(this.field_145814_a)), 0.0F);
+                        this.entityDropItem(new ItemStack(var1, 1, var1.damageDropped(this.field_175132_d)), 0.0F);
                     }
 
                     this.setDead();
@@ -182,41 +179,39 @@ public class EntityFallingBlock extends Entity
         }
     }
 
-    /**
-     * Called when the mob is falling. Calculates and applies fall damage.
-     */
-    protected void fall(float p_70069_1_)
+    public void fall(float distance, float damageMultiplier)
     {
-        if (this.field_145809_g)
+        Block var3 = this.field_175132_d.getBlock();
+
+        if (this.hurtEntities)
         {
-            int var2 = MathHelper.ceiling_float_int(p_70069_1_ - 1.0F);
+            int var4 = MathHelper.ceiling_float_int(distance - 1.0F);
 
-            if (var2 > 0)
+            if (var4 > 0)
             {
-                ArrayList var3 = new ArrayList(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox));
-                boolean var4 = this.field_145811_e == Blocks.anvil;
-                DamageSource var5 = var4 ? DamageSource.anvil : DamageSource.fallingBlock;
-                Iterator var6 = var3.iterator();
+                ArrayList var5 = Lists.newArrayList(this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.getEntityBoundingBox()));
+                boolean var6 = var3 == Blocks.anvil;
+                DamageSource var7 = var6 ? DamageSource.anvil : DamageSource.fallingBlock;
+                Iterator var8 = var5.iterator();
 
-                while (var6.hasNext())
+                while (var8.hasNext())
                 {
-                    Entity var7 = (Entity)var6.next();
-                    var7.attackEntityFrom(var5, (float)Math.min(MathHelper.floor_float((float)var2 * this.field_145816_i), this.field_145815_h));
+                    Entity var9 = (Entity)var8.next();
+                    var9.attackEntityFrom(var7, (float)Math.min(MathHelper.floor_float((float)var4 * this.fallHurtAmount), this.fallHurtMax));
                 }
 
-                if (var4 && (double)this.rand.nextFloat() < 0.05000000074505806D + (double)var2 * 0.05D)
+                if (var6 && (double)this.rand.nextFloat() < 0.05000000074505806D + (double)var4 * 0.05D)
                 {
-                    int var8 = this.field_145814_a >> 2;
-                    int var9 = this.field_145814_a & 3;
-                    ++var8;
+                    int var10 = ((Integer)this.field_175132_d.getValue(BlockAnvil.DAMAGE)).intValue();
+                    ++var10;
 
-                    if (var8 > 2)
+                    if (var10 > 2)
                     {
                         this.field_145808_f = true;
                     }
                     else
                     {
-                        this.field_145814_a = var9 | var8 << 2;
+                        this.field_175132_d = this.field_175132_d.withProperty(BlockAnvil.DAMAGE, Integer.valueOf(var10));
                     }
                 }
             }
@@ -226,80 +221,82 @@ public class EntityFallingBlock extends Entity
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        p_70014_1_.setByte("Tile", (byte)Block.getIdFromBlock(this.field_145811_e));
-        p_70014_1_.setInteger("TileID", Block.getIdFromBlock(this.field_145811_e));
-        p_70014_1_.setByte("Data", (byte)this.field_145814_a);
-        p_70014_1_.setByte("Time", (byte)this.field_145812_b);
-        p_70014_1_.setBoolean("DropItem", this.field_145813_c);
-        p_70014_1_.setBoolean("HurtEntities", this.field_145809_g);
-        p_70014_1_.setFloat("FallHurtAmount", this.field_145816_i);
-        p_70014_1_.setInteger("FallHurtMax", this.field_145815_h);
+        Block var2 = this.field_175132_d != null ? this.field_175132_d.getBlock() : Blocks.air;
+        ResourceLocation var3 = (ResourceLocation)Block.blockRegistry.getNameForObject(var2);
+        tagCompound.setString("Block", var3 == null ? "" : var3.toString());
+        tagCompound.setByte("Data", (byte)var2.getMetaFromState(this.field_175132_d));
+        tagCompound.setByte("Time", (byte)this.fallTime);
+        tagCompound.setBoolean("DropItem", this.shouldDropItem);
+        tagCompound.setBoolean("HurtEntities", this.hurtEntities);
+        tagCompound.setFloat("FallHurtAmount", this.fallHurtAmount);
+        tagCompound.setInteger("FallHurtMax", this.fallHurtMax);
 
-        if (this.field_145810_d != null)
+        if (this.tileEntityData != null)
         {
-            p_70014_1_.setTag("TileEntityData", this.field_145810_d);
+            tagCompound.setTag("TileEntityData", this.tileEntityData);
         }
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        if (p_70037_1_.func_150297_b("TileID", 99))
+        int var2 = tagCompund.getByte("Data") & 255;
+
+        if (tagCompund.hasKey("Block", 8))
         {
-            this.field_145811_e = Block.getBlockById(p_70037_1_.getInteger("TileID"));
+            this.field_175132_d = Block.getBlockFromName(tagCompund.getString("Block")).getStateFromMeta(var2);
+        }
+        else if (tagCompund.hasKey("TileID", 99))
+        {
+            this.field_175132_d = Block.getBlockById(tagCompund.getInteger("TileID")).getStateFromMeta(var2);
         }
         else
         {
-            this.field_145811_e = Block.getBlockById(p_70037_1_.getByte("Tile") & 255);
+            this.field_175132_d = Block.getBlockById(tagCompund.getByte("Tile") & 255).getStateFromMeta(var2);
         }
 
-        this.field_145814_a = p_70037_1_.getByte("Data") & 255;
-        this.field_145812_b = p_70037_1_.getByte("Time") & 255;
+        this.fallTime = tagCompund.getByte("Time") & 255;
+        Block var3 = this.field_175132_d.getBlock();
 
-        if (p_70037_1_.func_150297_b("HurtEntities", 99))
+        if (tagCompund.hasKey("HurtEntities", 99))
         {
-            this.field_145809_g = p_70037_1_.getBoolean("HurtEntities");
-            this.field_145816_i = p_70037_1_.getFloat("FallHurtAmount");
-            this.field_145815_h = p_70037_1_.getInteger("FallHurtMax");
+            this.hurtEntities = tagCompund.getBoolean("HurtEntities");
+            this.fallHurtAmount = tagCompund.getFloat("FallHurtAmount");
+            this.fallHurtMax = tagCompund.getInteger("FallHurtMax");
         }
-        else if (this.field_145811_e == Blocks.anvil)
+        else if (var3 == Blocks.anvil)
         {
-            this.field_145809_g = true;
-        }
-
-        if (p_70037_1_.func_150297_b("DropItem", 99))
-        {
-            this.field_145813_c = p_70037_1_.getBoolean("DropItem");
+            this.hurtEntities = true;
         }
 
-        if (p_70037_1_.func_150297_b("TileEntityData", 10))
+        if (tagCompund.hasKey("DropItem", 99))
         {
-            this.field_145810_d = p_70037_1_.getCompoundTag("TileEntityData");
+            this.shouldDropItem = tagCompund.getBoolean("DropItem");
         }
 
-        if (this.field_145811_e.getMaterial() == Material.air)
+        if (tagCompund.hasKey("TileEntityData", 10))
         {
-            this.field_145811_e = Blocks.sand;
+            this.tileEntityData = tagCompund.getCompoundTag("TileEntityData");
+        }
+
+        if (var3 == null || var3.getMaterial() == Material.air)
+        {
+            this.field_175132_d = Blocks.sand.getDefaultState();
         }
     }
 
-    public float getShadowSize()
-    {
-        return 0.0F;
-    }
-
-    public World func_145807_e()
+    public World getWorldObj()
     {
         return this.worldObj;
     }
 
-    public void func_145806_a(boolean p_145806_1_)
+    public void setHurtEntities(boolean p_145806_1_)
     {
-        this.field_145809_g = p_145806_1_;
+        this.hurtEntities = p_145806_1_;
     }
 
     /**
@@ -310,15 +307,20 @@ public class EntityFallingBlock extends Entity
         return false;
     }
 
-    public void addEntityCrashInfo(CrashReportCategory p_85029_1_)
+    public void addEntityCrashInfo(CrashReportCategory category)
     {
-        super.addEntityCrashInfo(p_85029_1_);
-        p_85029_1_.addCrashSection("Immitating block ID", Integer.valueOf(Block.getIdFromBlock(this.field_145811_e)));
-        p_85029_1_.addCrashSection("Immitating block data", Integer.valueOf(this.field_145814_a));
+        super.addEntityCrashInfo(category);
+
+        if (this.field_175132_d != null)
+        {
+            Block var2 = this.field_175132_d.getBlock();
+            category.addCrashSection("Immitating block ID", Integer.valueOf(Block.getIdFromBlock(var2)));
+            category.addCrashSection("Immitating block data", Integer.valueOf(var2.getMetaFromState(this.field_175132_d)));
+        }
     }
 
-    public Block func_145805_f()
+    public IBlockState getBlock()
     {
-        return this.field_145811_e;
+        return this.field_175132_d;
     }
 }

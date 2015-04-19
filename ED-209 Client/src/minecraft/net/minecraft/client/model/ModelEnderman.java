@@ -11,31 +11,30 @@ public class ModelEnderman extends ModelBiped
     public boolean isAttacking;
     private static final String __OBFID = "CL_00000838";
 
-    public ModelEnderman()
+    public ModelEnderman(float p_i46305_1_)
     {
         super(0.0F, -14.0F, 64, 32);
-        float var1 = -14.0F;
-        float var2 = 0.0F;
+        float var2 = -14.0F;
         this.bipedHeadwear = new ModelRenderer(this, 0, 16);
-        this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, var2 - 0.5F);
-        this.bipedHeadwear.setRotationPoint(0.0F, 0.0F + var1, 0.0F);
+        this.bipedHeadwear.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, p_i46305_1_ - 0.5F);
+        this.bipedHeadwear.setRotationPoint(0.0F, 0.0F + var2, 0.0F);
         this.bipedBody = new ModelRenderer(this, 32, 16);
-        this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, var2);
-        this.bipedBody.setRotationPoint(0.0F, 0.0F + var1, 0.0F);
+        this.bipedBody.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, p_i46305_1_);
+        this.bipedBody.setRotationPoint(0.0F, 0.0F + var2, 0.0F);
         this.bipedRightArm = new ModelRenderer(this, 56, 0);
-        this.bipedRightArm.addBox(-1.0F, -2.0F, -1.0F, 2, 30, 2, var2);
-        this.bipedRightArm.setRotationPoint(-3.0F, 2.0F + var1, 0.0F);
+        this.bipedRightArm.addBox(-1.0F, -2.0F, -1.0F, 2, 30, 2, p_i46305_1_);
+        this.bipedRightArm.setRotationPoint(-3.0F, 2.0F + var2, 0.0F);
         this.bipedLeftArm = new ModelRenderer(this, 56, 0);
         this.bipedLeftArm.mirror = true;
-        this.bipedLeftArm.addBox(-1.0F, -2.0F, -1.0F, 2, 30, 2, var2);
-        this.bipedLeftArm.setRotationPoint(5.0F, 2.0F + var1, 0.0F);
+        this.bipedLeftArm.addBox(-1.0F, -2.0F, -1.0F, 2, 30, 2, p_i46305_1_);
+        this.bipedLeftArm.setRotationPoint(5.0F, 2.0F + var2, 0.0F);
         this.bipedRightLeg = new ModelRenderer(this, 56, 0);
-        this.bipedRightLeg.addBox(-1.0F, 0.0F, -1.0F, 2, 30, 2, var2);
-        this.bipedRightLeg.setRotationPoint(-2.0F, 12.0F + var1, 0.0F);
+        this.bipedRightLeg.addBox(-1.0F, 0.0F, -1.0F, 2, 30, 2, p_i46305_1_);
+        this.bipedRightLeg.setRotationPoint(-2.0F, 12.0F + var2, 0.0F);
         this.bipedLeftLeg = new ModelRenderer(this, 56, 0);
         this.bipedLeftLeg.mirror = true;
-        this.bipedLeftLeg.addBox(-1.0F, 0.0F, -1.0F, 2, 30, 2, var2);
-        this.bipedLeftLeg.setRotationPoint(2.0F, 12.0F + var1, 0.0F);
+        this.bipedLeftLeg.addBox(-1.0F, 0.0F, -1.0F, 2, 30, 2, p_i46305_1_);
+        this.bipedLeftLeg.setRotationPoint(2.0F, 12.0F + var2, 0.0F);
     }
 
     /**

@@ -12,9 +12,10 @@ public class ItemPiston extends ItemBlock
     }
 
     /**
-     * Returns the metadata of the block which this Item (ItemBlock) can place
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
      */
-    public int getMetadata(int p_77647_1_)
+    public int getMetadata(int damage)
     {
         return 7;
     }

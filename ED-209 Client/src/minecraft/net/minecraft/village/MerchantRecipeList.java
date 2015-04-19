@@ -26,7 +26,7 @@ public class MerchantRecipeList extends ArrayList
         if (p_77203_3_ > 0 && p_77203_3_ < this.size())
         {
             MerchantRecipe var6 = (MerchantRecipe)this.get(p_77203_3_);
-            return p_77203_1_.getItem() == var6.getItemToBuy().getItem() && (p_77203_2_ == null && !var6.hasSecondItemToBuy() || var6.hasSecondItemToBuy() && p_77203_2_ != null && var6.getSecondItemToBuy().getItem() == p_77203_2_.getItem()) && p_77203_1_.stackSize >= var6.getItemToBuy().stackSize && (!var6.hasSecondItemToBuy() || p_77203_2_.stackSize >= var6.getSecondItemToBuy().stackSize) ? var6 : null;
+            return ItemStack.areItemsEqual(p_77203_1_, var6.getItemToBuy()) && (p_77203_2_ == null && !var6.hasSecondItemToBuy() || var6.hasSecondItemToBuy() && ItemStack.areItemsEqual(p_77203_2_, var6.getSecondItemToBuy())) && p_77203_1_.stackSize >= var6.getItemToBuy().stackSize && (!var6.hasSecondItemToBuy() || p_77203_2_.stackSize >= var6.getSecondItemToBuy().stackSize) ? var6 : null;
         }
         else
         {
@@ -34,7 +34,7 @@ public class MerchantRecipeList extends ArrayList
             {
                 MerchantRecipe var5 = (MerchantRecipe)this.get(var4);
 
-                if (p_77203_1_.getItem() == var5.getItemToBuy().getItem() && p_77203_1_.stackSize >= var5.getItemToBuy().stackSize && (!var5.hasSecondItemToBuy() && p_77203_2_ == null || var5.hasSecondItemToBuy() && p_77203_2_ != null && var5.getSecondItemToBuy().getItem() == p_77203_2_.getItem() && p_77203_2_.stackSize >= var5.getSecondItemToBuy().stackSize))
+                if (ItemStack.areItemsEqual(p_77203_1_, var5.getItemToBuy()) && p_77203_1_.stackSize >= var5.getItemToBuy().stackSize && (!var5.hasSecondItemToBuy() && p_77203_2_ == null || var5.hasSecondItemToBuy() && ItemStack.areItemsEqual(p_77203_2_, var5.getSecondItemToBuy()) && p_77203_2_.stackSize >= var5.getSecondItemToBuy().stackSize))
                 {
                     return var5;
                 }
@@ -44,30 +44,7 @@ public class MerchantRecipeList extends ArrayList
         }
     }
 
-    /**
-     * checks if there is a recipie for the same ingredients already on the list, and replaces it. otherwise, adds it
-     */
-    public void addToListWithCheck(MerchantRecipe p_77205_1_)
-    {
-        for (int var2 = 0; var2 < this.size(); ++var2)
-        {
-            MerchantRecipe var3 = (MerchantRecipe)this.get(var2);
-
-            if (p_77205_1_.hasSameIDsAs(var3))
-            {
-                if (p_77205_1_.hasSameItemsAs(var3))
-                {
-                    this.set(var2, p_77205_1_);
-                }
-
-                return;
-            }
-        }
-
-        this.add(p_77205_1_);
-    }
-
-    public void func_151391_a(PacketBuffer p_151391_1_) throws IOException
+    public void func_151391_a(PacketBuffer p_151391_1_)
     {
         p_151391_1_.writeByte((byte)(this.size() & 255));
 
@@ -85,6 +62,8 @@ public class MerchantRecipeList extends ArrayList
             }
 
             p_151391_1_.writeBoolean(var3.isRecipeDisabled());
+            p_151391_1_.writeInt(var3.func_180321_e());
+            p_151391_1_.writeInt(var3.func_180320_f());
         }
     }
 
@@ -105,14 +84,16 @@ public class MerchantRecipeList extends ArrayList
             }
 
             boolean var7 = p_151390_0_.readBoolean();
-            MerchantRecipe var8 = new MerchantRecipe(var4, var6, var5);
+            int var8 = p_151390_0_.readInt();
+            int var9 = p_151390_0_.readInt();
+            MerchantRecipe var10 = new MerchantRecipe(var4, var6, var5, var8, var9);
 
             if (var7)
             {
-                var8.func_82785_h();
+                var10.func_82785_h();
             }
 
-            var1.add(var8);
+            var1.add(var10);
         }
 
         return var1;

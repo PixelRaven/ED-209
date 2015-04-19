@@ -1,30 +1,37 @@
 package net.minecraft.util;
 
+import org.apache.commons.lang3.Validate;
+
 public class RegistryNamespacedDefaultedByKey extends RegistryNamespaced
 {
-    private final String field_148760_d;
+    private final Object field_148760_d;
     private Object field_148761_e;
     private static final String __OBFID = "CL_00001196";
 
-    public RegistryNamespacedDefaultedByKey(String p_i45127_1_)
+    public RegistryNamespacedDefaultedByKey(Object p_i46017_1_)
     {
-        this.field_148760_d = p_i45127_1_;
+        this.field_148760_d = p_i46017_1_;
+    }
+
+    public void register(int p_177775_1_, Object p_177775_2_, Object p_177775_3_)
+    {
+        if (this.field_148760_d.equals(p_177775_2_))
+        {
+            this.field_148761_e = p_177775_3_;
+        }
+
+        super.register(p_177775_1_, p_177775_2_, p_177775_3_);
     }
 
     /**
-     * Adds a new object to this registry, keyed by both the given integer ID and the given string.
+     * validates that this registry's key is non-null
      */
-    public void addObject(int p_148756_1_, String p_148756_2_, Object p_148756_3_)
+    public void validateKey()
     {
-        if (this.field_148760_d.equals(p_148756_2_))
-        {
-            this.field_148761_e = p_148756_3_;
-        }
-
-        super.addObject(p_148756_1_, p_148756_2_, p_148756_3_);
+        Validate.notNull(this.field_148760_d);
     }
 
-    public Object getObject(String p_82594_1_)
+    public Object getObject(Object p_82594_1_)
     {
         Object var2 = super.getObject(p_82594_1_);
         return var2 == null ? this.field_148761_e : var2;
@@ -33,14 +40,9 @@ public class RegistryNamespacedDefaultedByKey extends RegistryNamespaced
     /**
      * Gets the object identified by the given ID.
      */
-    public Object getObjectForID(int p_148754_1_)
+    public Object getObjectById(int p_148754_1_)
     {
-        Object var2 = super.getObjectForID(p_148754_1_);
+        Object var2 = super.getObjectById(p_148754_1_);
         return var2 == null ? this.field_148761_e : var2;
-    }
-
-    public Object getObject(Object p_82594_1_)
-    {
-        return this.getObject((String)p_82594_1_);
     }
 }

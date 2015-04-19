@@ -7,7 +7,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S12PacketEntityVelocity extends Packet
+public class S12PacketEntityVelocity implements Packet
 {
     private int field_149417_a;
     private int field_149415_b;
@@ -65,36 +65,31 @@ public class S12PacketEntityVelocity extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149417_a = p_148837_1_.readInt();
-        this.field_149415_b = p_148837_1_.readShort();
-        this.field_149416_c = p_148837_1_.readShort();
-        this.field_149414_d = p_148837_1_.readShort();
+        this.field_149417_a = data.readVarIntFromBuffer();
+        this.field_149415_b = data.readShort();
+        this.field_149416_c = data.readShort();
+        this.field_149414_d = data.readShort();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149417_a);
-        p_148840_1_.writeShort(this.field_149415_b);
-        p_148840_1_.writeShort(this.field_149416_c);
-        p_148840_1_.writeShort(this.field_149414_d);
-    }
-
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
-    {
-        p_148833_1_.handleEntityVelocity(this);
+        data.writeVarIntToBuffer(this.field_149417_a);
+        data.writeShort(this.field_149415_b);
+        data.writeShort(this.field_149416_c);
+        data.writeShort(this.field_149414_d);
     }
 
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        return String.format("id=%d, x=%.2f, y=%.2f, z=%.2f", new Object[] {Integer.valueOf(this.field_149417_a), Float.valueOf((float)this.field_149415_b / 8000.0F), Float.valueOf((float)this.field_149416_c / 8000.0F), Float.valueOf((float)this.field_149414_d / 8000.0F)});
+        handler.handleEntityVelocity(this);
     }
 
     public int func_149412_c()
@@ -117,8 +112,11 @@ public class S12PacketEntityVelocity extends Packet
         return this.field_149414_d;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.entity.passive.EntitySheep;
 
 public class ModelSheep1 extends ModelQuadruped
 {
-    private float field_78152_i;
+    private float headRotationAngleX;
     private static final String __OBFID = "CL_00000852";
 
     public ModelSheep1()
@@ -40,8 +40,8 @@ public class ModelSheep1 extends ModelQuadruped
     public void setLivingAnimations(EntityLivingBase p_78086_1_, float p_78086_2_, float p_78086_3_, float p_78086_4_)
     {
         super.setLivingAnimations(p_78086_1_, p_78086_2_, p_78086_3_, p_78086_4_);
-        this.head.rotationPointY = 6.0F + ((EntitySheep)p_78086_1_).func_70894_j(p_78086_4_) * 9.0F;
-        this.field_78152_i = ((EntitySheep)p_78086_1_).func_70890_k(p_78086_4_);
+        this.head.rotationPointY = 6.0F + ((EntitySheep)p_78086_1_).getHeadRotationPointY(p_78086_4_) * 9.0F;
+        this.headRotationAngleX = ((EntitySheep)p_78086_1_).getHeadRotationAngleX(p_78086_4_);
     }
 
     /**
@@ -52,6 +52,6 @@ public class ModelSheep1 extends ModelQuadruped
     public void setRotationAngles(float p_78087_1_, float p_78087_2_, float p_78087_3_, float p_78087_4_, float p_78087_5_, float p_78087_6_, Entity p_78087_7_)
     {
         super.setRotationAngles(p_78087_1_, p_78087_2_, p_78087_3_, p_78087_4_, p_78087_5_, p_78087_6_, p_78087_7_);
-        this.head.rotateAngleX = this.field_78152_i;
+        this.head.rotateAngleX = this.headRotationAngleX;
     }
 }

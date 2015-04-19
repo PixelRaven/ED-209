@@ -1,6 +1,10 @@
 package net.minecraft.world.gen.structure;
 
+import com.google.common.base.Objects;
 import net.minecraft.nbt.NBTTagIntArray;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Vec3i;
 
 public class StructureBoundingBox
 {
@@ -46,28 +50,30 @@ public class StructureBoundingBox
         return new StructureBoundingBox(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
     }
 
-    /**
-     * used to project a possible new component Bounding Box - to check if it would cut anything already spawned
-     */
-    public static StructureBoundingBox getComponentToAddBoundingBox(int p_78889_0_, int p_78889_1_, int p_78889_2_, int p_78889_3_, int p_78889_4_, int p_78889_5_, int p_78889_6_, int p_78889_7_, int p_78889_8_, int p_78889_9_)
+    public static StructureBoundingBox func_175897_a(int p_175897_0_, int p_175897_1_, int p_175897_2_, int p_175897_3_, int p_175897_4_, int p_175897_5_, int p_175897_6_, int p_175897_7_, int p_175897_8_, EnumFacing p_175897_9_)
     {
-        switch (p_78889_9_)
+        switch (StructureBoundingBox.SwitchEnumFacing.field_175895_a[p_175897_9_.ordinal()])
         {
-            case 0:
-                return new StructureBoundingBox(p_78889_0_ + p_78889_3_, p_78889_1_ + p_78889_4_, p_78889_2_ + p_78889_5_, p_78889_0_ + p_78889_6_ - 1 + p_78889_3_, p_78889_1_ + p_78889_7_ - 1 + p_78889_4_, p_78889_2_ + p_78889_8_ - 1 + p_78889_5_);
-
             case 1:
-                return new StructureBoundingBox(p_78889_0_ - p_78889_8_ + 1 + p_78889_5_, p_78889_1_ + p_78889_4_, p_78889_2_ + p_78889_3_, p_78889_0_ + p_78889_5_, p_78889_1_ + p_78889_7_ - 1 + p_78889_4_, p_78889_2_ + p_78889_6_ - 1 + p_78889_3_);
+                return new StructureBoundingBox(p_175897_0_ + p_175897_3_, p_175897_1_ + p_175897_4_, p_175897_2_ - p_175897_8_ + 1 + p_175897_5_, p_175897_0_ + p_175897_6_ - 1 + p_175897_3_, p_175897_1_ + p_175897_7_ - 1 + p_175897_4_, p_175897_2_ + p_175897_5_);
 
             case 2:
-                return new StructureBoundingBox(p_78889_0_ + p_78889_3_, p_78889_1_ + p_78889_4_, p_78889_2_ - p_78889_8_ + 1 + p_78889_5_, p_78889_0_ + p_78889_6_ - 1 + p_78889_3_, p_78889_1_ + p_78889_7_ - 1 + p_78889_4_, p_78889_2_ + p_78889_5_);
+                return new StructureBoundingBox(p_175897_0_ + p_175897_3_, p_175897_1_ + p_175897_4_, p_175897_2_ + p_175897_5_, p_175897_0_ + p_175897_6_ - 1 + p_175897_3_, p_175897_1_ + p_175897_7_ - 1 + p_175897_4_, p_175897_2_ + p_175897_8_ - 1 + p_175897_5_);
 
             case 3:
-                return new StructureBoundingBox(p_78889_0_ + p_78889_5_, p_78889_1_ + p_78889_4_, p_78889_2_ + p_78889_3_, p_78889_0_ + p_78889_8_ - 1 + p_78889_5_, p_78889_1_ + p_78889_7_ - 1 + p_78889_4_, p_78889_2_ + p_78889_6_ - 1 + p_78889_3_);
+                return new StructureBoundingBox(p_175897_0_ - p_175897_8_ + 1 + p_175897_5_, p_175897_1_ + p_175897_4_, p_175897_2_ + p_175897_3_, p_175897_0_ + p_175897_5_, p_175897_1_ + p_175897_7_ - 1 + p_175897_4_, p_175897_2_ + p_175897_6_ - 1 + p_175897_3_);
+
+            case 4:
+                return new StructureBoundingBox(p_175897_0_ + p_175897_5_, p_175897_1_ + p_175897_4_, p_175897_2_ + p_175897_3_, p_175897_0_ + p_175897_8_ - 1 + p_175897_5_, p_175897_1_ + p_175897_7_ - 1 + p_175897_4_, p_175897_2_ + p_175897_6_ - 1 + p_175897_3_);
 
             default:
-                return new StructureBoundingBox(p_78889_0_ + p_78889_3_, p_78889_1_ + p_78889_4_, p_78889_2_ + p_78889_5_, p_78889_0_ + p_78889_6_ - 1 + p_78889_3_, p_78889_1_ + p_78889_7_ - 1 + p_78889_4_, p_78889_2_ + p_78889_8_ - 1 + p_78889_5_);
+                return new StructureBoundingBox(p_175897_0_ + p_175897_3_, p_175897_1_ + p_175897_4_, p_175897_2_ + p_175897_5_, p_175897_0_ + p_175897_6_ - 1 + p_175897_3_, p_175897_1_ + p_175897_7_ - 1 + p_175897_4_, p_175897_2_ + p_175897_8_ - 1 + p_175897_5_);
         }
+    }
+
+    public static StructureBoundingBox func_175899_a(int p_175899_0_, int p_175899_1_, int p_175899_2_, int p_175899_3_, int p_175899_4_, int p_175899_5_)
+    {
+        return new StructureBoundingBox(Math.min(p_175899_0_, p_175899_3_), Math.min(p_175899_1_, p_175899_4_), Math.min(p_175899_2_, p_175899_5_), Math.max(p_175899_0_, p_175899_3_), Math.max(p_175899_1_, p_175899_4_), Math.max(p_175899_2_, p_175899_5_));
     }
 
     public StructureBoundingBox(StructureBoundingBox p_i2031_1_)
@@ -90,6 +96,16 @@ public class StructureBoundingBox
         this.maxZ = p_i2032_6_;
     }
 
+    public StructureBoundingBox(Vec3i p_i45626_1_, Vec3i p_i45626_2_)
+    {
+        this.minX = Math.min(p_i45626_1_.getX(), p_i45626_2_.getX());
+        this.minY = Math.min(p_i45626_1_.getY(), p_i45626_2_.getY());
+        this.minZ = Math.min(p_i45626_1_.getZ(), p_i45626_2_.getZ());
+        this.maxX = Math.max(p_i45626_1_.getX(), p_i45626_2_.getX());
+        this.maxY = Math.max(p_i45626_1_.getY(), p_i45626_2_.getY());
+        this.maxZ = Math.max(p_i45626_1_.getZ(), p_i45626_2_.getZ());
+    }
+
     public StructureBoundingBox(int p_i2033_1_, int p_i2033_2_, int p_i2033_3_, int p_i2033_4_)
     {
         this.minX = p_i2033_1_;
@@ -101,7 +117,7 @@ public class StructureBoundingBox
     }
 
     /**
-     * Returns whether the given bounding box intersects with this one. Args: structureboundingbox
+     * Discover if bounding box can fit within the current bounding box object.
      */
     public boolean intersectsWith(StructureBoundingBox p_78884_1_)
     {
@@ -142,16 +158,18 @@ public class StructureBoundingBox
         this.maxZ += p_78886_3_;
     }
 
-    /**
-     * Returns true if block is inside bounding box
-     */
-    public boolean isVecInside(int p_78890_1_, int p_78890_2_, int p_78890_3_)
+    public boolean func_175898_b(Vec3i p_175898_1_)
     {
-        return p_78890_1_ >= this.minX && p_78890_1_ <= this.maxX && p_78890_3_ >= this.minZ && p_78890_3_ <= this.maxZ && p_78890_2_ >= this.minY && p_78890_2_ <= this.maxY;
+        return p_175898_1_.getX() >= this.minX && p_175898_1_.getX() <= this.maxX && p_175898_1_.getZ() >= this.minZ && p_175898_1_.getZ() <= this.maxZ && p_175898_1_.getY() >= this.minY && p_175898_1_.getY() <= this.maxY;
+    }
+
+    public Vec3i func_175896_b()
+    {
+        return new Vec3i(this.maxX - this.minX, this.maxY - this.minY, this.maxZ - this.minZ);
     }
 
     /**
-     * Returns width of a bounding box
+     * Get dimension of the bounding box in the x direction.
      */
     public int getXSize()
     {
@@ -159,7 +177,7 @@ public class StructureBoundingBox
     }
 
     /**
-     * Returns height of a bounding box
+     * Get dimension of the bounding box in the y direction.
      */
     public int getYSize()
     {
@@ -167,35 +185,70 @@ public class StructureBoundingBox
     }
 
     /**
-     * Returns length of a bounding box
+     * Get dimension of the bounding box in the z direction.
      */
     public int getZSize()
     {
         return this.maxZ - this.minZ + 1;
     }
 
-    public int getCenterX()
+    public Vec3i func_180717_f()
     {
-        return this.minX + (this.maxX - this.minX + 1) / 2;
-    }
-
-    public int getCenterY()
-    {
-        return this.minY + (this.maxY - this.minY + 1) / 2;
-    }
-
-    public int getCenterZ()
-    {
-        return this.minZ + (this.maxZ - this.minZ + 1) / 2;
+        return new BlockPos(this.minX + (this.maxX - this.minX + 1) / 2, this.minY + (this.maxY - this.minY + 1) / 2, this.minZ + (this.maxZ - this.minZ + 1) / 2);
     }
 
     public String toString()
     {
-        return "(" + this.minX + ", " + this.minY + ", " + this.minZ + "; " + this.maxX + ", " + this.maxY + ", " + this.maxZ + ")";
+        return Objects.toStringHelper(this).add("x0", this.minX).add("y0", this.minY).add("z0", this.minZ).add("x1", this.maxX).add("y1", this.maxY).add("z1", this.maxZ).toString();
     }
 
     public NBTTagIntArray func_151535_h()
     {
         return new NBTTagIntArray(new int[] {this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ});
+    }
+
+    static final class SwitchEnumFacing
+    {
+        static final int[] field_175895_a = new int[EnumFacing.values().length];
+        private static final String __OBFID = "CL_00001999";
+
+        static
+        {
+            try
+            {
+                field_175895_a[EnumFacing.NORTH.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
+            }
+
+            try
+            {
+                field_175895_a[EnumFacing.SOUTH.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                field_175895_a[EnumFacing.WEST.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                field_175895_a[EnumFacing.EAST.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
+        }
     }
 }

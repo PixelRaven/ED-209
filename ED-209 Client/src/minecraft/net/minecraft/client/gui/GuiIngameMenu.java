@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.gui.achievement.GuiAchievements;
 import net.minecraft.client.gui.achievement.GuiStats;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -36,16 +37,16 @@ public class GuiIngameMenu extends GuiScreen
         var3.enabled = this.mc.isSingleplayer() && !this.mc.getIntegratedServer().getPublic();
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        switch (p_146284_1_.id)
+        switch (button.id)
         {
             case 0:
                 this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));
                 break;
 
             case 1:
-                p_146284_1_.enabled = false;
+                button.enabled = false;
                 this.mc.theWorld.sendQuittingDisconnectingPacket();
                 this.mc.loadWorld((WorldClient)null);
                 this.mc.displayGuiScreen(new GuiMainMenu());
@@ -61,11 +62,11 @@ public class GuiIngameMenu extends GuiScreen
                 break;
 
             case 5:
-                this.mc.displayGuiScreen(new GuiAchievements(this, this.mc.thePlayer.func_146107_m()));
+                this.mc.displayGuiScreen(new GuiAchievements(this, this.mc.thePlayer.getStatFileWriter()));
                 break;
 
             case 6:
-                this.mc.displayGuiScreen(new GuiStats(this, this.mc.thePlayer.func_146107_m()));
+                this.mc.displayGuiScreen(new GuiStats(this, this.mc.thePlayer.getStatFileWriter()));
                 break;
 
             case 7:
@@ -83,12 +84,12 @@ public class GuiIngameMenu extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, I18n.format("menu.game", new Object[0]), this.width / 2, 40, 16777215);
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

@@ -5,6 +5,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class ContainerWorkbench extends Container
@@ -13,40 +14,36 @@ public class ContainerWorkbench extends Container
     public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
     public IInventory craftResult = new InventoryCraftResult();
     private World worldObj;
-    private int posX;
-    private int posY;
-    private int posZ;
+    private BlockPos field_178145_h;
     private static final String __OBFID = "CL_00001744";
 
-    public ContainerWorkbench(InventoryPlayer p_i1808_1_, World p_i1808_2_, int p_i1808_3_, int p_i1808_4_, int p_i1808_5_)
+    public ContainerWorkbench(InventoryPlayer p_i45800_1_, World worldIn, BlockPos p_i45800_3_)
     {
-        this.worldObj = p_i1808_2_;
-        this.posX = p_i1808_3_;
-        this.posY = p_i1808_4_;
-        this.posZ = p_i1808_5_;
-        this.addSlotToContainer(new SlotCrafting(p_i1808_1_.player, this.craftMatrix, this.craftResult, 0, 124, 35));
-        int var6;
-        int var7;
+        this.worldObj = worldIn;
+        this.field_178145_h = p_i45800_3_;
+        this.addSlotToContainer(new SlotCrafting(p_i45800_1_.player, this.craftMatrix, this.craftResult, 0, 124, 35));
+        int var4;
+        int var5;
 
-        for (var6 = 0; var6 < 3; ++var6)
+        for (var4 = 0; var4 < 3; ++var4)
         {
-            for (var7 = 0; var7 < 3; ++var7)
+            for (var5 = 0; var5 < 3; ++var5)
             {
-                this.addSlotToContainer(new Slot(this.craftMatrix, var7 + var6 * 3, 30 + var7 * 18, 17 + var6 * 18));
+                this.addSlotToContainer(new Slot(this.craftMatrix, var5 + var4 * 3, 30 + var5 * 18, 17 + var4 * 18));
             }
         }
 
-        for (var6 = 0; var6 < 3; ++var6)
+        for (var4 = 0; var4 < 3; ++var4)
         {
-            for (var7 = 0; var7 < 9; ++var7)
+            for (var5 = 0; var5 < 9; ++var5)
             {
-                this.addSlotToContainer(new Slot(p_i1808_1_, var7 + var6 * 9 + 9, 8 + var7 * 18, 84 + var6 * 18));
+                this.addSlotToContainer(new Slot(p_i45800_1_, var5 + var4 * 9 + 9, 8 + var5 * 18, 84 + var4 * 18));
             }
         }
 
-        for (var6 = 0; var6 < 9; ++var6)
+        for (var4 = 0; var4 < 9; ++var4)
         {
-            this.addSlotToContainer(new Slot(p_i1808_1_, var6, 8 + var6 * 18, 142));
+            this.addSlotToContainer(new Slot(p_i45800_1_, var4, 8 + var4 * 18, 142));
         }
 
         this.onCraftMatrixChanged(this.craftMatrix);
@@ -67,7 +64,7 @@ public class ContainerWorkbench extends Container
     {
         super.onContainerClosed(p_75134_1_);
 
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             for (int var2 = 0; var2 < 9; ++var2)
             {
@@ -81,25 +78,25 @@ public class ContainerWorkbench extends Container
         }
     }
 
-    public boolean canInteractWith(EntityPlayer p_75145_1_)
+    public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.worldObj.getBlock(this.posX, this.posY, this.posZ) != Blocks.crafting_table ? false : p_75145_1_.getDistanceSq((double)this.posX + 0.5D, (double)this.posY + 0.5D, (double)this.posZ + 0.5D) <= 64.0D;
+        return this.worldObj.getBlockState(this.field_178145_h).getBlock() != Blocks.crafting_table ? false : playerIn.getDistanceSq((double)this.field_178145_h.getX() + 0.5D, (double)this.field_178145_h.getY() + 0.5D, (double)this.field_178145_h.getZ() + 0.5D) <= 64.0D;
     }
 
     /**
-     * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
+     * Take a stack from the specified inventory slot.
      */
-    public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_)
+    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack var3 = null;
-        Slot var4 = (Slot)this.inventorySlots.get(p_82846_2_);
+        Slot var4 = (Slot)this.inventorySlots.get(index);
 
         if (var4 != null && var4.getHasStack())
         {
             ItemStack var5 = var4.getStack();
             var3 = var5.copy();
 
-            if (p_82846_2_ == 0)
+            if (index == 0)
             {
                 if (!this.mergeItemStack(var5, 10, 46, true))
                 {
@@ -108,14 +105,14 @@ public class ContainerWorkbench extends Container
 
                 var4.onSlotChange(var5, var3);
             }
-            else if (p_82846_2_ >= 10 && p_82846_2_ < 37)
+            else if (index >= 10 && index < 37)
             {
                 if (!this.mergeItemStack(var5, 37, 46, false))
                 {
                     return null;
                 }
             }
-            else if (p_82846_2_ >= 37 && p_82846_2_ < 46)
+            else if (index >= 37 && index < 46)
             {
                 if (!this.mergeItemStack(var5, 10, 37, false))
                 {
@@ -141,7 +138,7 @@ public class ContainerWorkbench extends Container
                 return null;
             }
 
-            var4.onPickupFromSlot(p_82846_1_, var5);
+            var4.onPickupFromSlot(playerIn, var5);
         }
 
         return var3;

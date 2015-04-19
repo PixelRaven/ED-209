@@ -1,8 +1,9 @@
 package net.minecraft.profiler;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,10 @@ public class Profiler
     private static final Logger logger = LogManager.getLogger();
 
     /** List of parent sections */
-    private final List sectionList = new ArrayList();
+    private final List sectionList = Lists.newArrayList();
 
     /** List of timestamps (System.nanoTime) */
-    private final List timestampList = new ArrayList();
+    private final List timestampList = Lists.newArrayList();
 
     /** Flag profiling enabled */
     public boolean profilingEnabled;
@@ -26,7 +27,7 @@ public class Profiler
     private String profilingSection = "";
 
     /** Profiling map */
-    private final Map profilingMap = new HashMap();
+    private final Map profilingMap = Maps.newHashMap();
     private static final String __OBFID = "CL_00001497";
 
     /**
@@ -42,7 +43,7 @@ public class Profiler
     /**
      * Start section
      */
-    public void startSection(String p_76320_1_)
+    public void startSection(String name)
     {
         if (this.profilingEnabled)
         {
@@ -51,7 +52,7 @@ public class Profiler
                 this.profilingSection = this.profilingSection + ".";
             }
 
-            this.profilingSection = this.profilingSection + p_76320_1_;
+            this.profilingSection = this.profilingSection + name;
             this.sectionList.add(this.profilingSection);
             this.timestampList.add(Long.valueOf(System.nanoTime()));
         }
@@ -100,7 +101,7 @@ public class Profiler
         {
             long var3 = this.profilingMap.containsKey("root") ? ((Long)this.profilingMap.get("root")).longValue() : 0L;
             long var5 = this.profilingMap.containsKey(p_76321_1_) ? ((Long)this.profilingMap.get(p_76321_1_)).longValue() : -1L;
-            ArrayList var7 = new ArrayList();
+            ArrayList var7 = Lists.newArrayList();
 
             if (p_76321_1_.length() > 0)
             {
@@ -171,10 +172,10 @@ public class Profiler
     /**
      * End current section and start a new section
      */
-    public void endStartSection(String p_76318_1_)
+    public void endStartSection(String name)
     {
         this.endSection();
-        this.startSection(p_76318_1_);
+        this.startSection(name);
     }
 
     public String getNameOfLastSection()

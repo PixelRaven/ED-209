@@ -1,11 +1,11 @@
 package net.minecraft.entity.ai;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class EntityMinecartMobSpawner extends EntityMinecart
@@ -22,57 +22,49 @@ public class EntityMinecartMobSpawner extends EntityMinecart
         {
             return EntityMinecartMobSpawner.this.worldObj;
         }
-        public int getSpawnerX()
+        public BlockPos func_177221_b()
         {
-            return MathHelper.floor_double(EntityMinecartMobSpawner.this.posX);
-        }
-        public int getSpawnerY()
-        {
-            return MathHelper.floor_double(EntityMinecartMobSpawner.this.posY);
-        }
-        public int getSpawnerZ()
-        {
-            return MathHelper.floor_double(EntityMinecartMobSpawner.this.posZ);
+            return new BlockPos(EntityMinecartMobSpawner.this);
         }
     };
     private static final String __OBFID = "CL_00001678";
 
-    public EntityMinecartMobSpawner(World p_i1725_1_)
+    public EntityMinecartMobSpawner(World worldIn)
     {
-        super(p_i1725_1_);
+        super(worldIn);
     }
 
-    public EntityMinecartMobSpawner(World p_i1726_1_, double p_i1726_2_, double p_i1726_4_, double p_i1726_6_)
+    public EntityMinecartMobSpawner(World worldIn, double p_i1726_2_, double p_i1726_4_, double p_i1726_6_)
     {
-        super(p_i1726_1_, p_i1726_2_, p_i1726_4_, p_i1726_6_);
+        super(worldIn, p_i1726_2_, p_i1726_4_, p_i1726_6_);
     }
 
-    public int getMinecartType()
+    public EntityMinecart.EnumMinecartType func_180456_s()
     {
-        return 4;
+        return EntityMinecart.EnumMinecartType.SPAWNER;
     }
 
-    public Block func_145817_o()
+    public IBlockState func_180457_u()
     {
-        return Blocks.mob_spawner;
+        return Blocks.mob_spawner.getDefaultState();
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.mobSpawnerLogic.readFromNBT(p_70037_1_);
+        super.readEntityFromNBT(tagCompund);
+        this.mobSpawnerLogic.readFromNBT(tagCompund);
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        this.mobSpawnerLogic.writeToNBT(p_70014_1_);
+        super.writeEntityToNBT(tagCompound);
+        this.mobSpawnerLogic.writeToNBT(tagCompound);
     }
 
     public void handleHealthUpdate(byte p_70103_1_)

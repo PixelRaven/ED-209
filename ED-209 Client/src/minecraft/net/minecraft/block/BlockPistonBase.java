@@ -2,77 +2,43 @@ package net.minecraft.block;
 
 import java.util.List;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockPistonStructureHelper;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Facing;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockPistonBase extends Block
 {
-    private final boolean field_150082_a;
-    private IIcon field_150081_b;
-    private IIcon field_150083_M;
-    private IIcon field_150084_N;
+    public static final PropertyDirection FACING = PropertyDirection.create("facing");
+    public static final PropertyBool EXTENDED = PropertyBool.create("extended");
+
+    /** This piston is the sticky one? */
+    private final boolean isSticky;
     private static final String __OBFID = "CL_00000366";
 
     public BlockPistonBase(boolean p_i45443_1_)
     {
         super(Material.piston);
-        this.field_150082_a = p_i45443_1_;
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH).withProperty(EXTENDED, Boolean.valueOf(false)));
+        this.isSticky = p_i45443_1_;
         this.setStepSound(soundTypePiston);
         this.setHardness(0.5F);
         this.setCreativeTab(CreativeTabs.tabRedstone);
-    }
-
-    public IIcon func_150073_e()
-    {
-        return this.field_150084_N;
-    }
-
-    public void func_150070_b(float p_150070_1_, float p_150070_2_, float p_150070_3_, float p_150070_4_, float p_150070_5_, float p_150070_6_)
-    {
-        this.setBlockBounds(p_150070_1_, p_150070_2_, p_150070_3_, p_150070_4_, p_150070_5_, p_150070_6_);
-    }
-
-    /**
-     * Gets the block's texture. Args: side, meta
-     */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        int var3 = func_150076_b(p_149691_2_);
-        return var3 > 5 ? this.field_150084_N : (p_149691_1_ == var3 ? (!func_150075_c(p_149691_2_) && this.field_149759_B <= 0.0D && this.field_149760_C <= 0.0D && this.field_149754_D <= 0.0D && this.field_149755_E >= 1.0D && this.field_149756_F >= 1.0D && this.field_149757_G >= 1.0D ? this.field_150084_N : this.field_150081_b) : (p_149691_1_ == Facing.oppositeSide[var3] ? this.field_150083_M : this.blockIcon));
-    }
-
-    public static IIcon func_150074_e(String p_150074_0_)
-    {
-        return p_150074_0_ == "piston_side" ? Blocks.piston.blockIcon : (p_150074_0_ == "piston_top_normal" ? Blocks.piston.field_150084_N : (p_150074_0_ == "piston_top_sticky" ? Blocks.sticky_piston.field_150084_N : (p_150074_0_ == "piston_inner" ? Blocks.piston.field_150081_b : null)));
-    }
-
-    public void registerBlockIcons(IIconRegister p_149651_1_)
-    {
-        this.blockIcon = p_149651_1_.registerIcon("piston_side");
-        this.field_150084_N = p_149651_1_.registerIcon(this.field_150082_a ? "piston_top_sticky" : "piston_top_normal");
-        this.field_150081_b = p_149651_1_.registerIcon("piston_inner");
-        this.field_150083_M = p_149651_1_.registerIcon("piston_bottom");
-    }
-
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
-    {
-        return 16;
     }
 
     public boolean isOpaqueCube()
@@ -80,197 +46,215 @@ public class BlockPistonBase extends Block
         return false;
     }
 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
     {
-        return false;
-    }
+        worldIn.setBlockState(pos, state.withProperty(FACING, func_180695_a(worldIn, pos, placer)), 2);
 
-    /**
-     * Called when the block is placed in the world.
-     */
-    public void onBlockPlacedBy(World p_149689_1_, int p_149689_2_, int p_149689_3_, int p_149689_4_, EntityLivingBase p_149689_5_, ItemStack p_149689_6_)
-    {
-        int var7 = func_150071_a(p_149689_1_, p_149689_2_, p_149689_3_, p_149689_4_, p_149689_5_);
-        p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, var7, 2);
-
-        if (!p_149689_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            this.func_150078_e(p_149689_1_, p_149689_2_, p_149689_3_, p_149689_4_);
+            this.func_176316_e(worldIn, pos, state);
         }
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
-        if (!p_149695_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            this.func_150078_e(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_);
+            this.func_176316_e(worldIn, pos, state);
         }
     }
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        if (!p_149726_1_.isClient && p_149726_1_.getTileEntity(p_149726_2_, p_149726_3_, p_149726_4_) == null)
+        if (!worldIn.isRemote && worldIn.getTileEntity(pos) == null)
         {
-            this.func_150078_e(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
+            this.func_176316_e(worldIn, pos, state);
         }
     }
 
-    private void func_150078_e(World p_150078_1_, int p_150078_2_, int p_150078_3_, int p_150078_4_)
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        int var5 = p_150078_1_.getBlockMetadata(p_150078_2_, p_150078_3_, p_150078_4_);
-        int var6 = func_150076_b(var5);
+        return this.getDefaultState().withProperty(FACING, func_180695_a(worldIn, pos, placer)).withProperty(EXTENDED, Boolean.valueOf(false));
+    }
 
-        if (var6 != 7)
+    private void func_176316_e(World worldIn, BlockPos p_176316_2_, IBlockState p_176316_3_)
+    {
+        EnumFacing var4 = (EnumFacing)p_176316_3_.getValue(FACING);
+        boolean var5 = this.func_176318_b(worldIn, p_176316_2_, var4);
+
+        if (var5 && !((Boolean)p_176316_3_.getValue(EXTENDED)).booleanValue())
         {
-            boolean var7 = this.func_150072_a(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, var6);
-
-            if (var7 && !func_150075_c(var5))
+            if ((new BlockPistonStructureHelper(worldIn, p_176316_2_, var4, true)).func_177253_a())
             {
-                if (func_150077_h(p_150078_1_, p_150078_2_, p_150078_3_, p_150078_4_, var6))
+                worldIn.addBlockEvent(p_176316_2_, this, 0, var4.getIndex());
+            }
+        }
+        else if (!var5 && ((Boolean)p_176316_3_.getValue(EXTENDED)).booleanValue())
+        {
+            worldIn.setBlockState(p_176316_2_, p_176316_3_.withProperty(EXTENDED, Boolean.valueOf(false)), 2);
+            worldIn.addBlockEvent(p_176316_2_, this, 1, var4.getIndex());
+        }
+    }
+
+    private boolean func_176318_b(World worldIn, BlockPos p_176318_2_, EnumFacing p_176318_3_)
+    {
+        EnumFacing[] var4 = EnumFacing.values();
+        int var5 = var4.length;
+        int var6;
+
+        for (var6 = 0; var6 < var5; ++var6)
+        {
+            EnumFacing var7 = var4[var6];
+
+            if (var7 != p_176318_3_ && worldIn.func_175709_b(p_176318_2_.offset(var7), var7))
+            {
+                return true;
+            }
+        }
+
+        if (worldIn.func_175709_b(p_176318_2_, EnumFacing.NORTH))
+        {
+            return true;
+        }
+        else
+        {
+            BlockPos var9 = p_176318_2_.offsetUp();
+            EnumFacing[] var10 = EnumFacing.values();
+            var6 = var10.length;
+
+            for (int var11 = 0; var11 < var6; ++var11)
+            {
+                EnumFacing var8 = var10[var11];
+
+                if (var8 != EnumFacing.DOWN && worldIn.func_175709_b(var9.offset(var8), var8))
                 {
-                    p_150078_1_.func_147452_c(p_150078_2_, p_150078_3_, p_150078_4_, this, 0, var6);
+                    return true;
                 }
             }
-            else if (!var7 && func_150075_c(var5))
-            {
-                p_150078_1_.setBlockMetadataWithNotify(p_150078_2_, p_150078_3_, p_150078_4_, var6, 2);
-                p_150078_1_.func_147452_c(p_150078_2_, p_150078_3_, p_150078_4_, this, 1, var6);
-            }
+
+            return false;
         }
     }
 
-    private boolean func_150072_a(World p_150072_1_, int p_150072_2_, int p_150072_3_, int p_150072_4_, int p_150072_5_)
+    /**
+     * Called on both Client and Server when World#addBlockEvent is called
+     */
+    public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam)
     {
-        return p_150072_5_ != 0 && p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_ - 1, p_150072_4_, 0) ? true : (p_150072_5_ != 1 && p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_ + 1, p_150072_4_, 1) ? true : (p_150072_5_ != 2 && p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_, p_150072_4_ - 1, 2) ? true : (p_150072_5_ != 3 && p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_, p_150072_4_ + 1, 3) ? true : (p_150072_5_ != 5 && p_150072_1_.getIndirectPowerOutput(p_150072_2_ + 1, p_150072_3_, p_150072_4_, 5) ? true : (p_150072_5_ != 4 && p_150072_1_.getIndirectPowerOutput(p_150072_2_ - 1, p_150072_3_, p_150072_4_, 4) ? true : (p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_, p_150072_4_, 0) ? true : (p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_ + 2, p_150072_4_, 1) ? true : (p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_ + 1, p_150072_4_ - 1, 2) ? true : (p_150072_1_.getIndirectPowerOutput(p_150072_2_, p_150072_3_ + 1, p_150072_4_ + 1, 3) ? true : (p_150072_1_.getIndirectPowerOutput(p_150072_2_ - 1, p_150072_3_ + 1, p_150072_4_, 4) ? true : p_150072_1_.getIndirectPowerOutput(p_150072_2_ + 1, p_150072_3_ + 1, p_150072_4_, 5)))))))))));
-    }
+        EnumFacing var6 = (EnumFacing)state.getValue(FACING);
 
-    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_)
-    {
-        if (!p_149696_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            boolean var7 = this.func_150072_a(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_6_);
+            boolean var7 = this.func_176318_b(worldIn, pos, var6);
 
-            if (var7 && p_149696_5_ == 1)
+            if (var7 && eventID == 1)
             {
-                p_149696_1_.setBlockMetadataWithNotify(p_149696_2_, p_149696_3_, p_149696_4_, p_149696_6_ | 8, 2);
+                worldIn.setBlockState(pos, state.withProperty(EXTENDED, Boolean.valueOf(true)), 2);
                 return false;
             }
 
-            if (!var7 && p_149696_5_ == 0)
+            if (!var7 && eventID == 0)
             {
                 return false;
             }
         }
 
-        if (p_149696_5_ == 0)
+        if (eventID == 0)
         {
-            if (!this.func_150079_i(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_6_))
+            if (!this.func_176319_a(worldIn, pos, var6, true))
             {
                 return false;
             }
 
-            p_149696_1_.setBlockMetadataWithNotify(p_149696_2_, p_149696_3_, p_149696_4_, p_149696_6_ | 8, 2);
-            p_149696_1_.playSoundEffect((double)p_149696_2_ + 0.5D, (double)p_149696_3_ + 0.5D, (double)p_149696_4_ + 0.5D, "tile.piston.out", 0.5F, p_149696_1_.rand.nextFloat() * 0.25F + 0.6F);
+            worldIn.setBlockState(pos, state.withProperty(EXTENDED, Boolean.valueOf(true)), 2);
+            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "tile.piston.out", 0.5F, worldIn.rand.nextFloat() * 0.25F + 0.6F);
         }
-        else if (p_149696_5_ == 1)
+        else if (eventID == 1)
         {
-            TileEntity var16 = p_149696_1_.getTileEntity(p_149696_2_ + Facing.offsetsXForSide[p_149696_6_], p_149696_3_ + Facing.offsetsYForSide[p_149696_6_], p_149696_4_ + Facing.offsetsZForSide[p_149696_6_]);
+            TileEntity var13 = worldIn.getTileEntity(pos.offset(var6));
 
-            if (var16 instanceof TileEntityPiston)
+            if (var13 instanceof TileEntityPiston)
             {
-                ((TileEntityPiston)var16).func_145866_f();
+                ((TileEntityPiston)var13).clearPistonTileEntity();
             }
 
-            p_149696_1_.setBlock(p_149696_2_, p_149696_3_, p_149696_4_, Blocks.piston_extension, p_149696_6_, 3);
-            p_149696_1_.setTileEntity(p_149696_2_, p_149696_3_, p_149696_4_, BlockPistonMoving.func_149962_a(this, p_149696_6_, p_149696_6_, false, true));
+            worldIn.setBlockState(pos, Blocks.piston_extension.getDefaultState().withProperty(BlockPistonMoving.field_176426_a, var6).withProperty(BlockPistonMoving.field_176425_b, this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT), 3);
+            worldIn.setTileEntity(pos, BlockPistonMoving.func_176423_a(this.getStateFromMeta(eventParam), var6, false, true));
 
-            if (this.field_150082_a)
+            if (this.isSticky)
             {
-                int var8 = p_149696_2_ + Facing.offsetsXForSide[p_149696_6_] * 2;
-                int var9 = p_149696_3_ + Facing.offsetsYForSide[p_149696_6_] * 2;
-                int var10 = p_149696_4_ + Facing.offsetsZForSide[p_149696_6_] * 2;
-                Block var11 = p_149696_1_.getBlock(var8, var9, var10);
-                int var12 = p_149696_1_.getBlockMetadata(var8, var9, var10);
-                boolean var13 = false;
+                BlockPos var8 = pos.add(var6.getFrontOffsetX() * 2, var6.getFrontOffsetY() * 2, var6.getFrontOffsetZ() * 2);
+                Block var9 = worldIn.getBlockState(var8).getBlock();
+                boolean var10 = false;
 
-                if (var11 == Blocks.piston_extension)
+                if (var9 == Blocks.piston_extension)
                 {
-                    TileEntity var14 = p_149696_1_.getTileEntity(var8, var9, var10);
+                    TileEntity var11 = worldIn.getTileEntity(var8);
 
-                    if (var14 instanceof TileEntityPiston)
+                    if (var11 instanceof TileEntityPiston)
                     {
-                        TileEntityPiston var15 = (TileEntityPiston)var14;
+                        TileEntityPiston var12 = (TileEntityPiston)var11;
 
-                        if (var15.func_145864_c() == p_149696_6_ && var15.func_145868_b())
+                        if (var12.func_174930_e() == var6 && var12.isExtending())
                         {
-                            var15.func_145866_f();
-                            var11 = var15.func_145861_a();
-                            var12 = var15.getBlockMetadata();
-                            var13 = true;
+                            var12.clearPistonTileEntity();
+                            var10 = true;
                         }
                     }
                 }
 
-                if (!var13 && var11.getMaterial() != Material.air && func_150080_a(var11, p_149696_1_, var8, var9, var10, false) && (var11.getMobilityFlag() == 0 || var11 == Blocks.piston || var11 == Blocks.sticky_piston))
+                if (!var10 && var9.getMaterial() != Material.air && func_180696_a(var9, worldIn, var8, var6.getOpposite(), false) && (var9.getMobilityFlag() == 0 || var9 == Blocks.piston || var9 == Blocks.sticky_piston))
                 {
-                    p_149696_2_ += Facing.offsetsXForSide[p_149696_6_];
-                    p_149696_3_ += Facing.offsetsYForSide[p_149696_6_];
-                    p_149696_4_ += Facing.offsetsZForSide[p_149696_6_];
-                    p_149696_1_.setBlock(p_149696_2_, p_149696_3_, p_149696_4_, Blocks.piston_extension, var12, 3);
-                    p_149696_1_.setTileEntity(p_149696_2_, p_149696_3_, p_149696_4_, BlockPistonMoving.func_149962_a(var11, var12, p_149696_6_, false, false));
-                    p_149696_1_.setBlockToAir(var8, var9, var10);
-                }
-                else if (!var13)
-                {
-                    p_149696_1_.setBlockToAir(p_149696_2_ + Facing.offsetsXForSide[p_149696_6_], p_149696_3_ + Facing.offsetsYForSide[p_149696_6_], p_149696_4_ + Facing.offsetsZForSide[p_149696_6_]);
+                    this.func_176319_a(worldIn, pos, var6, false);
                 }
             }
             else
             {
-                p_149696_1_.setBlockToAir(p_149696_2_ + Facing.offsetsXForSide[p_149696_6_], p_149696_3_ + Facing.offsetsYForSide[p_149696_6_], p_149696_4_ + Facing.offsetsZForSide[p_149696_6_]);
+                worldIn.setBlockToAir(pos.offset(var6));
             }
 
-            p_149696_1_.playSoundEffect((double)p_149696_2_ + 0.5D, (double)p_149696_3_ + 0.5D, (double)p_149696_4_ + 0.5D, "tile.piston.in", 0.5F, p_149696_1_.rand.nextFloat() * 0.15F + 0.6F);
+            worldIn.playSoundEffect((double)pos.getX() + 0.5D, (double)pos.getY() + 0.5D, (double)pos.getZ() + 0.5D, "tile.piston.in", 0.5F, worldIn.rand.nextFloat() * 0.15F + 0.6F);
         }
 
         return true;
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
     {
-        int var5 = p_149719_1_.getBlockMetadata(p_149719_2_, p_149719_3_, p_149719_4_);
+        IBlockState var3 = access.getBlockState(pos);
 
-        if (func_150075_c(var5))
+        if (var3.getBlock() == this && ((Boolean)var3.getValue(EXTENDED)).booleanValue())
         {
-            float var6 = 0.25F;
+            float var4 = 0.25F;
+            EnumFacing var5 = (EnumFacing)var3.getValue(FACING);
 
-            switch (func_150076_b(var5))
+            if (var5 != null)
             {
-                case 0:
-                    this.setBlockBounds(0.0F, 0.25F, 0.0F, 1.0F, 1.0F, 1.0F);
-                    break;
+                switch (BlockPistonBase.SwitchEnumFacing.field_177243_a[var5.ordinal()])
+                {
+                    case 1:
+                        this.setBlockBounds(0.0F, 0.25F, 0.0F, 1.0F, 1.0F, 1.0F);
+                        break;
 
-                case 1:
-                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.75F, 1.0F);
-                    break;
+                    case 2:
+                        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.75F, 1.0F);
+                        break;
 
-                case 2:
-                    this.setBlockBounds(0.0F, 0.0F, 0.25F, 1.0F, 1.0F, 1.0F);
-                    break;
+                    case 3:
+                        this.setBlockBounds(0.0F, 0.0F, 0.25F, 1.0F, 1.0F, 1.0F);
+                        break;
 
-                case 3:
-                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.75F);
-                    break;
+                    case 4:
+                        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.75F);
+                        break;
 
-                case 4:
-                    this.setBlockBounds(0.25F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-                    break;
+                    case 5:
+                        this.setBlockBounds(0.25F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+                        break;
 
-                case 5:
-                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 0.75F, 1.0F, 1.0F);
+                    case 6:
+                        this.setBlockBounds(0.0F, 0.0F, 0.0F, 0.75F, 1.0F, 1.0F);
+                }
             }
         }
         else
@@ -287,234 +271,287 @@ public class BlockPistonBase extends Block
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public void addCollisionBoxesToList(World p_149743_1_, int p_149743_2_, int p_149743_3_, int p_149743_4_, AxisAlignedBB p_149743_5_, List p_149743_6_, Entity p_149743_7_)
+    /**
+     * Add all collision boxes of this Block to the list that intersect with the given mask.
+     *  
+     * @param collidingEntity the Entity colliding with this Block
+     */
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
     {
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-        super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
     }
 
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-        this.setBlockBoundsBasedOnState(p_149668_1_, p_149668_2_, p_149668_3_, p_149668_4_);
-        return super.getCollisionBoundingBoxFromPool(p_149668_1_, p_149668_2_, p_149668_3_, p_149668_4_);
+        this.setBlockBoundsBasedOnState(worldIn, pos);
+        return super.getCollisionBoundingBox(worldIn, pos, state);
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
-    public static int func_150076_b(int p_150076_0_)
+    public static EnumFacing func_176317_b(int p_176317_0_)
     {
-        return p_150076_0_ & 7;
+        int var1 = p_176317_0_ & 7;
+        return var1 > 5 ? null : EnumFacing.getFront(var1);
     }
 
-    public static boolean func_150075_c(int p_150075_0_)
+    public static EnumFacing func_180695_a(World worldIn, BlockPos p_180695_1_, EntityLivingBase p_180695_2_)
     {
-        return (p_150075_0_ & 8) != 0;
-    }
-
-    public static int func_150071_a(World p_150071_0_, int p_150071_1_, int p_150071_2_, int p_150071_3_, EntityLivingBase p_150071_4_)
-    {
-        if (MathHelper.abs((float)p_150071_4_.posX - (float)p_150071_1_) < 2.0F && MathHelper.abs((float)p_150071_4_.posZ - (float)p_150071_3_) < 2.0F)
+        if (MathHelper.abs((float)p_180695_2_.posX - (float)p_180695_1_.getX()) < 2.0F && MathHelper.abs((float)p_180695_2_.posZ - (float)p_180695_1_.getZ()) < 2.0F)
         {
-            double var5 = p_150071_4_.posY + 1.82D - (double)p_150071_4_.yOffset;
+            double var3 = p_180695_2_.posY + (double)p_180695_2_.getEyeHeight();
 
-            if (var5 - (double)p_150071_2_ > 2.0D)
+            if (var3 - (double)p_180695_1_.getY() > 2.0D)
             {
-                return 1;
+                return EnumFacing.UP;
             }
 
-            if ((double)p_150071_2_ - var5 > 0.0D)
+            if ((double)p_180695_1_.getY() - var3 > 0.0D)
             {
-                return 0;
+                return EnumFacing.DOWN;
             }
         }
 
-        int var7 = MathHelper.floor_double((double)(p_150071_4_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
-        return var7 == 0 ? 2 : (var7 == 1 ? 5 : (var7 == 2 ? 3 : (var7 == 3 ? 4 : 0)));
+        return p_180695_2_.func_174811_aO().getOpposite();
     }
 
-    private static boolean func_150080_a(Block p_150080_0_, World p_150080_1_, int p_150080_2_, int p_150080_3_, int p_150080_4_, boolean p_150080_5_)
+    public static boolean func_180696_a(Block p_180696_0_, World worldIn, BlockPos p_180696_2_, EnumFacing p_180696_3_, boolean p_180696_4_)
     {
-        if (p_150080_0_ == Blocks.obsidian)
+        if (p_180696_0_ == Blocks.obsidian)
+        {
+            return false;
+        }
+        else if (!worldIn.getWorldBorder().contains(p_180696_2_))
+        {
+            return false;
+        }
+        else if (p_180696_2_.getY() >= 0 && (p_180696_3_ != EnumFacing.DOWN || p_180696_2_.getY() != 0))
+        {
+            if (p_180696_2_.getY() <= worldIn.getHeight() - 1 && (p_180696_3_ != EnumFacing.UP || p_180696_2_.getY() != worldIn.getHeight() - 1))
+            {
+                if (p_180696_0_ != Blocks.piston && p_180696_0_ != Blocks.sticky_piston)
+                {
+                    if (p_180696_0_.getBlockHardness(worldIn, p_180696_2_) == -1.0F)
+                    {
+                        return false;
+                    }
+
+                    if (p_180696_0_.getMobilityFlag() == 2)
+                    {
+                        return false;
+                    }
+
+                    if (p_180696_0_.getMobilityFlag() == 1)
+                    {
+                        if (!p_180696_4_)
+                        {
+                            return false;
+                        }
+
+                        return true;
+                    }
+                }
+                else if (((Boolean)worldIn.getBlockState(p_180696_2_).getValue(EXTENDED)).booleanValue())
+                {
+                    return false;
+                }
+
+                return !(p_180696_0_ instanceof ITileEntityProvider);
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private boolean func_176319_a(World worldIn, BlockPos p_176319_2_, EnumFacing p_176319_3_, boolean p_176319_4_)
+    {
+        if (!p_176319_4_)
+        {
+            worldIn.setBlockToAir(p_176319_2_.offset(p_176319_3_));
+        }
+
+        BlockPistonStructureHelper var5 = new BlockPistonStructureHelper(worldIn, p_176319_2_, p_176319_3_, p_176319_4_);
+        List var6 = var5.func_177254_c();
+        List var7 = var5.func_177252_d();
+
+        if (!var5.func_177253_a())
         {
             return false;
         }
         else
         {
-            if (p_150080_0_ != Blocks.piston && p_150080_0_ != Blocks.sticky_piston)
+            int var8 = var6.size() + var7.size();
+            Block[] var9 = new Block[var8];
+            EnumFacing var10 = p_176319_4_ ? p_176319_3_ : p_176319_3_.getOpposite();
+            int var11;
+            BlockPos var12;
+
+            for (var11 = var7.size() - 1; var11 >= 0; --var11)
             {
-                if (p_150080_0_.getBlockHardness(p_150080_1_, p_150080_2_, p_150080_3_, p_150080_4_) == -1.0F)
-                {
-                    return false;
-                }
-
-                if (p_150080_0_.getMobilityFlag() == 2)
-                {
-                    return false;
-                }
-
-                if (p_150080_0_.getMobilityFlag() == 1)
-                {
-                    if (!p_150080_5_)
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
-            else if (func_150075_c(p_150080_1_.getBlockMetadata(p_150080_2_, p_150080_3_, p_150080_4_)))
-            {
-                return false;
+                var12 = (BlockPos)var7.get(var11);
+                Block var13 = worldIn.getBlockState(var12).getBlock();
+                var13.dropBlockAsItem(worldIn, var12, worldIn.getBlockState(var12), 0);
+                worldIn.setBlockToAir(var12);
+                --var8;
+                var9[var8] = var13;
             }
 
-            return !(p_150080_0_ instanceof ITileEntityProvider);
-        }
-    }
+            IBlockState var19;
 
-    private static boolean func_150077_h(World p_150077_0_, int p_150077_1_, int p_150077_2_, int p_150077_3_, int p_150077_4_)
-    {
-        int var5 = p_150077_1_ + Facing.offsetsXForSide[p_150077_4_];
-        int var6 = p_150077_2_ + Facing.offsetsYForSide[p_150077_4_];
-        int var7 = p_150077_3_ + Facing.offsetsZForSide[p_150077_4_];
-        int var8 = 0;
-
-        while (true)
-        {
-            if (var8 < 13)
+            for (var11 = var6.size() - 1; var11 >= 0; --var11)
             {
-                if (var6 <= 0 || var6 >= 255)
-                {
-                    return false;
-                }
+                var12 = (BlockPos)var6.get(var11);
+                var19 = worldIn.getBlockState(var12);
+                Block var14 = var19.getBlock();
+                var14.getMetaFromState(var19);
+                worldIn.setBlockToAir(var12);
+                var12 = var12.offset(var10);
+                worldIn.setBlockState(var12, Blocks.piston_extension.getDefaultState().withProperty(FACING, p_176319_3_), 4);
+                worldIn.setTileEntity(var12, BlockPistonMoving.func_176423_a(var19, p_176319_3_, p_176319_4_, false));
+                --var8;
+                var9[var8] = var14;
+            }
 
-                Block var9 = p_150077_0_.getBlock(var5, var6, var7);
+            BlockPos var16 = p_176319_2_.offset(p_176319_3_);
 
-                if (var9.getMaterial() != Material.air)
-                {
-                    if (!func_150080_a(var9, p_150077_0_, var5, var6, var7, true))
-                    {
-                        return false;
-                    }
+            if (p_176319_4_)
+            {
+                BlockPistonExtension.EnumPistonType var17 = this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT;
+                var19 = Blocks.piston_head.getDefaultState().withProperty(BlockPistonExtension.field_176326_a, p_176319_3_).withProperty(BlockPistonExtension.field_176325_b, var17);
+                IBlockState var20 = Blocks.piston_extension.getDefaultState().withProperty(BlockPistonMoving.field_176426_a, p_176319_3_).withProperty(BlockPistonMoving.field_176425_b, this.isSticky ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT);
+                worldIn.setBlockState(var16, var20, 4);
+                worldIn.setTileEntity(var16, BlockPistonMoving.func_176423_a(var19, p_176319_3_, true, false));
+            }
 
-                    if (var9.getMobilityFlag() != 1)
-                    {
-                        if (var8 == 12)
-                        {
-                            return false;
-                        }
+            int var18;
 
-                        var5 += Facing.offsetsXForSide[p_150077_4_];
-                        var6 += Facing.offsetsYForSide[p_150077_4_];
-                        var7 += Facing.offsetsZForSide[p_150077_4_];
-                        ++var8;
-                        continue;
-                    }
-                }
+            for (var18 = var7.size() - 1; var18 >= 0; --var18)
+            {
+                worldIn.notifyNeighborsOfStateChange((BlockPos)var7.get(var18), var9[var8++]);
+            }
+
+            for (var18 = var6.size() - 1; var18 >= 0; --var18)
+            {
+                worldIn.notifyNeighborsOfStateChange((BlockPos)var6.get(var18), var9[var8++]);
+            }
+
+            if (p_176319_4_)
+            {
+                worldIn.notifyNeighborsOfStateChange(var16, Blocks.piston_head);
+                worldIn.notifyNeighborsOfStateChange(p_176319_2_, this);
             }
 
             return true;
         }
     }
 
-    private boolean func_150079_i(World p_150079_1_, int p_150079_2_, int p_150079_3_, int p_150079_4_, int p_150079_5_)
+    /**
+     * Possibly modify the given BlockState before rendering it on an Entity (Minecarts, Endermen, ...)
+     */
+    public IBlockState getStateForEntityRender(IBlockState state)
     {
-        int var6 = p_150079_2_ + Facing.offsetsXForSide[p_150079_5_];
-        int var7 = p_150079_3_ + Facing.offsetsYForSide[p_150079_5_];
-        int var8 = p_150079_4_ + Facing.offsetsZForSide[p_150079_5_];
-        int var9 = 0;
+        return this.getDefaultState().withProperty(FACING, EnumFacing.UP);
+    }
 
-        while (true)
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(FACING, func_176317_b(meta)).withProperty(EXTENDED, Boolean.valueOf((meta & 8) > 0));
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        byte var2 = 0;
+        int var3 = var2 | ((EnumFacing)state.getValue(FACING)).getIndex();
+
+        if (((Boolean)state.getValue(EXTENDED)).booleanValue())
         {
-            if (var9 < 13)
+            var3 |= 8;
+        }
+
+        return var3;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {FACING, EXTENDED});
+    }
+
+    static final class SwitchEnumFacing
+    {
+        static final int[] field_177243_a = new int[EnumFacing.values().length];
+        private static final String __OBFID = "CL_00002037";
+
+        static
+        {
+            try
             {
-                if (var7 <= 0 || var7 >= 255)
-                {
-                    return false;
-                }
-
-                Block var10 = p_150079_1_.getBlock(var6, var7, var8);
-
-                if (var10.getMaterial() != Material.air)
-                {
-                    if (!func_150080_a(var10, p_150079_1_, var6, var7, var8, true))
-                    {
-                        return false;
-                    }
-
-                    if (var10.getMobilityFlag() != 1)
-                    {
-                        if (var9 == 12)
-                        {
-                            return false;
-                        }
-
-                        var6 += Facing.offsetsXForSide[p_150079_5_];
-                        var7 += Facing.offsetsYForSide[p_150079_5_];
-                        var8 += Facing.offsetsZForSide[p_150079_5_];
-                        ++var9;
-                        continue;
-                    }
-
-                    var10.dropBlockAsItem(p_150079_1_, var6, var7, var8, p_150079_1_.getBlockMetadata(var6, var7, var8), 0);
-                    p_150079_1_.setBlockToAir(var6, var7, var8);
-                }
+                field_177243_a[EnumFacing.DOWN.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var6)
+            {
+                ;
             }
 
-            var9 = var6;
-            int var19 = var7;
-            int var11 = var8;
-            int var12 = 0;
-            Block[] var13;
-            int var14;
-            int var15;
-            int var16;
-
-            for (var13 = new Block[13]; var6 != p_150079_2_ || var7 != p_150079_3_ || var8 != p_150079_4_; var8 = var16)
+            try
             {
-                var14 = var6 - Facing.offsetsXForSide[p_150079_5_];
-                var15 = var7 - Facing.offsetsYForSide[p_150079_5_];
-                var16 = var8 - Facing.offsetsZForSide[p_150079_5_];
-                Block var17 = p_150079_1_.getBlock(var14, var15, var16);
-                int var18 = p_150079_1_.getBlockMetadata(var14, var15, var16);
-
-                if (var17 == this && var14 == p_150079_2_ && var15 == p_150079_3_ && var16 == p_150079_4_)
-                {
-                    p_150079_1_.setBlock(var6, var7, var8, Blocks.piston_extension, p_150079_5_ | (this.field_150082_a ? 8 : 0), 4);
-                    p_150079_1_.setTileEntity(var6, var7, var8, BlockPistonMoving.func_149962_a(Blocks.piston_head, p_150079_5_ | (this.field_150082_a ? 8 : 0), p_150079_5_, true, false));
-                }
-                else
-                {
-                    p_150079_1_.setBlock(var6, var7, var8, Blocks.piston_extension, var18, 4);
-                    p_150079_1_.setTileEntity(var6, var7, var8, BlockPistonMoving.func_149962_a(var17, var18, p_150079_5_, true, false));
-                }
-
-                var13[var12++] = var17;
-                var6 = var14;
-                var7 = var15;
+                field_177243_a[EnumFacing.UP.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var5)
+            {
+                ;
             }
 
-            var6 = var9;
-            var7 = var19;
-            var8 = var11;
-
-            for (var12 = 0; var6 != p_150079_2_ || var7 != p_150079_3_ || var8 != p_150079_4_; var8 = var16)
+            try
             {
-                var14 = var6 - Facing.offsetsXForSide[p_150079_5_];
-                var15 = var7 - Facing.offsetsYForSide[p_150079_5_];
-                var16 = var8 - Facing.offsetsZForSide[p_150079_5_];
-                p_150079_1_.notifyBlocksOfNeighborChange(var14, var15, var16, var13[var12++]);
-                var6 = var14;
-                var7 = var15;
+                field_177243_a[EnumFacing.NORTH.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
             }
 
-            return true;
+            try
+            {
+                field_177243_a[EnumFacing.SOUTH.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177243_a[EnumFacing.WEST.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177243_a[EnumFacing.EAST.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
         }
     }
 }

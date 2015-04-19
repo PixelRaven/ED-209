@@ -6,24 +6,24 @@ import net.minecraft.item.ItemStack;
 
 public class WeightedRandomFishable extends WeightedRandom.Item
 {
-    private final ItemStack field_150711_b;
-    private float field_150712_c;
-    private boolean field_150710_d;
+    private final ItemStack returnStack;
+    private float maxDamagePercent;
+    private boolean enchantable;
     private static final String __OBFID = "CL_00001664";
 
     public WeightedRandomFishable(ItemStack p_i45317_1_, int p_i45317_2_)
     {
         super(p_i45317_2_);
-        this.field_150711_b = p_i45317_1_;
+        this.returnStack = p_i45317_1_;
     }
 
-    public ItemStack func_150708_a(Random p_150708_1_)
+    public ItemStack getItemStack(Random p_150708_1_)
     {
-        ItemStack var2 = this.field_150711_b.copy();
+        ItemStack var2 = this.returnStack.copy();
 
-        if (this.field_150712_c > 0.0F)
+        if (this.maxDamagePercent > 0.0F)
         {
-            int var3 = (int)(this.field_150712_c * (float)this.field_150711_b.getMaxDamage());
+            int var3 = (int)(this.maxDamagePercent * (float)this.returnStack.getMaxDamage());
             int var4 = var2.getMaxDamage() - p_150708_1_.nextInt(p_150708_1_.nextInt(var3) + 1);
 
             if (var4 > var3)
@@ -39,7 +39,7 @@ public class WeightedRandomFishable extends WeightedRandom.Item
             var2.setItemDamage(var4);
         }
 
-        if (this.field_150710_d)
+        if (this.enchantable)
         {
             EnchantmentHelper.addRandomEnchantment(p_150708_1_, var2, 30);
         }
@@ -47,15 +47,15 @@ public class WeightedRandomFishable extends WeightedRandom.Item
         return var2;
     }
 
-    public WeightedRandomFishable func_150709_a(float p_150709_1_)
+    public WeightedRandomFishable setMaxDamagePercent(float p_150709_1_)
     {
-        this.field_150712_c = p_150709_1_;
+        this.maxDamagePercent = p_150709_1_;
         return this;
     }
 
-    public WeightedRandomFishable func_150707_a()
+    public WeightedRandomFishable setEnchantable()
     {
-        this.field_150710_d = true;
+        this.enchantable = true;
         return this;
     }
 }

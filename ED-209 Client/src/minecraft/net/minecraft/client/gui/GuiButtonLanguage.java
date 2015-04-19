@@ -1,7 +1,7 @@
 package net.minecraft.client.gui;
 
 import net.minecraft.client.Minecraft;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.renderer.GlStateManager;
 
 public class GuiButtonLanguage extends GuiButton
 {
@@ -15,21 +15,21 @@ public class GuiButtonLanguage extends GuiButton
     /**
      * Draws this button to the screen.
      */
-    public void drawButton(Minecraft p_146112_1_, int p_146112_2_, int p_146112_3_)
+    public void drawButton(Minecraft mc, int mouseX, int mouseY)
     {
-        if (this.field_146125_m)
+        if (this.visible)
         {
-            p_146112_1_.getTextureManager().bindTexture(GuiButton.field_146122_a);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            boolean var4 = p_146112_2_ >= this.field_146128_h && p_146112_3_ >= this.field_146129_i && p_146112_2_ < this.field_146128_h + this.field_146120_f && p_146112_3_ < this.field_146129_i + this.field_146121_g;
+            mc.getTextureManager().bindTexture(GuiButton.buttonTextures);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            boolean var4 = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
             int var5 = 106;
 
             if (var4)
             {
-                var5 += this.field_146121_g;
+                var5 += this.height;
             }
 
-            this.drawTexturedModalRect(this.field_146128_h, this.field_146129_i, 0, var5, this.field_146120_f, this.field_146121_g);
+            this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, var5, this.width, this.height);
         }
     }
 }

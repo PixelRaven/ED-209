@@ -1,9 +1,9 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragon;
-import org.lwjgl.opengl.GL11;
 
 public class ModelDragon extends ModelBase
 {
@@ -138,14 +138,14 @@ public class ModelDragon extends ModelBase
      */
     public void render(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_)
     {
-        GL11.glPushMatrix();
+        GlStateManager.pushMatrix();
         EntityDragon var8 = (EntityDragon)p_78088_1_;
         float var9 = var8.prevAnimTime + (var8.animTime - var8.prevAnimTime) * this.partialTicks;
         this.jaw.rotateAngleX = (float)(Math.sin((double)(var9 * (float)Math.PI * 2.0F)) + 1.0D) * 0.2F;
         float var10 = (float)(Math.sin((double)(var9 * (float)Math.PI * 2.0F - 1.0F)) + 1.0D);
         var10 = (var10 * var10 * 1.0F + var10 * 2.0F) * 0.05F;
-        GL11.glTranslatef(0.0F, var10 - 2.0F, -3.0F);
-        GL11.glRotatef(var10 * 2.0F, 1.0F, 0.0F, 0.0F);
+        GlStateManager.translate(0.0F, var10 - 2.0F, -3.0F);
+        GlStateManager.rotate(var10 * 2.0F, 1.0F, 0.0F, 0.0F);
         float var11 = -30.0F;
         float var13 = 0.0F;
         float var14 = 1.5F;
@@ -181,16 +181,16 @@ public class ModelDragon extends ModelBase
         this.head.rotateAngleY = this.updateRotations(var22[0] - var15[0]) * (float)Math.PI / 180.0F * 1.0F;
         this.head.rotateAngleZ = -this.updateRotations(var22[0] - (double)var17) * (float)Math.PI / 180.0F * 1.0F;
         this.head.render(p_78088_7_);
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0.0F, 1.0F, 0.0F);
-        GL11.glRotatef(-var16 * var14 * 1.0F, 0.0F, 0.0F, 1.0F);
-        GL11.glTranslatef(0.0F, -1.0F, 0.0F);
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0.0F, 1.0F, 0.0F);
+        GlStateManager.rotate(-var16 * var14 * 1.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.translate(0.0F, -1.0F, 0.0F);
         this.body.rotateAngleZ = 0.0F;
         this.body.render(p_78088_7_);
 
         for (int var23 = 0; var23 < 2; ++var23)
         {
-            GL11.glEnable(GL11.GL_CULL_FACE);
+            GlStateManager.enableCull();
             var21 = var9 * (float)Math.PI * 2.0F;
             this.wing.rotateAngleX = 0.125F - (float)Math.cos((double)var21) * 0.2F;
             this.wing.rotateAngleY = 0.25F;
@@ -205,17 +205,17 @@ public class ModelDragon extends ModelBase
             this.wing.render(p_78088_7_);
             this.frontLeg.render(p_78088_7_);
             this.rearLeg.render(p_78088_7_);
-            GL11.glScalef(-1.0F, 1.0F, 1.0F);
+            GlStateManager.scale(-1.0F, 1.0F, 1.0F);
 
             if (var23 == 0)
             {
-                GL11.glCullFace(GL11.GL_FRONT);
+                GlStateManager.cullFace(1028);
             }
         }
 
-        GL11.glPopMatrix();
-        GL11.glCullFace(GL11.GL_BACK);
-        GL11.glDisable(GL11.GL_CULL_FACE);
+        GlStateManager.popMatrix();
+        GlStateManager.cullFace(1029);
+        GlStateManager.disableCull();
         float var24 = -((float)Math.sin((double)(var9 * (float)Math.PI * 2.0F))) * 0.0F;
         var18 = var9 * (float)Math.PI * 2.0F;
         var11 = 10.0F;
@@ -239,7 +239,7 @@ public class ModelDragon extends ModelBase
             this.spine.render(p_78088_7_);
         }
 
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
     }
 
     /**

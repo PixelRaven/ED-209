@@ -22,11 +22,6 @@ public class ModelBlaze extends ModelBase
         this.blazeHead.addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
     }
 
-    public int func_78104_a()
-    {
-        return 8;
-    }
-
     /**
      * Sets the models various rotation angles then renders the model.
      */

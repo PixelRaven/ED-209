@@ -1,5 +1,6 @@
 package net.minecraft.util;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
@@ -25,7 +26,7 @@ public class EnumTypeAdapterFactory implements TypeAdapterFactory
         }
         else
         {
-            final HashMap var4 = new HashMap();
+            final HashMap var4 = Maps.newHashMap();
             Object[] var5 = var3.getEnumConstants();
             int var6 = var5.length;
 

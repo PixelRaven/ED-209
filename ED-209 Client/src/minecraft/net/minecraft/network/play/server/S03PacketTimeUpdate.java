@@ -6,7 +6,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S03PacketTimeUpdate extends Packet
+public class S03PacketTimeUpdate implements Packet
 {
     private long field_149369_a;
     private long field_149368_b;
@@ -33,32 +33,27 @@ public class S03PacketTimeUpdate extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149369_a = p_148837_1_.readLong();
-        this.field_149368_b = p_148837_1_.readLong();
+        this.field_149369_a = data.readLong();
+        this.field_149368_b = data.readLong();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeLong(this.field_149369_a);
-        p_148840_1_.writeLong(this.field_149368_b);
-    }
-
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
-    {
-        p_148833_1_.handleTimeUpdate(this);
+        data.writeLong(this.field_149369_a);
+        data.writeLong(this.field_149368_b);
     }
 
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        return String.format("time=%d,dtime=%d", new Object[] {Long.valueOf(this.field_149369_a), Long.valueOf(this.field_149368_b)});
+        handler.handleTimeUpdate(this);
     }
 
     public long func_149366_c()
@@ -71,8 +66,11 @@ public class S03PacketTimeUpdate extends Packet
         return this.field_149368_b;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

@@ -4,24 +4,25 @@ import com.google.common.collect.Maps;
 import java.util.Iterator;
 import java.util.Map;
 import net.minecraft.block.material.MapColor;
-import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec4b;
 import net.minecraft.world.storage.MapData;
-import org.lwjgl.opengl.GL11;
 
 public class MapItemRenderer
 {
-    private static final ResourceLocation field_148253_a = new ResourceLocation("textures/map/map_icons.png");
-    private final TextureManager field_148251_b;
-    private final Map field_148252_c = Maps.newHashMap();
+    private static final ResourceLocation mapIcons = new ResourceLocation("textures/map/map_icons.png");
+    private final TextureManager textureManager;
+    private final Map loadedMaps = Maps.newHashMap();
     private static final String __OBFID = "CL_00000663";
 
     public MapItemRenderer(TextureManager p_i45009_1_)
     {
-        this.field_148251_b = p_i45009_1_;
+        this.textureManager = p_i45009_1_;
     }
 
     public void func_148246_a(MapData p_148246_1_)
@@ -36,12 +37,12 @@ public class MapItemRenderer
 
     private MapItemRenderer.Instance func_148248_b(MapData p_148248_1_)
     {
-        MapItemRenderer.Instance var2 = (MapItemRenderer.Instance)this.field_148252_c.get(p_148248_1_.mapName);
+        MapItemRenderer.Instance var2 = (MapItemRenderer.Instance)this.loadedMaps.get(p_148248_1_.mapName);
 
         if (var2 == null)
         {
             var2 = new MapItemRenderer.Instance(p_148248_1_, null);
-            this.field_148252_c.put(p_148248_1_.mapName, var2);
+            this.loadedMaps.put(p_148248_1_.mapName, var2);
         }
 
         return var2;
@@ -49,15 +50,15 @@ public class MapItemRenderer
 
     public void func_148249_a()
     {
-        Iterator var1 = this.field_148252_c.values().iterator();
+        Iterator var1 = this.loadedMaps.values().iterator();
 
         while (var1.hasNext())
         {
             MapItemRenderer.Instance var2 = (MapItemRenderer.Instance)var1.next();
-            this.field_148251_b.func_147645_c(var2.field_148240_d);
+            this.textureManager.deleteTexture(var2.field_148240_d);
         }
 
-        this.field_148252_c.clear();
+        this.loadedMaps.clear();
     }
 
     class Instance
@@ -73,7 +74,7 @@ public class MapItemRenderer
             this.field_148242_b = p_i45007_2_;
             this.field_148243_c = new DynamicTexture(128, 128);
             this.field_148241_e = this.field_148243_c.getTextureData();
-            this.field_148240_d = MapItemRenderer.this.field_148251_b.getDynamicTextureLocation("map/" + p_i45007_2_.mapName, this.field_148243_c);
+            this.field_148240_d = MapItemRenderer.this.textureManager.getDynamicTextureLocation("map/" + p_i45007_2_.mapName, this.field_148243_c);
 
             for (int var3 = 0; var3 < this.field_148241_e.length; ++var3)
             {
@@ -104,54 +105,56 @@ public class MapItemRenderer
         {
             byte var2 = 0;
             byte var3 = 0;
-            Tessellator var4 = Tessellator.instance;
-            float var5 = 0.0F;
-            MapItemRenderer.this.field_148251_b.bindTexture(this.field_148240_d);
-            GL11.glEnable(GL11.GL_BLEND);
-            OpenGlHelper.glBlendFunc(1, 771, 0, 1);
-            GL11.glDisable(GL11.GL_ALPHA_TEST);
-            var4.startDrawingQuads();
-            var4.addVertexWithUV((double)((float)(var2 + 0) + var5), (double)((float)(var3 + 128) - var5), -0.009999999776482582D, 0.0D, 1.0D);
-            var4.addVertexWithUV((double)((float)(var2 + 128) - var5), (double)((float)(var3 + 128) - var5), -0.009999999776482582D, 1.0D, 1.0D);
-            var4.addVertexWithUV((double)((float)(var2 + 128) - var5), (double)((float)(var3 + 0) + var5), -0.009999999776482582D, 1.0D, 0.0D);
-            var4.addVertexWithUV((double)((float)(var2 + 0) + var5), (double)((float)(var3 + 0) + var5), -0.009999999776482582D, 0.0D, 0.0D);
+            Tessellator var4 = Tessellator.getInstance();
+            WorldRenderer var5 = var4.getWorldRenderer();
+            float var6 = 0.0F;
+            MapItemRenderer.this.textureManager.bindTexture(this.field_148240_d);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(1, 771, 0, 1);
+            GlStateManager.disableAlpha();
+            var5.startDrawingQuads();
+            var5.addVertexWithUV((double)((float)(var2 + 0) + var6), (double)((float)(var3 + 128) - var6), -0.009999999776482582D, 0.0D, 1.0D);
+            var5.addVertexWithUV((double)((float)(var2 + 128) - var6), (double)((float)(var3 + 128) - var6), -0.009999999776482582D, 1.0D, 1.0D);
+            var5.addVertexWithUV((double)((float)(var2 + 128) - var6), (double)((float)(var3 + 0) + var6), -0.009999999776482582D, 1.0D, 0.0D);
+            var5.addVertexWithUV((double)((float)(var2 + 0) + var6), (double)((float)(var3 + 0) + var6), -0.009999999776482582D, 0.0D, 0.0D);
             var4.draw();
-            GL11.glEnable(GL11.GL_ALPHA_TEST);
-            GL11.glDisable(GL11.GL_BLEND);
-            MapItemRenderer.this.field_148251_b.bindTexture(MapItemRenderer.field_148253_a);
-            int var6 = 0;
-            Iterator var7 = this.field_148242_b.playersVisibleOnMap.values().iterator();
+            GlStateManager.enableAlpha();
+            GlStateManager.disableBlend();
+            MapItemRenderer.this.textureManager.bindTexture(MapItemRenderer.mapIcons);
+            int var7 = 0;
+            Iterator var8 = this.field_148242_b.playersVisibleOnMap.values().iterator();
 
-            while (var7.hasNext())
+            while (var8.hasNext())
             {
-                MapData.MapCoord var8 = (MapData.MapCoord)var7.next();
+                Vec4b var9 = (Vec4b)var8.next();
 
-                if (!p_148237_1_ || var8.iconSize == 1)
+                if (!p_148237_1_ || var9.func_176110_a() == 1)
                 {
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef((float)var2 + (float)var8.centerX / 2.0F + 64.0F, (float)var3 + (float)var8.centerZ / 2.0F + 64.0F, -0.02F);
-                    GL11.glRotatef((float)(var8.iconRotation * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
-                    GL11.glScalef(4.0F, 4.0F, 3.0F);
-                    GL11.glTranslatef(-0.125F, 0.125F, 0.0F);
-                    float var9 = (float)(var8.iconSize % 4 + 0) / 4.0F;
-                    float var10 = (float)(var8.iconSize / 4 + 0) / 4.0F;
-                    float var11 = (float)(var8.iconSize % 4 + 1) / 4.0F;
-                    float var12 = (float)(var8.iconSize / 4 + 1) / 4.0F;
-                    var4.startDrawingQuads();
-                    var4.addVertexWithUV(-1.0D, 1.0D, (double)((float)var6 * 0.001F), (double)var9, (double)var10);
-                    var4.addVertexWithUV(1.0D, 1.0D, (double)((float)var6 * 0.001F), (double)var11, (double)var10);
-                    var4.addVertexWithUV(1.0D, -1.0D, (double)((float)var6 * 0.001F), (double)var11, (double)var12);
-                    var4.addVertexWithUV(-1.0D, -1.0D, (double)((float)var6 * 0.001F), (double)var9, (double)var12);
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate((float)var2 + (float)var9.func_176112_b() / 2.0F + 64.0F, (float)var3 + (float)var9.func_176113_c() / 2.0F + 64.0F, -0.02F);
+                    GlStateManager.rotate((float)(var9.func_176111_d() * 360) / 16.0F, 0.0F, 0.0F, 1.0F);
+                    GlStateManager.scale(4.0F, 4.0F, 3.0F);
+                    GlStateManager.translate(-0.125F, 0.125F, 0.0F);
+                    byte var10 = var9.func_176110_a();
+                    float var11 = (float)(var10 % 4 + 0) / 4.0F;
+                    float var12 = (float)(var10 / 4 + 0) / 4.0F;
+                    float var13 = (float)(var10 % 4 + 1) / 4.0F;
+                    float var14 = (float)(var10 / 4 + 1) / 4.0F;
+                    var5.startDrawingQuads();
+                    var5.addVertexWithUV(-1.0D, 1.0D, (double)((float)var7 * 0.001F), (double)var11, (double)var12);
+                    var5.addVertexWithUV(1.0D, 1.0D, (double)((float)var7 * 0.001F), (double)var13, (double)var12);
+                    var5.addVertexWithUV(1.0D, -1.0D, (double)((float)var7 * 0.001F), (double)var13, (double)var14);
+                    var5.addVertexWithUV(-1.0D, -1.0D, (double)((float)var7 * 0.001F), (double)var11, (double)var14);
                     var4.draw();
-                    GL11.glPopMatrix();
-                    ++var6;
+                    GlStateManager.popMatrix();
+                    ++var7;
                 }
             }
 
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0.0F, 0.0F, -0.04F);
-            GL11.glScalef(1.0F, 1.0F, 1.0F);
-            GL11.glPopMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, 0.0F, -0.04F);
+            GlStateManager.scale(1.0F, 1.0F, 1.0F);
+            GlStateManager.popMatrix();
         }
 
         Instance(MapData p_i45008_2_, Object p_i45008_3_)

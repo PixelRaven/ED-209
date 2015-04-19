@@ -118,7 +118,10 @@ public class StringTranslate
         return var2 == null ? p_135064_1_ : var2;
     }
 
-    public synchronized boolean containsTranslateKey(String p_94520_1_)
+    /**
+     * Returns true if the passed key is in the translation table.
+     */
+    public synchronized boolean isKeyTranslated(String p_94520_1_)
     {
         return this.languageList.containsKey(p_94520_1_);
     }

@@ -35,7 +35,7 @@ public class LanguageMetadataSectionSerializer extends BaseMetadataSectionSerial
 
             Entry var7 = (Entry)var6.next();
             var8 = (String)var7.getKey();
-            JsonObject var9 = JsonUtils.getJsonElementAsJsonObject((JsonElement)var7.getValue(), "language");
+            JsonObject var9 = JsonUtils.getElementAsJsonObject((JsonElement)var7.getValue(), "language");
             var10 = JsonUtils.getJsonObjectStringFieldValue(var9, "region");
             var11 = JsonUtils.getJsonObjectStringFieldValue(var9, "name");
             var12 = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(var9, "bidirectional", false);

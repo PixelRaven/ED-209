@@ -8,15 +8,15 @@ import net.minecraft.util.ResourceLocation;
 
 public class MusicTicker implements IUpdatePlayerListBox
 {
-    private final Random field_147679_a = new Random();
-    private final Minecraft field_147677_b;
-    private ISound field_147678_c;
-    private int field_147676_d = 100;
+    private final Random rand = new Random();
+    private final Minecraft mc;
+    private ISound currentMusic;
+    private int timeUntilNextMusic = 100;
     private static final String __OBFID = "CL_00001138";
 
-    public MusicTicker(Minecraft p_i45112_1_)
+    public MusicTicker(Minecraft mcIn)
     {
-        this.field_147677_b = p_i45112_1_;
+        this.mc = mcIn;
     }
 
     /**
@@ -24,28 +24,28 @@ public class MusicTicker implements IUpdatePlayerListBox
      */
     public void update()
     {
-        MusicTicker.MusicType var1 = this.field_147677_b.func_147109_W();
+        MusicTicker.MusicType var1 = this.mc.getAmbientMusicType();
 
-        if (this.field_147678_c != null)
+        if (this.currentMusic != null)
         {
-            if (!var1.func_148635_a().equals(this.field_147678_c.func_147650_b()))
+            if (!var1.getMusicLocation().equals(this.currentMusic.getSoundLocation()))
             {
-                this.field_147677_b.getSoundHandler().func_147683_b(this.field_147678_c);
-                this.field_147676_d = MathHelper.getRandomIntegerInRange(this.field_147679_a, 0, var1.func_148634_b() / 2);
+                this.mc.getSoundHandler().stopSound(this.currentMusic);
+                this.timeUntilNextMusic = MathHelper.getRandomIntegerInRange(this.rand, 0, var1.getMinDelay() / 2);
             }
 
-            if (!this.field_147677_b.getSoundHandler().func_147692_c(this.field_147678_c))
+            if (!this.mc.getSoundHandler().isSoundPlaying(this.currentMusic))
             {
-                this.field_147678_c = null;
-                this.field_147676_d = Math.min(MathHelper.getRandomIntegerInRange(this.field_147679_a, var1.func_148634_b(), var1.func_148633_c()), this.field_147676_d);
+                this.currentMusic = null;
+                this.timeUntilNextMusic = Math.min(MathHelper.getRandomIntegerInRange(this.rand, var1.getMinDelay(), var1.getMaxDelay()), this.timeUntilNextMusic);
             }
         }
 
-        if (this.field_147678_c == null && this.field_147676_d-- <= 0)
+        if (this.currentMusic == null && this.timeUntilNextMusic-- <= 0)
         {
-            this.field_147678_c = PositionedSoundRecord.func_147673_a(var1.func_148635_a());
-            this.field_147677_b.getSoundHandler().playSound(this.field_147678_c);
-            this.field_147676_d = Integer.MAX_VALUE;
+            this.currentMusic = PositionedSoundRecord.createPositionedSoundRecord(var1.getMusicLocation());
+            this.mc.getSoundHandler().playSound(this.currentMusic);
+            this.timeUntilNextMusic = Integer.MAX_VALUE;
         }
     }
 
@@ -58,33 +58,33 @@ public class MusicTicker implements IUpdatePlayerListBox
         NETHER("NETHER", 4, new ResourceLocation("minecraft:music.game.nether"), 1200, 3600),
         END_BOSS("END_BOSS", 5, new ResourceLocation("minecraft:music.game.end.dragon"), 0, 0),
         END("END", 6, new ResourceLocation("minecraft:music.game.end"), 6000, 24000);
-        private final ResourceLocation field_148645_h;
-        private final int field_148646_i;
-        private final int field_148643_j;
+        private final ResourceLocation musicLocation;
+        private final int minDelay;
+        private final int maxDelay;
 
         private static final MusicTicker.MusicType[] $VALUES = new MusicTicker.MusicType[]{MENU, GAME, CREATIVE, CREDITS, NETHER, END_BOSS, END};
         private static final String __OBFID = "CL_00001139";
 
-        private MusicType(String p_i45111_1_, int p_i45111_2_, ResourceLocation p_i45111_3_, int p_i45111_4_, int p_i45111_5_)
+        private MusicType(String p_i45111_1_, int p_i45111_2_, ResourceLocation location, int p_i45111_4_, int p_i45111_5_)
         {
-            this.field_148645_h = p_i45111_3_;
-            this.field_148646_i = p_i45111_4_;
-            this.field_148643_j = p_i45111_5_;
+            this.musicLocation = location;
+            this.minDelay = p_i45111_4_;
+            this.maxDelay = p_i45111_5_;
         }
 
-        public ResourceLocation func_148635_a()
+        public ResourceLocation getMusicLocation()
         {
-            return this.field_148645_h;
+            return this.musicLocation;
         }
 
-        public int func_148634_b()
+        public int getMinDelay()
         {
-            return this.field_148646_i;
+            return this.minDelay;
         }
 
-        public int func_148633_c()
+        public int getMaxDelay()
         {
-            return this.field_148643_j;
+            return this.maxDelay;
         }
     }
 }

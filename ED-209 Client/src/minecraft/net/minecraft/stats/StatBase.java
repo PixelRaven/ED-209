@@ -69,7 +69,7 @@ public class StatBase
         this.statName = p_i45307_2_;
         this.type = p_i45307_3_;
         this.field_150957_c = new ObjectiveStat(this);
-        IScoreObjectiveCriteria.field_96643_a.put(this.field_150957_c.func_96636_a(), this.field_150957_c);
+        IScoreObjectiveCriteria.INSTANCES.put(this.field_150957_c.getName(), this.field_150957_c);
     }
 
     public StatBase(String p_i45308_1_, IChatComponent p_i45308_2_)
@@ -117,7 +117,7 @@ public class StatBase
         return this.type.format(p_75968_1_);
     }
 
-    public IChatComponent func_150951_e()
+    public IChatComponent getStatName()
     {
         IChatComponent var1 = this.statName.createCopy();
         var1.getChatStyle().setColor(EnumChatFormatting.GRAY);
@@ -127,7 +127,7 @@ public class StatBase
 
     public IChatComponent func_150955_j()
     {
-        IChatComponent var1 = this.func_150951_e();
+        IChatComponent var1 = this.getStatName();
         IChatComponent var2 = (new ChatComponentText("[")).appendSibling(var1).appendText("]");
         var2.setChatStyle(var1.getChatStyle());
         return var2;

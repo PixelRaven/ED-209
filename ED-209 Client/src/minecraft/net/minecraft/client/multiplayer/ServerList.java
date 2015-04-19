@@ -1,7 +1,7 @@
 package net.minecraft.client.multiplayer;
 
+import com.google.common.collect.Lists;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -19,12 +19,12 @@ public class ServerList
     private final Minecraft mc;
 
     /** List of ServerData instances. */
-    private final List servers = new ArrayList();
+    private final List servers = Lists.newArrayList();
     private static final String __OBFID = "CL_00000891";
 
-    public ServerList(Minecraft p_i1194_1_)
+    public ServerList(Minecraft mcIn)
     {
-        this.mc = p_i1194_1_;
+        this.mc = mcIn;
         this.loadServerList();
     }
 

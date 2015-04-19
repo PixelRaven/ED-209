@@ -11,7 +11,7 @@ public class Session
     private final String username;
     private final String playerID;
     private final String token;
-    private final Session.Type field_152429_d;
+    private final Session.Type sessionType;
     private static final String __OBFID = "CL_00000659";
 
     public Session(String p_i1098_1_, String p_i1098_2_, String p_i1098_3_, String p_i1098_4_)
@@ -19,7 +19,7 @@ public class Session
         this.username = p_i1098_1_;
         this.playerID = p_i1098_2_;
         this.token = p_i1098_3_;
-        this.field_152429_d = Session.Type.func_152421_a(p_i1098_4_);
+        this.sessionType = Session.Type.setSessionType(p_i1098_4_);
     }
 
     public String getSessionID()
@@ -42,7 +42,7 @@ public class Session
         return this.token;
     }
 
-    public GameProfile func_148256_e()
+    public GameProfile getProfile()
     {
         try
         {
@@ -55,9 +55,12 @@ public class Session
         }
     }
 
-    public Session.Type func_152428_f()
+    /**
+     * Returns either 'legacy' or 'mojang' whether the account is migrated or not
+     */
+    public Session.Type getSessionType()
     {
-        return this.field_152429_d;
+        return this.sessionType;
     }
 
     public static enum Type
@@ -65,17 +68,17 @@ public class Session
         LEGACY("LEGACY", 0, "legacy"),
         MOJANG("MOJANG", 1, "mojang");
         private static final Map field_152425_c = Maps.newHashMap();
-        private final String field_152426_d;
+        private final String sessionType;
 
         private static final Session.Type[] $VALUES = new Session.Type[]{LEGACY, MOJANG};
         private static final String __OBFID = "CL_00001851";
 
         private Type(String p_i1096_1_, int p_i1096_2_, String p_i1096_3_)
         {
-            this.field_152426_d = p_i1096_3_;
+            this.sessionType = p_i1096_3_;
         }
 
-        public static Session.Type func_152421_a(String p_152421_0_)
+        public static Session.Type setSessionType(String p_152421_0_)
         {
             return (Session.Type)field_152425_c.get(p_152421_0_.toLowerCase());
         }
@@ -87,7 +90,7 @@ public class Session
             for (int var2 = 0; var2 < var1; ++var2)
             {
                 Session.Type var3 = var0[var2];
-                field_152425_c.put(var3.field_152426_d, var3);
+                field_152425_c.put(var3.sessionType, var3);
             }
         }
     }

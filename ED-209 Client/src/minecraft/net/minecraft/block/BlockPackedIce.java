@@ -10,7 +10,7 @@ public class BlockPackedIce extends Block
 
     public BlockPackedIce()
     {
-        super(Material.field_151598_x);
+        super(Material.packedIce);
         this.slipperiness = 0.98F;
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
@@ -18,7 +18,7 @@ public class BlockPackedIce extends Block
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }

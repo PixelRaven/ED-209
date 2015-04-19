@@ -1,12 +1,14 @@
 package net.minecraft.enchantment;
 
+import net.minecraft.util.ResourceLocation;
+
 public class EnchantmentFireAspect extends Enchantment
 {
     private static final String __OBFID = "CL_00000116";
 
-    protected EnchantmentFireAspect(int p_i1932_1_, int p_i1932_2_)
+    protected EnchantmentFireAspect(int p_i45770_1_, ResourceLocation p_i45770_2_, int p_i45770_3_)
     {
-        super(p_i1932_1_, p_i1932_2_, EnumEnchantmentType.weapon);
+        super(p_i45770_1_, p_i45770_2_, p_i45770_3_, EnumEnchantmentType.WEAPON);
         this.setName("fire");
     }
 

@@ -13,48 +13,53 @@ import net.minecraft.util.StringUtils;
 
 public class TileEntitySkull extends TileEntity
 {
-    private int field_145908_a;
-    private int field_145910_i;
-    private GameProfile field_152110_j = null;
+    private int skullType;
+    private int skullRotation;
+    private GameProfile playerProfile = null;
     private static final String __OBFID = "CL_00000364";
 
-    public void writeToNBT(NBTTagCompound p_145841_1_)
+    public void writeToNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(p_145841_1_);
-        p_145841_1_.setByte("SkullType", (byte)(this.field_145908_a & 255));
-        p_145841_1_.setByte("Rot", (byte)(this.field_145910_i & 255));
+        super.writeToNBT(compound);
+        compound.setByte("SkullType", (byte)(this.skullType & 255));
+        compound.setByte("Rot", (byte)(this.skullRotation & 255));
 
-        if (this.field_152110_j != null)
+        if (this.playerProfile != null)
         {
             NBTTagCompound var2 = new NBTTagCompound();
-            NBTUtil.func_152460_a(var2, this.field_152110_j);
-            p_145841_1_.setTag("Owner", var2);
+            NBTUtil.writeGameProfile(var2, this.playerProfile);
+            compound.setTag("Owner", var2);
         }
     }
 
-    public void readFromNBT(NBTTagCompound p_145839_1_)
+    public void readFromNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(p_145839_1_);
-        this.field_145908_a = p_145839_1_.getByte("SkullType");
-        this.field_145910_i = p_145839_1_.getByte("Rot");
+        super.readFromNBT(compound);
+        this.skullType = compound.getByte("SkullType");
+        this.skullRotation = compound.getByte("Rot");
 
-        if (this.field_145908_a == 3)
+        if (this.skullType == 3)
         {
-            if (p_145839_1_.func_150297_b("Owner", 10))
+            if (compound.hasKey("Owner", 10))
             {
-                this.field_152110_j = NBTUtil.func_152459_a(p_145839_1_.getCompoundTag("Owner"));
+                this.playerProfile = NBTUtil.readGameProfileFromNBT(compound.getCompoundTag("Owner"));
             }
-            else if (p_145839_1_.func_150297_b("ExtraType", 8) && !StringUtils.isNullOrEmpty(p_145839_1_.getString("ExtraType")))
+            else if (compound.hasKey("ExtraType", 8))
             {
-                this.field_152110_j = new GameProfile((UUID)null, p_145839_1_.getString("ExtraType"));
-                this.func_152109_d();
+                String var2 = compound.getString("ExtraType");
+
+                if (!StringUtils.isNullOrEmpty(var2))
+                {
+                    this.playerProfile = new GameProfile((UUID)null, var2);
+                    this.func_152109_d();
+                }
             }
         }
     }
 
-    public GameProfile func_152108_a()
+    public GameProfile getPlayerProfile()
     {
-        return this.field_152110_j;
+        return this.playerProfile;
     }
 
     /**
@@ -64,58 +69,79 @@ public class TileEntitySkull extends TileEntity
     {
         NBTTagCompound var1 = new NBTTagCompound();
         this.writeToNBT(var1);
-        return new S35PacketUpdateTileEntity(this.field_145851_c, this.field_145848_d, this.field_145849_e, 4, var1);
+        return new S35PacketUpdateTileEntity(this.pos, 4, var1);
     }
 
-    public void func_152107_a(int p_152107_1_)
+    public void setType(int type)
     {
-        this.field_145908_a = p_152107_1_;
-        this.field_152110_j = null;
+        this.skullType = type;
+        this.playerProfile = null;
     }
 
-    public void func_152106_a(GameProfile p_152106_1_)
+    public void setPlayerProfile(GameProfile playerProfile)
     {
-        this.field_145908_a = 3;
-        this.field_152110_j = p_152106_1_;
+        this.skullType = 3;
+        this.playerProfile = playerProfile;
         this.func_152109_d();
     }
 
     private void func_152109_d()
     {
-        if (this.field_152110_j != null && !StringUtils.isNullOrEmpty(this.field_152110_j.getName()))
-        {
-            if (!this.field_152110_j.isComplete() || !this.field_152110_j.getProperties().containsKey("textures"))
-            {
-                GameProfile var1 = MinecraftServer.getServer().func_152358_ax().func_152655_a(this.field_152110_j.getName());
+        this.playerProfile = updateGameprofile(this.playerProfile);
+        this.markDirty();
+    }
 
-                if (var1 != null)
+    public static GameProfile updateGameprofile(GameProfile input)
+    {
+        if (input != null && !StringUtils.isNullOrEmpty(input.getName()))
+        {
+            if (input.isComplete() && input.getProperties().containsKey("textures"))
+            {
+                return input;
+            }
+            else if (MinecraftServer.getServer() == null)
+            {
+                return input;
+            }
+            else
+            {
+                GameProfile var1 = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(input.getName());
+
+                if (var1 == null)
+                {
+                    return input;
+                }
+                else
                 {
                     Property var2 = (Property)Iterables.getFirst(var1.getProperties().get("textures"), (Object)null);
 
                     if (var2 == null)
                     {
-                        var1 = MinecraftServer.getServer().func_147130_as().fillProfileProperties(var1, true);
+                        var1 = MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(var1, true);
                     }
 
-                    this.field_152110_j = var1;
-                    this.onInventoryChanged();
+                    return var1;
                 }
             }
         }
+        else
+        {
+            return input;
+        }
     }
 
-    public int func_145904_a()
+    public int getSkullType()
     {
-        return this.field_145908_a;
+        return this.skullType;
     }
 
-    public int func_145906_b()
+    public int getSkullRotation()
     {
-        return this.field_145910_i;
+        return this.skullRotation;
     }
 
-    public void func_145903_a(int p_145903_1_)
+    public void setSkullRotation(int rotation)
     {
-        this.field_145910_i = p_145903_1_;
+        this.skullRotation = rotation;
     }
 }

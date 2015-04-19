@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 public class ThreadDownloadImageData extends SimpleTexture
 {
     private static final Logger logger = LogManager.getLogger();
-    private static final AtomicInteger field_147643_d = new AtomicInteger(0);
+    private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
     private final File field_152434_e;
     private final String imageUrl;
     private final IImageBuffer imageBuffer;
@@ -36,7 +36,7 @@ public class ThreadDownloadImageData extends SimpleTexture
         this.imageBuffer = p_i1049_4_;
     }
 
-    private void func_147640_e()
+    private void checkTextureUploaded()
     {
         if (!this.textureUploaded)
         {
@@ -44,7 +44,7 @@ public class ThreadDownloadImageData extends SimpleTexture
             {
                 if (this.textureLocation != null)
                 {
-                    this.func_147631_c();
+                    this.deleteGlTexture();
                 }
 
                 TextureUtil.uploadTextureImage(super.getGlTextureId(), this.bufferedImage);
@@ -55,11 +55,11 @@ public class ThreadDownloadImageData extends SimpleTexture
 
     public int getGlTextureId()
     {
-        this.func_147640_e();
+        this.checkTextureUploaded();
         return super.getGlTextureId();
     }
 
-    public void func_147641_a(BufferedImage p_147641_1_)
+    public void setBufferedImage(BufferedImage p_147641_1_)
     {
         this.bufferedImage = p_147641_1_;
 
@@ -88,7 +88,7 @@ public class ThreadDownloadImageData extends SimpleTexture
 
                     if (this.imageBuffer != null)
                     {
-                        this.func_147641_a(this.imageBuffer.parseUserSkin(this.bufferedImage));
+                        this.setBufferedImage(this.imageBuffer.parseUserSkin(this.bufferedImage));
                     }
                 }
                 catch (IOException var3)
@@ -106,7 +106,7 @@ public class ThreadDownloadImageData extends SimpleTexture
 
     protected void func_152433_a()
     {
-        this.imageThread = new Thread("Texture Downloader #" + field_147643_d.incrementAndGet())
+        this.imageThread = new Thread("Texture Downloader #" + threadDownloadCounter.incrementAndGet())
         {
             private static final String __OBFID = "CL_00001050";
             public void run()
@@ -135,7 +135,7 @@ public class ThreadDownloadImageData extends SimpleTexture
                     }
                     else
                     {
-                        var2 = ImageIO.read(var1.getInputStream());
+                        var2 = TextureUtil.func_177053_a(var1.getInputStream());
                     }
 
                     if (ThreadDownloadImageData.this.imageBuffer != null)
@@ -143,7 +143,7 @@ public class ThreadDownloadImageData extends SimpleTexture
                         var2 = ThreadDownloadImageData.this.imageBuffer.parseUserSkin(var2);
                     }
 
-                    ThreadDownloadImageData.this.func_147641_a(var2);
+                    ThreadDownloadImageData.this.setBufferedImage(var2);
                 }
                 catch (Exception var6)
                 {

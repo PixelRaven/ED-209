@@ -5,12 +5,14 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 
-public class S3BPacketScoreboardObjective extends Packet
+public class S3BPacketScoreboardObjective implements Packet
 {
     private String field_149343_a;
     private String field_149341_b;
+    private IScoreObjectiveCriteria.EnumRenderType field_179818_c;
     private int field_149342_c;
     private static final String __OBFID = "CL_00001333";
 
@@ -20,32 +22,46 @@ public class S3BPacketScoreboardObjective extends Packet
     {
         this.field_149343_a = p_i45224_1_.getName();
         this.field_149341_b = p_i45224_1_.getDisplayName();
+        this.field_179818_c = p_i45224_1_.getCriteria().func_178790_c();
         this.field_149342_c = p_i45224_2_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149343_a = p_148837_1_.readStringFromBuffer(16);
-        this.field_149341_b = p_148837_1_.readStringFromBuffer(32);
-        this.field_149342_c = p_148837_1_.readByte();
+        this.field_149343_a = data.readStringFromBuffer(16);
+        this.field_149342_c = data.readByte();
+
+        if (this.field_149342_c == 0 || this.field_149342_c == 2)
+        {
+            this.field_149341_b = data.readStringFromBuffer(32);
+            this.field_179818_c = IScoreObjectiveCriteria.EnumRenderType.func_178795_a(data.readStringFromBuffer(16));
+        }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(this.field_149343_a);
-        p_148840_1_.writeStringToBuffer(this.field_149341_b);
-        p_148840_1_.writeByte(this.field_149342_c);
+        data.writeString(this.field_149343_a);
+        data.writeByte(this.field_149342_c);
+
+        if (this.field_149342_c == 0 || this.field_149342_c == 2)
+        {
+            data.writeString(this.field_149341_b);
+            data.writeString(this.field_179818_c.func_178796_a());
+        }
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleScoreboardObjective(this);
+        handler.handleScoreboardObjective(this);
     }
 
     public String func_149339_c()
@@ -63,8 +79,16 @@ public class S3BPacketScoreboardObjective extends Packet
         return this.field_149342_c;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    public IScoreObjectiveCriteria.EnumRenderType func_179817_d()
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        return this.field_179818_c;
+    }
+
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
+    {
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

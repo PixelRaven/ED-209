@@ -3,13 +3,13 @@ package net.minecraft.entity.ai;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.pathfinding.PathEntity;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class EntityAIAttackOnCollide extends EntityAIBase
 {
     World worldObj;
-    EntityCreature attacker;
+    protected EntityCreature attacker;
 
     /**
      * An amount of decrementing ticks that allows the entity to attack once the tick reaches 0.
@@ -80,7 +80,7 @@ public class EntityAIAttackOnCollide extends EntityAIBase
     public boolean continueExecuting()
     {
         EntityLivingBase var1 = this.attacker.getAttackTarget();
-        return var1 == null ? false : (!var1.isEntityAlive() ? false : (!this.longMemory ? !this.attacker.getNavigator().noPath() : this.attacker.isWithinHomeDistance(MathHelper.floor_double(var1.posX), MathHelper.floor_double(var1.posY), MathHelper.floor_double(var1.posZ))));
+        return var1 == null ? false : (!var1.isEntityAlive() ? false : (!this.longMemory ? !this.attacker.getNavigator().noPath() : this.attacker.func_180485_d(new BlockPos(var1))));
     }
 
     /**
@@ -107,14 +107,14 @@ public class EntityAIAttackOnCollide extends EntityAIBase
     {
         EntityLivingBase var1 = this.attacker.getAttackTarget();
         this.attacker.getLookHelper().setLookPositionWithEntity(var1, 30.0F, 30.0F);
-        double var2 = this.attacker.getDistanceSq(var1.posX, var1.boundingBox.minY, var1.posZ);
-        double var4 = (double)(this.attacker.width * 2.0F * this.attacker.width * 2.0F + var1.width);
+        double var2 = this.attacker.getDistanceSq(var1.posX, var1.getEntityBoundingBox().minY, var1.posZ);
+        double var4 = this.func_179512_a(var1);
         --this.field_75445_i;
 
         if ((this.longMemory || this.attacker.getEntitySenses().canSee(var1)) && this.field_75445_i <= 0 && (this.field_151497_i == 0.0D && this.field_151495_j == 0.0D && this.field_151496_k == 0.0D || var1.getDistanceSq(this.field_151497_i, this.field_151495_j, this.field_151496_k) >= 1.0D || this.attacker.getRNG().nextFloat() < 0.05F))
         {
             this.field_151497_i = var1.posX;
-            this.field_151495_j = var1.boundingBox.minY;
+            this.field_151495_j = var1.getEntityBoundingBox().minY;
             this.field_151496_k = var1.posZ;
             this.field_75445_i = 4 + this.attacker.getRNG().nextInt(7);
 
@@ -135,7 +135,7 @@ public class EntityAIAttackOnCollide extends EntityAIBase
 
         this.attackTick = Math.max(this.attackTick - 1, 0);
 
-        if (var2 <= var4 && this.attackTick <= 20)
+        if (var2 <= var4 && this.attackTick <= 0)
         {
             this.attackTick = 20;
 
@@ -146,5 +146,10 @@ public class EntityAIAttackOnCollide extends EntityAIBase
 
             this.attacker.attackEntityAsMob(var1);
         }
+    }
+
+    protected double func_179512_a(EntityLivingBase p_179512_1_)
+    {
+        return (double)(this.attacker.width * 2.0F * this.attacker.width * 2.0F + p_179512_1_.width);
     }
 }

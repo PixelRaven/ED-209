@@ -2,7 +2,10 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class BlockStaticLiquid extends BlockLiquid
@@ -20,75 +23,88 @@ public class BlockStaticLiquid extends BlockLiquid
         }
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
-        super.onNeighborBlockChange(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, p_149695_5_);
-
-        if (p_149695_1_.getBlock(p_149695_2_, p_149695_3_, p_149695_4_) == this)
+        if (!this.func_176365_e(worldIn, pos, state))
         {
-            this.setNotStationary(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_);
+            this.updateLiquid(worldIn, pos, state);
         }
     }
 
-    private void setNotStationary(World p_149818_1_, int p_149818_2_, int p_149818_3_, int p_149818_4_)
+    private void updateLiquid(World worldIn, BlockPos p_176370_2_, IBlockState p_176370_3_)
     {
-        int var5 = p_149818_1_.getBlockMetadata(p_149818_2_, p_149818_3_, p_149818_4_);
-        p_149818_1_.setBlock(p_149818_2_, p_149818_3_, p_149818_4_, Block.getBlockById(Block.getIdFromBlock(this) - 1), var5, 2);
-        p_149818_1_.scheduleBlockUpdate(p_149818_2_, p_149818_3_, p_149818_4_, Block.getBlockById(Block.getIdFromBlock(this) - 1), this.func_149738_a(p_149818_1_));
+        BlockDynamicLiquid var4 = getDynamicLiquidForMaterial(this.blockMaterial);
+        worldIn.setBlockState(p_176370_2_, var4.getDefaultState().withProperty(LEVEL, p_176370_3_.getValue(LEVEL)), 2);
+        worldIn.scheduleUpdate(p_176370_2_, var4, this.tickRate(worldIn));
     }
 
-    /**
-     * Ticks the block if it's been scheduled
-     */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
         if (this.blockMaterial == Material.lava)
         {
-            int var6 = p_149674_5_.nextInt(3);
-            int var7;
-
-            for (var7 = 0; var7 < var6; ++var7)
+            if (worldIn.getGameRules().getGameRuleBooleanValue("doFireTick"))
             {
-                p_149674_2_ += p_149674_5_.nextInt(3) - 1;
-                ++p_149674_3_;
-                p_149674_4_ += p_149674_5_.nextInt(3) - 1;
-                Block var8 = p_149674_1_.getBlock(p_149674_2_, p_149674_3_, p_149674_4_);
+                int var5 = rand.nextInt(3);
 
-                if (var8.blockMaterial == Material.air)
+                if (var5 > 0)
                 {
-                    if (this.isFlammable(p_149674_1_, p_149674_2_ - 1, p_149674_3_, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_ + 1, p_149674_3_, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ - 1) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_ + 1) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_ - 1, p_149674_4_) || this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_ + 1, p_149674_4_))
+                    BlockPos var6 = pos;
+
+                    for (int var7 = 0; var7 < var5; ++var7)
                     {
-                        p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.fire);
-                        return;
+                        var6 = var6.add(rand.nextInt(3) - 1, 1, rand.nextInt(3) - 1);
+                        Block var8 = worldIn.getBlockState(var6).getBlock();
+
+                        if (var8.blockMaterial == Material.air)
+                        {
+                            if (this.isSurroundingBlockFlammable(worldIn, var6))
+                            {
+                                worldIn.setBlockState(var6, Blocks.fire.getDefaultState());
+                                return;
+                            }
+                        }
+                        else if (var8.blockMaterial.blocksMovement())
+                        {
+                            return;
+                        }
                     }
                 }
-                else if (var8.blockMaterial.blocksMovement())
+                else
                 {
-                    return;
-                }
-            }
-
-            if (var6 == 0)
-            {
-                var7 = p_149674_2_;
-                int var10 = p_149674_4_;
-
-                for (int var9 = 0; var9 < 3; ++var9)
-                {
-                    p_149674_2_ = var7 + p_149674_5_.nextInt(3) - 1;
-                    p_149674_4_ = var10 + p_149674_5_.nextInt(3) - 1;
-
-                    if (p_149674_1_.isAirBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_) && this.isFlammable(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_))
+                    for (int var9 = 0; var9 < 3; ++var9)
                     {
-                        p_149674_1_.setBlock(p_149674_2_, p_149674_3_ + 1, p_149674_4_, Blocks.fire);
+                        BlockPos var10 = pos.add(rand.nextInt(3) - 1, 0, rand.nextInt(3) - 1);
+
+                        if (worldIn.isAirBlock(var10.offsetUp()) && this.getCanBlockBurn(worldIn, var10))
+                        {
+                            worldIn.setBlockState(var10.offsetUp(), Blocks.fire.getDefaultState());
+                        }
                     }
                 }
             }
         }
     }
 
-    private boolean isFlammable(World p_149817_1_, int p_149817_2_, int p_149817_3_, int p_149817_4_)
+    protected boolean isSurroundingBlockFlammable(World worldIn, BlockPos p_176369_2_)
     {
-        return p_149817_1_.getBlock(p_149817_2_, p_149817_3_, p_149817_4_).getMaterial().getCanBurn();
+        EnumFacing[] var3 = EnumFacing.values();
+        int var4 = var3.length;
+
+        for (int var5 = 0; var5 < var4; ++var5)
+        {
+            EnumFacing var6 = var3[var5];
+
+            if (this.getCanBlockBurn(worldIn, p_176369_2_.offset(var6)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean getCanBlockBurn(World worldIn, BlockPos p_176368_2_)
+    {
+        return worldIn.getBlockState(p_176368_2_).getBlock().getMaterial().getCanBurn();
     }
 }

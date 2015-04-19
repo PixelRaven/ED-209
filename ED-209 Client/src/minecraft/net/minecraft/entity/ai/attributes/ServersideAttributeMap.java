@@ -14,18 +14,18 @@ public class ServersideAttributeMap extends BaseAttributeMap
     protected final Map descriptionToAttributeInstanceMap = new LowerStringMap();
     private static final String __OBFID = "CL_00001569";
 
-    public ModifiableAttributeInstance getAttributeInstance(IAttribute p_111151_1_)
+    public ModifiableAttributeInstance func_180795_e(IAttribute p_180795_1_)
     {
-        return (ModifiableAttributeInstance)super.getAttributeInstance(p_111151_1_);
+        return (ModifiableAttributeInstance)super.getAttributeInstance(p_180795_1_);
     }
 
-    public ModifiableAttributeInstance getAttributeInstanceByName(String p_111152_1_)
+    public ModifiableAttributeInstance func_180796_b(String p_180796_1_)
     {
-        IAttributeInstance var2 = super.getAttributeInstanceByName(p_111152_1_);
+        IAttributeInstance var2 = super.getAttributeInstanceByName(p_180796_1_);
 
         if (var2 == null)
         {
-            var2 = (IAttributeInstance)this.descriptionToAttributeInstanceMap.get(p_111152_1_);
+            var2 = (IAttributeInstance)this.descriptionToAttributeInstanceMap.get(p_180796_1_);
         }
 
         return (ModifiableAttributeInstance)var2;
@@ -36,30 +36,39 @@ public class ServersideAttributeMap extends BaseAttributeMap
      */
     public IAttributeInstance registerAttribute(IAttribute p_111150_1_)
     {
-        if (this.attributesByName.containsKey(p_111150_1_.getAttributeUnlocalizedName()))
-        {
-            throw new IllegalArgumentException("Attribute is already registered!");
-        }
-        else
-        {
-            ModifiableAttributeInstance var2 = new ModifiableAttributeInstance(this, p_111150_1_);
-            this.attributesByName.put(p_111150_1_.getAttributeUnlocalizedName(), var2);
+        IAttributeInstance var2 = super.registerAttribute(p_111150_1_);
 
-            if (p_111150_1_ instanceof RangedAttribute && ((RangedAttribute)p_111150_1_).getDescription() != null)
-            {
-                this.descriptionToAttributeInstanceMap.put(((RangedAttribute)p_111150_1_).getDescription(), var2);
-            }
-
-            this.attributes.put(p_111150_1_, var2);
-            return var2;
+        if (p_111150_1_ instanceof RangedAttribute && ((RangedAttribute)p_111150_1_).getDescription() != null)
+        {
+            this.descriptionToAttributeInstanceMap.put(((RangedAttribute)p_111150_1_).getDescription(), var2);
         }
+
+        return var2;
     }
 
-    public void addAttributeInstance(ModifiableAttributeInstance p_111149_1_)
+    protected IAttributeInstance func_180376_c(IAttribute p_180376_1_)
     {
-        if (p_111149_1_.getAttribute().getShouldWatch())
+        return new ModifiableAttributeInstance(this, p_180376_1_);
+    }
+
+    public void func_180794_a(IAttributeInstance p_180794_1_)
+    {
+        if (p_180794_1_.getAttribute().getShouldWatch())
         {
-            this.attributeInstanceSet.add(p_111149_1_);
+            this.attributeInstanceSet.add(p_180794_1_);
+        }
+
+        Iterator var2 = this.field_180377_c.get(p_180794_1_.getAttribute()).iterator();
+
+        while (var2.hasNext())
+        {
+            IAttribute var3 = (IAttribute)var2.next();
+            ModifiableAttributeInstance var4 = this.func_180795_e(var3);
+
+            if (var4 != null)
+            {
+                var4.flagForUpdate();
+            }
         }
     }
 
@@ -84,5 +93,15 @@ public class ServersideAttributeMap extends BaseAttributeMap
         }
 
         return var1;
+    }
+
+    public IAttributeInstance getAttributeInstanceByName(String p_111152_1_)
+    {
+        return this.func_180796_b(p_111152_1_);
+    }
+
+    public IAttributeInstance getAttributeInstance(IAttribute p_111151_1_)
+    {
+        return this.func_180795_e(p_111151_1_);
     }
 }

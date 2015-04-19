@@ -5,7 +5,10 @@ import net.minecraft.item.ItemStack;
 
 public interface ICrafting
 {
-    void sendContainerAndContentsToPlayer(Container p_71110_1_, List p_71110_2_);
+    /**
+     * update the crafting window inventory with the items in the list
+     */
+    void updateCraftingInventory(Container p_71110_1_, List p_71110_2_);
 
     /**
      * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
@@ -19,4 +22,6 @@ public interface ICrafting
      * value. Both are truncated to shorts in non-local SMP.
      */
     void sendProgressBarUpdate(Container p_71112_1_, int p_71112_2_, int p_71112_3_);
+
+    void func_175173_a(Container p_175173_1_, IInventory p_175173_2_);
 }

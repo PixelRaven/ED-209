@@ -12,7 +12,7 @@ public class RecipesMapCloning implements IRecipe
     /**
      * Used to check if a recipe matches current crafting inventory
      */
-    public boolean matches(InventoryCrafting p_77569_1_, World p_77569_2_)
+    public boolean matches(InventoryCrafting p_77569_1_, World worldIn)
     {
         int var3 = 0;
         ItemStack var4 = null;
@@ -84,7 +84,7 @@ public class RecipesMapCloning implements IRecipe
 
         if (var3 != null && var2 >= 1)
         {
-            ItemStack var6 = new ItemStack(Items.filled_map, var2 + 1, var3.getItemDamage());
+            ItemStack var6 = new ItemStack(Items.filled_map, var2 + 1, var3.getMetadata());
 
             if (var3.hasDisplayName())
             {
@@ -110,5 +110,22 @@ public class RecipesMapCloning implements IRecipe
     public ItemStack getRecipeOutput()
     {
         return null;
+    }
+
+    public ItemStack[] func_179532_b(InventoryCrafting p_179532_1_)
+    {
+        ItemStack[] var2 = new ItemStack[p_179532_1_.getSizeInventory()];
+
+        for (int var3 = 0; var3 < var2.length; ++var3)
+        {
+            ItemStack var4 = p_179532_1_.getStackInSlot(var3);
+
+            if (var4 != null && var4.getItem().hasContainerItem())
+            {
+                var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+            }
+        }
+
+        return var2;
     }
 }

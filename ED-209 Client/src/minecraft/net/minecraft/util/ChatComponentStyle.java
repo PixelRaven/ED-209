@@ -19,10 +19,10 @@ public abstract class ChatComponentStyle implements IChatComponent
     /**
      * Appends the given component to the end of this one.
      */
-    public IChatComponent appendSibling(IChatComponent p_150257_1_)
+    public IChatComponent appendSibling(IChatComponent component)
     {
-        p_150257_1_.getChatStyle().setParentStyle(this.getChatStyle());
-        this.siblings.add(p_150257_1_);
+        component.getChatStyle().setParentStyle(this.getChatStyle());
+        this.siblings.add(component);
         return this;
     }
 
@@ -37,14 +37,14 @@ public abstract class ChatComponentStyle implements IChatComponent
     /**
      * Appends the given text to the end of this component.
      */
-    public IChatComponent appendText(String p_150258_1_)
+    public IChatComponent appendText(String text)
     {
-        return this.appendSibling(new ChatComponentText(p_150258_1_));
+        return this.appendSibling(new ChatComponentText(text));
     }
 
-    public IChatComponent setChatStyle(ChatStyle p_150255_1_)
+    public IChatComponent setChatStyle(ChatStyle style)
     {
-        this.style = p_150255_1_;
+        this.style = style;
         Iterator var2 = this.siblings.iterator();
 
         while (var2.hasNext())
@@ -119,9 +119,9 @@ public abstract class ChatComponentStyle implements IChatComponent
      * Creates an iterator that iterates over the given components, returning deep copies of each component in turn so
      * that the properties of the returned objects will remain externally consistent after being returned.
      */
-    public static Iterator createDeepCopyIterator(Iterable p_150262_0_)
+    public static Iterator createDeepCopyIterator(Iterable components)
     {
-        Iterator var1 = Iterators.concat(Iterators.transform(p_150262_0_.iterator(), new Function()
+        Iterator var1 = Iterators.concat(Iterators.transform(components.iterator(), new Function()
         {
             private static final String __OBFID = "CL_00001258";
             public Iterator apply(IChatComponent p_apply_1_)

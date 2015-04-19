@@ -1,19 +1,19 @@
 package net.minecraft.world.gen.feature;
 
+import java.util.List;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.WeightedRandomChestContent;
 import net.minecraft.world.World;
 
 public class WorldGeneratorBonusChest extends WorldGenerator
 {
-    /**
-     * Instance of WeightedRandomChestContent what will randomly generate items into the Bonus Chest.
-     */
-    private final WeightedRandomChestContent[] theBonusChestGenerator;
+    private final List field_175909_a;
 
     /**
      * Value of this int will determine how much items gonna generate in Bonus Chest.
@@ -21,63 +21,66 @@ public class WorldGeneratorBonusChest extends WorldGenerator
     private final int itemsToGenerateInBonusChest;
     private static final String __OBFID = "CL_00000403";
 
-    public WorldGeneratorBonusChest(WeightedRandomChestContent[] p_i2010_1_, int p_i2010_2_)
+    public WorldGeneratorBonusChest(List p_i45634_1_, int p_i45634_2_)
     {
-        this.theBonusChestGenerator = p_i2010_1_;
-        this.itemsToGenerateInBonusChest = p_i2010_2_;
+        this.field_175909_a = p_i45634_1_;
+        this.itemsToGenerateInBonusChest = p_i45634_2_;
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        Block var6;
+        Block var4;
 
-        while (((var6 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_)).getMaterial() == Material.air || var6.getMaterial() == Material.leaves) && p_76484_4_ > 1)
+        while (((var4 = worldIn.getBlockState(p_180709_3_).getBlock()).getMaterial() == Material.air || var4.getMaterial() == Material.leaves) && p_180709_3_.getY() > 1)
         {
-            --p_76484_4_;
+            p_180709_3_ = p_180709_3_.offsetDown();
         }
 
-        if (p_76484_4_ < 1)
+        if (p_180709_3_.getY() < 1)
         {
             return false;
         }
         else
         {
-            ++p_76484_4_;
+            p_180709_3_ = p_180709_3_.offsetUp();
 
-            for (int var7 = 0; var7 < 4; ++var7)
+            for (int var5 = 0; var5 < 4; ++var5)
             {
-                int var8 = p_76484_3_ + p_76484_2_.nextInt(4) - p_76484_2_.nextInt(4);
-                int var9 = p_76484_4_ + p_76484_2_.nextInt(3) - p_76484_2_.nextInt(3);
-                int var10 = p_76484_5_ + p_76484_2_.nextInt(4) - p_76484_2_.nextInt(4);
+                BlockPos var6 = p_180709_3_.add(p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4), p_180709_2_.nextInt(3) - p_180709_2_.nextInt(3), p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4));
 
-                if (p_76484_1_.isAirBlock(var8, var9, var10) && World.doesBlockHaveSolidTopSurface(p_76484_1_, var8, var9 - 1, var10))
+                if (worldIn.isAirBlock(var6) && World.doesBlockHaveSolidTopSurface(worldIn, var6.offsetDown()))
                 {
-                    p_76484_1_.setBlock(var8, var9, var10, Blocks.chest, 0, 2);
-                    TileEntityChest var11 = (TileEntityChest)p_76484_1_.getTileEntity(var8, var9, var10);
+                    worldIn.setBlockState(var6, Blocks.chest.getDefaultState(), 2);
+                    TileEntity var7 = worldIn.getTileEntity(var6);
 
-                    if (var11 != null && var11 != null)
+                    if (var7 instanceof TileEntityChest)
                     {
-                        WeightedRandomChestContent.generateChestContents(p_76484_2_, this.theBonusChestGenerator, var11, this.itemsToGenerateInBonusChest);
+                        WeightedRandomChestContent.generateChestContents(p_180709_2_, this.field_175909_a, (TileEntityChest)var7, this.itemsToGenerateInBonusChest);
                     }
 
-                    if (p_76484_1_.isAirBlock(var8 - 1, var9, var10) && World.doesBlockHaveSolidTopSurface(p_76484_1_, var8 - 1, var9 - 1, var10))
+                    BlockPos var8 = var6.offsetEast();
+                    BlockPos var9 = var6.offsetWest();
+                    BlockPos var10 = var6.offsetNorth();
+                    BlockPos var11 = var6.offsetSouth();
+
+                    if (worldIn.isAirBlock(var9) && World.doesBlockHaveSolidTopSurface(worldIn, var9.offsetDown()))
                     {
-                        p_76484_1_.setBlock(var8 - 1, var9, var10, Blocks.torch, 0, 2);
+                        worldIn.setBlockState(var9, Blocks.torch.getDefaultState(), 2);
                     }
 
-                    if (p_76484_1_.isAirBlock(var8 + 1, var9, var10) && World.doesBlockHaveSolidTopSurface(p_76484_1_, var8 - 1, var9 - 1, var10))
+                    if (worldIn.isAirBlock(var8) && World.doesBlockHaveSolidTopSurface(worldIn, var8.offsetDown()))
                     {
-                        p_76484_1_.setBlock(var8 + 1, var9, var10, Blocks.torch, 0, 2);
+                        worldIn.setBlockState(var8, Blocks.torch.getDefaultState(), 2);
                     }
 
-                    if (p_76484_1_.isAirBlock(var8, var9, var10 - 1) && World.doesBlockHaveSolidTopSurface(p_76484_1_, var8 - 1, var9 - 1, var10))
+                    if (worldIn.isAirBlock(var10) && World.doesBlockHaveSolidTopSurface(worldIn, var10.offsetDown()))
                     {
-                        p_76484_1_.setBlock(var8, var9, var10 - 1, Blocks.torch, 0, 2);
+                        worldIn.setBlockState(var10, Blocks.torch.getDefaultState(), 2);
                     }
 
-                    if (p_76484_1_.isAirBlock(var8, var9, var10 + 1) && World.doesBlockHaveSolidTopSurface(p_76484_1_, var8 - 1, var9 - 1, var10))
+                    if (worldIn.isAirBlock(var11) && World.doesBlockHaveSolidTopSurface(worldIn, var11.offsetDown()))
                     {
-                        p_76484_1_.setBlock(var8, var9, var10 + 1, Blocks.torch, 0, 2);
+                        worldIn.setBlockState(var11, Blocks.torch.getDefaultState(), 2);
                     }
 
                     return true;

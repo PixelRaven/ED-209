@@ -1,9 +1,11 @@
 package net.minecraft.client.model;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class ModelRenderer
@@ -48,7 +50,7 @@ public class ModelRenderer
         this.textureWidth = 64.0F;
         this.textureHeight = 32.0F;
         this.showModel = true;
-        this.cubeList = new ArrayList();
+        this.cubeList = Lists.newArrayList();
         this.baseModel = p_i1172_1_;
         p_i1172_1_.boxList.add(this);
         this.boxName = p_i1172_2_;
@@ -73,7 +75,7 @@ public class ModelRenderer
     {
         if (this.childModels == null)
         {
-            this.childModels = new ArrayList();
+            this.childModels = Lists.newArrayList();
         }
 
         this.childModels.add(p_78792_1_);
@@ -98,6 +100,12 @@ public class ModelRenderer
     public ModelRenderer addBox(float p_78789_1_, float p_78789_2_, float p_78789_3_, int p_78789_4_, int p_78789_5_, int p_78789_6_)
     {
         this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, p_78789_1_, p_78789_2_, p_78789_3_, p_78789_4_, p_78789_5_, p_78789_6_, 0.0F));
+        return this;
+    }
+
+    public ModelRenderer addBox(float p_178769_1_, float p_178769_2_, float p_178769_3_, int p_178769_4_, int p_178769_5_, int p_178769_6_, boolean p_178769_7_)
+    {
+        this.cubeList.add(new ModelBox(this, this.textureOffsetX, this.textureOffsetY, p_178769_1_, p_178769_2_, p_178769_3_, p_178769_4_, p_178769_5_, p_178769_6_, 0.0F, p_178769_7_));
         return this;
     }
 
@@ -127,14 +135,14 @@ public class ModelRenderer
                     this.compileDisplayList(p_78785_1_);
                 }
 
-                GL11.glTranslatef(this.offsetX, this.offsetY, this.offsetZ);
+                GlStateManager.translate(this.offsetX, this.offsetY, this.offsetZ);
                 int var2;
 
                 if (this.rotateAngleX == 0.0F && this.rotateAngleY == 0.0F && this.rotateAngleZ == 0.0F)
                 {
                     if (this.rotationPointX == 0.0F && this.rotationPointY == 0.0F && this.rotationPointZ == 0.0F)
                     {
-                        GL11.glCallList(this.displayList);
+                        GlStateManager.callList(this.displayList);
 
                         if (this.childModels != null)
                         {
@@ -146,8 +154,8 @@ public class ModelRenderer
                     }
                     else
                     {
-                        GL11.glTranslatef(this.rotationPointX * p_78785_1_, this.rotationPointY * p_78785_1_, this.rotationPointZ * p_78785_1_);
-                        GL11.glCallList(this.displayList);
+                        GlStateManager.translate(this.rotationPointX * p_78785_1_, this.rotationPointY * p_78785_1_, this.rotationPointZ * p_78785_1_);
+                        GlStateManager.callList(this.displayList);
 
                         if (this.childModels != null)
                         {
@@ -157,30 +165,30 @@ public class ModelRenderer
                             }
                         }
 
-                        GL11.glTranslatef(-this.rotationPointX * p_78785_1_, -this.rotationPointY * p_78785_1_, -this.rotationPointZ * p_78785_1_);
+                        GlStateManager.translate(-this.rotationPointX * p_78785_1_, -this.rotationPointY * p_78785_1_, -this.rotationPointZ * p_78785_1_);
                     }
                 }
                 else
                 {
-                    GL11.glPushMatrix();
-                    GL11.glTranslatef(this.rotationPointX * p_78785_1_, this.rotationPointY * p_78785_1_, this.rotationPointZ * p_78785_1_);
+                    GlStateManager.pushMatrix();
+                    GlStateManager.translate(this.rotationPointX * p_78785_1_, this.rotationPointY * p_78785_1_, this.rotationPointZ * p_78785_1_);
 
                     if (this.rotateAngleZ != 0.0F)
                     {
-                        GL11.glRotatef(this.rotateAngleZ * (180F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                        GlStateManager.rotate(this.rotateAngleZ * (180F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                     }
 
                     if (this.rotateAngleY != 0.0F)
                     {
-                        GL11.glRotatef(this.rotateAngleY * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                        GlStateManager.rotate(this.rotateAngleY * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                     }
 
                     if (this.rotateAngleX != 0.0F)
                     {
-                        GL11.glRotatef(this.rotateAngleX * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                        GlStateManager.rotate(this.rotateAngleX * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
 
-                    GL11.glCallList(this.displayList);
+                    GlStateManager.callList(this.displayList);
 
                     if (this.childModels != null)
                     {
@@ -190,10 +198,10 @@ public class ModelRenderer
                         }
                     }
 
-                    GL11.glPopMatrix();
+                    GlStateManager.popMatrix();
                 }
 
-                GL11.glTranslatef(-this.offsetX, -this.offsetY, -this.offsetZ);
+                GlStateManager.translate(-this.offsetX, -this.offsetY, -this.offsetZ);
             }
         }
     }
@@ -209,26 +217,26 @@ public class ModelRenderer
                     this.compileDisplayList(p_78791_1_);
                 }
 
-                GL11.glPushMatrix();
-                GL11.glTranslatef(this.rotationPointX * p_78791_1_, this.rotationPointY * p_78791_1_, this.rotationPointZ * p_78791_1_);
+                GlStateManager.pushMatrix();
+                GlStateManager.translate(this.rotationPointX * p_78791_1_, this.rotationPointY * p_78791_1_, this.rotationPointZ * p_78791_1_);
 
                 if (this.rotateAngleY != 0.0F)
                 {
-                    GL11.glRotatef(this.rotateAngleY * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                    GlStateManager.rotate(this.rotateAngleY * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                 }
 
                 if (this.rotateAngleX != 0.0F)
                 {
-                    GL11.glRotatef(this.rotateAngleX * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                    GlStateManager.rotate(this.rotateAngleX * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                 }
 
                 if (this.rotateAngleZ != 0.0F)
                 {
-                    GL11.glRotatef(this.rotateAngleZ * (180F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                    GlStateManager.rotate(this.rotateAngleZ * (180F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                 }
 
-                GL11.glCallList(this.displayList);
-                GL11.glPopMatrix();
+                GlStateManager.callList(this.displayList);
+                GlStateManager.popMatrix();
             }
         }
     }
@@ -251,26 +259,26 @@ public class ModelRenderer
                 {
                     if (this.rotationPointX != 0.0F || this.rotationPointY != 0.0F || this.rotationPointZ != 0.0F)
                     {
-                        GL11.glTranslatef(this.rotationPointX * p_78794_1_, this.rotationPointY * p_78794_1_, this.rotationPointZ * p_78794_1_);
+                        GlStateManager.translate(this.rotationPointX * p_78794_1_, this.rotationPointY * p_78794_1_, this.rotationPointZ * p_78794_1_);
                     }
                 }
                 else
                 {
-                    GL11.glTranslatef(this.rotationPointX * p_78794_1_, this.rotationPointY * p_78794_1_, this.rotationPointZ * p_78794_1_);
+                    GlStateManager.translate(this.rotationPointX * p_78794_1_, this.rotationPointY * p_78794_1_, this.rotationPointZ * p_78794_1_);
 
                     if (this.rotateAngleZ != 0.0F)
                     {
-                        GL11.glRotatef(this.rotateAngleZ * (180F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
+                        GlStateManager.rotate(this.rotateAngleZ * (180F / (float)Math.PI), 0.0F, 0.0F, 1.0F);
                     }
 
                     if (this.rotateAngleY != 0.0F)
                     {
-                        GL11.glRotatef(this.rotateAngleY * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
+                        GlStateManager.rotate(this.rotateAngleY * (180F / (float)Math.PI), 0.0F, 1.0F, 0.0F);
                     }
 
                     if (this.rotateAngleX != 0.0F)
                     {
-                        GL11.glRotatef(this.rotateAngleX * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
+                        GlStateManager.rotate(this.rotateAngleX * (180F / (float)Math.PI), 1.0F, 0.0F, 0.0F);
                     }
                 }
             }
@@ -284,7 +292,7 @@ public class ModelRenderer
     {
         this.displayList = GLAllocation.generateDisplayLists(1);
         GL11.glNewList(this.displayList, GL11.GL_COMPILE);
-        Tessellator var2 = Tessellator.instance;
+        WorldRenderer var2 = Tessellator.getInstance().getWorldRenderer();
 
         for (int var3 = 0; var3 < this.cubeList.size(); ++var3)
         {

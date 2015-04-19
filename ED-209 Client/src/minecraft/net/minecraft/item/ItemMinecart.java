@@ -1,15 +1,16 @@
 package net.minecraft.item;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
 import net.minecraft.dispenser.IBehaviorDispenseItem;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
@@ -19,81 +20,109 @@ public class ItemMinecart extends Item
     {
         private final BehaviorDefaultDispenseItem behaviourDefaultDispenseItem = new BehaviorDefaultDispenseItem();
         private static final String __OBFID = "CL_00000050";
-        public ItemStack dispenseStack(IBlockSource p_82487_1_, ItemStack p_82487_2_)
+        public ItemStack dispenseStack(IBlockSource source, ItemStack stack)
         {
-            EnumFacing var3 = BlockDispenser.func_149937_b(p_82487_1_.getBlockMetadata());
-            World var4 = p_82487_1_.getWorld();
-            double var5 = p_82487_1_.getX() + (double)((float)var3.getFrontOffsetX() * 1.125F);
-            double var7 = p_82487_1_.getY() + (double)((float)var3.getFrontOffsetY() * 1.125F);
-            double var9 = p_82487_1_.getZ() + (double)((float)var3.getFrontOffsetZ() * 1.125F);
-            int var11 = p_82487_1_.getXInt() + var3.getFrontOffsetX();
-            int var12 = p_82487_1_.getYInt() + var3.getFrontOffsetY();
-            int var13 = p_82487_1_.getZInt() + var3.getFrontOffsetZ();
-            Block var14 = var4.getBlock(var11, var12, var13);
-            double var15;
+            EnumFacing var3 = BlockDispenser.getFacing(source.getBlockMetadata());
+            World var4 = source.getWorld();
+            double var5 = source.getX() + (double)var3.getFrontOffsetX() * 1.125D;
+            double var7 = Math.floor(source.getY()) + (double)var3.getFrontOffsetY();
+            double var9 = source.getZ() + (double)var3.getFrontOffsetZ() * 1.125D;
+            BlockPos var11 = source.getBlockPos().offset(var3);
+            IBlockState var12 = var4.getBlockState(var11);
+            BlockRailBase.EnumRailDirection var13 = var12.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)var12.getValue(((BlockRailBase)var12.getBlock()).func_176560_l()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+            double var14;
 
-            if (BlockRailBase.func_150051_a(var14))
+            if (BlockRailBase.func_176563_d(var12))
             {
-                var15 = 0.0D;
+                if (var13.func_177018_c())
+                {
+                    var14 = 0.6D;
+                }
+                else
+                {
+                    var14 = 0.1D;
+                }
             }
             else
             {
-                if (var14.getMaterial() != Material.air || !BlockRailBase.func_150051_a(var4.getBlock(var11, var12 - 1, var13)))
+                if (var12.getBlock().getMaterial() != Material.air || !BlockRailBase.func_176563_d(var4.getBlockState(var11.offsetDown())))
                 {
-                    return this.behaviourDefaultDispenseItem.dispense(p_82487_1_, p_82487_2_);
+                    return this.behaviourDefaultDispenseItem.dispense(source, stack);
                 }
 
-                var15 = -1.0D;
+                IBlockState var16 = var4.getBlockState(var11.offsetDown());
+                BlockRailBase.EnumRailDirection var17 = var16.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)var16.getValue(((BlockRailBase)var16.getBlock()).func_176560_l()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+
+                if (var3 != EnumFacing.DOWN && var17.func_177018_c())
+                {
+                    var14 = -0.4D;
+                }
+                else
+                {
+                    var14 = -0.9D;
+                }
             }
 
-            EntityMinecart var17 = EntityMinecart.createMinecart(var4, var5, var7 + var15, var9, ((ItemMinecart)p_82487_2_.getItem()).minecartType);
+            EntityMinecart var18 = EntityMinecart.func_180458_a(var4, var5, var7 + var14, var9, ((ItemMinecart)stack.getItem()).minecartType);
 
-            if (p_82487_2_.hasDisplayName())
+            if (stack.hasDisplayName())
             {
-                var17.setMinecartName(p_82487_2_.getDisplayName());
+                var18.setCustomNameTag(stack.getDisplayName());
             }
 
-            var4.spawnEntityInWorld(var17);
-            p_82487_2_.splitStack(1);
-            return p_82487_2_;
+            var4.spawnEntityInWorld(var18);
+            stack.splitStack(1);
+            return stack;
         }
-        protected void playDispenseSound(IBlockSource p_82485_1_)
+        protected void playDispenseSound(IBlockSource source)
         {
-            p_82485_1_.getWorld().playAuxSFX(1000, p_82485_1_.getXInt(), p_82485_1_.getYInt(), p_82485_1_.getZInt(), 0);
+            source.getWorld().playAuxSFX(1000, source.getBlockPos(), 0);
         }
     };
-    public int minecartType;
+    private final EntityMinecart.EnumMinecartType minecartType;
     private static final String __OBFID = "CL_00000049";
 
-    public ItemMinecart(int p_i45345_1_)
+    public ItemMinecart(EntityMinecart.EnumMinecartType p_i45785_1_)
     {
         this.maxStackSize = 1;
-        this.minecartType = p_i45345_1_;
+        this.minecartType = p_i45785_1_;
         this.setCreativeTab(CreativeTabs.tabTransport);
         BlockDispenser.dispenseBehaviorRegistry.putObject(this, dispenserMinecartBehavior);
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (BlockRailBase.func_150051_a(p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_)))
-        {
-            if (!p_77648_3_.isClient)
-            {
-                EntityMinecart var11 = EntityMinecart.createMinecart(p_77648_3_, (double)((float)p_77648_4_ + 0.5F), (double)((float)p_77648_5_ + 0.5F), (double)((float)p_77648_6_ + 0.5F), this.minecartType);
+        IBlockState var9 = worldIn.getBlockState(pos);
 
-                if (p_77648_1_.hasDisplayName())
+        if (BlockRailBase.func_176563_d(var9))
+        {
+            if (!worldIn.isRemote)
+            {
+                BlockRailBase.EnumRailDirection var10 = var9.getBlock() instanceof BlockRailBase ? (BlockRailBase.EnumRailDirection)var9.getValue(((BlockRailBase)var9.getBlock()).func_176560_l()) : BlockRailBase.EnumRailDirection.NORTH_SOUTH;
+                double var11 = 0.0D;
+
+                if (var10.func_177018_c())
                 {
-                    var11.setMinecartName(p_77648_1_.getDisplayName());
+                    var11 = 0.5D;
                 }
 
-                p_77648_3_.spawnEntityInWorld(var11);
+                EntityMinecart var13 = EntityMinecart.func_180458_a(worldIn, (double)pos.getX() + 0.5D, (double)pos.getY() + 0.0625D + var11, (double)pos.getZ() + 0.5D, this.minecartType);
+
+                if (stack.hasDisplayName())
+                {
+                    var13.setCustomNameTag(stack.getDisplayName());
+                }
+
+                worldIn.spawnEntityInWorld(var13);
             }
 
-            --p_77648_1_.stackSize;
+            --stack.stackSize;
             return true;
         }
         else

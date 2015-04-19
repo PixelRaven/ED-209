@@ -3,11 +3,14 @@ package net.minecraft.item;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFence;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLeashKnot;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class ItemLead extends Item
@@ -20,22 +23,24 @@ public class ItemLead extends Item
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        Block var11 = p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_);
+        Block var9 = worldIn.getBlockState(pos).getBlock();
 
-        if (var11.getRenderType() == 11)
+        if (var9 instanceof BlockFence)
         {
-            if (p_77648_3_.isClient)
+            if (worldIn.isRemote)
             {
                 return true;
             }
             else
             {
-                func_150909_a(p_77648_2_, p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_);
+                func_180618_a(playerIn, worldIn, pos);
                 return true;
             }
         }
@@ -45,34 +50,33 @@ public class ItemLead extends Item
         }
     }
 
-    public static boolean func_150909_a(EntityPlayer p_150909_0_, World p_150909_1_, int p_150909_2_, int p_150909_3_, int p_150909_4_)
+    public static boolean func_180618_a(EntityPlayer p_180618_0_, World worldIn, BlockPos p_180618_2_)
     {
-        EntityLeashKnot var5 = EntityLeashKnot.getKnotForBlock(p_150909_1_, p_150909_2_, p_150909_3_, p_150909_4_);
-        boolean var6 = false;
-        double var7 = 7.0D;
-        List var9 = p_150909_1_.getEntitiesWithinAABB(EntityLiving.class, AxisAlignedBB.getBoundingBox((double)p_150909_2_ - var7, (double)p_150909_3_ - var7, (double)p_150909_4_ - var7, (double)p_150909_2_ + var7, (double)p_150909_3_ + var7, (double)p_150909_4_ + var7));
+        EntityLeashKnot var3 = EntityLeashKnot.func_174863_b(worldIn, p_180618_2_);
+        boolean var4 = false;
+        double var5 = 7.0D;
+        int var7 = p_180618_2_.getX();
+        int var8 = p_180618_2_.getY();
+        int var9 = p_180618_2_.getZ();
+        List var10 = worldIn.getEntitiesWithinAABB(EntityLiving.class, new AxisAlignedBB((double)var7 - var5, (double)var8 - var5, (double)var9 - var5, (double)var7 + var5, (double)var8 + var5, (double)var9 + var5));
+        Iterator var11 = var10.iterator();
 
-        if (var9 != null)
+        while (var11.hasNext())
         {
-            Iterator var10 = var9.iterator();
+            EntityLiving var12 = (EntityLiving)var11.next();
 
-            while (var10.hasNext())
+            if (var12.getLeashed() && var12.getLeashedToEntity() == p_180618_0_)
             {
-                EntityLiving var11 = (EntityLiving)var10.next();
-
-                if (var11.getLeashed() && var11.getLeashedToEntity() == p_150909_0_)
+                if (var3 == null)
                 {
-                    if (var5 == null)
-                    {
-                        var5 = EntityLeashKnot.func_110129_a(p_150909_1_, p_150909_2_, p_150909_3_, p_150909_4_);
-                    }
-
-                    var11.setLeashedToEntity(var5, true);
-                    var6 = true;
+                    var3 = EntityLeashKnot.func_174862_a(worldIn, p_180618_2_);
                 }
+
+                var12.setLeashedToEntity(var3, true);
+                var4 = true;
             }
         }
 
-        return var6;
+        return var4;
     }
 }

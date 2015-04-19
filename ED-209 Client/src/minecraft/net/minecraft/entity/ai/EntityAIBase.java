@@ -23,7 +23,8 @@ public abstract class EntityAIBase
     }
 
     /**
-     * Determine if this AI Task is interruptible by a higher (= lower value) priority task.
+     * Determine if this AI Task is interruptible by a higher (= lower value) priority task. All vanilla AITask have
+     * this value set to true.
      */
     public boolean isInterruptible()
     {

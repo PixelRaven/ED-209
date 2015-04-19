@@ -1,19 +1,15 @@
 package net.minecraft.client.main;
 
-import com.google.common.collect.HashMultimap;
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.authlib.properties.PropertyMap.Serializer;
 import java.io.File;
-import java.lang.reflect.ParameterizedType;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.Proxy.Type;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.NonOptionArgumentSpec;
 import joptsimple.OptionParser;
@@ -23,38 +19,6 @@ import net.minecraft.util.Session;
 
 public class Main
 {
-    private static final java.lang.reflect.Type field_152370_a = new ParameterizedType()
-    {
-        private static final String __OBFID = "CL_00000828";
-        public java.lang.reflect.Type[] getActualTypeArguments()
-        {
-            return new java.lang.reflect.Type[] {String.class, new ParameterizedType()
-            {
-                private static final String __OBFID = "CL_00001836";
-                public java.lang.reflect.Type[] getActualTypeArguments()
-                {
-                    return new java.lang.reflect.Type[] {String.class};
-                }
-                public java.lang.reflect.Type getRawType()
-                {
-                    return Collection.class;
-                }
-                public java.lang.reflect.Type getOwnerType()
-                {
-                    return null;
-                }
-            }
-                                                };
-        }
-        public java.lang.reflect.Type getRawType()
-        {
-            return Map.class;
-        }
-        public java.lang.reflect.Type getOwnerType()
-        {
-            return null;
-        }
-    };
     private static final String __OBFID = "CL_00001461";
 
     public static void main(String[] p_main_0_)
@@ -64,6 +28,7 @@ public class Main
         var1.allowsUnrecognizedOptions();
         var1.accepts("demo");
         var1.accepts("fullscreen");
+        var1.accepts("checkGlErrors");
         ArgumentAcceptingOptionSpec var2 = var1.accepts("server").withRequiredArg();
         ArgumentAcceptingOptionSpec var3 = var1.accepts("port").withRequiredArg().ofType(Integer.class).defaultsTo(Integer.valueOf(25565), new Integer[0]);
         ArgumentAcceptingOptionSpec var4 = var1.accepts("gameDir").withRequiredArg().ofType(File.class).defaultsTo(new File("."), new File[0]);
@@ -85,6 +50,12 @@ public class Main
         NonOptionArgumentSpec var20 = var1.nonOptions();
         OptionSet var21 = var1.parse(p_main_0_);
         List var22 = var21.valuesOf(var20);
+
+        if (!var22.isEmpty())
+        {
+            System.out.println("Completely ignored arguments: " + var22);
+        }
+
         String var23 = (String)var21.valueOf(var7);
         Proxy var24 = Proxy.NO_PROXY;
 
@@ -94,7 +65,7 @@ public class Main
             {
                 var24 = new Proxy(Type.SOCKS, new InetSocketAddress(var23, ((Integer)var21.valueOf(var8)).intValue()));
             }
-            catch (Exception var41)
+            catch (Exception var43)
             {
                 ;
             }
@@ -107,7 +78,7 @@ public class Main
         {
             Authenticator.setDefault(new Authenticator()
             {
-                private static final String __OBFID = "CL_00000829";
+                private static final String __OBFID = "CL_00000828";
                 protected PasswordAuthentication getPasswordAuthentication()
                 {
                     return new PasswordAuthentication(var25, var26.toCharArray());
@@ -118,47 +89,29 @@ public class Main
         int var27 = ((Integer)var21.valueOf(var15)).intValue();
         int var28 = ((Integer)var21.valueOf(var16)).intValue();
         boolean var29 = var21.has("fullscreen");
-        boolean var30 = var21.has("demo");
-        String var31 = (String)var21.valueOf(var14);
-        HashMultimap var32 = HashMultimap.create();
-        Iterator var33 = ((Map)(new Gson()).fromJson((String)var21.valueOf(var17), field_152370_a)).entrySet().iterator();
-
-        while (var33.hasNext())
-        {
-            Entry var34 = (Entry)var33.next();
-            var32.putAll(var34.getKey(), (Iterable)var34.getValue());
-        }
-
-        File var42 = (File)var21.valueOf(var4);
-        File var43 = var21.has(var5) ? (File)var21.valueOf(var5) : new File(var42, "assets/");
-        File var35 = var21.has(var6) ? (File)var21.valueOf(var6) : new File(var42, "resourcepacks/");
-        String var36 = var21.has(var12) ? (String)var12.value(var21) : (String)var11.value(var21);
-        String var37 = var21.has(var18) ? (String)var18.value(var21) : null;
-        Session var38 = new Session((String)var11.value(var21), var36, (String)var13.value(var21), (String)var19.value(var21));
-        Minecraft var39 = new Minecraft(var38, var27, var28, var29, var30, var42, var43, var35, var24, var31, var32, var37);
-        String var40 = (String)var21.valueOf(var2);
-
-        if (var40 != null)
-        {
-            var39.setServer(var40, ((Integer)var21.valueOf(var3)).intValue());
-        }
-
+        boolean var30 = var21.has("checkGlErrors");
+        boolean var31 = var21.has("demo");
+        String var32 = (String)var21.valueOf(var14);
+        PropertyMap var33 = (PropertyMap)(new GsonBuilder()).registerTypeAdapter(PropertyMap.class, new Serializer()).create().fromJson((String)var21.valueOf(var17), PropertyMap.class);
+        File var34 = (File)var21.valueOf(var4);
+        File var35 = var21.has(var5) ? (File)var21.valueOf(var5) : new File(var34, "assets/");
+        File var36 = var21.has(var6) ? (File)var21.valueOf(var6) : new File(var34, "resourcepacks/");
+        String var37 = var21.has(var12) ? (String)var12.value(var21) : (String)var11.value(var21);
+        String var38 = var21.has(var18) ? (String)var18.value(var21) : null;
+        String var39 = (String)var21.valueOf(var2);
+        Integer var40 = (Integer)var21.valueOf(var3);
+        Session var41 = new Session((String)var11.value(var21), var37, (String)var13.value(var21), (String)var19.value(var21));
+        GameConfiguration var42 = new GameConfiguration(new GameConfiguration.UserInformation(var41, var33, var24), new GameConfiguration.DisplayInformation(var27, var28, var29, var30), new GameConfiguration.FolderInformation(var34, var36, var35, var38), new GameConfiguration.GameInformation(var31, var32), new GameConfiguration.ServerInformation(var39, var40.intValue()));
         Runtime.getRuntime().addShutdownHook(new Thread("Client Shutdown Thread")
         {
-            private static final String __OBFID = "CL_00001835";
+            private static final String __OBFID = "CL_00000829";
             public void run()
             {
                 Minecraft.stopIntegratedServer();
             }
         });
-
-        if (!var22.isEmpty())
-        {
-            System.out.println("Completely ignored arguments: " + var22);
-        }
-
         Thread.currentThread().setName("Client thread");
-        var39.run();
+        (new Minecraft(var42)).run();
     }
 
     private static boolean func_110121_a(String p_110121_0_)

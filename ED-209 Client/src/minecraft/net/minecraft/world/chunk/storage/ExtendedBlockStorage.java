@@ -1,6 +1,7 @@
 package net.minecraft.world.chunk.storage;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.NibbleArray;
 
@@ -21,21 +22,7 @@ public class ExtendedBlockStorage
      * Chunk from random tick updates for performance reasons.
      */
     private int tickRefCount;
-
-    /**
-     * Contains the least significant 8 bits of each block ID belonging to this block storage's parent Chunk.
-     */
-    private byte[] blockLSBArray;
-
-    /**
-     * Contains the most significant 4 bits of each block ID belonging to this block storage's parent Chunk.
-     */
-    private NibbleArray blockMSBArray;
-
-    /**
-     * Stores the metadata associated with blocks in this ExtendedBlockStorage.
-     */
-    private NibbleArray blockMetadataArray;
+    private char[] data;
 
     /** The NibbleArray containing a block of Block-light data. */
     private NibbleArray blocklightArray;
@@ -44,41 +31,29 @@ public class ExtendedBlockStorage
     private NibbleArray skylightArray;
     private static final String __OBFID = "CL_00000375";
 
-    public ExtendedBlockStorage(int p_i1997_1_, boolean p_i1997_2_)
+    public ExtendedBlockStorage(int y, boolean storeSkylight)
     {
-        this.yBase = p_i1997_1_;
-        this.blockLSBArray = new byte[4096];
-        this.blockMetadataArray = new NibbleArray(this.blockLSBArray.length, 4);
-        this.blocklightArray = new NibbleArray(this.blockLSBArray.length, 4);
+        this.yBase = y;
+        this.data = new char[4096];
+        this.blocklightArray = new NibbleArray();
 
-        if (p_i1997_2_)
+        if (storeSkylight)
         {
-            this.skylightArray = new NibbleArray(this.blockLSBArray.length, 4);
+            this.skylightArray = new NibbleArray();
         }
     }
 
-    public Block func_150819_a(int p_150819_1_, int p_150819_2_, int p_150819_3_)
+    public IBlockState get(int x, int y, int z)
     {
-        int var4 = this.blockLSBArray[p_150819_2_ << 8 | p_150819_3_ << 4 | p_150819_1_] & 255;
-
-        if (this.blockMSBArray != null)
-        {
-            var4 |= this.blockMSBArray.get(p_150819_1_, p_150819_2_, p_150819_3_) << 8;
-        }
-
-        return Block.getBlockById(var4);
+        IBlockState var4 = (IBlockState)Block.BLOCK_STATE_IDS.getByValue(this.data[y << 8 | z << 4 | x]);
+        return var4 != null ? var4 : Blocks.air.getDefaultState();
     }
 
-    public void func_150818_a(int p_150818_1_, int p_150818_2_, int p_150818_3_, Block p_150818_4_)
+    public void set(int x, int y, int z, IBlockState state)
     {
-        int var5 = this.blockLSBArray[p_150818_2_ << 8 | p_150818_3_ << 4 | p_150818_1_] & 255;
-
-        if (this.blockMSBArray != null)
-        {
-            var5 |= this.blockMSBArray.get(p_150818_1_, p_150818_2_, p_150818_3_) << 8;
-        }
-
-        Block var6 = Block.getBlockById(var5);
+        IBlockState var5 = this.get(x, y, z);
+        Block var6 = var5.getBlock();
+        Block var7 = state.getBlock();
 
         if (var6 != Blocks.air)
         {
@@ -90,48 +65,35 @@ public class ExtendedBlockStorage
             }
         }
 
-        if (p_150818_4_ != Blocks.air)
+        if (var7 != Blocks.air)
         {
             ++this.blockRefCount;
 
-            if (p_150818_4_.getTickRandomly())
+            if (var7.getTickRandomly())
             {
                 ++this.tickRefCount;
             }
         }
 
-        int var7 = Block.getIdFromBlock(p_150818_4_);
-        this.blockLSBArray[p_150818_2_ << 8 | p_150818_3_ << 4 | p_150818_1_] = (byte)(var7 & 255);
+        this.data[y << 8 | z << 4 | x] = (char)Block.BLOCK_STATE_IDS.get(state);
+    }
 
-        if (var7 > 255)
-        {
-            if (this.blockMSBArray == null)
-            {
-                this.blockMSBArray = new NibbleArray(this.blockLSBArray.length, 4);
-            }
-
-            this.blockMSBArray.set(p_150818_1_, p_150818_2_, p_150818_3_, (var7 & 3840) >> 8);
-        }
-        else if (this.blockMSBArray != null)
-        {
-            this.blockMSBArray.set(p_150818_1_, p_150818_2_, p_150818_3_, 0);
-        }
+    /**
+     * Returns the block for a location in a chunk, with the extended ID merged from a byte array and a NibbleArray to
+     * form a full 12-bit block ID.
+     */
+    public Block getBlockByExtId(int x, int y, int z)
+    {
+        return this.get(x, y, z).getBlock();
     }
 
     /**
      * Returns the metadata associated with the block at the given coordinates in this ExtendedBlockStorage.
      */
-    public int getExtBlockMetadata(int p_76665_1_, int p_76665_2_, int p_76665_3_)
+    public int getExtBlockMetadata(int x, int y, int z)
     {
-        return this.blockMetadataArray.get(p_76665_1_, p_76665_2_, p_76665_3_);
-    }
-
-    /**
-     * Sets the metadata of the Block at the given coordinates in this ExtendedBlockStorage to the given metadata.
-     */
-    public void setExtBlockMetadata(int p_76654_1_, int p_76654_2_, int p_76654_3_, int p_76654_4_)
-    {
-        this.blockMetadataArray.set(p_76654_1_, p_76654_2_, p_76654_3_, p_76654_4_);
+        IBlockState var4 = this.get(x, y, z);
+        return var4.getBlock().getMetaFromState(var4);
     }
 
     /**
@@ -162,33 +124,33 @@ public class ExtendedBlockStorage
     /**
      * Sets the saved Sky-light value in the extended block storage structure.
      */
-    public void setExtSkylightValue(int p_76657_1_, int p_76657_2_, int p_76657_3_, int p_76657_4_)
+    public void setExtSkylightValue(int x, int y, int z, int value)
     {
-        this.skylightArray.set(p_76657_1_, p_76657_2_, p_76657_3_, p_76657_4_);
+        this.skylightArray.set(x, y, z, value);
     }
 
     /**
      * Gets the saved Sky-light value in the extended block storage structure.
      */
-    public int getExtSkylightValue(int p_76670_1_, int p_76670_2_, int p_76670_3_)
+    public int getExtSkylightValue(int x, int y, int z)
     {
-        return this.skylightArray.get(p_76670_1_, p_76670_2_, p_76670_3_);
+        return this.skylightArray.get(x, y, z);
     }
 
     /**
      * Sets the saved Block-light value in the extended block storage structure.
      */
-    public void setExtBlocklightValue(int p_76677_1_, int p_76677_2_, int p_76677_3_, int p_76677_4_)
+    public void setExtBlocklightValue(int x, int y, int z, int value)
     {
-        this.blocklightArray.set(p_76677_1_, p_76677_2_, p_76677_3_, p_76677_4_);
+        this.blocklightArray.set(x, y, z, value);
     }
 
     /**
      * Gets the saved Block-light value in the extended block storage structure.
      */
-    public int getExtBlocklightValue(int p_76674_1_, int p_76674_2_, int p_76674_3_)
+    public int getExtBlocklightValue(int x, int y, int z)
     {
-        return this.blocklightArray.get(p_76674_1_, p_76674_2_, p_76674_3_);
+        return this.blocklightArray.get(x, y, z);
     }
 
     public void removeInvalidBlocks()
@@ -202,7 +164,7 @@ public class ExtendedBlockStorage
             {
                 for (int var3 = 0; var3 < 16; ++var3)
                 {
-                    Block var4 = this.func_150819_a(var1, var2, var3);
+                    Block var4 = this.getBlockByExtId(var1, var2, var3);
 
                     if (var4 != Blocks.air)
                     {
@@ -218,27 +180,14 @@ public class ExtendedBlockStorage
         }
     }
 
-    public byte[] getBlockLSBArray()
+    public char[] getData()
     {
-        return this.blockLSBArray;
+        return this.data;
     }
 
-    public void clearMSBArray()
+    public void setData(char[] dataArray)
     {
-        this.blockMSBArray = null;
-    }
-
-    /**
-     * Returns the block ID MSB (bits 11..8) array for this storage array's Chunk.
-     */
-    public NibbleArray getBlockMSBArray()
-    {
-        return this.blockMSBArray;
-    }
-
-    public NibbleArray getMetadataArray()
-    {
-        return this.blockMetadataArray;
+        this.data = dataArray;
     }
 
     /**
@@ -258,52 +207,18 @@ public class ExtendedBlockStorage
     }
 
     /**
-     * Sets the array of block ID least significant bits for this ExtendedBlockStorage.
-     */
-    public void setBlockLSBArray(byte[] p_76664_1_)
-    {
-        this.blockLSBArray = p_76664_1_;
-    }
-
-    /**
-     * Sets the array of blockID most significant bits (blockMSBArray) for this ExtendedBlockStorage.
-     */
-    public void setBlockMSBArray(NibbleArray p_76673_1_)
-    {
-        this.blockMSBArray = p_76673_1_;
-    }
-
-    /**
-     * Sets the NibbleArray of block metadata (blockMetadataArray) for this ExtendedBlockStorage.
-     */
-    public void setBlockMetadataArray(NibbleArray p_76668_1_)
-    {
-        this.blockMetadataArray = p_76668_1_;
-    }
-
-    /**
      * Sets the NibbleArray instance used for Block-light values in this particular storage block.
      */
-    public void setBlocklightArray(NibbleArray p_76659_1_)
+    public void setBlocklightArray(NibbleArray newBlocklightArray)
     {
-        this.blocklightArray = p_76659_1_;
+        this.blocklightArray = newBlocklightArray;
     }
 
     /**
      * Sets the NibbleArray instance used for Sky-light values in this particular storage block.
      */
-    public void setSkylightArray(NibbleArray p_76666_1_)
+    public void setSkylightArray(NibbleArray newSkylightArray)
     {
-        this.skylightArray = p_76666_1_;
-    }
-
-    /**
-     * Called by a Chunk to initialize the MSB array if getBlockMSBArray returns null. Returns the newly-created
-     * NibbleArray instance.
-     */
-    public NibbleArray createBlockMSBArray()
-    {
-        this.blockMSBArray = new NibbleArray(this.blockLSBArray.length, 4);
-        return this.blockMSBArray;
+        this.skylightArray = newSkylightArray;
     }
 }

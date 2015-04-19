@@ -3,6 +3,7 @@ package net.minecraft.entity.item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public class EntityTNTPrimed extends Entity
@@ -12,17 +13,16 @@ public class EntityTNTPrimed extends Entity
     private EntityLivingBase tntPlacedBy;
     private static final String __OBFID = "CL_00001681";
 
-    public EntityTNTPrimed(World p_i1729_1_)
+    public EntityTNTPrimed(World worldIn)
     {
-        super(p_i1729_1_);
+        super(worldIn);
         this.preventEntitySpawning = true;
         this.setSize(0.98F, 0.98F);
-        this.yOffset = this.height / 2.0F;
     }
 
-    public EntityTNTPrimed(World p_i1730_1_, double p_i1730_2_, double p_i1730_4_, double p_i1730_6_, EntityLivingBase p_i1730_8_)
+    public EntityTNTPrimed(World worldIn, double p_i1730_2_, double p_i1730_4_, double p_i1730_6_, EntityLivingBase p_i1730_8_)
     {
-        this(p_i1730_1_);
+        this(worldIn);
         this.setPosition(p_i1730_2_, p_i1730_4_, p_i1730_6_);
         float var9 = (float)(Math.random() * Math.PI * 2.0D);
         this.motionX = (double)(-((float)Math.sin((double)var9)) * 0.02F);
@@ -79,42 +79,38 @@ public class EntityTNTPrimed extends Entity
         {
             this.setDead();
 
-            if (!this.worldObj.isClient)
+            if (!this.worldObj.isRemote)
             {
                 this.explode();
             }
         }
         else
         {
-            this.worldObj.spawnParticle("smoke", this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
+            this.handleWaterMovement();
+            this.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
         }
     }
 
     private void explode()
     {
         float var1 = 4.0F;
-        this.worldObj.createExplosion(this, this.posX, this.posY, this.posZ, var1, true);
+        this.worldObj.createExplosion(this, this.posX, this.posY + (double)(this.height / 2.0F), this.posZ, var1, true);
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        p_70014_1_.setByte("Fuse", (byte)this.fuse);
+        tagCompound.setByte("Fuse", (byte)this.fuse);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        this.fuse = p_70037_1_.getByte("Fuse");
-    }
-
-    public float getShadowSize()
-    {
-        return 0.0F;
+        this.fuse = tagCompund.getByte("Fuse");
     }
 
     /**
@@ -123,5 +119,10 @@ public class EntityTNTPrimed extends Entity
     public EntityLivingBase getTntPlacedBy()
     {
         return this.tntPlacedBy;
+    }
+
+    public float getEyeHeight()
+    {
+        return 0.0F;
     }
 }

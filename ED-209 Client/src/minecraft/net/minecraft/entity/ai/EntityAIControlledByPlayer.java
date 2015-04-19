@@ -2,15 +2,16 @@ package net.minecraft.entity.ai;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSlab;
+import net.minecraft.block.BlockStairs;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.pathfinding.PathFinder;
-import net.minecraft.pathfinding.PathPoint;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.pathfinder.WalkNodeProcessor;
 
 public class EntityAIControlledByPlayer extends EntityAIBase
 {
@@ -112,7 +113,7 @@ public class EntityAIControlledByPlayer extends EntityAIBase
 
         if (this.thisEntity.onGround)
         {
-            var8 = this.thisEntity.worldObj.getBlock(MathHelper.floor_float((float)var4), MathHelper.floor_float((float)var5) - 1, MathHelper.floor_float((float)var6)).slipperiness * 0.91F;
+            var8 = this.thisEntity.worldObj.getBlockState(new BlockPos(MathHelper.floor_float((float)var4), MathHelper.floor_float((float)var5) - 1, MathHelper.floor_float((float)var6))).getBlock().slipperiness * 0.91F;
         }
 
         float var9 = 0.16277136F / (var8 * var8 * var8);
@@ -156,14 +157,16 @@ public class EntityAIControlledByPlayer extends EntityAIBase
 
         int var17 = MathHelper.floor_double(this.thisEntity.posX + (double)var15);
         int var18 = MathHelper.floor_double(this.thisEntity.posZ + (double)var16);
-        PathPoint var19 = new PathPoint(MathHelper.floor_float(this.thisEntity.width + 1.0F), MathHelper.floor_float(this.thisEntity.height + var1.height + 1.0F), MathHelper.floor_float(this.thisEntity.width + 1.0F));
+        int var19 = MathHelper.floor_float(this.thisEntity.width + 1.0F);
+        int var20 = MathHelper.floor_float(this.thisEntity.height + var1.height + 1.0F);
+        int var21 = MathHelper.floor_float(this.thisEntity.width + 1.0F);
 
         if (var4 != var17 || var6 != var18)
         {
-            Block var20 = this.thisEntity.worldObj.getBlock(var4, var5, var6);
-            boolean var21 = !this.func_151498_a(var20) && (var20.getMaterial() != Material.air || !this.func_151498_a(this.thisEntity.worldObj.getBlock(var4, var5 - 1, var6)));
+            Block var22 = this.thisEntity.worldObj.getBlockState(new BlockPos(var4, var5, var6)).getBlock();
+            boolean var23 = !this.isStairOrSlab(var22) && (var22.getMaterial() != Material.air || !this.isStairOrSlab(this.thisEntity.worldObj.getBlockState(new BlockPos(var4, var5 - 1, var6)).getBlock()));
 
-            if (var21 && PathFinder.func_82565_a(this.thisEntity, var17, var5, var18, var19, false, false, true) == 0 && PathFinder.func_82565_a(this.thisEntity, var4, var5 + 1, var6, var19, false, false, true) == 1 && PathFinder.func_82565_a(this.thisEntity, var17, var5 + 1, var18, var19, false, false, true) == 1)
+            if (var23 && 0 == WalkNodeProcessor.func_176170_a(this.thisEntity.worldObj, this.thisEntity, var17, var5, var18, var19, var20, var21, false, false, true) && 1 == WalkNodeProcessor.func_176170_a(this.thisEntity.worldObj, this.thisEntity, var4, var5 + 1, var6, var19, var20, var21, false, false, true) && 1 == WalkNodeProcessor.func_176170_a(this.thisEntity.worldObj, this.thisEntity, var17, var5 + 1, var18, var19, var20, var21, false, false, true))
             {
                 var2.getJumpHelper().setJumping();
             }
@@ -171,17 +174,17 @@ public class EntityAIControlledByPlayer extends EntityAIBase
 
         if (!var1.capabilities.isCreativeMode && this.currentSpeed >= this.maxSpeed * 0.5F && this.thisEntity.getRNG().nextFloat() < 0.006F && !this.speedBoosted)
         {
-            ItemStack var22 = var1.getHeldItem();
+            ItemStack var24 = var1.getHeldItem();
 
-            if (var22 != null && var22.getItem() == Items.carrot_on_a_stick)
+            if (var24 != null && var24.getItem() == Items.carrot_on_a_stick)
             {
-                var22.damageItem(1, var1);
+                var24.damageItem(1, var1);
 
-                if (var22.stackSize == 0)
+                if (var24.stackSize == 0)
                 {
-                    ItemStack var23 = new ItemStack(Items.fishing_rod);
-                    var23.setTagCompound(var22.stackTagCompound);
-                    var1.inventory.mainInventory[var1.inventory.currentItem] = var23;
+                    ItemStack var25 = new ItemStack(Items.fishing_rod);
+                    var25.setTagCompound(var24.getTagCompound());
+                    var1.inventory.mainInventory[var1.inventory.currentItem] = var25;
                 }
             }
         }
@@ -189,9 +192,12 @@ public class EntityAIControlledByPlayer extends EntityAIBase
         this.thisEntity.moveEntityWithHeading(0.0F, var7);
     }
 
-    private boolean func_151498_a(Block p_151498_1_)
+    /**
+     * True if the block is a stair block or a slab block
+     */
+    private boolean isStairOrSlab(Block p_151498_1_)
     {
-        return p_151498_1_.getRenderType() == 10 || p_151498_1_ instanceof BlockSlab;
+        return p_151498_1_ instanceof BlockStairs || p_151498_1_ instanceof BlockSlab;
     }
 
     /**

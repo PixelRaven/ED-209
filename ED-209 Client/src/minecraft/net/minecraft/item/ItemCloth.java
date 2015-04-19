@@ -1,8 +1,6 @@
 package net.minecraft.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockColored;
-import net.minecraft.util.IIcon;
 
 public class ItemCloth extends ItemBlock
 {
@@ -16,27 +14,20 @@ public class ItemCloth extends ItemBlock
     }
 
     /**
-     * Gets an icon index based on an item's damage value
+     * Converts the given ItemStack damage value into a metadata value to be placed in the world when this Item is
+     * placed as a Block (mostly used with ItemBlocks).
      */
-    public IIcon getIconFromDamage(int p_77617_1_)
+    public int getMetadata(int damage)
     {
-        return this.field_150939_a.func_149735_b(2, BlockColored.func_150032_b(p_77617_1_));
-    }
-
-    /**
-     * Returns the metadata of the block which this Item (ItemBlock) can place
-     */
-    public int getMetadata(int p_77647_1_)
-    {
-        return p_77647_1_;
+        return damage;
     }
 
     /**
      * Returns the unlocalized name of this item. This version accepts an ItemStack so different stacks can have
      * different names based on their damage or NBT.
      */
-    public String getUnlocalizedName(ItemStack p_77667_1_)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        return super.getUnlocalizedName() + "." + ItemDye.field_150923_a[BlockColored.func_150032_b(p_77667_1_.getItemDamage())];
+        return super.getUnlocalizedName() + "." + EnumDyeColor.func_176764_b(stack.getMetadata()).func_176762_d();
     }
 }

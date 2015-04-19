@@ -1,39 +1,35 @@
 package net.minecraft.nbt;
 
-import java.util.ArrayList;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.Stack;
+import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class JsonToNBT
 {
     private static final Logger logger = LogManager.getLogger();
+    private static final Pattern field_179273_b = Pattern.compile("\\[[-+\\d|,\\s]+\\]");
     private static final String __OBFID = "CL_00001232";
 
-    public static NBTBase func_150315_a(String p_150315_0_) throws NBTException
+    public static NBTTagCompound func_180713_a(String p_180713_0_) throws NBTException
     {
-        p_150315_0_ = p_150315_0_.trim();
-        int var1 = func_150310_b(p_150315_0_);
+        p_180713_0_ = p_180713_0_.trim();
 
-        if (var1 != 1)
+        if (!p_180713_0_.startsWith("{"))
+        {
+            throw new NBTException("Invalid tag encountered, expected \'{\' as first char.");
+        }
+        else if (func_150310_b(p_180713_0_) != 1)
         {
             throw new NBTException("Encountered multiple top tags, only one expected");
         }
         else
         {
-            JsonToNBT.Any var2 = null;
-
-            if (p_150315_0_.startsWith("{"))
-            {
-                var2 = func_150316_a("tag", p_150315_0_);
-            }
-            else
-            {
-                var2 = func_150316_a(func_150313_b(p_150315_0_, false), func_150311_c(p_150315_0_, false));
-            }
-
-            return var2.func_150489_a();
+            return (NBTTagCompound)func_150316_a("tag", p_180713_0_).func_150489_a();
         }
     }
 
@@ -49,7 +45,7 @@ public class JsonToNBT
 
             if (var5 == 34)
             {
-                if (var4 > 0 && p_150310_0_.charAt(var4 - 1) == 92)
+                if (func_179271_b(p_150310_0_, var4))
                 {
                     if (!var2)
                     {
@@ -95,108 +91,88 @@ public class JsonToNBT
         {
             throw new NBTException("Unbalanced brackets: " + p_150310_0_);
         }
-        else if (var1 == 0 && !p_150310_0_.isEmpty())
-        {
-            return 1;
-        }
         else
         {
+            if (var1 == 0 && !p_150310_0_.isEmpty())
+            {
+                var1 = 1;
+            }
+
             return var1;
         }
+    }
+
+    static JsonToNBT.Any func_179272_a(String ... p_179272_0_) throws NBTException
+    {
+        return func_150316_a(p_179272_0_[0], p_179272_0_[1]);
     }
 
     static JsonToNBT.Any func_150316_a(String p_150316_0_, String p_150316_1_) throws NBTException
     {
         p_150316_1_ = p_150316_1_.trim();
-        func_150310_b(p_150316_1_);
         String var3;
-        String var4;
-        String var5;
+        boolean var4;
         char var6;
 
         if (p_150316_1_.startsWith("{"))
         {
-            if (!p_150316_1_.endsWith("}"))
-            {
-                throw new NBTException("Unable to locate ending bracket for: " + p_150316_1_);
-            }
-            else
-            {
-                p_150316_1_ = p_150316_1_.substring(1, p_150316_1_.length() - 1);
-                JsonToNBT.Compound var7 = new JsonToNBT.Compound(p_150316_0_);
+            p_150316_1_ = p_150316_1_.substring(1, p_150316_1_.length() - 1);
+            JsonToNBT.Compound var5;
 
-                while (p_150316_1_.length() > 0)
+            for (var5 = new JsonToNBT.Compound(p_150316_0_); p_150316_1_.length() > 0; p_150316_1_ = p_150316_1_.substring(var3.length() + 1))
+            {
+                var3 = func_150314_a(p_150316_1_, true);
+
+                if (var3.length() > 0)
                 {
-                    var3 = func_150314_a(p_150316_1_, false);
-
-                    if (var3.length() > 0)
-                    {
-                        var4 = func_150313_b(var3, false);
-                        var5 = func_150311_c(var3, false);
-                        var7.field_150491_b.add(func_150316_a(var4, var5));
-
-                        if (p_150316_1_.length() < var3.length() + 1)
-                        {
-                            break;
-                        }
-
-                        var6 = p_150316_1_.charAt(var3.length());
-
-                        if (var6 != 44 && var6 != 123 && var6 != 125 && var6 != 91 && var6 != 93)
-                        {
-                            throw new NBTException("Unexpected token \'" + var6 + "\' at: " + p_150316_1_.substring(var3.length()));
-                        }
-
-                        p_150316_1_ = p_150316_1_.substring(var3.length() + 1);
-                    }
+                    var4 = false;
+                    var5.field_150491_b.add(func_179270_a(var3, var4));
                 }
 
-                return var7;
+                if (p_150316_1_.length() < var3.length() + 1)
+                {
+                    break;
+                }
+
+                var6 = p_150316_1_.charAt(var3.length());
+
+                if (var6 != 44 && var6 != 123 && var6 != 125 && var6 != 91 && var6 != 93)
+                {
+                    throw new NBTException("Unexpected token \'" + var6 + "\' at: " + p_150316_1_.substring(var3.length()));
+                }
             }
+
+            return var5;
         }
-        else if (p_150316_1_.startsWith("[") && !p_150316_1_.matches("\\[[-\\d|,\\s]+\\]"))
+        else if (p_150316_1_.startsWith("[") && !field_179273_b.matcher(p_150316_1_).matches())
         {
-            if (!p_150316_1_.endsWith("]"))
-            {
-                throw new NBTException("Unable to locate ending bracket for: " + p_150316_1_);
-            }
-            else
-            {
-                p_150316_1_ = p_150316_1_.substring(1, p_150316_1_.length() - 1);
-                JsonToNBT.List var2 = new JsonToNBT.List(p_150316_0_);
+            p_150316_1_ = p_150316_1_.substring(1, p_150316_1_.length() - 1);
+            JsonToNBT.List var2;
 
-                while (p_150316_1_.length() > 0)
+            for (var2 = new JsonToNBT.List(p_150316_0_); p_150316_1_.length() > 0; p_150316_1_ = p_150316_1_.substring(var3.length() + 1))
+            {
+                var3 = func_150314_a(p_150316_1_, false);
+
+                if (var3.length() > 0)
                 {
-                    var3 = func_150314_a(p_150316_1_, true);
-
-                    if (var3.length() > 0)
-                    {
-                        var4 = func_150313_b(var3, true);
-                        var5 = func_150311_c(var3, true);
-                        var2.field_150492_b.add(func_150316_a(var4, var5));
-
-                        if (p_150316_1_.length() < var3.length() + 1)
-                        {
-                            break;
-                        }
-
-                        var6 = p_150316_1_.charAt(var3.length());
-
-                        if (var6 != 44 && var6 != 123 && var6 != 125 && var6 != 91 && var6 != 93)
-                        {
-                            throw new NBTException("Unexpected token \'" + var6 + "\' at: " + p_150316_1_.substring(var3.length()));
-                        }
-
-                        p_150316_1_ = p_150316_1_.substring(var3.length() + 1);
-                    }
-                    else
-                    {
-                        logger.debug(p_150316_1_);
-                    }
+                    var4 = true;
+                    var2.field_150492_b.add(func_179270_a(var3, var4));
                 }
 
-                return var2;
+                if (p_150316_1_.length() < var3.length() + 1)
+                {
+                    break;
+                }
+
+                var6 = p_150316_1_.charAt(var3.length());
+
+                if (var6 != 44 && var6 != 123 && var6 != 125 && var6 != 91 && var6 != 93)
+                {
+                    throw new NBTException("Unexpected token \'" + var6 + "\' at: " + p_150316_1_.substring(var3.length()));
+                }
             }
+
+            return var2;
         }
         else
         {
@@ -204,102 +180,111 @@ public class JsonToNBT
         }
     }
 
+    private static JsonToNBT.Any func_179270_a(String p_179270_0_, boolean p_179270_1_) throws NBTException
+    {
+        String var2 = func_150313_b(p_179270_0_, p_179270_1_);
+        String var3 = func_150311_c(p_179270_0_, p_179270_1_);
+        return func_179272_a(new String[] {var2, var3});
+    }
+
     private static String func_150314_a(String p_150314_0_, boolean p_150314_1_) throws NBTException
     {
         int var2 = func_150312_a(p_150314_0_, ':');
+        int var3 = func_150312_a(p_150314_0_, ',');
 
-        if (var2 < 0 && !p_150314_1_)
+        if (p_150314_1_)
         {
-            throw new NBTException("Unable to locate name/value separator for string: " + p_150314_0_);
-        }
-        else
-        {
-            int var3 = func_150312_a(p_150314_0_, ',');
+            if (var2 == -1)
+            {
+                throw new NBTException("Unable to locate name/value separator for string: " + p_150314_0_);
+            }
 
-            if (var3 >= 0 && var3 < var2 && !p_150314_1_)
+            if (var3 != -1 && var3 < var2)
             {
                 throw new NBTException("Name error at: " + p_150314_0_);
             }
-            else
+        }
+        else if (var2 == -1 || var2 > var3)
+        {
+            var2 = -1;
+        }
+
+        return func_179269_a(p_150314_0_, var2);
+    }
+
+    private static String func_179269_a(String p_179269_0_, int p_179269_1_) throws NBTException
+    {
+        Stack var2 = new Stack();
+        int var3 = p_179269_1_ + 1;
+        boolean var4 = false;
+        boolean var5 = false;
+        boolean var6 = false;
+
+        for (int var7 = 0; var3 < p_179269_0_.length(); ++var3)
+        {
+            char var8 = p_179269_0_.charAt(var3);
+
+            if (var8 == 34)
             {
-                if (p_150314_1_ && (var2 < 0 || var2 > var3))
+                if (func_179271_b(p_179269_0_, var3))
                 {
-                    var2 = -1;
-                }
-
-                Stack var4 = new Stack();
-                int var5 = var2 + 1;
-                boolean var6 = false;
-                boolean var7 = false;
-                boolean var8 = false;
-
-                for (int var9 = 0; var5 < p_150314_0_.length(); ++var5)
-                {
-                    char var10 = p_150314_0_.charAt(var5);
-
-                    if (var10 == 34)
+                    if (!var4)
                     {
-                        if (var5 > 0 && p_150314_0_.charAt(var5 - 1) == 92)
-                        {
-                            if (!var6)
-                            {
-                                throw new NBTException("Illegal use of \\\": " + p_150314_0_);
-                            }
-                        }
-                        else
-                        {
-                            var6 = !var6;
-
-                            if (var6 && !var8)
-                            {
-                                var7 = true;
-                            }
-
-                            if (!var6)
-                            {
-                                var9 = var5;
-                            }
-                        }
-                    }
-                    else if (!var6)
-                    {
-                        if (var10 != 123 && var10 != 91)
-                        {
-                            if (var10 == 125 && (var4.isEmpty() || ((Character)var4.pop()).charValue() != 123))
-                            {
-                                throw new NBTException("Unbalanced curly brackets {}: " + p_150314_0_);
-                            }
-
-                            if (var10 == 93 && (var4.isEmpty() || ((Character)var4.pop()).charValue() != 91))
-                            {
-                                throw new NBTException("Unbalanced square brackets []: " + p_150314_0_);
-                            }
-
-                            if (var10 == 44 && var4.isEmpty())
-                            {
-                                return p_150314_0_.substring(0, var5);
-                            }
-                        }
-                        else
-                        {
-                            var4.push(Character.valueOf(var10));
-                        }
-                    }
-
-                    if (!Character.isWhitespace(var10))
-                    {
-                        if (!var6 && var7 && var9 != var5)
-                        {
-                            return p_150314_0_.substring(0, var9 + 1);
-                        }
-
-                        var8 = true;
+                        throw new NBTException("Illegal use of \\\": " + p_179269_0_);
                     }
                 }
+                else
+                {
+                    var4 = !var4;
 
-                return p_150314_0_.substring(0, var5);
+                    if (var4 && !var6)
+                    {
+                        var5 = true;
+                    }
+
+                    if (!var4)
+                    {
+                        var7 = var3;
+                    }
+                }
+            }
+            else if (!var4)
+            {
+                if (var8 != 123 && var8 != 91)
+                {
+                    if (var8 == 125 && (var2.isEmpty() || ((Character)var2.pop()).charValue() != 123))
+                    {
+                        throw new NBTException("Unbalanced curly brackets {}: " + p_179269_0_);
+                    }
+
+                    if (var8 == 93 && (var2.isEmpty() || ((Character)var2.pop()).charValue() != 91))
+                    {
+                        throw new NBTException("Unbalanced square brackets []: " + p_179269_0_);
+                    }
+
+                    if (var8 == 44 && var2.isEmpty())
+                    {
+                        return p_179269_0_.substring(0, var3);
+                    }
+                }
+                else
+                {
+                    var2.push(Character.valueOf(var8));
+                }
+            }
+
+            if (!Character.isWhitespace(var8))
+            {
+                if (!var4 && var5 && var7 != var3)
+                {
+                    return p_179269_0_.substring(0, var7 + 1);
+                }
+
+                var6 = true;
             }
         }
+
+        return p_179269_0_.substring(0, var3);
     }
 
     private static String func_150313_b(String p_150313_0_, boolean p_150313_1_) throws NBTException
@@ -314,9 +299,9 @@ public class JsonToNBT
             }
         }
 
-        int var2 = p_150313_0_.indexOf(58);
+        int var2 = func_150312_a(p_150313_0_, ':');
 
-        if (var2 < 0)
+        if (var2 == -1)
         {
             if (p_150313_1_)
             {
@@ -345,9 +330,9 @@ public class JsonToNBT
             }
         }
 
-        int var2 = p_150311_0_.indexOf(58);
+        int var2 = func_150312_a(p_150311_0_, ':');
 
-        if (var2 < 0)
+        if (var2 == -1)
         {
             if (p_150311_1_)
             {
@@ -368,18 +353,18 @@ public class JsonToNBT
     {
         int var2 = 0;
 
-        for (boolean var3 = false; var2 < p_150312_0_.length(); ++var2)
+        for (boolean var3 = true; var2 < p_150312_0_.length(); ++var2)
         {
             char var4 = p_150312_0_.charAt(var2);
 
             if (var4 == 34)
             {
-                if (var2 <= 0 || p_150312_0_.charAt(var2 - 1) != 92)
+                if (!func_179271_b(p_150312_0_, var2))
                 {
                     var3 = !var3;
                 }
             }
-            else if (!var3)
+            else if (var3)
             {
                 if (var4 == p_150312_1_)
                 {
@@ -396,6 +381,11 @@ public class JsonToNBT
         return -1;
     }
 
+    private static boolean func_179271_b(String p_179271_0_, int p_179271_1_)
+    {
+        return p_179271_1_ > 0 && p_179271_0_.charAt(p_179271_1_ - 1) == 92 && !func_179271_b(p_179271_0_, p_179271_1_ - 1);
+    }
+
     abstract static class Any
     {
         protected String field_150490_a;
@@ -406,7 +396,7 @@ public class JsonToNBT
 
     static class Compound extends JsonToNBT.Any
     {
-        protected ArrayList field_150491_b = new ArrayList();
+        protected java.util.List field_150491_b = Lists.newArrayList();
         private static final String __OBFID = "CL_00001234";
 
         public Compound(String p_i45137_1_)
@@ -431,7 +421,7 @@ public class JsonToNBT
 
     static class List extends JsonToNBT.Any
     {
-        protected ArrayList field_150492_b = new ArrayList();
+        protected java.util.List field_150492_b = Lists.newArrayList();
         private static final String __OBFID = "CL_00001235";
 
         public List(String p_i45138_1_)
@@ -456,6 +446,14 @@ public class JsonToNBT
 
     static class Primitive extends JsonToNBT.Any
     {
+        private static final Pattern field_179265_c = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[d|D]");
+        private static final Pattern field_179263_d = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[f|F]");
+        private static final Pattern field_179264_e = Pattern.compile("[-+]?[0-9]+[b|B]");
+        private static final Pattern field_179261_f = Pattern.compile("[-+]?[0-9]+[l|L]");
+        private static final Pattern field_179262_g = Pattern.compile("[-+]?[0-9]+[s|S]");
+        private static final Pattern field_179267_h = Pattern.compile("[-+]?[0-9]+");
+        private static final Pattern field_179268_i = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+");
+        private static final Splitter field_179266_j = Splitter.on(',').omitEmptyStrings();
         protected String field_150493_b;
         private static final String __OBFID = "CL_00001236";
 
@@ -469,83 +467,42 @@ public class JsonToNBT
         {
             try
             {
-                if (this.field_150493_b.matches("[-+]?[0-9]*\\.?[0-9]+[d|D]"))
+                if (field_179265_c.matcher(this.field_150493_b).matches())
                 {
                     return new NBTTagDouble(Double.parseDouble(this.field_150493_b.substring(0, this.field_150493_b.length() - 1)));
                 }
-                else if (this.field_150493_b.matches("[-+]?[0-9]*\\.?[0-9]+[f|F]"))
+
+                if (field_179263_d.matcher(this.field_150493_b).matches())
                 {
                     return new NBTTagFloat(Float.parseFloat(this.field_150493_b.substring(0, this.field_150493_b.length() - 1)));
                 }
-                else if (this.field_150493_b.matches("[-+]?[0-9]+[b|B]"))
+
+                if (field_179264_e.matcher(this.field_150493_b).matches())
                 {
                     return new NBTTagByte(Byte.parseByte(this.field_150493_b.substring(0, this.field_150493_b.length() - 1)));
                 }
-                else if (this.field_150493_b.matches("[-+]?[0-9]+[l|L]"))
+
+                if (field_179261_f.matcher(this.field_150493_b).matches())
                 {
                     return new NBTTagLong(Long.parseLong(this.field_150493_b.substring(0, this.field_150493_b.length() - 1)));
                 }
-                else if (this.field_150493_b.matches("[-+]?[0-9]+[s|S]"))
+
+                if (field_179262_g.matcher(this.field_150493_b).matches())
                 {
                     return new NBTTagShort(Short.parseShort(this.field_150493_b.substring(0, this.field_150493_b.length() - 1)));
                 }
-                else if (this.field_150493_b.matches("[-+]?[0-9]+"))
+
+                if (field_179267_h.matcher(this.field_150493_b).matches())
                 {
-                    return new NBTTagInt(Integer.parseInt(this.field_150493_b.substring(0, this.field_150493_b.length())));
+                    return new NBTTagInt(Integer.parseInt(this.field_150493_b));
                 }
-                else if (this.field_150493_b.matches("[-+]?[0-9]*\\.?[0-9]+"))
+
+                if (field_179268_i.matcher(this.field_150493_b).matches())
                 {
-                    return new NBTTagDouble(Double.parseDouble(this.field_150493_b.substring(0, this.field_150493_b.length())));
+                    return new NBTTagDouble(Double.parseDouble(this.field_150493_b));
                 }
-                else if (!this.field_150493_b.equalsIgnoreCase("true") && !this.field_150493_b.equalsIgnoreCase("false"))
-                {
-                    if (this.field_150493_b.startsWith("[") && this.field_150493_b.endsWith("]"))
-                    {
-                        if (this.field_150493_b.length() > 2)
-                        {
-                            String var1 = this.field_150493_b.substring(1, this.field_150493_b.length() - 1);
-                            String[] var2 = var1.split(",");
 
-                            try
-                            {
-                                if (var2.length <= 1)
-                                {
-                                    return new NBTTagIntArray(new int[] {Integer.parseInt(var1.trim())});
-                                }
-                                else
-                                {
-                                    int[] var3 = new int[var2.length];
-
-                                    for (int var4 = 0; var4 < var2.length; ++var4)
-                                    {
-                                        var3[var4] = Integer.parseInt(var2[var4].trim());
-                                    }
-
-                                    return new NBTTagIntArray(var3);
-                                }
-                            }
-                            catch (NumberFormatException var5)
-                            {
-                                return new NBTTagString(this.field_150493_b);
-                            }
-                        }
-                        else
-                        {
-                            return new NBTTagIntArray();
-                        }
-                    }
-                    else
-                    {
-                        if (this.field_150493_b.startsWith("\"") && this.field_150493_b.endsWith("\"") && this.field_150493_b.length() > 2)
-                        {
-                            this.field_150493_b = this.field_150493_b.substring(1, this.field_150493_b.length() - 1);
-                        }
-
-                        this.field_150493_b = this.field_150493_b.replaceAll("\\\\\"", "\"");
-                        return new NBTTagString(this.field_150493_b);
-                    }
-                }
-                else
+                if (this.field_150493_b.equalsIgnoreCase("true") || this.field_150493_b.equalsIgnoreCase("false"))
                 {
                     return new NBTTagByte((byte)(Boolean.parseBoolean(this.field_150493_b) ? 1 : 0));
                 }
@@ -554,6 +511,53 @@ public class JsonToNBT
             {
                 this.field_150493_b = this.field_150493_b.replaceAll("\\\\\"", "\"");
                 return new NBTTagString(this.field_150493_b);
+            }
+
+            if (this.field_150493_b.startsWith("[") && this.field_150493_b.endsWith("]"))
+            {
+                String var7 = this.field_150493_b.substring(1, this.field_150493_b.length() - 1);
+                String[] var8 = (String[])Iterables.toArray(field_179266_j.split(var7), String.class);
+
+                try
+                {
+                    int[] var3 = new int[var8.length];
+
+                    for (int var4 = 0; var4 < var8.length; ++var4)
+                    {
+                        var3[var4] = Integer.parseInt(var8[var4].trim());
+                    }
+
+                    return new NBTTagIntArray(var3);
+                }
+                catch (NumberFormatException var5)
+                {
+                    return new NBTTagString(this.field_150493_b);
+                }
+            }
+            else
+            {
+                if (this.field_150493_b.startsWith("\"") && this.field_150493_b.endsWith("\""))
+                {
+                    this.field_150493_b = this.field_150493_b.substring(1, this.field_150493_b.length() - 1);
+                }
+
+                this.field_150493_b = this.field_150493_b.replaceAll("\\\\\"", "\"");
+                StringBuilder var1 = new StringBuilder();
+
+                for (int var2 = 0; var2 < this.field_150493_b.length(); ++var2)
+                {
+                    if (var2 < this.field_150493_b.length() - 1 && this.field_150493_b.charAt(var2) == 92 && this.field_150493_b.charAt(var2 + 1) == 92)
+                    {
+                        var1.append('\\');
+                        ++var2;
+                    }
+                    else
+                    {
+                        var1.append(this.field_150493_b.charAt(var2));
+                    }
+                }
+
+                return new NBTTagString(var1.toString());
             }
         }
     }

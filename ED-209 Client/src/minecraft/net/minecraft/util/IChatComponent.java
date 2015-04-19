@@ -18,19 +18,19 @@ import java.util.Map.Entry;
 
 public interface IChatComponent extends Iterable
 {
-    IChatComponent setChatStyle(ChatStyle p_150255_1_);
+    IChatComponent setChatStyle(ChatStyle style);
 
     ChatStyle getChatStyle();
 
     /**
      * Appends the given text to the end of this component.
      */
-    IChatComponent appendText(String p_150258_1_);
+    IChatComponent appendText(String text);
 
     /**
      * Appends the given component to the end of this one.
      */
-    IChatComponent appendSibling(IChatComponent p_150257_1_);
+    IChatComponent appendSibling(IChatComponent component);
 
     /**
      * Gets the text of this component, without any special formatting codes added, for chat.  TODO: why is this two
@@ -61,7 +61,7 @@ public interface IChatComponent extends Iterable
 
     public static class Serializer implements JsonDeserializer, JsonSerializer
     {
-        private static final Gson field_150700_a;
+        private static final Gson GSON;
         private static final String __OBFID = "CL_00001263";
 
         public IChatComponent deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_)
@@ -76,20 +76,20 @@ public interface IChatComponent extends Iterable
                 {
                     JsonArray var11 = p_deserialize_1_.getAsJsonArray();
                     IChatComponent var12 = null;
-                    Iterator var14 = var11.iterator();
+                    Iterator var15 = var11.iterator();
 
-                    while (var14.hasNext())
+                    while (var15.hasNext())
                     {
-                        JsonElement var16 = (JsonElement)var14.next();
-                        IChatComponent var17 = this.deserialize(var16, var16.getClass(), p_deserialize_3_);
+                        JsonElement var17 = (JsonElement)var15.next();
+                        IChatComponent var18 = this.deserialize(var17, var17.getClass(), p_deserialize_3_);
 
                         if (var12 == null)
                         {
-                            var12 = var17;
+                            var12 = var18;
                         }
                         else
                         {
-                            var12.appendSibling(var17);
+                            var12.appendSibling(var18);
                         }
                     }
 
@@ -109,13 +109,8 @@ public interface IChatComponent extends Iterable
                 {
                     var5 = new ChatComponentText(var4.get("text").getAsString());
                 }
-                else
+                else if (var4.has("translate"))
                 {
-                    if (!var4.has("translate"))
-                    {
-                        throw new JsonParseException("Don\'t know how to turn " + p_deserialize_1_.toString() + " into a Component");
-                    }
-
                     String var6 = var4.get("translate").getAsString();
 
                     if (var4.has("with"))
@@ -145,19 +140,44 @@ public interface IChatComponent extends Iterable
                         var5 = new ChatComponentTranslation(var6, new Object[0]);
                     }
                 }
+                else if (var4.has("score"))
+                {
+                    JsonObject var13 = var4.getAsJsonObject("score");
+
+                    if (!var13.has("name") || !var13.has("objective"))
+                    {
+                        throw new JsonParseException("A score component needs a least a name and an objective");
+                    }
+
+                    var5 = new ChatComponentScore(JsonUtils.getJsonObjectStringFieldValue(var13, "name"), JsonUtils.getJsonObjectStringFieldValue(var13, "objective"));
+
+                    if (var13.has("value"))
+                    {
+                        ((ChatComponentScore)var5).func_179997_b(JsonUtils.getJsonObjectStringFieldValue(var13, "value"));
+                    }
+                }
+                else
+                {
+                    if (!var4.has("selector"))
+                    {
+                        throw new JsonParseException("Don\'t know how to turn " + p_deserialize_1_.toString() + " into a Component");
+                    }
+
+                    var5 = new ChatComponentSelector(JsonUtils.getJsonObjectStringFieldValue(var4, "selector"));
+                }
 
                 if (var4.has("extra"))
                 {
-                    JsonArray var13 = var4.getAsJsonArray("extra");
+                    JsonArray var14 = var4.getAsJsonArray("extra");
 
-                    if (var13.size() <= 0)
+                    if (var14.size() <= 0)
                     {
                         throw new JsonParseException("Unexpected empty array of components");
                     }
 
-                    for (int var15 = 0; var15 < var13.size(); ++var15)
+                    for (int var16 = 0; var16 < var14.size(); ++var16)
                     {
-                        ((IChatComponent)var5).appendSibling(this.deserialize(var13.get(var15), p_deserialize_2_, p_deserialize_3_));
+                        ((IChatComponent)var5).appendSibling(this.deserialize(var14.get(var16), p_deserialize_2_, p_deserialize_3_));
                     }
                 }
 
@@ -166,9 +186,9 @@ public interface IChatComponent extends Iterable
             }
         }
 
-        private void func_150695_a(ChatStyle p_150695_1_, JsonObject p_150695_2_, JsonSerializationContext p_150695_3_)
+        private void serializeChatStyle(ChatStyle style, JsonObject object, JsonSerializationContext ctx)
         {
-            JsonElement var4 = p_150695_3_.serialize(p_150695_1_);
+            JsonElement var4 = ctx.serialize(style);
 
             if (var4.isJsonObject())
             {
@@ -178,7 +198,7 @@ public interface IChatComponent extends Iterable
                 while (var6.hasNext())
                 {
                     Entry var7 = (Entry)var6.next();
-                    p_150695_2_.add((String)var7.getKey(), (JsonElement)var7.getValue());
+                    object.add((String)var7.getKey(), (JsonElement)var7.getValue());
                 }
             }
         }
@@ -195,7 +215,7 @@ public interface IChatComponent extends Iterable
 
                 if (!p_serialize_1_.getChatStyle().isEmpty())
                 {
-                    this.func_150695_a(p_serialize_1_.getChatStyle(), var4, p_serialize_3_);
+                    this.serializeChatStyle(p_serialize_1_.getChatStyle(), var4, p_serialize_3_);
                 }
 
                 if (!p_serialize_1_.getSiblings().isEmpty())
@@ -216,52 +236,66 @@ public interface IChatComponent extends Iterable
                 {
                     var4.addProperty("text", ((ChatComponentText)p_serialize_1_).getChatComponentText_TextValue());
                 }
-                else
+                else if (p_serialize_1_ instanceof ChatComponentTranslation)
                 {
-                    if (!(p_serialize_1_ instanceof ChatComponentTranslation))
-                    {
-                        throw new IllegalArgumentException("Don\'t know how to serialize " + p_serialize_1_ + " as a Component");
-                    }
-
                     ChatComponentTranslation var11 = (ChatComponentTranslation)p_serialize_1_;
                     var4.addProperty("translate", var11.getKey());
 
                     if (var11.getFormatArgs() != null && var11.getFormatArgs().length > 0)
                     {
-                        JsonArray var12 = new JsonArray();
-                        Object[] var13 = var11.getFormatArgs();
-                        int var8 = var13.length;
+                        JsonArray var14 = new JsonArray();
+                        Object[] var16 = var11.getFormatArgs();
+                        int var8 = var16.length;
 
                         for (int var9 = 0; var9 < var8; ++var9)
                         {
-                            Object var10 = var13[var9];
+                            Object var10 = var16[var9];
 
                             if (var10 instanceof IChatComponent)
                             {
-                                var12.add(this.serialize((IChatComponent)var10, var10.getClass(), p_serialize_3_));
+                                var14.add(this.serialize((IChatComponent)var10, var10.getClass(), p_serialize_3_));
                             }
                             else
                             {
-                                var12.add(new JsonPrimitive(String.valueOf(var10)));
+                                var14.add(new JsonPrimitive(String.valueOf(var10)));
                             }
                         }
 
-                        var4.add("with", var12);
+                        var4.add("with", var14);
                     }
+                }
+                else if (p_serialize_1_ instanceof ChatComponentScore)
+                {
+                    ChatComponentScore var12 = (ChatComponentScore)p_serialize_1_;
+                    JsonObject var15 = new JsonObject();
+                    var15.addProperty("name", var12.func_179995_g());
+                    var15.addProperty("objective", var12.func_179994_h());
+                    var15.addProperty("value", var12.getUnformattedTextForChat());
+                    var4.add("score", var15);
+                }
+                else
+                {
+                    if (!(p_serialize_1_ instanceof ChatComponentSelector))
+                    {
+                        throw new IllegalArgumentException("Don\'t know how to serialize " + p_serialize_1_ + " as a Component");
+                    }
+
+                    ChatComponentSelector var13 = (ChatComponentSelector)p_serialize_1_;
+                    var4.addProperty("selector", var13.func_179992_g());
                 }
 
                 return var4;
             }
         }
 
-        public static String func_150696_a(IChatComponent p_150696_0_)
+        public static String componentToJson(IChatComponent component)
         {
-            return field_150700_a.toJson(p_150696_0_);
+            return GSON.toJson(component);
         }
 
-        public static IChatComponent func_150699_a(String p_150699_0_)
+        public static IChatComponent jsonToComponent(String json)
         {
-            return (IChatComponent)field_150700_a.fromJson(p_150699_0_, IChatComponent.class);
+            return (IChatComponent)GSON.fromJson(json, IChatComponent.class);
         }
 
         public JsonElement serialize(Object p_serialize_1_, Type p_serialize_2_, JsonSerializationContext p_serialize_3_)
@@ -275,7 +309,7 @@ public interface IChatComponent extends Iterable
             var0.registerTypeHierarchyAdapter(IChatComponent.class, new IChatComponent.Serializer());
             var0.registerTypeHierarchyAdapter(ChatStyle.class, new ChatStyle.Serializer());
             var0.registerTypeAdapterFactory(new EnumTypeAdapterFactory());
-            field_150700_a = var0.create();
+            GSON = var0.create();
         }
     }
 }

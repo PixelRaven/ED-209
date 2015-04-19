@@ -1,34 +1,42 @@
 package net.minecraft.block;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class BlockContainer extends Block implements ITileEntityProvider
 {
     private static final String __OBFID = "CL_00000193";
 
-    protected BlockContainer(Material p_i45386_1_)
+    protected BlockContainer(Material materialIn)
     {
-        super(p_i45386_1_);
+        super(materialIn);
         this.isBlockContainer = true;
     }
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
+    /**
+     * The type of render function that is called for this block
+     */
+    public int getRenderType()
     {
-        super.onBlockAdded(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
+        return -1;
     }
 
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
-        p_149749_1_.removeTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+        super.breakBlock(worldIn, pos, state);
+        worldIn.removeTileEntity(pos);
     }
 
-    public boolean onBlockEventReceived(World p_149696_1_, int p_149696_2_, int p_149696_3_, int p_149696_4_, int p_149696_5_, int p_149696_6_)
+    /**
+     * Called on both Client and Server when World#addBlockEvent is called
+     */
+    public boolean onBlockEventReceived(World worldIn, BlockPos pos, IBlockState state, int eventID, int eventParam)
     {
-        super.onBlockEventReceived(p_149696_1_, p_149696_2_, p_149696_3_, p_149696_4_, p_149696_5_, p_149696_6_);
-        TileEntity var7 = p_149696_1_.getTileEntity(p_149696_2_, p_149696_3_, p_149696_4_);
-        return var7 != null ? var7.receiveClientEvent(p_149696_5_, p_149696_6_) : false;
+        super.onBlockEventReceived(worldIn, pos, state, eventID, eventParam);
+        TileEntity var6 = worldIn.getTileEntity(pos);
+        return var6 == null ? false : var6.receiveClientEvent(eventID, eventParam);
     }
 }

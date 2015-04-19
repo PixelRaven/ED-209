@@ -4,16 +4,16 @@ import net.minecraft.util.ResourceLocation;
 
 public abstract class MovingSound extends PositionedSound implements ITickableSound
 {
-    protected boolean field_147668_j = false;
+    protected boolean donePlaying = false;
     private static final String __OBFID = "CL_00001117";
 
-    protected MovingSound(ResourceLocation p_i45104_1_)
+    protected MovingSound(ResourceLocation location)
     {
-        super(p_i45104_1_);
+        super(location);
     }
 
-    public boolean func_147667_k()
+    public boolean isDonePlaying()
     {
-        return this.field_147668_j;
+        return this.donePlaying;
     }
 }

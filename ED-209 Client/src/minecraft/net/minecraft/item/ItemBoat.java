@@ -6,7 +6,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -25,15 +27,15 @@ public class ItemBoat extends Item
     /**
      * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
      */
-    public ItemStack onItemRightClick(ItemStack p_77659_1_, World p_77659_2_, EntityPlayer p_77659_3_)
+    public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer playerIn)
     {
         float var4 = 1.0F;
-        float var5 = p_77659_3_.prevRotationPitch + (p_77659_3_.rotationPitch - p_77659_3_.prevRotationPitch) * var4;
-        float var6 = p_77659_3_.prevRotationYaw + (p_77659_3_.rotationYaw - p_77659_3_.prevRotationYaw) * var4;
-        double var7 = p_77659_3_.prevPosX + (p_77659_3_.posX - p_77659_3_.prevPosX) * (double)var4;
-        double var9 = p_77659_3_.prevPosY + (p_77659_3_.posY - p_77659_3_.prevPosY) * (double)var4 + 1.62D - (double)p_77659_3_.yOffset;
-        double var11 = p_77659_3_.prevPosZ + (p_77659_3_.posZ - p_77659_3_.prevPosZ) * (double)var4;
-        Vec3 var13 = Vec3.createVectorHelper(var7, var9, var11);
+        float var5 = playerIn.prevRotationPitch + (playerIn.rotationPitch - playerIn.prevRotationPitch) * var4;
+        float var6 = playerIn.prevRotationYaw + (playerIn.rotationYaw - playerIn.prevRotationYaw) * var4;
+        double var7 = playerIn.prevPosX + (playerIn.posX - playerIn.prevPosX) * (double)var4;
+        double var9 = playerIn.prevPosY + (playerIn.posY - playerIn.prevPosY) * (double)var4 + (double)playerIn.getEyeHeight();
+        double var11 = playerIn.prevPosZ + (playerIn.posZ - playerIn.prevPosZ) * (double)var4;
+        Vec3 var13 = new Vec3(var7, var9, var11);
         float var14 = MathHelper.cos(-var6 * 0.017453292F - (float)Math.PI);
         float var15 = MathHelper.sin(-var6 * 0.017453292F - (float)Math.PI);
         float var16 = -MathHelper.cos(-var5 * 0.017453292F);
@@ -42,28 +44,27 @@ public class ItemBoat extends Item
         float var20 = var14 * var16;
         double var21 = 5.0D;
         Vec3 var23 = var13.addVector((double)var18 * var21, (double)var17 * var21, (double)var20 * var21);
-        MovingObjectPosition var24 = p_77659_2_.rayTraceBlocks(var13, var23, true);
+        MovingObjectPosition var24 = worldIn.rayTraceBlocks(var13, var23, true);
 
         if (var24 == null)
         {
-            return p_77659_1_;
+            return itemStackIn;
         }
         else
         {
-            Vec3 var25 = p_77659_3_.getLook(var4);
+            Vec3 var25 = playerIn.getLook(var4);
             boolean var26 = false;
             float var27 = 1.0F;
-            List var28 = p_77659_2_.getEntitiesWithinAABBExcludingEntity(p_77659_3_, p_77659_3_.boundingBox.addCoord(var25.xCoord * var21, var25.yCoord * var21, var25.zCoord * var21).expand((double)var27, (double)var27, (double)var27));
-            int var29;
+            List var28 = worldIn.getEntitiesWithinAABBExcludingEntity(playerIn, playerIn.getEntityBoundingBox().addCoord(var25.xCoord * var21, var25.yCoord * var21, var25.zCoord * var21).expand((double)var27, (double)var27, (double)var27));
 
-            for (var29 = 0; var29 < var28.size(); ++var29)
+            for (int var29 = 0; var29 < var28.size(); ++var29)
             {
                 Entity var30 = (Entity)var28.get(var29);
 
                 if (var30.canBeCollidedWith())
                 {
                     float var31 = var30.getCollisionBorderSize();
-                    AxisAlignedBB var32 = var30.boundingBox.expand((double)var31, (double)var31, (double)var31);
+                    AxisAlignedBB var32 = var30.getEntityBoundingBox().expand((double)var31, (double)var31, (double)var31);
 
                     if (var32.isVecInside(var13))
                     {
@@ -74,41 +75,41 @@ public class ItemBoat extends Item
 
             if (var26)
             {
-                return p_77659_1_;
+                return itemStackIn;
             }
             else
             {
                 if (var24.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
                 {
-                    var29 = var24.blockX;
-                    int var33 = var24.blockY;
-                    int var34 = var24.blockZ;
+                    BlockPos var33 = var24.func_178782_a();
 
-                    if (p_77659_2_.getBlock(var29, var33, var34) == Blocks.snow_layer)
+                    if (worldIn.getBlockState(var33).getBlock() == Blocks.snow_layer)
                     {
-                        --var33;
+                        var33 = var33.offsetDown();
                     }
 
-                    EntityBoat var35 = new EntityBoat(p_77659_2_, (double)((float)var29 + 0.5F), (double)((float)var33 + 1.0F), (double)((float)var34 + 0.5F));
-                    var35.rotationYaw = (float)(((MathHelper.floor_double((double)(p_77659_3_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) - 1) * 90);
+                    EntityBoat var34 = new EntityBoat(worldIn, (double)((float)var33.getX() + 0.5F), (double)((float)var33.getY() + 1.0F), (double)((float)var33.getZ() + 0.5F));
+                    var34.rotationYaw = (float)(((MathHelper.floor_double((double)(playerIn.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3) - 1) * 90);
 
-                    if (!p_77659_2_.getCollidingBoundingBoxes(var35, var35.boundingBox.expand(-0.1D, -0.1D, -0.1D)).isEmpty())
+                    if (!worldIn.getCollidingBoundingBoxes(var34, var34.getEntityBoundingBox().expand(-0.1D, -0.1D, -0.1D)).isEmpty())
                     {
-                        return p_77659_1_;
+                        return itemStackIn;
                     }
 
-                    if (!p_77659_2_.isClient)
+                    if (!worldIn.isRemote)
                     {
-                        p_77659_2_.spawnEntityInWorld(var35);
+                        worldIn.spawnEntityInWorld(var34);
                     }
 
-                    if (!p_77659_3_.capabilities.isCreativeMode)
+                    if (!playerIn.capabilities.isCreativeMode)
                     {
-                        --p_77659_1_.stackSize;
+                        --itemStackIn.stackSize;
                     }
+
+                    playerIn.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
                 }
 
-                return p_77659_1_;
+                return itemStackIn;
             }
         }
     }

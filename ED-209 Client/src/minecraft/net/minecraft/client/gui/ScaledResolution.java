@@ -5,20 +5,20 @@ import net.minecraft.util.MathHelper;
 
 public class ScaledResolution
 {
+    private final double scaledWidthD;
+    private final double scaledHeightD;
     private int scaledWidth;
     private int scaledHeight;
-    private double scaledWidthD;
-    private double scaledHeightD;
     private int scaleFactor;
     private static final String __OBFID = "CL_00000666";
 
-    public ScaledResolution(Minecraft p_i46324_1_, int p_i46324_2_, int p_i46324_3_)
+    public ScaledResolution(Minecraft mcIn, int p_i46324_2_, int p_i46324_3_)
     {
         this.scaledWidth = p_i46324_2_;
         this.scaledHeight = p_i46324_3_;
         this.scaleFactor = 1;
-        boolean var4 = p_i46324_1_.func_152349_b();
-        int var5 = p_i46324_1_.gameSettings.guiScale;
+        boolean var4 = mcIn.isUnicode();
+        int var5 = mcIn.gameSettings.guiScale;
 
         if (var5 == 0)
         {

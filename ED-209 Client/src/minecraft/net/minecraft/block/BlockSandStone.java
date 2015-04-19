@@ -2,79 +2,130 @@ package net.minecraft.block;
 
 import java.util.List;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.IStringSerializable;
 
 public class BlockSandStone extends Block
 {
-    public static final String[] field_150157_a = new String[] {"default", "chiseled", "smooth"};
-    private static final String[] field_150156_b = new String[] {"normal", "carved", "smooth"};
-    private IIcon[] field_150158_M;
-    private IIcon field_150159_N;
-    private IIcon field_150160_O;
+    public static final PropertyEnum field_176297_a = PropertyEnum.create("type", BlockSandStone.EnumType.class);
     private static final String __OBFID = "CL_00000304";
 
     public BlockSandStone()
     {
         super(Material.rock);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176297_a, BlockSandStone.EnumType.DEFAULT));
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Get the damage value that this Block should drop
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public int damageDropped(IBlockState state)
     {
-        if (p_149691_1_ != 1 && (p_149691_1_ != 0 || p_149691_2_ != 1 && p_149691_2_ != 2))
-        {
-            if (p_149691_1_ == 0)
-            {
-                return this.field_150160_O;
-            }
-            else
-            {
-                if (p_149691_2_ < 0 || p_149691_2_ >= this.field_150158_M.length)
-                {
-                    p_149691_2_ = 0;
-                }
+        return ((BlockSandStone.EnumType)state.getValue(field_176297_a)).func_176675_a();
+    }
 
-                return this.field_150158_M[p_149691_2_];
-            }
-        }
-        else
+    /**
+     * returns a list of blocks with the same ID, but different meta (eg: wood returns 4 blocks)
+     */
+    public void getSubBlocks(Item itemIn, CreativeTabs tab, List list)
+    {
+        BlockSandStone.EnumType[] var4 = BlockSandStone.EnumType.values();
+        int var5 = var4.length;
+
+        for (int var6 = 0; var6 < var5; ++var6)
         {
-            return this.field_150159_N;
+            BlockSandStone.EnumType var7 = var4[var6];
+            list.add(new ItemStack(itemIn, 1, var7.func_176675_a()));
         }
     }
 
     /**
-     * Determines the damage on the item the block drops. Used in cloth and wood.
+     * Convert the given metadata into a BlockState for this Block
      */
-    public int damageDropped(int p_149692_1_)
+    public IBlockState getStateFromMeta(int meta)
     {
-        return p_149692_1_;
+        return this.getDefaultState().withProperty(field_176297_a, BlockSandStone.EnumType.func_176673_a(meta));
     }
 
-    public void getSubBlocks(Item p_149666_1_, CreativeTabs p_149666_2_, List p_149666_3_)
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
     {
-        p_149666_3_.add(new ItemStack(p_149666_1_, 1, 0));
-        p_149666_3_.add(new ItemStack(p_149666_1_, 1, 1));
-        p_149666_3_.add(new ItemStack(p_149666_1_, 1, 2));
+        return ((BlockSandStone.EnumType)state.getValue(field_176297_a)).func_176675_a();
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    protected BlockState createBlockState()
     {
-        this.field_150158_M = new IIcon[field_150156_b.length];
+        return new BlockState(this, new IProperty[] {field_176297_a});
+    }
 
-        for (int var2 = 0; var2 < this.field_150158_M.length; ++var2)
+    public static enum EnumType implements IStringSerializable
+    {
+        DEFAULT("DEFAULT", 0, 0, "sandstone", "default"),
+        CHISELED("CHISELED", 1, 1, "chiseled_sandstone", "chiseled"),
+        SMOOTH("SMOOTH", 2, 2, "smooth_sandstone", "smooth");
+        private static final BlockSandStone.EnumType[] field_176679_d = new BlockSandStone.EnumType[values().length];
+        private final int field_176680_e;
+        private final String field_176677_f;
+        private final String field_176678_g;
+
+        private static final BlockSandStone.EnumType[] $VALUES = new BlockSandStone.EnumType[]{DEFAULT, CHISELED, SMOOTH};
+        private static final String __OBFID = "CL_00002068";
+
+        private EnumType(String p_i45686_1_, int p_i45686_2_, int p_i45686_3_, String p_i45686_4_, String p_i45686_5_)
         {
-            this.field_150158_M[var2] = p_149651_1_.registerIcon(this.getTextureName() + "_" + field_150156_b[var2]);
+            this.field_176680_e = p_i45686_3_;
+            this.field_176677_f = p_i45686_4_;
+            this.field_176678_g = p_i45686_5_;
         }
 
-        this.field_150159_N = p_149651_1_.registerIcon(this.getTextureName() + "_top");
-        this.field_150160_O = p_149651_1_.registerIcon(this.getTextureName() + "_bottom");
+        public int func_176675_a()
+        {
+            return this.field_176680_e;
+        }
+
+        public String toString()
+        {
+            return this.field_176677_f;
+        }
+
+        public static BlockSandStone.EnumType func_176673_a(int p_176673_0_)
+        {
+            if (p_176673_0_ < 0 || p_176673_0_ >= field_176679_d.length)
+            {
+                p_176673_0_ = 0;
+            }
+
+            return field_176679_d[p_176673_0_];
+        }
+
+        public String getName()
+        {
+            return this.field_176677_f;
+        }
+
+        public String func_176676_c()
+        {
+            return this.field_176678_g;
+        }
+
+        static {
+            BlockSandStone.EnumType[] var0 = values();
+            int var1 = var0.length;
+
+            for (int var2 = 0; var2 < var1; ++var2)
+            {
+                BlockSandStone.EnumType var3 = var0[var2];
+                field_176679_d[var3.func_176675_a()] = var3;
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 
 public abstract class StructureStart
@@ -37,7 +38,7 @@ public abstract class StructureStart
     /**
      * Keeps iterating Structure Pieces and spawning them until the checks tell it to stop
      */
-    public void generateStructure(World p_75068_1_, Random p_75068_2_, StructureBoundingBox p_75068_3_)
+    public void generateStructure(World worldIn, Random p_75068_2_, StructureBoundingBox p_75068_3_)
     {
         Iterator var4 = this.components.iterator();
 
@@ -45,7 +46,7 @@ public abstract class StructureStart
         {
             StructureComponent var5 = (StructureComponent)var4.next();
 
-            if (var5.getBoundingBox().intersectsWith(p_75068_3_) && !var5.addComponentParts(p_75068_1_, p_75068_2_, p_75068_3_))
+            if (var5.getBoundingBox().intersectsWith(p_75068_3_) && !var5.addComponentParts(worldIn, p_75068_2_, p_75068_3_))
             {
                 var4.remove();
             }
@@ -90,7 +91,7 @@ public abstract class StructureStart
 
     public void func_143022_a(NBTTagCompound p_143022_1_) {}
 
-    public void func_143020_a(World p_143020_1_, NBTTagCompound p_143020_2_)
+    public void func_143020_a(World worldIn, NBTTagCompound p_143020_2_)
     {
         this.field_143024_c = p_143020_2_.getInteger("ChunkX");
         this.field_143023_d = p_143020_2_.getInteger("ChunkZ");
@@ -104,7 +105,7 @@ public abstract class StructureStart
 
         for (int var4 = 0; var4 < var3.tagCount(); ++var4)
         {
-            this.components.add(MapGenStructureIO.func_143032_b(var3.getCompoundTagAt(var4), p_143020_1_));
+            this.components.add(MapGenStructureIO.func_143032_b(var3.getCompoundTagAt(var4), worldIn));
         }
 
         this.func_143017_b(p_143020_2_);
@@ -115,7 +116,7 @@ public abstract class StructureStart
     /**
      * offsets the structure Bounding Boxes up to a certain height, typically 63 - 10
      */
-    protected void markAvailableHeight(World p_75067_1_, Random p_75067_2_, int p_75067_3_)
+    protected void markAvailableHeight(World worldIn, Random p_75067_2_, int p_75067_3_)
     {
         int var4 = 63 - p_75067_3_;
         int var5 = this.boundingBox.getYSize() + 1;
@@ -136,7 +137,7 @@ public abstract class StructureStart
         }
     }
 
-    protected void setRandomHeight(World p_75070_1_, Random p_75070_2_, int p_75070_3_, int p_75070_4_)
+    protected void setRandomHeight(World worldIn, Random p_75070_2_, int p_75070_3_, int p_75070_4_)
     {
         int var5 = p_75070_4_ - p_75070_3_ + 1 - this.boundingBox.getYSize();
         boolean var6 = true;
@@ -169,6 +170,13 @@ public abstract class StructureStart
     {
         return true;
     }
+
+    public boolean func_175788_a(ChunkCoordIntPair p_175788_1_)
+    {
+        return true;
+    }
+
+    public void func_175787_b(ChunkCoordIntPair p_175787_1_) {}
 
     public int func_143019_e()
     {

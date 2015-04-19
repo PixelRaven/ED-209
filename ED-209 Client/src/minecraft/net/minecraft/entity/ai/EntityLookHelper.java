@@ -44,7 +44,7 @@ public class EntityLookHelper
         }
         else
         {
-            this.posY = (p_75651_1_.boundingBox.minY + p_75651_1_.boundingBox.maxY) / 2.0D;
+            this.posY = (p_75651_1_.getEntityBoundingBox().minY + p_75651_1_.getEntityBoundingBox().maxY) / 2.0D;
         }
 
         this.posZ = p_75651_1_.posZ;
@@ -121,5 +121,25 @@ public class EntityLookHelper
         }
 
         return p_75652_1_ + var4;
+    }
+
+    public boolean func_180424_b()
+    {
+        return this.isLooking;
+    }
+
+    public double func_180423_e()
+    {
+        return this.posX;
+    }
+
+    public double func_180422_f()
+    {
+        return this.posY;
+    }
+
+    public double func_180421_g()
+    {
+        return this.posZ;
     }
 }

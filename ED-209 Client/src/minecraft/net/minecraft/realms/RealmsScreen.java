@@ -1,10 +1,12 @@
 package net.minecraft.realms;
 
+import com.mojang.util.UUIDTypeAdapter;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreenRealmsProxy;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -15,12 +17,12 @@ public class RealmsScreen
     public static final int SKIN_HEAD_V = 8;
     public static final int SKIN_HEAD_WIDTH = 8;
     public static final int SKIN_HEAD_HEIGHT = 8;
-    public static final int SKIN_TEX_WIDTH = 64;
-    public static final int SKIN_TEX_HEIGHT = 32;
     public static final int SKIN_HAT_U = 40;
     public static final int SKIN_HAT_V = 8;
     public static final int SKIN_HAT_WIDTH = 8;
     public static final int SKIN_HAT_HEIGHT = 8;
+    public static final int SKIN_TEX_WIDTH = 64;
+    public static final int SKIN_TEX_HEIGHT = 64;
     protected Minecraft minecraft;
     public int width;
     public int height;
@@ -53,12 +55,12 @@ public class RealmsScreen
 
     public static void blit(int p_blit_0_, int p_blit_1_, float p_blit_2_, float p_blit_3_, int p_blit_4_, int p_blit_5_, int p_blit_6_, int p_blit_7_, float p_blit_8_, float p_blit_9_)
     {
-        Gui.func_152125_a(p_blit_0_, p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_, p_blit_7_, p_blit_8_, p_blit_9_);
+        Gui.drawScaledCustomSizeModalRect(p_blit_0_, p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_, p_blit_7_, p_blit_8_, p_blit_9_);
     }
 
     public static void blit(int p_blit_0_, int p_blit_1_, float p_blit_2_, float p_blit_3_, int p_blit_4_, int p_blit_5_, float p_blit_6_, float p_blit_7_)
     {
-        Gui.func_146110_a(p_blit_0_, p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_, p_blit_7_);
+        Gui.drawModalRectWithCustomSizedTexture(p_blit_0_, p_blit_1_, p_blit_2_, p_blit_3_, p_blit_4_, p_blit_5_, p_blit_6_, p_blit_7_);
     }
 
     public void fillGradient(int p_fillGradient_1_, int p_fillGradient_2_, int p_fillGradient_3_, int p_fillGradient_4_, int p_fillGradient_5_, int p_fillGradient_6_)
@@ -78,7 +80,7 @@ public class RealmsScreen
 
     public void renderBackground(int p_renderBackground_1_)
     {
-        this.proxy.func_146270_b(p_renderBackground_1_);
+        this.proxy.drawWorldBackground(p_renderBackground_1_);
     }
 
     public void render(int p_render_1_, int p_render_2_, float p_render_3_)
@@ -91,30 +93,30 @@ public class RealmsScreen
 
     public void renderTooltip(ItemStack p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_)
     {
-        this.proxy.func_146285_a(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
+        this.proxy.renderToolTip(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
     }
 
     public void renderTooltip(String p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_)
     {
-        this.proxy.func_146279_a(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
+        this.proxy.drawCreativeTabHoveringText(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
     }
 
     public void renderTooltip(List p_renderTooltip_1_, int p_renderTooltip_2_, int p_renderTooltip_3_)
     {
-        this.proxy.func_146283_a(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
+        this.proxy.drawHoveringText(p_renderTooltip_1_, p_renderTooltip_2_, p_renderTooltip_3_);
     }
 
-    public static void bindFace(String p_bindFace_0_)
+    public static void bindFace(String p_bindFace_0_, String p_bindFace_1_)
     {
-        ResourceLocation var1 = AbstractClientPlayer.getLocationSkin(p_bindFace_0_);
+        ResourceLocation var2 = AbstractClientPlayer.getLocationSkin(p_bindFace_1_);
 
-        if (var1 == null)
+        if (var2 == null)
         {
-            var1 = AbstractClientPlayer.getLocationSkin("default");
+            var2 = DefaultPlayerSkin.func_177334_a(UUIDTypeAdapter.fromString(p_bindFace_0_));
         }
 
-        AbstractClientPlayer.getDownloadImageSkin(var1, p_bindFace_0_);
-        Minecraft.getMinecraft().getTextureManager().bindTexture(var1);
+        AbstractClientPlayer.getDownloadImageSkin(var2, p_bindFace_1_);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(var2);
     }
 
     public static void bind(String p_bind_0_)
@@ -187,9 +189,9 @@ public class RealmsScreen
         this.proxy.func_154328_b(p_buttonsRemove_1_);
     }
 
-    public RealmsEditBox newEditBox(int p_newEditBox_1_, int p_newEditBox_2_, int p_newEditBox_3_, int p_newEditBox_4_)
+    public RealmsEditBox newEditBox(int p_newEditBox_1_, int p_newEditBox_2_, int p_newEditBox_3_, int p_newEditBox_4_, int p_newEditBox_5_)
     {
-        return new RealmsEditBox(p_newEditBox_1_, p_newEditBox_2_, p_newEditBox_3_, p_newEditBox_4_);
+        return new RealmsEditBox(p_newEditBox_1_, p_newEditBox_2_, p_newEditBox_3_, p_newEditBox_4_, p_newEditBox_5_);
     }
 
     public void mouseClicked(int p_mouseClicked_1_, int p_mouseClicked_2_, int p_mouseClicked_3_) {}

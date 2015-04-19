@@ -1,54 +1,54 @@
 package net.minecraft.client.particle;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class EntityPickupFX extends EntityFX
 {
-    private Entity entityToPickUp;
-    private Entity entityPickingUp;
+    private Entity field_174840_a;
+    private Entity field_174843_ax;
     private int age;
     private int maxAge;
-
-    /** renamed from yOffset to fix shadowing Entity.yOffset */
-    private float yOffs;
+    private float field_174841_aA;
+    private RenderManager field_174842_aB = Minecraft.getMinecraft().getRenderManager();
     private static final String __OBFID = "CL_00000930";
 
-    public EntityPickupFX(World p_i1233_1_, Entity p_i1233_2_, Entity p_i1233_3_, float p_i1233_4_)
+    public EntityPickupFX(World worldIn, Entity p_i1233_2_, Entity p_i1233_3_, float p_i1233_4_)
     {
-        super(p_i1233_1_, p_i1233_2_.posX, p_i1233_2_.posY, p_i1233_2_.posZ, p_i1233_2_.motionX, p_i1233_2_.motionY, p_i1233_2_.motionZ);
-        this.entityToPickUp = p_i1233_2_;
-        this.entityPickingUp = p_i1233_3_;
+        super(worldIn, p_i1233_2_.posX, p_i1233_2_.posY, p_i1233_2_.posZ, p_i1233_2_.motionX, p_i1233_2_.motionY, p_i1233_2_.motionZ);
+        this.field_174840_a = p_i1233_2_;
+        this.field_174843_ax = p_i1233_3_;
         this.maxAge = 3;
-        this.yOffs = p_i1233_4_;
+        this.field_174841_aA = p_i1233_4_;
     }
 
-    public void renderParticle(Tessellator p_70539_1_, float p_70539_2_, float p_70539_3_, float p_70539_4_, float p_70539_5_, float p_70539_6_, float p_70539_7_)
+    public void func_180434_a(WorldRenderer p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_)
     {
-        float var8 = ((float)this.age + p_70539_2_) / (float)this.maxAge;
-        var8 *= var8;
-        double var9 = this.entityToPickUp.posX;
-        double var11 = this.entityToPickUp.posY;
-        double var13 = this.entityToPickUp.posZ;
-        double var15 = this.entityPickingUp.lastTickPosX + (this.entityPickingUp.posX - this.entityPickingUp.lastTickPosX) * (double)p_70539_2_;
-        double var17 = this.entityPickingUp.lastTickPosY + (this.entityPickingUp.posY - this.entityPickingUp.lastTickPosY) * (double)p_70539_2_ + (double)this.yOffs;
-        double var19 = this.entityPickingUp.lastTickPosZ + (this.entityPickingUp.posZ - this.entityPickingUp.lastTickPosZ) * (double)p_70539_2_;
-        double var21 = var9 + (var15 - var9) * (double)var8;
-        double var23 = var11 + (var17 - var11) * (double)var8;
-        double var25 = var13 + (var19 - var13) * (double)var8;
-        int var27 = this.getBrightnessForRender(p_70539_2_);
-        int var28 = var27 % 65536;
-        int var29 = var27 / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)var28 / 1.0F, (float)var29 / 1.0F);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        var21 -= interpPosX;
-        var23 -= interpPosY;
-        var25 -= interpPosZ;
-        RenderManager.instance.func_147940_a(this.entityToPickUp, (double)((float)var21), (double)((float)var23), (double)((float)var25), this.entityToPickUp.rotationYaw, p_70539_2_);
+        float var9 = ((float)this.age + p_180434_3_) / (float)this.maxAge;
+        var9 *= var9;
+        double var10 = this.field_174840_a.posX;
+        double var12 = this.field_174840_a.posY;
+        double var14 = this.field_174840_a.posZ;
+        double var16 = this.field_174843_ax.lastTickPosX + (this.field_174843_ax.posX - this.field_174843_ax.lastTickPosX) * (double)p_180434_3_;
+        double var18 = this.field_174843_ax.lastTickPosY + (this.field_174843_ax.posY - this.field_174843_ax.lastTickPosY) * (double)p_180434_3_ + (double)this.field_174841_aA;
+        double var20 = this.field_174843_ax.lastTickPosZ + (this.field_174843_ax.posZ - this.field_174843_ax.lastTickPosZ) * (double)p_180434_3_;
+        double var22 = var10 + (var16 - var10) * (double)var9;
+        double var24 = var12 + (var18 - var12) * (double)var9;
+        double var26 = var14 + (var20 - var14) * (double)var9;
+        int var28 = this.getBrightnessForRender(p_180434_3_);
+        int var29 = var28 % 65536;
+        int var30 = var28 / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)var29 / 1.0F, (float)var30 / 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        var22 -= interpPosX;
+        var24 -= interpPosY;
+        var26 -= interpPosZ;
+        this.field_174842_aB.renderEntityWithPosYaw(this.field_174840_a, (double)((float)var22), (double)((float)var24), (double)((float)var26), this.field_174840_a.rotationYaw, p_180434_3_);
     }
 
     /**

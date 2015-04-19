@@ -1,5 +1,6 @@
 package net.minecraft.item.crafting;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.InventoryCrafting;
@@ -17,7 +18,7 @@ public class RecipeFireworks implements IRecipe
     /**
      * Used to check if a recipe matches current crafting inventory
      */
-    public boolean matches(InventoryCrafting p_77569_1_, World p_77569_2_)
+    public boolean matches(InventoryCrafting p_77569_1_, World worldIn)
     {
         this.field_92102_a = null;
         int var3 = 0;
@@ -102,7 +103,7 @@ public class RecipeFireworks implements IRecipe
                     {
                         ItemStack var26 = p_77569_1_.getStackInSlot(var24);
 
-                        if (var26 != null && var26.getItem() == Items.firework_charge && var26.hasTagCompound() && var26.getTagCompound().func_150297_b("Explosion", 10))
+                        if (var26 != null && var26.getItem() == Items.firework_charge && var26.hasTagCompound() && var26.getTagCompound().hasKey("Explosion", 10))
                         {
                             var23.appendTag(var26.getTagCompound().getCompoundTag("Explosion"));
                         }
@@ -122,7 +123,7 @@ public class RecipeFireworks implements IRecipe
                 var16 = new NBTTagCompound();
                 var19 = new NBTTagCompound();
                 byte var22 = 0;
-                ArrayList var12 = new ArrayList();
+                ArrayList var12 = Lists.newArrayList();
 
                 for (int var13 = 0; var13 < p_77569_1_.getSizeInventory(); ++var13)
                 {
@@ -132,7 +133,7 @@ public class RecipeFireworks implements IRecipe
                     {
                         if (var14.getItem() == Items.dye)
                         {
-                            var12.add(Integer.valueOf(ItemDye.field_150922_c[var14.getItemDamage()]));
+                            var12.add(Integer.valueOf(ItemDye.dyeColors[var14.getMetadata() & 15]));
                         }
                         else if (var14.getItem() == Items.glowstone_dust)
                         {
@@ -176,7 +177,7 @@ public class RecipeFireworks implements IRecipe
             }
             else if (var4 == 0 && var3 == 0 && var6 == 1 && var5 > 0 && var5 == var7)
             {
-                ArrayList var15 = new ArrayList();
+                ArrayList var15 = Lists.newArrayList();
 
                 for (int var17 = 0; var17 < p_77569_1_.getSizeInventory(); ++var17)
                 {
@@ -186,7 +187,7 @@ public class RecipeFireworks implements IRecipe
                     {
                         if (var11.getItem() == Items.dye)
                         {
-                            var15.add(Integer.valueOf(ItemDye.field_150922_c[var11.getItemDamage()]));
+                            var15.add(Integer.valueOf(ItemDye.dyeColors[var11.getMetadata() & 15]));
                         }
                         else if (var11.getItem() == Items.firework_charge)
                         {
@@ -252,5 +253,22 @@ public class RecipeFireworks implements IRecipe
     public ItemStack getRecipeOutput()
     {
         return this.field_92102_a;
+    }
+
+    public ItemStack[] func_179532_b(InventoryCrafting p_179532_1_)
+    {
+        ItemStack[] var2 = new ItemStack[p_179532_1_.getSizeInventory()];
+
+        for (int var3 = 0; var3 < var2.length; ++var3)
+        {
+            ItemStack var4 = p_179532_1_.getStackInSlot(var3);
+
+            if (var4 != null && var4.getItem().hasContainerItem())
+            {
+                var2[var3] = new ItemStack(var4.getItem().getContainerItem());
+            }
+        }
+
+        return var2;
     }
 }

@@ -6,90 +6,116 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
 
-public class S3CPacketUpdateScore extends Packet
+public class S3CPacketUpdateScore implements Packet
 {
-    private String field_149329_a = "";
-    private String field_149327_b = "";
-    private int field_149328_c;
-    private int field_149326_d;
+    private String name = "";
+    private String objective = "";
+    private int value;
+    private S3CPacketUpdateScore.Action action;
     private static final String __OBFID = "CL_00001335";
 
     public S3CPacketUpdateScore() {}
 
-    public S3CPacketUpdateScore(Score p_i45227_1_, int p_i45227_2_)
+    public S3CPacketUpdateScore(Score scoreIn)
     {
-        this.field_149329_a = p_i45227_1_.getPlayerName();
-        this.field_149327_b = p_i45227_1_.func_96645_d().getName();
-        this.field_149328_c = p_i45227_1_.getScorePoints();
-        this.field_149326_d = p_i45227_2_;
+        this.name = scoreIn.getPlayerName();
+        this.objective = scoreIn.getObjective().getName();
+        this.value = scoreIn.getScorePoints();
+        this.action = S3CPacketUpdateScore.Action.CHANGE;
     }
 
-    public S3CPacketUpdateScore(String p_i45228_1_)
+    public S3CPacketUpdateScore(String nameIn)
     {
-        this.field_149329_a = p_i45228_1_;
-        this.field_149327_b = "";
-        this.field_149328_c = 0;
-        this.field_149326_d = 1;
+        this.name = nameIn;
+        this.objective = "";
+        this.value = 0;
+        this.action = S3CPacketUpdateScore.Action.REMOVE;
+    }
+
+    public S3CPacketUpdateScore(String nameIn, ScoreObjective objectiveIn)
+    {
+        this.name = nameIn;
+        this.objective = objectiveIn.getName();
+        this.value = 0;
+        this.action = S3CPacketUpdateScore.Action.REMOVE;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149329_a = p_148837_1_.readStringFromBuffer(16);
-        this.field_149326_d = p_148837_1_.readByte();
+        this.name = data.readStringFromBuffer(40);
+        this.action = (S3CPacketUpdateScore.Action)data.readEnumValue(S3CPacketUpdateScore.Action.class);
+        this.objective = data.readStringFromBuffer(16);
 
-        if (this.field_149326_d != 1)
+        if (this.action != S3CPacketUpdateScore.Action.REMOVE)
         {
-            this.field_149327_b = p_148837_1_.readStringFromBuffer(16);
-            this.field_149328_c = p_148837_1_.readInt();
+            this.value = data.readVarIntFromBuffer();
         }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(this.field_149329_a);
-        p_148840_1_.writeByte(this.field_149326_d);
+        data.writeString(this.name);
+        data.writeEnumValue(this.action);
+        data.writeString(this.objective);
 
-        if (this.field_149326_d != 1)
+        if (this.action != S3CPacketUpdateScore.Action.REMOVE)
         {
-            p_148840_1_.writeStringToBuffer(this.field_149327_b);
-            p_148840_1_.writeInt(this.field_149328_c);
+            data.writeVarIntToBuffer(this.value);
         }
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleUpdateScore(this);
+        handler.handleUpdateScore(this);
     }
 
     public String func_149324_c()
     {
-        return this.field_149329_a;
+        return this.name;
     }
 
     public String func_149321_d()
     {
-        return this.field_149327_b;
+        return this.objective;
     }
 
     public int func_149323_e()
     {
-        return this.field_149328_c;
+        return this.value;
     }
 
-    public int func_149322_f()
+    public S3CPacketUpdateScore.Action func_180751_d()
     {
-        return this.field_149326_d;
+        return this.action;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
+    }
+
+    public static enum Action
+    {
+        CHANGE("CHANGE", 0),
+        REMOVE("REMOVE", 1);
+
+        private static final S3CPacketUpdateScore.Action[] $VALUES = new S3CPacketUpdateScore.Action[]{CHANGE, REMOVE};
+        private static final String __OBFID = "CL_00002288";
+
+        private Action(String p_i45957_1_, int p_i45957_2_) {}
     }
 }

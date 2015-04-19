@@ -40,12 +40,12 @@ public interface ISaveFormat
     boolean func_154334_a(String p_154334_1_);
 
     /**
-     * Checks if the save directory uses the old map format
+     * gets if the map is old chunk saving (true) or McRegion (false)
      */
     boolean isOldMapFormat(String p_75801_1_);
 
     /**
-     * Converts the specified map to the new map format. Args: worldName, loadingScreen
+     * converts the map to mcRegion
      */
     boolean convertMapFormat(String p_75805_1_, IProgressUpdate p_75805_2_);
 

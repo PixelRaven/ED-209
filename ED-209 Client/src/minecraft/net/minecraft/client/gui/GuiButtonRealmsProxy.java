@@ -20,78 +20,87 @@ public class GuiButtonRealmsProxy extends GuiButton
         this.field_154318_o = p_i1090_1_;
     }
 
-    public int func_154314_d()
+    public int getId()
     {
         return super.id;
     }
 
-    public boolean func_154315_e()
+    public boolean getEnabled()
     {
         return super.enabled;
     }
 
-    public void func_154313_b(boolean p_154313_1_)
+    public void setEnabled(boolean p_154313_1_)
     {
         super.enabled = p_154313_1_;
     }
 
-    public void func_154311_a(String p_154311_1_)
+    public void setText(String p_154311_1_)
     {
         super.displayString = p_154311_1_;
     }
 
-    public int func_146117_b()
+    public int getButtonWidth()
     {
-        return super.func_146117_b();
+        return super.getButtonWidth();
     }
 
-    public int func_154316_f()
+    public int getPositionY()
     {
-        return super.field_146129_i;
+        return super.yPosition;
     }
 
     /**
      * Returns true if the mouse has been pressed on this control. Equivalent of MouseListener.mousePressed(MouseEvent
      * e).
      */
-    public boolean mousePressed(Minecraft p_146116_1_, int p_146116_2_, int p_146116_3_)
+    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY)
     {
-        if (super.mousePressed(p_146116_1_, p_146116_2_, p_146116_3_))
+        if (super.mousePressed(mc, mouseX, mouseY))
         {
-            this.field_154318_o.clicked(p_146116_2_, p_146116_3_);
+            this.field_154318_o.clicked(mouseX, mouseY);
         }
 
-        return super.mousePressed(p_146116_1_, p_146116_2_, p_146116_3_);
+        return super.mousePressed(mc, mouseX, mouseY);
     }
 
     /**
      * Fired when the mouse button is released. Equivalent of MouseListener.mouseReleased(MouseEvent e).
      */
-    public void mouseReleased(int p_146118_1_, int p_146118_2_)
+    public void mouseReleased(int mouseX, int mouseY)
     {
-        this.field_154318_o.released(p_146118_1_, p_146118_2_);
+        this.field_154318_o.released(mouseX, mouseY);
     }
 
     /**
      * Fired when the mouse button is dragged. Equivalent of MouseListener.mouseDragged(MouseEvent e).
      */
-    public void mouseDragged(Minecraft p_146119_1_, int p_146119_2_, int p_146119_3_)
+    public void mouseDragged(Minecraft mc, int mouseX, int mouseY)
     {
-        this.field_154318_o.renderBg(p_146119_2_, p_146119_3_);
+        this.field_154318_o.renderBg(mouseX, mouseY);
     }
 
-    public RealmsButton func_154317_g()
+    public RealmsButton getRealmsButton()
     {
         return this.field_154318_o;
     }
 
-    public int getHoverState(boolean p_146114_1_)
+    /**
+     * Returns 0 if the button is disabled, 1 if the mouse is NOT hovering over this button and 2 if it IS hovering over
+     * this button.
+     */
+    public int getHoverState(boolean mouseOver)
     {
-        return this.field_154318_o.getYImage(p_146114_1_);
+        return this.field_154318_o.getYImage(mouseOver);
     }
 
     public int func_154312_c(boolean p_154312_1_)
     {
         return super.getHoverState(p_154312_1_);
+    }
+
+    public int func_175232_g()
+    {
+        return this.height;
     }
 }

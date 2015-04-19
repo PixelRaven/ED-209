@@ -96,7 +96,16 @@ public class Locale
         while (var2.hasNext())
         {
             IResource var3 = (IResource)var2.next();
-            this.loadLocaleData(var3.getInputStream());
+            InputStream var4 = var3.getInputStream();
+
+            try
+            {
+                this.loadLocaleData(var4);
+            }
+            finally
+            {
+                IOUtils.closeQuietly(var4);
+            }
         }
     }
 

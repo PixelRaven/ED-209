@@ -19,7 +19,7 @@ public interface ISaveHandler
     void checkSessionLock() throws MinecraftException;
 
     /**
-     * Returns the chunk loader with the provided world provider
+     * initializes and returns the chunk loader for the specified world provider
      */
     IChunkLoader getChunkLoader(WorldProvider p_75763_1_);
 
@@ -29,14 +29,11 @@ public interface ISaveHandler
     void saveWorldInfoWithPlayer(WorldInfo p_75755_1_, NBTTagCompound p_75755_2_);
 
     /**
-     * Saves the passed in world info.
+     * used to update level.dat from old format to MCRegion format
      */
     void saveWorldInfo(WorldInfo p_75761_1_);
 
-    /**
-     * returns null if no saveHandler is relevent (eg. SMP)
-     */
-    IPlayerFileData getSaveHandler();
+    IPlayerFileData getPlayerNBTManager();
 
     /**
      * Called to flush all changes to disk, waiting for them to complete.

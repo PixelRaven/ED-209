@@ -2,15 +2,27 @@ package net.minecraft.entity.monster;
 
 import java.util.Random;
 import net.minecraft.block.Block;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAILeapAtTarget;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
+import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.pathfinding.PathNavigate;
+import net.minecraft.pathfinding.PathNavigateClimber;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
@@ -18,10 +30,26 @@ public class EntitySpider extends EntityMob
 {
     private static final String __OBFID = "CL_00001699";
 
-    public EntitySpider(World p_i1743_1_)
+    public EntitySpider(World worldIn)
     {
-        super(p_i1743_1_);
+        super(worldIn);
         this.setSize(1.4F, 0.9F);
+        this.tasks.addTask(1, new EntityAISwimming(this));
+        this.tasks.addTask(2, this.field_175455_a);
+        this.tasks.addTask(3, new EntityAILeapAtTarget(this, 0.4F));
+        this.tasks.addTask(4, new EntitySpider.AISpiderAttack(EntityPlayer.class));
+        this.tasks.addTask(4, new EntitySpider.AISpiderAttack(EntityIronGolem.class));
+        this.tasks.addTask(5, new EntityAIWander(this, 0.8D));
+        this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 8.0F));
+        this.tasks.addTask(6, new EntityAILookIdle(this));
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, false, new Class[0]));
+        this.targetTasks.addTask(2, new EntitySpider.AISpiderTarget(EntityPlayer.class));
+        this.targetTasks.addTask(3, new EntitySpider.AISpiderTarget(EntityIronGolem.class));
+    }
+
+    protected PathNavigate func_175447_b(World worldIn)
+    {
+        return new PathNavigateClimber(this, worldIn);
     }
 
     protected void entityInit()
@@ -37,7 +65,7 @@ public class EntitySpider extends EntityMob
     {
         super.onUpdate();
 
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             this.setBesideClimbableBlock(this.isCollidedHorizontally);
         }
@@ -47,26 +75,7 @@ public class EntitySpider extends EntityMob
     {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(16.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.800000011920929D);
-    }
-
-    /**
-     * Finds the closest player within 16 blocks to attack, or null if this Entity isn't interested in attacking
-     * (Animals, Spiders at day, peaceful PigZombies).
-     */
-    protected Entity findPlayerToAttack()
-    {
-        float var1 = this.getBrightness(1.0F);
-
-        if (var1 < 0.5F)
-        {
-            double var2 = 16.0D;
-            return this.worldObj.getClosestVulnerablePlayerToEntity(this, var2);
-        }
-        else
-        {
-            return null;
-        }
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.30000001192092896D);
     }
 
     /**
@@ -93,44 +102,12 @@ public class EntitySpider extends EntityMob
         return "mob.spider.death";
     }
 
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.spider.step", 0.15F, 1.0F);
     }
 
-    /**
-     * Basic mob attack. Default to touch of death in EntityCreature. Overridden by each mob to define their attack.
-     */
-    protected void attackEntity(Entity p_70785_1_, float p_70785_2_)
-    {
-        float var3 = this.getBrightness(1.0F);
-
-        if (var3 > 0.5F && this.rand.nextInt(100) == 0)
-        {
-            this.entityToAttack = null;
-        }
-        else
-        {
-            if (p_70785_2_ > 2.0F && p_70785_2_ < 6.0F && this.rand.nextInt(10) == 0)
-            {
-                if (this.onGround)
-                {
-                    double var4 = p_70785_1_.posX - this.posX;
-                    double var6 = p_70785_1_.posZ - this.posZ;
-                    float var8 = MathHelper.sqrt_double(var4 * var4 + var6 * var6);
-                    this.motionX = var4 / (double)var8 * 0.5D * 0.800000011920929D + this.motionX * 0.20000000298023224D;
-                    this.motionZ = var6 / (double)var8 * 0.5D * 0.800000011920929D + this.motionZ * 0.20000000298023224D;
-                    this.motionY = 0.4000000059604645D;
-                }
-            }
-            else
-            {
-                super.attackEntity(p_70785_1_, p_70785_2_);
-            }
-        }
-    }
-
-    protected Item func_146068_u()
+    protected Item getDropItem()
     {
         return Items.string;
     }
@@ -144,7 +121,7 @@ public class EntitySpider extends EntityMob
 
         if (p_70628_1_ && (this.rand.nextInt(3) == 0 || this.rand.nextInt(1 + p_70628_2_) > 0))
         {
-            this.func_145779_a(Items.spider_eye, 1);
+            this.dropItem(Items.spider_eye, 1);
         }
     }
 
@@ -203,40 +180,91 @@ public class EntitySpider extends EntityMob
         this.dataWatcher.updateObject(16, Byte.valueOf(var2));
     }
 
-    public IEntityLivingData onSpawnWithEgg(IEntityLivingData p_110161_1_)
+    public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, IEntityLivingData p_180482_2_)
     {
-        Object p_110161_1_1 = super.onSpawnWithEgg(p_110161_1_);
+        Object p_180482_2_1 = super.func_180482_a(p_180482_1_, p_180482_2_);
 
         if (this.worldObj.rand.nextInt(100) == 0)
         {
-            EntitySkeleton var2 = new EntitySkeleton(this.worldObj);
-            var2.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
-            var2.onSpawnWithEgg((IEntityLivingData)null);
-            this.worldObj.spawnEntityInWorld(var2);
-            var2.mountEntity(this);
+            EntitySkeleton var3 = new EntitySkeleton(this.worldObj);
+            var3.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, 0.0F);
+            var3.func_180482_a(p_180482_1_, (IEntityLivingData)null);
+            this.worldObj.spawnEntityInWorld(var3);
+            var3.mountEntity(this);
         }
 
-        if (p_110161_1_1 == null)
+        if (p_180482_2_1 == null)
         {
-            p_110161_1_1 = new EntitySpider.GroupData();
+            p_180482_2_1 = new EntitySpider.GroupData();
 
-            if (this.worldObj.difficultySetting == EnumDifficulty.HARD && this.worldObj.rand.nextFloat() < 0.1F * this.worldObj.func_147462_b(this.posX, this.posY, this.posZ))
+            if (this.worldObj.getDifficulty() == EnumDifficulty.HARD && this.worldObj.rand.nextFloat() < 0.1F * p_180482_1_.func_180170_c())
             {
-                ((EntitySpider.GroupData)p_110161_1_1).func_111104_a(this.worldObj.rand);
+                ((EntitySpider.GroupData)p_180482_2_1).func_111104_a(this.worldObj.rand);
             }
         }
 
-        if (p_110161_1_1 instanceof EntitySpider.GroupData)
+        if (p_180482_2_1 instanceof EntitySpider.GroupData)
         {
-            int var4 = ((EntitySpider.GroupData)p_110161_1_1).field_111105_a;
+            int var5 = ((EntitySpider.GroupData)p_180482_2_1).field_111105_a;
 
-            if (var4 > 0 && Potion.potionTypes[var4] != null)
+            if (var5 > 0 && Potion.potionTypes[var5] != null)
             {
-                this.addPotionEffect(new PotionEffect(var4, Integer.MAX_VALUE));
+                this.addPotionEffect(new PotionEffect(var5, Integer.MAX_VALUE));
             }
         }
 
-        return (IEntityLivingData)p_110161_1_1;
+        return (IEntityLivingData)p_180482_2_1;
+    }
+
+    public float getEyeHeight()
+    {
+        return 0.65F;
+    }
+
+    class AISpiderAttack extends EntityAIAttackOnCollide
+    {
+        private static final String __OBFID = "CL_00002197";
+
+        public AISpiderAttack(Class p_i45819_2_)
+        {
+            super(EntitySpider.this, p_i45819_2_, 1.0D, true);
+        }
+
+        public boolean continueExecuting()
+        {
+            float var1 = this.attacker.getBrightness(1.0F);
+
+            if (var1 >= 0.5F && this.attacker.getRNG().nextInt(100) == 0)
+            {
+                this.attacker.setAttackTarget((EntityLivingBase)null);
+                return false;
+            }
+            else
+            {
+                return super.continueExecuting();
+            }
+        }
+
+        protected double func_179512_a(EntityLivingBase p_179512_1_)
+        {
+            return (double)(4.0F + p_179512_1_.width);
+        }
+    }
+
+    class AISpiderTarget extends EntityAINearestAttackableTarget
+    {
+        private static final String __OBFID = "CL_00002196";
+
+        public AISpiderTarget(Class p_i45818_2_)
+        {
+            super(EntitySpider.this, p_i45818_2_, true);
+        }
+
+        public boolean shouldExecute()
+        {
+            float var1 = this.taskOwner.getBrightness(1.0F);
+            return var1 >= 0.5F ? false : super.shouldExecute();
+        }
     }
 
     public static class GroupData implements IEntityLivingData

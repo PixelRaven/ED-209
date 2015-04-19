@@ -6,7 +6,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S13PacketDestroyEntities extends Packet
+public class S13PacketDestroyEntities implements Packet
 {
     private int[] field_149100_a;
     private static final String __OBFID = "CL_00001320";
@@ -21,52 +21,35 @@ public class S13PacketDestroyEntities extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149100_a = new int[p_148837_1_.readByte()];
+        this.field_149100_a = new int[data.readVarIntFromBuffer()];
 
         for (int var2 = 0; var2 < this.field_149100_a.length; ++var2)
         {
-            this.field_149100_a[var2] = p_148837_1_.readInt();
+            this.field_149100_a[var2] = data.readVarIntFromBuffer();
         }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeByte(this.field_149100_a.length);
+        data.writeVarIntToBuffer(this.field_149100_a.length);
 
         for (int var2 = 0; var2 < this.field_149100_a.length; ++var2)
         {
-            p_148840_1_.writeInt(this.field_149100_a[var2]);
+            data.writeVarIntToBuffer(this.field_149100_a[var2]);
         }
-    }
-
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
-    {
-        p_148833_1_.handleDestroyEntities(this);
     }
 
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        StringBuilder var1 = new StringBuilder();
-
-        for (int var2 = 0; var2 < this.field_149100_a.length; ++var2)
-        {
-            if (var2 > 0)
-            {
-                var1.append(", ");
-            }
-
-            var1.append(this.field_149100_a[var2]);
-        }
-
-        return String.format("entities=%d[%s]", new Object[] {Integer.valueOf(this.field_149100_a.length), var1});
+        handler.handleDestroyEntities(this);
     }
 
     public int[] func_149098_c()
@@ -74,8 +57,11 @@ public class S13PacketDestroyEntities extends Packet
         return this.field_149100_a;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

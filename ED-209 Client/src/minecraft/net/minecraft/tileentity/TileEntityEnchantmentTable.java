@@ -2,59 +2,70 @@ package net.minecraft.tileentity;
 
 import java.util.Random;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.gui.IUpdatePlayerListBox;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.IInteractionObject;
 
-public class TileEntityEnchantmentTable extends TileEntity
+public class TileEntityEnchantmentTable extends TileEntity implements IUpdatePlayerListBox, IInteractionObject
 {
-    public int field_145926_a;
-    public float field_145933_i;
-    public float field_145931_j;
+    public int tickCount;
+    public float pageFlip;
+    public float pageFlipPrev;
     public float field_145932_k;
     public float field_145929_l;
-    public float field_145930_m;
-    public float field_145927_n;
-    public float field_145928_o;
-    public float field_145925_p;
+    public float bookSpread;
+    public float bookSpreadPrev;
+    public float bookRotation;
+    public float bookRotationPrev;
     public float field_145924_q;
     private static Random field_145923_r = new Random();
     private String field_145922_s;
     private static final String __OBFID = "CL_00000354";
 
-    public void writeToNBT(NBTTagCompound p_145841_1_)
+    public void writeToNBT(NBTTagCompound compound)
     {
-        super.writeToNBT(p_145841_1_);
+        super.writeToNBT(compound);
 
-        if (this.func_145921_b())
+        if (this.hasCustomName())
         {
-            p_145841_1_.setString("CustomName", this.field_145922_s);
+            compound.setString("CustomName", this.field_145922_s);
         }
     }
 
-    public void readFromNBT(NBTTagCompound p_145839_1_)
+    public void readFromNBT(NBTTagCompound compound)
     {
-        super.readFromNBT(p_145839_1_);
+        super.readFromNBT(compound);
 
-        if (p_145839_1_.func_150297_b("CustomName", 8))
+        if (compound.hasKey("CustomName", 8))
         {
-            this.field_145922_s = p_145839_1_.getString("CustomName");
+            this.field_145922_s = compound.getString("CustomName");
         }
     }
 
-    public void updateEntity()
+    /**
+     * Updates the JList with a new model.
+     */
+    public void update()
     {
-        super.updateEntity();
-        this.field_145927_n = this.field_145930_m;
-        this.field_145925_p = this.field_145928_o;
-        EntityPlayer var1 = this.worldObj.getClosestPlayer((double)((float)this.field_145851_c + 0.5F), (double)((float)this.field_145848_d + 0.5F), (double)((float)this.field_145849_e + 0.5F), 3.0D);
+        this.bookSpreadPrev = this.bookSpread;
+        this.bookRotationPrev = this.bookRotation;
+        EntityPlayer var1 = this.worldObj.getClosestPlayer((double)((float)this.pos.getX() + 0.5F), (double)((float)this.pos.getY() + 0.5F), (double)((float)this.pos.getZ() + 0.5F), 3.0D);
 
         if (var1 != null)
         {
-            double var2 = var1.posX - (double)((float)this.field_145851_c + 0.5F);
-            double var4 = var1.posZ - (double)((float)this.field_145849_e + 0.5F);
+            double var2 = var1.posX - (double)((float)this.pos.getX() + 0.5F);
+            double var4 = var1.posZ - (double)((float)this.pos.getZ() + 0.5F);
             this.field_145924_q = (float)Math.atan2(var4, var2);
-            this.field_145930_m += 0.1F;
+            this.bookSpread += 0.1F;
 
-            if (this.field_145930_m < 0.5F || field_145923_r.nextInt(40) == 0)
+            if (this.bookSpread < 0.5F || field_145923_r.nextInt(40) == 0)
             {
                 float var6 = this.field_145932_k;
 
@@ -68,17 +79,17 @@ public class TileEntityEnchantmentTable extends TileEntity
         else
         {
             this.field_145924_q += 0.02F;
-            this.field_145930_m -= 0.1F;
+            this.bookSpread -= 0.1F;
         }
 
-        while (this.field_145928_o >= (float)Math.PI)
+        while (this.bookRotation >= (float)Math.PI)
         {
-            this.field_145928_o -= ((float)Math.PI * 2F);
+            this.bookRotation -= ((float)Math.PI * 2F);
         }
 
-        while (this.field_145928_o < -(float)Math.PI)
+        while (this.bookRotation < -(float)Math.PI)
         {
-            this.field_145928_o += ((float)Math.PI * 2F);
+            this.bookRotation += ((float)Math.PI * 2F);
         }
 
         while (this.field_145924_q >= (float)Math.PI)
@@ -93,7 +104,7 @@ public class TileEntityEnchantmentTable extends TileEntity
 
         float var7;
 
-        for (var7 = this.field_145924_q - this.field_145928_o; var7 >= (float)Math.PI; var7 -= ((float)Math.PI * 2F))
+        for (var7 = this.field_145924_q - this.bookRotation; var7 >= (float)Math.PI; var7 -= ((float)Math.PI * 2F))
         {
             ;
         }
@@ -103,43 +114,29 @@ public class TileEntityEnchantmentTable extends TileEntity
             var7 += ((float)Math.PI * 2F);
         }
 
-        this.field_145928_o += var7 * 0.4F;
-
-        if (this.field_145930_m < 0.0F)
-        {
-            this.field_145930_m = 0.0F;
-        }
-
-        if (this.field_145930_m > 1.0F)
-        {
-            this.field_145930_m = 1.0F;
-        }
-
-        ++this.field_145926_a;
-        this.field_145931_j = this.field_145933_i;
-        float var3 = (this.field_145932_k - this.field_145933_i) * 0.4F;
+        this.bookRotation += var7 * 0.4F;
+        this.bookSpread = MathHelper.clamp_float(this.bookSpread, 0.0F, 1.0F);
+        ++this.tickCount;
+        this.pageFlipPrev = this.pageFlip;
+        float var3 = (this.field_145932_k - this.pageFlip) * 0.4F;
         float var8 = 0.2F;
-
-        if (var3 < -var8)
-        {
-            var3 = -var8;
-        }
-
-        if (var3 > var8)
-        {
-            var3 = var8;
-        }
-
+        var3 = MathHelper.clamp_float(var3, -var8, var8);
         this.field_145929_l += (var3 - this.field_145929_l) * 0.9F;
-        this.field_145933_i += this.field_145929_l;
+        this.pageFlip += this.field_145929_l;
     }
 
-    public String func_145919_a()
+    /**
+     * Gets the name of this command sender (usually username, but possibly "Rcon")
+     */
+    public String getName()
     {
-        return this.func_145921_b() ? this.field_145922_s : "container.enchant";
+        return this.hasCustomName() ? this.field_145922_s : "container.enchant";
     }
 
-    public boolean func_145921_b()
+    /**
+     * Returns true if this thing is named
+     */
+    public boolean hasCustomName()
     {
         return this.field_145922_s != null && this.field_145922_s.length() > 0;
     }
@@ -147,5 +144,20 @@ public class TileEntityEnchantmentTable extends TileEntity
     public void func_145920_a(String p_145920_1_)
     {
         this.field_145922_s = p_145920_1_;
+    }
+
+    public IChatComponent getDisplayName()
+    {
+        return (IChatComponent)(this.hasCustomName() ? new ChatComponentText(this.getName()) : new ChatComponentTranslation(this.getName(), new Object[0]));
+    }
+
+    public Container createContainer(InventoryPlayer playerInventory, EntityPlayer playerIn)
+    {
+        return new ContainerEnchantment(playerInventory, this.worldObj, this.pos);
+    }
+
+    public String getGuiID()
+    {
+        return "minecraft:enchanting_table";
     }
 }

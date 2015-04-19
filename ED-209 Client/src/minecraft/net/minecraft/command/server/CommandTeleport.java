@@ -1,13 +1,17 @@
 package net.minecraft.command.server;
 
+import java.util.EnumSet;
 import java.util.List;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MathHelper;
 
 public class CommandTeleport extends CommandBase
 {
@@ -26,83 +30,156 @@ public class CommandTeleport extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.tp.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length < 1)
+        if (args.length < 1)
         {
             throw new WrongUsageException("commands.tp.usage", new Object[0]);
         }
         else
         {
-            EntityPlayerMP var3;
+            byte var3 = 0;
+            Object var4;
 
-            if (p_71515_2_.length != 2 && p_71515_2_.length != 4)
+            if (args.length != 2 && args.length != 4 && args.length != 6)
             {
-                var3 = getCommandSenderAsPlayer(p_71515_1_);
+                var4 = getCommandSenderAsPlayer(sender);
             }
             else
             {
-                var3 = getPlayer(p_71515_1_, p_71515_2_[0]);
-
-                if (var3 == null)
-                {
-                    throw new PlayerNotFoundException();
-                }
+                var4 = func_175768_b(sender, args[0]);
+                var3 = 1;
             }
 
-            if (p_71515_2_.length != 3 && p_71515_2_.length != 4)
+            if (args.length != 1 && args.length != 2)
             {
-                if (p_71515_2_.length == 1 || p_71515_2_.length == 2)
+                if (args.length < var3 + 3)
                 {
-                    EntityPlayerMP var11 = getPlayer(p_71515_1_, p_71515_2_[p_71515_2_.length - 1]);
+                    throw new WrongUsageException("commands.tp.usage", new Object[0]);
+                }
+                else if (((Entity)var4).worldObj != null)
+                {
+                    int var14 = var3 + 1;
+                    CommandBase.CoordinateArg var6 = func_175770_a(((Entity)var4).posX, args[var3], true);
+                    CommandBase.CoordinateArg var7 = func_175767_a(((Entity)var4).posY, args[var14++], 0, 0, false);
+                    CommandBase.CoordinateArg var8 = func_175770_a(((Entity)var4).posZ, args[var14++], true);
+                    CommandBase.CoordinateArg var9 = func_175770_a((double)((Entity)var4).rotationYaw, args.length > var14 ? args[var14++] : "~", false);
+                    CommandBase.CoordinateArg var10 = func_175770_a((double)((Entity)var4).rotationPitch, args.length > var14 ? args[var14] : "~", false);
+                    float var12;
 
-                    if (var11 == null)
+                    if (var4 instanceof EntityPlayerMP)
                     {
-                        throw new PlayerNotFoundException();
+                        EnumSet var11 = EnumSet.noneOf(S08PacketPlayerPosLook.EnumFlags.class);
+
+                        if (var6.func_179630_c())
+                        {
+                            var11.add(S08PacketPlayerPosLook.EnumFlags.X);
+                        }
+
+                        if (var7.func_179630_c())
+                        {
+                            var11.add(S08PacketPlayerPosLook.EnumFlags.Y);
+                        }
+
+                        if (var8.func_179630_c())
+                        {
+                            var11.add(S08PacketPlayerPosLook.EnumFlags.Z);
+                        }
+
+                        if (var10.func_179630_c())
+                        {
+                            var11.add(S08PacketPlayerPosLook.EnumFlags.X_ROT);
+                        }
+
+                        if (var9.func_179630_c())
+                        {
+                            var11.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
+                        }
+
+                        var12 = (float)var9.func_179629_b();
+
+                        if (!var9.func_179630_c())
+                        {
+                            var12 = MathHelper.wrapAngleTo180_float(var12);
+                        }
+
+                        float var13 = (float)var10.func_179629_b();
+
+                        if (!var10.func_179630_c())
+                        {
+                            var13 = MathHelper.wrapAngleTo180_float(var13);
+                        }
+
+                        if (var13 > 90.0F || var13 < -90.0F)
+                        {
+                            var13 = MathHelper.wrapAngleTo180_float(180.0F - var13);
+                            var12 = MathHelper.wrapAngleTo180_float(var12 + 180.0F);
+                        }
+
+                        ((Entity)var4).mountEntity((Entity)null);
+                        ((EntityPlayerMP)var4).playerNetServerHandler.func_175089_a(var6.func_179629_b(), var7.func_179629_b(), var8.func_179629_b(), var12, var13, var11);
+                        ((Entity)var4).setRotationYawHead(var12);
+                    }
+                    else
+                    {
+                        float var15 = (float)MathHelper.wrapAngleTo180_double(var9.func_179628_a());
+                        var12 = (float)MathHelper.wrapAngleTo180_double(var10.func_179628_a());
+
+                        if (var12 > 90.0F || var12 < -90.0F)
+                        {
+                            var12 = MathHelper.wrapAngleTo180_float(180.0F - var12);
+                            var15 = MathHelper.wrapAngleTo180_float(var15 + 180.0F);
+                        }
+
+                        ((Entity)var4).setLocationAndAngles(var6.func_179628_a(), var7.func_179628_a(), var8.func_179628_a(), var15, var12);
+                        ((Entity)var4).setRotationYawHead(var15);
                     }
 
-                    if (var11.worldObj != var3.worldObj)
-                    {
-                        func_152373_a(p_71515_1_, this, "commands.tp.notSameDimension", new Object[0]);
-                        return;
-                    }
-
-                    var3.mountEntity((Entity)null);
-                    var3.playerNetServerHandler.setPlayerLocation(var11.posX, var11.posY, var11.posZ, var11.rotationYaw, var11.rotationPitch);
-                    func_152373_a(p_71515_1_, this, "commands.tp.success", new Object[] {var3.getCommandSenderName(), var11.getCommandSenderName()});
+                    notifyOperators(sender, this, "commands.tp.success.coordinates", new Object[] {((Entity)var4).getName(), Double.valueOf(var6.func_179628_a()), Double.valueOf(var7.func_179628_a()), Double.valueOf(var8.func_179628_a())});
                 }
             }
-            else if (var3.worldObj != null)
+            else
             {
-                int var4 = p_71515_2_.length - 3;
-                double var5 = func_110666_a(p_71515_1_, var3.posX, p_71515_2_[var4++]);
-                double var7 = func_110665_a(p_71515_1_, var3.posY, p_71515_2_[var4++], 0, 0);
-                double var9 = func_110666_a(p_71515_1_, var3.posZ, p_71515_2_[var4++]);
-                var3.mountEntity((Entity)null);
-                var3.setPositionAndUpdate(var5, var7, var9);
-                func_152373_a(p_71515_1_, this, "commands.tp.success.coordinates", new Object[] {var3.getCommandSenderName(), Double.valueOf(var5), Double.valueOf(var7), Double.valueOf(var9)});
+                Entity var5 = func_175768_b(sender, args[args.length - 1]);
+
+                if (var5.worldObj != ((Entity)var4).worldObj)
+                {
+                    throw new CommandException("commands.tp.notSameDimension", new Object[0]);
+                }
+                else
+                {
+                    ((Entity)var4).mountEntity((Entity)null);
+
+                    if (var4 instanceof EntityPlayerMP)
+                    {
+                        ((EntityPlayerMP)var4).playerNetServerHandler.setPlayerLocation(var5.posX, var5.posY, var5.posZ, var5.rotationYaw, var5.rotationPitch);
+                    }
+                    else
+                    {
+                        ((Entity)var4).setLocationAndAngles(var5.posX, var5.posY, var5.posZ, var5.rotationYaw, var5.rotationPitch);
+                    }
+
+                    notifyOperators(sender, this, "commands.tp.success", new Object[] {((Entity)var4).getName(), var5.getName()});
+                }
             }
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length != 1 && p_71516_2_.length != 2 ? null : getListOfStringsMatchingLastWord(p_71516_2_, MinecraftServer.getServer().getAllUsernames());
+        return args.length != 1 && args.length != 2 ? null : getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames());
     }
 
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 0;
+        return index == 0;
     }
 }

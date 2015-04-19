@@ -18,7 +18,7 @@ public class MaterialTransparent extends Material
     /**
      * Will prevent grass from growing on dirt underneath and kill any grass below it if it returns true
      */
-    public boolean getCanBlockGrass()
+    public boolean blocksLight()
     {
         return false;
     }

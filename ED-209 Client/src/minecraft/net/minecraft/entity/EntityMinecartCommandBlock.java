@@ -1,15 +1,15 @@
 package net.minecraft.entity;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class EntityMinecartCommandBlock extends EntityMinecart
@@ -19,8 +19,8 @@ public class EntityMinecartCommandBlock extends EntityMinecart
         private static final String __OBFID = "CL_00001673";
         public void func_145756_e()
         {
-            EntityMinecartCommandBlock.this.getDataWatcher().updateObject(23, this.func_145753_i());
-            EntityMinecartCommandBlock.this.getDataWatcher().updateObject(24, IChatComponent.Serializer.func_150696_a(this.func_145749_h()));
+            EntityMinecartCommandBlock.this.getDataWatcher().updateObject(23, this.getCustomName());
+            EntityMinecartCommandBlock.this.getDataWatcher().updateObject(24, IChatComponent.Serializer.componentToJson(this.getLastOutput()));
         }
         public int func_145751_f()
         {
@@ -30,26 +30,34 @@ public class EntityMinecartCommandBlock extends EntityMinecart
         {
             p_145757_1_.writeInt(EntityMinecartCommandBlock.this.getEntityId());
         }
-        public ChunkCoordinates getPlayerCoordinates()
+        public BlockPos getPosition()
         {
-            return new ChunkCoordinates(MathHelper.floor_double(EntityMinecartCommandBlock.this.posX), MathHelper.floor_double(EntityMinecartCommandBlock.this.posY + 0.5D), MathHelper.floor_double(EntityMinecartCommandBlock.this.posZ));
+            return new BlockPos(EntityMinecartCommandBlock.this.posX, EntityMinecartCommandBlock.this.posY + 0.5D, EntityMinecartCommandBlock.this.posZ);
+        }
+        public Vec3 getPositionVector()
+        {
+            return new Vec3(EntityMinecartCommandBlock.this.posX, EntityMinecartCommandBlock.this.posY, EntityMinecartCommandBlock.this.posZ);
         }
         public World getEntityWorld()
         {
             return EntityMinecartCommandBlock.this.worldObj;
         }
+        public Entity getCommandSenderEntity()
+        {
+            return EntityMinecartCommandBlock.this;
+        }
     };
     private int field_145823_b = 0;
     private static final String __OBFID = "CL_00001672";
 
-    public EntityMinecartCommandBlock(World p_i45321_1_)
+    public EntityMinecartCommandBlock(World worldIn)
     {
-        super(p_i45321_1_);
+        super(worldIn);
     }
 
-    public EntityMinecartCommandBlock(World p_i45322_1_, double p_i45322_2_, double p_i45322_4_, double p_i45322_6_)
+    public EntityMinecartCommandBlock(World worldIn, double p_i45322_2_, double p_i45322_4_, double p_i45322_6_)
     {
-        super(p_i45322_1_, p_i45322_2_, p_i45322_4_, p_i45322_6_);
+        super(worldIn, p_i45322_2_, p_i45322_4_, p_i45322_6_);
     }
 
     protected void entityInit()
@@ -62,31 +70,31 @@ public class EntityMinecartCommandBlock extends EntityMinecart
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.field_145824_a.func_145759_b(p_70037_1_);
-        this.getDataWatcher().updateObject(23, this.func_145822_e().func_145753_i());
-        this.getDataWatcher().updateObject(24, IChatComponent.Serializer.func_150696_a(this.func_145822_e().func_145749_h()));
+        super.readEntityFromNBT(tagCompund);
+        this.field_145824_a.readDataFromNBT(tagCompund);
+        this.getDataWatcher().updateObject(23, this.func_145822_e().getCustomName());
+        this.getDataWatcher().updateObject(24, IChatComponent.Serializer.componentToJson(this.func_145822_e().getLastOutput()));
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        this.field_145824_a.func_145758_a(p_70014_1_);
+        super.writeEntityToNBT(tagCompound);
+        this.field_145824_a.writeDataToNBT(tagCompound);
     }
 
-    public int getMinecartType()
+    public EntityMinecart.EnumMinecartType func_180456_s()
     {
-        return 6;
+        return EntityMinecart.EnumMinecartType.COMMAND_BLOCK;
     }
 
-    public Block func_145817_o()
+    public IBlockState func_180457_u()
     {
-        return Blocks.command_block;
+        return Blocks.command_block.getDefaultState();
     }
 
     public CommandBlockLogic func_145822_e()
@@ -101,7 +109,7 @@ public class EntityMinecartCommandBlock extends EntityMinecart
     {
         if (p_96095_4_ && this.ticksExisted - this.field_145823_b >= 4)
         {
-            this.func_145822_e().func_145755_a(this.worldObj);
+            this.func_145822_e().trigger(this.worldObj);
             this.field_145823_b = this.ticksExisted;
         }
     }
@@ -109,14 +117,10 @@ public class EntityMinecartCommandBlock extends EntityMinecart
     /**
      * First layer of player interaction
      */
-    public boolean interactFirst(EntityPlayer p_130002_1_)
+    public boolean interactFirst(EntityPlayer playerIn)
     {
-        if (this.worldObj.isClient)
-        {
-            p_130002_1_.func_146095_a(this.func_145822_e());
-        }
-
-        return super.interactFirst(p_130002_1_);
+        this.field_145824_a.func_175574_a(playerIn);
+        return false;
     }
 
     public void func_145781_i(int p_145781_1_)
@@ -127,7 +131,7 @@ public class EntityMinecartCommandBlock extends EntityMinecart
         {
             try
             {
-                this.field_145824_a.func_145750_b(IChatComponent.Serializer.func_150699_a(this.getDataWatcher().getWatchableObjectString(24)));
+                this.field_145824_a.func_145750_b(IChatComponent.Serializer.jsonToComponent(this.getDataWatcher().getWatchableObjectString(24)));
             }
             catch (Throwable var3)
             {
@@ -136,7 +140,7 @@ public class EntityMinecartCommandBlock extends EntityMinecart
         }
         else if (p_145781_1_ == 23)
         {
-            this.field_145824_a.func_145752_a(this.getDataWatcher().getWatchableObjectString(23));
+            this.field_145824_a.setCommand(this.getDataWatcher().getWatchableObjectString(23));
         }
     }
 }

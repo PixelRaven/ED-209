@@ -19,7 +19,7 @@ public class AnvilSaveHandler extends SaveHandler
     }
 
     /**
-     * Returns the chunk loader with the provided world provider
+     * initializes and returns the chunk loader for the specified world provider
      */
     public IChunkLoader getChunkLoader(WorldProvider p_75763_1_)
     {
@@ -60,7 +60,7 @@ public class AnvilSaveHandler extends SaveHandler
     {
         try
         {
-            ThreadedFileIOBase.threadedIOInstance.waitForFinish();
+            ThreadedFileIOBase.func_178779_a().waitForFinish();
         }
         catch (InterruptedException var2)
         {

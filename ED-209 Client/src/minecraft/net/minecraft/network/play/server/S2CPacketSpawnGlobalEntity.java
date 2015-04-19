@@ -9,7 +9,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.MathHelper;
 
-public class S2CPacketSpawnGlobalEntity extends Packet
+public class S2CPacketSpawnGlobalEntity implements Packet
 {
     private int field_149059_a;
     private int field_149057_b;
@@ -36,38 +36,30 @@ public class S2CPacketSpawnGlobalEntity extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149059_a = p_148837_1_.readVarIntFromBuffer();
-        this.field_149056_e = p_148837_1_.readByte();
-        this.field_149057_b = p_148837_1_.readInt();
-        this.field_149058_c = p_148837_1_.readInt();
-        this.field_149055_d = p_148837_1_.readInt();
+        this.field_149059_a = data.readVarIntFromBuffer();
+        this.field_149056_e = data.readByte();
+        this.field_149057_b = data.readInt();
+        this.field_149058_c = data.readInt();
+        this.field_149055_d = data.readInt();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeVarIntToBuffer(this.field_149059_a);
-        p_148840_1_.writeByte(this.field_149056_e);
-        p_148840_1_.writeInt(this.field_149057_b);
-        p_148840_1_.writeInt(this.field_149058_c);
-        p_148840_1_.writeInt(this.field_149055_d);
+        data.writeVarIntToBuffer(this.field_149059_a);
+        data.writeByte(this.field_149056_e);
+        data.writeInt(this.field_149057_b);
+        data.writeInt(this.field_149058_c);
+        data.writeInt(this.field_149055_d);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180720_a(INetHandlerPlayClient p_180720_1_)
     {
-        p_148833_1_.handleSpawnGlobalEntity(this);
-    }
-
-    /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
-     */
-    public String serialize()
-    {
-        return String.format("id=%d, type=%d, x=%.2f, y=%.2f, z=%.2f", new Object[] {Integer.valueOf(this.field_149059_a), Integer.valueOf(this.field_149056_e), Float.valueOf((float)this.field_149057_b / 32.0F), Float.valueOf((float)this.field_149058_c / 32.0F), Float.valueOf((float)this.field_149055_d / 32.0F)});
+        p_180720_1_.handleSpawnGlobalEntity(this);
     }
 
     public int func_149052_c()
@@ -95,8 +87,11 @@ public class S2CPacketSpawnGlobalEntity extends Packet
         return this.field_149056_e;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180720_a((INetHandlerPlayClient)handler);
     }
 }

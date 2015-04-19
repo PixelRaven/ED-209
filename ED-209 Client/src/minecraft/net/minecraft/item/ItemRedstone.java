@@ -1,8 +1,12 @@
 package net.minecraft.item;
 
+import net.minecraft.block.Block;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 public class ItemRedstone extends Item
@@ -15,62 +19,38 @@ public class ItemRedstone extends Item
     }
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_77648_3_.getBlock(p_77648_4_, p_77648_5_, p_77648_6_) != Blocks.snow_layer)
-        {
-            if (p_77648_7_ == 0)
-            {
-                --p_77648_5_;
-            }
+        boolean var9 = worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos);
+        BlockPos var10 = var9 ? pos : pos.offset(side);
 
-            if (p_77648_7_ == 1)
-            {
-                ++p_77648_5_;
-            }
-
-            if (p_77648_7_ == 2)
-            {
-                --p_77648_6_;
-            }
-
-            if (p_77648_7_ == 3)
-            {
-                ++p_77648_6_;
-            }
-
-            if (p_77648_7_ == 4)
-            {
-                --p_77648_4_;
-            }
-
-            if (p_77648_7_ == 5)
-            {
-                ++p_77648_4_;
-            }
-
-            if (!p_77648_3_.isAirBlock(p_77648_4_, p_77648_5_, p_77648_6_))
-            {
-                return false;
-            }
-        }
-
-        if (!p_77648_2_.canPlayerEdit(p_77648_4_, p_77648_5_, p_77648_6_, p_77648_7_, p_77648_1_))
+        if (!playerIn.func_175151_a(var10, side, stack))
         {
             return false;
         }
         else
         {
-            if (Blocks.redstone_wire.canPlaceBlockAt(p_77648_3_, p_77648_4_, p_77648_5_, p_77648_6_))
-            {
-                --p_77648_1_.stackSize;
-                p_77648_3_.setBlock(p_77648_4_, p_77648_5_, p_77648_6_, Blocks.redstone_wire);
-            }
+            Block var11 = worldIn.getBlockState(var10).getBlock();
 
-            return true;
+            if (!worldIn.canBlockBePlaced(var11, var10, false, side, (Entity)null, stack))
+            {
+                return false;
+            }
+            else if (Blocks.redstone_wire.canPlaceBlockAt(worldIn, var10))
+            {
+                --stack.stackSize;
+                worldIn.setBlockState(var10, Blocks.redstone_wire.getDefaultState());
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

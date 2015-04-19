@@ -2,39 +2,39 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenTallGrass extends WorldGenerator
 {
-    private Block field_150522_a;
-    private int tallGrassMetadata;
+    private final IBlockState field_175907_a;
     private static final String __OBFID = "CL_00000437";
 
-    public WorldGenTallGrass(Block p_i45466_1_, int p_i45466_2_)
+    public WorldGenTallGrass(BlockTallGrass.EnumType p_i45629_1_)
     {
-        this.field_150522_a = p_i45466_1_;
-        this.tallGrassMetadata = p_i45466_2_;
+        this.field_175907_a = Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.field_176497_a, p_i45629_1_);
     }
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        Block var6;
+        Block var4;
 
-        while (((var6 = p_76484_1_.getBlock(p_76484_3_, p_76484_4_, p_76484_5_)).getMaterial() == Material.air || var6.getMaterial() == Material.leaves) && p_76484_4_ > 0)
+        while (((var4 = worldIn.getBlockState(p_180709_3_).getBlock()).getMaterial() == Material.air || var4.getMaterial() == Material.leaves) && p_180709_3_.getY() > 0)
         {
-            --p_76484_4_;
+            p_180709_3_ = p_180709_3_.offsetDown();
         }
 
-        for (int var7 = 0; var7 < 128; ++var7)
+        for (int var5 = 0; var5 < 128; ++var5)
         {
-            int var8 = p_76484_3_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
-            int var9 = p_76484_4_ + p_76484_2_.nextInt(4) - p_76484_2_.nextInt(4);
-            int var10 = p_76484_5_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
+            BlockPos var6 = p_180709_3_.add(p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8), p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4), p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8));
 
-            if (p_76484_1_.isAirBlock(var8, var9, var10) && this.field_150522_a.canBlockStay(p_76484_1_, var8, var9, var10))
+            if (worldIn.isAirBlock(var6) && Blocks.tallgrass.canBlockStay(worldIn, var6, this.field_175907_a))
             {
-                p_76484_1_.setBlock(var8, var9, var10, this.field_150522_a, this.tallGrassMetadata, 2);
+                worldIn.setBlockState(var6, this.field_175907_a, 2);
             }
         }
 

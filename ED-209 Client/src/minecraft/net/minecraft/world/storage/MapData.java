@@ -1,14 +1,20 @@
 package net.minecraft.world.storage;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.S34PacketMaps;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec4b;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 
@@ -25,13 +31,13 @@ public class MapData extends WorldSavedData
     /**
      * Holds a reference to the MapInfo of the players who own a copy of the map
      */
-    public List playersArrayList = new ArrayList();
+    public List playersArrayList = Lists.newArrayList();
 
     /**
      * Holds a reference to the players who own a copy of the map and a reference to their MapInfo
      */
-    private Map playersHashMap = new HashMap();
-    public Map playersVisibleOnMap = new LinkedHashMap();
+    private Map playersHashMap = Maps.newHashMap();
+    public Map playersVisibleOnMap = Maps.newLinkedHashMap();
     private static final String __OBFID = "CL_00000577";
 
     public MapData(String p_i2140_1_)
@@ -39,36 +45,35 @@ public class MapData extends WorldSavedData
         super(p_i2140_1_);
     }
 
+    public void func_176054_a(double p_176054_1_, double p_176054_3_, int p_176054_5_)
+    {
+        int var6 = 128 * (1 << p_176054_5_);
+        int var7 = MathHelper.floor_double((p_176054_1_ + 64.0D) / (double)var6);
+        int var8 = MathHelper.floor_double((p_176054_3_ + 64.0D) / (double)var6);
+        this.xCenter = var7 * var6 + var6 / 2 - 64;
+        this.zCenter = var8 * var6 + var6 / 2 - 64;
+    }
+
     /**
      * reads in data from the NBTTagCompound into this MapDataBase
      */
-    public void readFromNBT(NBTTagCompound p_76184_1_)
+    public void readFromNBT(NBTTagCompound nbt)
     {
-        this.dimension = p_76184_1_.getByte("dimension");
-        this.xCenter = p_76184_1_.getInteger("xCenter");
-        this.zCenter = p_76184_1_.getInteger("zCenter");
-        this.scale = p_76184_1_.getByte("scale");
-
-        if (this.scale < 0)
-        {
-            this.scale = 0;
-        }
-
-        if (this.scale > 4)
-        {
-            this.scale = 4;
-        }
-
-        short var2 = p_76184_1_.getShort("width");
-        short var3 = p_76184_1_.getShort("height");
+        this.dimension = nbt.getByte("dimension");
+        this.xCenter = nbt.getInteger("xCenter");
+        this.zCenter = nbt.getInteger("zCenter");
+        this.scale = nbt.getByte("scale");
+        this.scale = (byte)MathHelper.clamp_int(this.scale, 0, 4);
+        short var2 = nbt.getShort("width");
+        short var3 = nbt.getShort("height");
 
         if (var2 == 128 && var3 == 128)
         {
-            this.colors = p_76184_1_.getByteArray("colors");
+            this.colors = nbt.getByteArray("colors");
         }
         else
         {
-            byte[] var4 = p_76184_1_.getByteArray("colors");
+            byte[] var4 = nbt.getByteArray("colors");
             this.colors = new byte[16384];
             int var5 = (128 - var2) / 2;
             int var6 = (128 - var3) / 2;
@@ -96,15 +101,15 @@ public class MapData extends WorldSavedData
     /**
      * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
      */
-    public void writeToNBT(NBTTagCompound p_76187_1_)
+    public void writeToNBT(NBTTagCompound nbt)
     {
-        p_76187_1_.setByte("dimension", this.dimension);
-        p_76187_1_.setInteger("xCenter", this.xCenter);
-        p_76187_1_.setInteger("zCenter", this.zCenter);
-        p_76187_1_.setByte("scale", this.scale);
-        p_76187_1_.setShort("width", (short)128);
-        p_76187_1_.setShort("height", (short)128);
-        p_76187_1_.setByteArray("colors", this.colors);
+        nbt.setByte("dimension", this.dimension);
+        nbt.setInteger("xCenter", this.xCenter);
+        nbt.setInteger("zCenter", this.zCenter);
+        nbt.setByte("scale", this.scale);
+        nbt.setShort("width", (short)128);
+        nbt.setShort("height", (short)128);
+        nbt.setByteArray("colors", this.colors);
     }
 
     /**
@@ -121,18 +126,18 @@ public class MapData extends WorldSavedData
 
         if (!p_76191_1_.inventory.hasItemStack(p_76191_2_))
         {
-            this.playersVisibleOnMap.remove(p_76191_1_.getCommandSenderName());
+            this.playersVisibleOnMap.remove(p_76191_1_.getName());
         }
 
-        for (int var5 = 0; var5 < this.playersArrayList.size(); ++var5)
+        for (int var6 = 0; var6 < this.playersArrayList.size(); ++var6)
         {
-            MapData.MapInfo var4 = (MapData.MapInfo)this.playersArrayList.get(var5);
+            MapData.MapInfo var4 = (MapData.MapInfo)this.playersArrayList.get(var6);
 
             if (!var4.entityplayerObj.isDead && (var4.entityplayerObj.inventory.hasItemStack(p_76191_2_) || p_76191_2_.isOnItemFrame()))
             {
                 if (!p_76191_2_.isOnItemFrame() && var4.entityplayerObj.dimension == this.dimension)
                 {
-                    this.func_82567_a(0, var4.entityplayerObj.worldObj, var4.entityplayerObj.getCommandSenderName(), var4.entityplayerObj.posX, var4.entityplayerObj.posZ, (double)var4.entityplayerObj.rotationYaw);
+                    this.func_82567_a(0, var4.entityplayerObj.worldObj, var4.entityplayerObj.getName(), var4.entityplayerObj.posX, var4.entityplayerObj.posZ, (double)var4.entityplayerObj.rotationYaw);
                 }
             }
             else
@@ -144,11 +149,28 @@ public class MapData extends WorldSavedData
 
         if (p_76191_2_.isOnItemFrame())
         {
-            this.func_82567_a(1, p_76191_1_.worldObj, "frame-" + p_76191_2_.getItemFrame().getEntityId(), (double)p_76191_2_.getItemFrame().field_146063_b, (double)p_76191_2_.getItemFrame().field_146062_d, (double)(p_76191_2_.getItemFrame().hangingDirection * 90));
+            EntityItemFrame var7 = p_76191_2_.getItemFrame();
+            BlockPos var9 = var7.func_174857_n();
+            this.func_82567_a(1, p_76191_1_.worldObj, "frame-" + var7.getEntityId(), (double)var9.getX(), (double)var9.getZ(), (double)(var7.field_174860_b.getHorizontalIndex() * 90));
+        }
+
+        if (p_76191_2_.hasTagCompound() && p_76191_2_.getTagCompound().hasKey("Decorations", 9))
+        {
+            NBTTagList var8 = p_76191_2_.getTagCompound().getTagList("Decorations", 10);
+
+            for (int var10 = 0; var10 < var8.tagCount(); ++var10)
+            {
+                NBTTagCompound var5 = var8.getCompoundTagAt(var10);
+
+                if (!this.playersVisibleOnMap.containsKey(var5.getString("id")))
+                {
+                    this.func_82567_a(var5.getByte("type"), p_76191_1_.worldObj, var5.getString("id"), var5.getDouble("x"), var5.getDouble("z"), var5.getDouble("rot"));
+                }
+            }
         }
     }
 
-    private void func_82567_a(int p_82567_1_, World p_82567_2_, String p_82567_3_, double p_82567_4_, double p_82567_6_, double p_82567_8_)
+    private void func_82567_a(int p_82567_1_, World worldIn, String p_82567_3_, double p_82567_4_, double p_82567_6_, double p_82567_8_)
     {
         int var10 = 1 << this.scale;
         float var11 = (float)(p_82567_4_ - (double)this.xCenter) / (float)var10;
@@ -165,7 +187,7 @@ public class MapData extends WorldSavedData
 
             if (this.dimension < 0)
             {
-                int var17 = (int)(p_82567_2_.getWorldInfo().getWorldTime() / 10L);
+                int var17 = (int)(worldIn.getWorldInfo().getWorldTime() / 10L);
                 var15 = (byte)(var17 * var17 * 34187121 + var17 * 121 >> 15 & 15);
             }
         }
@@ -201,77 +223,24 @@ public class MapData extends WorldSavedData
             }
         }
 
-        this.playersVisibleOnMap.put(p_82567_3_, new MapData.MapCoord((byte)p_82567_1_, var13, var14, var15));
+        this.playersVisibleOnMap.put(p_82567_3_, new Vec4b((byte)p_82567_1_, var13, var14, var15));
     }
 
-    /**
-     * Get byte array of packet data to send to players on map for updating map data
-     */
-    public byte[] getUpdatePacketData(ItemStack p_76193_1_, World p_76193_2_, EntityPlayer p_76193_3_)
+    public Packet func_176052_a(ItemStack p_176052_1_, World worldIn, EntityPlayer p_176052_3_)
     {
-        MapData.MapInfo var4 = (MapData.MapInfo)this.playersHashMap.get(p_76193_3_);
-        return var4 == null ? null : var4.getPlayersOnMap(p_76193_1_);
+        MapData.MapInfo var4 = (MapData.MapInfo)this.playersHashMap.get(p_176052_3_);
+        return var4 == null ? null : var4.func_176101_a(p_176052_1_);
     }
 
-    /**
-     * Marks a vertical range of pixels as being modified so they will be resent to clients. Parameters: X, lowest Y,
-     * highest Y
-     */
-    public void setColumnDirty(int p_76194_1_, int p_76194_2_, int p_76194_3_)
+    public void func_176053_a(int p_176053_1_, int p_176053_2_)
     {
         super.markDirty();
+        Iterator var3 = this.playersArrayList.iterator();
 
-        for (int var4 = 0; var4 < this.playersArrayList.size(); ++var4)
+        while (var3.hasNext())
         {
-            MapData.MapInfo var5 = (MapData.MapInfo)this.playersArrayList.get(var4);
-
-            if (var5.field_76209_b[p_76194_1_] < 0 || var5.field_76209_b[p_76194_1_] > p_76194_2_)
-            {
-                var5.field_76209_b[p_76194_1_] = p_76194_2_;
-            }
-
-            if (var5.field_76210_c[p_76194_1_] < 0 || var5.field_76210_c[p_76194_1_] < p_76194_3_)
-            {
-                var5.field_76210_c[p_76194_1_] = p_76194_3_;
-            }
-        }
-    }
-
-    /**
-     * Updates the client's map with information from other players in MP
-     */
-    public void updateMPMapData(byte[] p_76192_1_)
-    {
-        int var2;
-
-        if (p_76192_1_[0] == 0)
-        {
-            var2 = p_76192_1_[1] & 255;
-            int var3 = p_76192_1_[2] & 255;
-
-            for (int var4 = 0; var4 < p_76192_1_.length - 3; ++var4)
-            {
-                this.colors[(var4 + var3) * 128 + var2] = p_76192_1_[var4 + 3];
-            }
-
-            this.markDirty();
-        }
-        else if (p_76192_1_[0] == 1)
-        {
-            this.playersVisibleOnMap.clear();
-
-            for (var2 = 0; var2 < (p_76192_1_.length - 1) / 3; ++var2)
-            {
-                byte var7 = (byte)(p_76192_1_[var2 * 3 + 1] >> 4);
-                byte var8 = p_76192_1_[var2 * 3 + 2];
-                byte var5 = p_76192_1_[var2 * 3 + 3];
-                byte var6 = (byte)(p_76192_1_[var2 * 3 + 1] & 15);
-                this.playersVisibleOnMap.put("icon-" + var2, new MapData.MapCoord(var7, var8, var5, var6));
-            }
-        }
-        else if (p_76192_1_[0] == 2)
-        {
-            this.scale = p_76192_1_[1];
+            MapData.MapInfo var4 = (MapData.MapInfo)var3.next();
+            var4.func_176102_a(p_176053_1_, p_176053_2_);
         }
     }
 
@@ -289,126 +258,52 @@ public class MapData extends WorldSavedData
         return var2;
     }
 
-    public class MapCoord
-    {
-        public byte iconSize;
-        public byte centerX;
-        public byte centerZ;
-        public byte iconRotation;
-        private static final String __OBFID = "CL_00000579";
-
-        public MapCoord(byte p_i2139_2_, byte p_i2139_3_, byte p_i2139_4_, byte p_i2139_5_)
-        {
-            this.iconSize = p_i2139_2_;
-            this.centerX = p_i2139_3_;
-            this.centerZ = p_i2139_4_;
-            this.iconRotation = p_i2139_5_;
-        }
-    }
-
     public class MapInfo
     {
         public final EntityPlayer entityplayerObj;
-        public int[] field_76209_b = new int[128];
-        public int[] field_76210_c = new int[128];
-        private int currentRandomNumber;
-        private int ticksUntilPlayerLocationMapUpdate;
-        private byte[] lastPlayerLocationOnMap;
+        private boolean field_176105_d = true;
+        private int field_176106_e = 0;
+        private int field_176103_f = 0;
+        private int field_176104_g = 127;
+        private int field_176108_h = 127;
+        private int field_176109_i;
         public int field_82569_d;
-        private boolean field_82570_i;
         private static final String __OBFID = "CL_00000578";
 
         public MapInfo(EntityPlayer p_i2138_2_)
         {
             this.entityplayerObj = p_i2138_2_;
-
-            for (int var3 = 0; var3 < this.field_76209_b.length; ++var3)
-            {
-                this.field_76209_b[var3] = 0;
-                this.field_76210_c[var3] = 127;
-            }
         }
 
-        public byte[] getPlayersOnMap(ItemStack p_76204_1_)
+        public Packet func_176101_a(ItemStack p_176101_1_)
         {
-            byte[] var2;
-
-            if (!this.field_82570_i)
+            if (this.field_176105_d)
             {
-                var2 = new byte[] {(byte)2, MapData.this.scale};
-                this.field_82570_i = true;
-                return var2;
+                this.field_176105_d = false;
+                return new S34PacketMaps(p_176101_1_.getMetadata(), MapData.this.scale, MapData.this.playersVisibleOnMap.values(), MapData.this.colors, this.field_176106_e, this.field_176103_f, this.field_176104_g + 1 - this.field_176106_e, this.field_176108_h + 1 - this.field_176103_f);
             }
             else
             {
-                int var3;
-                int var11;
+                return this.field_176109_i++ % 5 == 0 ? new S34PacketMaps(p_176101_1_.getMetadata(), MapData.this.scale, MapData.this.playersVisibleOnMap.values(), MapData.this.colors, 0, 0, 0, 0) : null;
+            }
+        }
 
-                if (--this.ticksUntilPlayerLocationMapUpdate < 0)
-                {
-                    this.ticksUntilPlayerLocationMapUpdate = 4;
-                    var2 = new byte[MapData.this.playersVisibleOnMap.size() * 3 + 1];
-                    var2[0] = 1;
-                    var3 = 0;
-
-                    for (Iterator var4 = MapData.this.playersVisibleOnMap.values().iterator(); var4.hasNext(); ++var3)
-                    {
-                        MapData.MapCoord var5 = (MapData.MapCoord)var4.next();
-                        var2[var3 * 3 + 1] = (byte)(var5.iconSize << 4 | var5.iconRotation & 15);
-                        var2[var3 * 3 + 2] = var5.centerX;
-                        var2[var3 * 3 + 3] = var5.centerZ;
-                    }
-
-                    boolean var9 = !p_76204_1_.isOnItemFrame();
-
-                    if (this.lastPlayerLocationOnMap != null && this.lastPlayerLocationOnMap.length == var2.length)
-                    {
-                        for (var11 = 0; var11 < var2.length; ++var11)
-                        {
-                            if (var2[var11] != this.lastPlayerLocationOnMap[var11])
-                            {
-                                var9 = false;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var9 = false;
-                    }
-
-                    if (!var9)
-                    {
-                        this.lastPlayerLocationOnMap = var2;
-                        return var2;
-                    }
-                }
-
-                for (int var8 = 0; var8 < 1; ++var8)
-                {
-                    var3 = this.currentRandomNumber++ * 11 % 128;
-
-                    if (this.field_76209_b[var3] >= 0)
-                    {
-                        int var10 = this.field_76210_c[var3] - this.field_76209_b[var3] + 1;
-                        var11 = this.field_76209_b[var3];
-                        byte[] var6 = new byte[var10 + 3];
-                        var6[0] = 0;
-                        var6[1] = (byte)var3;
-                        var6[2] = (byte)var11;
-
-                        for (int var7 = 0; var7 < var6.length - 3; ++var7)
-                        {
-                            var6[var7 + 3] = MapData.this.colors[(var7 + var11) * 128 + var3];
-                        }
-
-                        this.field_76210_c[var3] = -1;
-                        this.field_76209_b[var3] = -1;
-                        return var6;
-                    }
-                }
-
-                return null;
+        public void func_176102_a(int p_176102_1_, int p_176102_2_)
+        {
+            if (this.field_176105_d)
+            {
+                this.field_176106_e = Math.min(this.field_176106_e, p_176102_1_);
+                this.field_176103_f = Math.min(this.field_176103_f, p_176102_2_);
+                this.field_176104_g = Math.max(this.field_176104_g, p_176102_1_);
+                this.field_176108_h = Math.max(this.field_176108_h, p_176102_2_);
+            }
+            else
+            {
+                this.field_176105_d = true;
+                this.field_176106_e = p_176102_1_;
+                this.field_176103_f = p_176102_2_;
+                this.field_176104_g = p_176102_1_;
+                this.field_176108_h = p_176102_2_;
             }
         }
     }

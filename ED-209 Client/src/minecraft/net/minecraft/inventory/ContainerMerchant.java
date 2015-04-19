@@ -16,10 +16,10 @@ public class ContainerMerchant extends Container
     private final World theWorld;
     private static final String __OBFID = "CL_00001757";
 
-    public ContainerMerchant(InventoryPlayer p_i1821_1_, IMerchant p_i1821_2_, World p_i1821_3_)
+    public ContainerMerchant(InventoryPlayer p_i1821_1_, IMerchant p_i1821_2_, World worldIn)
     {
         this.theMerchant = p_i1821_2_;
-        this.theWorld = p_i1821_3_;
+        this.theWorld = worldIn;
         this.merchantInventory = new InventoryMerchant(p_i1821_1_.player, p_i1821_2_);
         this.addSlotToContainer(new Slot(this.merchantInventory, 0, 36, 53));
         this.addSlotToContainer(new Slot(this.merchantInventory, 1, 62, 53));
@@ -45,9 +45,9 @@ public class ContainerMerchant extends Container
         return this.merchantInventory;
     }
 
-    public void addCraftingToCrafters(ICrafting p_75132_1_)
+    public void onCraftGuiOpened(ICrafting p_75132_1_)
     {
-        super.addCraftingToCrafters(p_75132_1_);
+        super.onCraftGuiOpened(p_75132_1_);
     }
 
     /**
@@ -74,25 +74,25 @@ public class ContainerMerchant extends Container
 
     public void updateProgressBar(int p_75137_1_, int p_75137_2_) {}
 
-    public boolean canInteractWith(EntityPlayer p_75145_1_)
+    public boolean canInteractWith(EntityPlayer playerIn)
     {
-        return this.theMerchant.getCustomer() == p_75145_1_;
+        return this.theMerchant.getCustomer() == playerIn;
     }
 
     /**
-     * Called when a player shift-clicks on a slot. You must override this or you will crash when someone does that.
+     * Take a stack from the specified inventory slot.
      */
-    public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_)
+    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index)
     {
         ItemStack var3 = null;
-        Slot var4 = (Slot)this.inventorySlots.get(p_82846_2_);
+        Slot var4 = (Slot)this.inventorySlots.get(index);
 
         if (var4 != null && var4.getHasStack())
         {
             ItemStack var5 = var4.getStack();
             var3 = var5.copy();
 
-            if (p_82846_2_ == 2)
+            if (index == 2)
             {
                 if (!this.mergeItemStack(var5, 3, 39, true))
                 {
@@ -101,16 +101,16 @@ public class ContainerMerchant extends Container
 
                 var4.onSlotChange(var5, var3);
             }
-            else if (p_82846_2_ != 0 && p_82846_2_ != 1)
+            else if (index != 0 && index != 1)
             {
-                if (p_82846_2_ >= 3 && p_82846_2_ < 30)
+                if (index >= 3 && index < 30)
                 {
                     if (!this.mergeItemStack(var5, 30, 39, false))
                     {
                         return null;
                     }
                 }
-                else if (p_82846_2_ >= 30 && p_82846_2_ < 39 && !this.mergeItemStack(var5, 3, 30, false))
+                else if (index >= 30 && index < 39 && !this.mergeItemStack(var5, 3, 30, false))
                 {
                     return null;
                 }
@@ -134,7 +134,7 @@ public class ContainerMerchant extends Container
                 return null;
             }
 
-            var4.onPickupFromSlot(p_82846_1_, var5);
+            var4.onPickupFromSlot(playerIn, var5);
         }
 
         return var3;
@@ -149,7 +149,7 @@ public class ContainerMerchant extends Container
         this.theMerchant.setCustomer((EntityPlayer)null);
         super.onContainerClosed(p_75134_1_);
 
-        if (!this.theWorld.isClient)
+        if (!this.theWorld.isRemote)
         {
             ItemStack var2 = this.merchantInventory.getStackInSlotOnClosing(0);
 

@@ -7,82 +7,75 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class C17PacketCustomPayload extends Packet
+public class C17PacketCustomPayload implements Packet
 {
-    private String field_149562_a;
-    private int field_149560_b;
-    private byte[] field_149561_c;
+    private String channel;
+    private PacketBuffer data;
     private static final String __OBFID = "CL_00001356";
 
     public C17PacketCustomPayload() {}
 
-    public C17PacketCustomPayload(String p_i45248_1_, ByteBuf p_i45248_2_)
+    public C17PacketCustomPayload(String p_i45945_1_, PacketBuffer p_i45945_2_)
     {
-        this(p_i45248_1_, p_i45248_2_.array());
-    }
+        this.channel = p_i45945_1_;
+        this.data = p_i45945_2_;
 
-    public C17PacketCustomPayload(String p_i45249_1_, byte[] p_i45249_2_)
-    {
-        this.field_149562_a = p_i45249_1_;
-        this.field_149561_c = p_i45249_2_;
-
-        if (p_i45249_2_ != null)
+        if (p_i45945_2_.writerIndex() > 32767)
         {
-            this.field_149560_b = p_i45249_2_.length;
-
-            if (this.field_149560_b >= 32767)
-            {
-                throw new IllegalArgumentException("Payload may not be larger than 32k");
-            }
+            throw new IllegalArgumentException("Payload may not be larger than 32767 bytes");
         }
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149562_a = p_148837_1_.readStringFromBuffer(20);
-        this.field_149560_b = p_148837_1_.readShort();
+        this.channel = data.readStringFromBuffer(20);
+        int var2 = data.readableBytes();
 
-        if (this.field_149560_b > 0 && this.field_149560_b < 32767)
+        if (var2 >= 0 && var2 <= 32767)
         {
-            this.field_149561_c = new byte[this.field_149560_b];
-            p_148837_1_.readBytes(this.field_149561_c);
+            this.data = new PacketBuffer(data.readBytes(var2));
+        }
+        else
+        {
+            throw new IOException("Payload may not be larger than 32767 bytes");
         }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(this.field_149562_a);
-        p_148840_1_.writeShort((short)this.field_149560_b);
-
-        if (this.field_149561_c != null)
-        {
-            p_148840_1_.writeBytes(this.field_149561_c);
-        }
+        data.writeString(this.channel);
+        data.writeBytes((ByteBuf)this.data);
     }
 
-    public void processPacket(INetHandlerPlayServer p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
     {
-        p_148833_1_.processVanilla250Packet(this);
+        handler.processVanilla250Packet(this);
     }
 
-    public String func_149559_c()
+    public String getChannelName()
     {
-        return this.field_149562_a;
+        return this.channel;
     }
 
-    public byte[] func_149558_e()
+    public PacketBuffer getBufferData()
     {
-        return this.field_149561_c;
+        return this.data;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayServer)p_148833_1_);
+        this.processPacket((INetHandlerPlayServer)handler);
     }
 }

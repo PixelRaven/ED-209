@@ -1,8 +1,10 @@
 package net.minecraft.block;
 
-import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -10,117 +12,118 @@ import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Items;
-import net.minecraft.util.IIcon;
+import net.minecraft.item.Item;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
 public class BlockTNT extends Block
 {
-    private IIcon field_150116_a;
-    private IIcon field_150115_b;
+    public static final PropertyBool field_176246_a = PropertyBool.create("explode");
     private static final String __OBFID = "CL_00000324";
 
     public BlockTNT()
     {
         super(Material.tnt);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176246_a, Boolean.valueOf(false)));
         this.setCreativeTab(CreativeTabs.tabRedstone);
     }
 
-    /**
-     * Gets the block's texture. Args: side, meta
-     */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        return p_149691_1_ == 0 ? this.field_150115_b : (p_149691_1_ == 1 ? this.field_150116_a : this.blockIcon);
-    }
+        super.onBlockAdded(worldIn, pos, state);
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
-    {
-        super.onBlockAdded(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
-
-        if (p_149726_1_.isBlockIndirectlyGettingPowered(p_149726_2_, p_149726_3_, p_149726_4_))
+        if (worldIn.isBlockPowered(pos))
         {
-            this.onBlockDestroyedByPlayer(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_, 1);
-            p_149726_1_.setBlockToAir(p_149726_2_, p_149726_3_, p_149726_4_);
+            this.onBlockDestroyedByPlayer(worldIn, pos, state.withProperty(field_176246_a, Boolean.valueOf(true)));
+            worldIn.setBlockToAir(pos);
         }
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
-        if (p_149695_1_.isBlockIndirectlyGettingPowered(p_149695_2_, p_149695_3_, p_149695_4_))
+        if (worldIn.isBlockPowered(pos))
         {
-            this.onBlockDestroyedByPlayer(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_, 1);
-            p_149695_1_.setBlockToAir(p_149695_2_, p_149695_3_, p_149695_4_);
+            this.onBlockDestroyedByPlayer(worldIn, pos, state.withProperty(field_176246_a, Boolean.valueOf(true)));
+            worldIn.setBlockToAir(pos);
         }
     }
 
     /**
-     * Returns the quantity of items to drop on block destruction.
+     * Called when this Block is destroyed by an Explosion
      */
-    public int quantityDropped(Random p_149745_1_)
+    public void onBlockDestroyedByExplosion(World worldIn, BlockPos pos, Explosion explosionIn)
     {
-        return 1;
-    }
-
-    /**
-     * Called upon the block being destroyed by an explosion
-     */
-    public void onBlockDestroyedByExplosion(World p_149723_1_, int p_149723_2_, int p_149723_3_, int p_149723_4_, Explosion p_149723_5_)
-    {
-        if (!p_149723_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            EntityTNTPrimed var6 = new EntityTNTPrimed(p_149723_1_, (double)((float)p_149723_2_ + 0.5F), (double)((float)p_149723_3_ + 0.5F), (double)((float)p_149723_4_ + 0.5F), p_149723_5_.getExplosivePlacedBy());
-            var6.fuse = p_149723_1_.rand.nextInt(var6.fuse / 4) + var6.fuse / 8;
-            p_149723_1_.spawnEntityInWorld(var6);
+            EntityTNTPrimed var4 = new EntityTNTPrimed(worldIn, (double)((float)pos.getX() + 0.5F), (double)((float)pos.getY() + 0.5F), (double)((float)pos.getZ() + 0.5F), explosionIn.getExplosivePlacedBy());
+            var4.fuse = worldIn.rand.nextInt(var4.fuse / 4) + var4.fuse / 8;
+            worldIn.spawnEntityInWorld(var4);
         }
     }
 
-    public void onBlockDestroyedByPlayer(World p_149664_1_, int p_149664_2_, int p_149664_3_, int p_149664_4_, int p_149664_5_)
+    /**
+     * Called when a player destroys this Block
+     */
+    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
-        this.func_150114_a(p_149664_1_, p_149664_2_, p_149664_3_, p_149664_4_, p_149664_5_, (EntityLivingBase)null);
+        this.func_180692_a(worldIn, pos, state, (EntityLivingBase)null);
     }
 
-    public void func_150114_a(World p_150114_1_, int p_150114_2_, int p_150114_3_, int p_150114_4_, int p_150114_5_, EntityLivingBase p_150114_6_)
+    public void func_180692_a(World worldIn, BlockPos p_180692_2_, IBlockState p_180692_3_, EntityLivingBase p_180692_4_)
     {
-        if (!p_150114_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            if ((p_150114_5_ & 1) == 1)
+            if (((Boolean)p_180692_3_.getValue(field_176246_a)).booleanValue())
             {
-                EntityTNTPrimed var7 = new EntityTNTPrimed(p_150114_1_, (double)((float)p_150114_2_ + 0.5F), (double)((float)p_150114_3_ + 0.5F), (double)((float)p_150114_4_ + 0.5F), p_150114_6_);
-                p_150114_1_.spawnEntityInWorld(var7);
-                p_150114_1_.playSoundAtEntity(var7, "game.tnt.primed", 1.0F, 1.0F);
+                EntityTNTPrimed var5 = new EntityTNTPrimed(worldIn, (double)((float)p_180692_2_.getX() + 0.5F), (double)((float)p_180692_2_.getY() + 0.5F), (double)((float)p_180692_2_.getZ() + 0.5F), p_180692_4_);
+                worldIn.spawnEntityInWorld(var5);
+                worldIn.playSoundAtEntity(var5, "game.tnt.primed", 1.0F, 1.0F);
             }
         }
     }
 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_149727_5_.getCurrentEquippedItem() != null && p_149727_5_.getCurrentEquippedItem().getItem() == Items.flint_and_steel)
+        if (playerIn.getCurrentEquippedItem() != null)
         {
-            this.func_150114_a(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, 1, p_149727_5_);
-            p_149727_1_.setBlockToAir(p_149727_2_, p_149727_3_, p_149727_4_);
-            p_149727_5_.getCurrentEquippedItem().damageItem(1, p_149727_5_);
-            return true;
+            Item var9 = playerIn.getCurrentEquippedItem().getItem();
+
+            if (var9 == Items.flint_and_steel || var9 == Items.fire_charge)
+            {
+                this.func_180692_a(worldIn, pos, state.withProperty(field_176246_a, Boolean.valueOf(true)), playerIn);
+                worldIn.setBlockToAir(pos);
+
+                if (var9 == Items.flint_and_steel)
+                {
+                    playerIn.getCurrentEquippedItem().damageItem(1, playerIn);
+                }
+                else if (!playerIn.capabilities.isCreativeMode)
+                {
+                    --playerIn.getCurrentEquippedItem().stackSize;
+                }
+
+                return true;
+            }
         }
-        else
-        {
-            return super.onBlockActivated(p_149727_1_, p_149727_2_, p_149727_3_, p_149727_4_, p_149727_5_, p_149727_6_, p_149727_7_, p_149727_8_, p_149727_9_);
-        }
+
+        return super.onBlockActivated(worldIn, pos, state, playerIn, side, hitX, hitY, hitZ);
     }
 
-    public void onEntityCollidedWithBlock(World p_149670_1_, int p_149670_2_, int p_149670_3_, int p_149670_4_, Entity p_149670_5_)
+    /**
+     * Called When an Entity Collided with the Block
+     */
+    public void onEntityCollidedWithBlock(World worldIn, BlockPos pos, IBlockState state, Entity entityIn)
     {
-        if (p_149670_5_ instanceof EntityArrow && !p_149670_1_.isClient)
+        if (!worldIn.isRemote && entityIn instanceof EntityArrow)
         {
-            EntityArrow var6 = (EntityArrow)p_149670_5_;
+            EntityArrow var5 = (EntityArrow)entityIn;
 
-            if (var6.isBurning())
+            if (var5.isBurning())
             {
-                this.func_150114_a(p_149670_1_, p_149670_2_, p_149670_3_, p_149670_4_, 1, var6.shootingEntity instanceof EntityLivingBase ? (EntityLivingBase)var6.shootingEntity : null);
-                p_149670_1_.setBlockToAir(p_149670_2_, p_149670_3_, p_149670_4_);
+                this.func_180692_a(worldIn, pos, worldIn.getBlockState(pos).withProperty(field_176246_a, Boolean.valueOf(true)), var5.shootingEntity instanceof EntityLivingBase ? (EntityLivingBase)var5.shootingEntity : null);
+                worldIn.setBlockToAir(pos);
             }
         }
     }
@@ -128,15 +131,29 @@ public class BlockTNT extends Block
     /**
      * Return whether this block can drop from an explosion.
      */
-    public boolean canDropFromExplosion(Explosion p_149659_1_)
+    public boolean canDropFromExplosion(Explosion explosionIn)
     {
         return false;
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
     {
-        this.blockIcon = p_149651_1_.registerIcon(this.getTextureName() + "_side");
-        this.field_150116_a = p_149651_1_.registerIcon(this.getTextureName() + "_top");
-        this.field_150115_b = p_149651_1_.registerIcon(this.getTextureName() + "_bottom");
+        return this.getDefaultState().withProperty(field_176246_a, Boolean.valueOf((meta & 1) > 0));
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((Boolean)state.getValue(field_176246_a)).booleanValue() ? 1 : 0;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {field_176246_a});
     }
 }

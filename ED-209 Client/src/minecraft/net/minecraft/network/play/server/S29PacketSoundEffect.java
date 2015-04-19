@@ -5,9 +5,10 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.MathHelper;
 import org.apache.commons.lang3.Validate;
 
-public class S29PacketSoundEffect extends Packet
+public class S29PacketSoundEffect implements Packet
 {
     private String field_149219_a;
     private int field_149217_b;
@@ -28,42 +29,33 @@ public class S29PacketSoundEffect extends Packet
         this.field_149215_d = (int)(p_i45200_6_ * 8.0D);
         this.field_149216_e = p_i45200_8_;
         this.field_149214_f = (int)(p_i45200_9_ * 63.0F);
-
-        if (this.field_149214_f < 0)
-        {
-            this.field_149214_f = 0;
-        }
-
-        if (this.field_149214_f > 255)
-        {
-            this.field_149214_f = 255;
-        }
+        p_i45200_9_ = MathHelper.clamp_float(p_i45200_9_, 0.0F, 255.0F);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149219_a = p_148837_1_.readStringFromBuffer(256);
-        this.field_149217_b = p_148837_1_.readInt();
-        this.field_149218_c = p_148837_1_.readInt();
-        this.field_149215_d = p_148837_1_.readInt();
-        this.field_149216_e = p_148837_1_.readFloat();
-        this.field_149214_f = p_148837_1_.readUnsignedByte();
+        this.field_149219_a = data.readStringFromBuffer(256);
+        this.field_149217_b = data.readInt();
+        this.field_149218_c = data.readInt();
+        this.field_149215_d = data.readInt();
+        this.field_149216_e = data.readFloat();
+        this.field_149214_f = data.readUnsignedByte();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeStringToBuffer(this.field_149219_a);
-        p_148840_1_.writeInt(this.field_149217_b);
-        p_148840_1_.writeInt(this.field_149218_c);
-        p_148840_1_.writeInt(this.field_149215_d);
-        p_148840_1_.writeFloat(this.field_149216_e);
-        p_148840_1_.writeByte(this.field_149214_f);
+        data.writeString(this.field_149219_a);
+        data.writeInt(this.field_149217_b);
+        data.writeInt(this.field_149218_c);
+        data.writeInt(this.field_149215_d);
+        data.writeFloat(this.field_149216_e);
+        data.writeByte(this.field_149214_f);
     }
 
     public String func_149212_c()
@@ -96,13 +88,19 @@ public class S29PacketSoundEffect extends Packet
         return (float)this.field_149214_f / 63.0F;
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleSoundEffect(this);
+        handler.handleSoundEffect(this);
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

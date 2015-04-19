@@ -1,11 +1,14 @@
 package net.minecraft.client.particle;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.MathHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import org.lwjgl.opengl.GL11;
 
 public class EntityFootStepFX extends EntityFX
 {
@@ -15,44 +18,44 @@ public class EntityFootStepFX extends EntityFX
     private TextureManager currentFootSteps;
     private static final String __OBFID = "CL_00000908";
 
-    public EntityFootStepFX(TextureManager p_i1210_1_, World p_i1210_2_, double p_i1210_3_, double p_i1210_5_, double p_i1210_7_)
+    protected EntityFootStepFX(TextureManager p_i1210_1_, World worldIn, double p_i1210_3_, double p_i1210_5_, double p_i1210_7_)
     {
-        super(p_i1210_2_, p_i1210_3_, p_i1210_5_, p_i1210_7_, 0.0D, 0.0D, 0.0D);
+        super(worldIn, p_i1210_3_, p_i1210_5_, p_i1210_7_, 0.0D, 0.0D, 0.0D);
         this.currentFootSteps = p_i1210_1_;
         this.motionX = this.motionY = this.motionZ = 0.0D;
         this.footstepMaxAge = 200;
     }
 
-    public void renderParticle(Tessellator p_70539_1_, float p_70539_2_, float p_70539_3_, float p_70539_4_, float p_70539_5_, float p_70539_6_, float p_70539_7_)
+    public void func_180434_a(WorldRenderer p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_)
     {
-        float var8 = ((float)this.footstepAge + p_70539_2_) / (float)this.footstepMaxAge;
-        var8 *= var8;
-        float var9 = 2.0F - var8 * 2.0F;
+        float var9 = ((float)this.footstepAge + p_180434_3_) / (float)this.footstepMaxAge;
+        var9 *= var9;
+        float var10 = 2.0F - var9 * 2.0F;
 
-        if (var9 > 1.0F)
+        if (var10 > 1.0F)
         {
-            var9 = 1.0F;
+            var10 = 1.0F;
         }
 
-        var9 *= 0.2F;
-        GL11.glDisable(GL11.GL_LIGHTING);
-        float var10 = 0.125F;
-        float var11 = (float)(this.posX - interpPosX);
-        float var12 = (float)(this.posY - interpPosY);
-        float var13 = (float)(this.posZ - interpPosZ);
-        float var14 = this.worldObj.getLightBrightness(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ));
+        var10 *= 0.2F;
+        GlStateManager.disableLighting();
+        float var11 = 0.125F;
+        float var12 = (float)(this.posX - interpPosX);
+        float var13 = (float)(this.posY - interpPosY);
+        float var14 = (float)(this.posZ - interpPosZ);
+        float var15 = this.worldObj.getLightBrightness(new BlockPos(this));
         this.currentFootSteps.bindTexture(field_110126_a);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        p_70539_1_.startDrawingQuads();
-        p_70539_1_.setColorRGBA_F(var14, var14, var14, var9);
-        p_70539_1_.addVertexWithUV((double)(var11 - var10), (double)var12, (double)(var13 + var10), 0.0D, 1.0D);
-        p_70539_1_.addVertexWithUV((double)(var11 + var10), (double)var12, (double)(var13 + var10), 1.0D, 1.0D);
-        p_70539_1_.addVertexWithUV((double)(var11 + var10), (double)var12, (double)(var13 - var10), 1.0D, 0.0D);
-        p_70539_1_.addVertexWithUV((double)(var11 - var10), (double)var12, (double)(var13 - var10), 0.0D, 0.0D);
-        p_70539_1_.draw();
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_LIGHTING);
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(770, 771);
+        p_180434_1_.startDrawingQuads();
+        p_180434_1_.func_178960_a(var15, var15, var15, var10);
+        p_180434_1_.addVertexWithUV((double)(var12 - var11), (double)var13, (double)(var14 + var11), 0.0D, 1.0D);
+        p_180434_1_.addVertexWithUV((double)(var12 + var11), (double)var13, (double)(var14 + var11), 1.0D, 1.0D);
+        p_180434_1_.addVertexWithUV((double)(var12 + var11), (double)var13, (double)(var14 - var11), 1.0D, 0.0D);
+        p_180434_1_.addVertexWithUV((double)(var12 - var11), (double)var13, (double)(var14 - var11), 0.0D, 0.0D);
+        Tessellator.getInstance().draw();
+        GlStateManager.disableBlend();
+        GlStateManager.enableLighting();
     }
 
     /**
@@ -71,5 +74,15 @@ public class EntityFootStepFX extends EntityFX
     public int getFXLayer()
     {
         return 3;
+    }
+
+    public static class Factory implements IParticleFactory
+    {
+        private static final String __OBFID = "CL_00002601";
+
+        public EntityFX func_178902_a(int p_178902_1_, World worldIn, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int ... p_178902_15_)
+        {
+            return new EntityFootStepFX(Minecraft.getMinecraft().getTextureManager(), worldIn, p_178902_3_, p_178902_5_, p_178902_7_);
+        }
     }
 }

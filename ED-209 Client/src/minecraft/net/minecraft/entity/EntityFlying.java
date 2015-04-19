@@ -1,5 +1,7 @@
 package net.minecraft.entity;
 
+import net.minecraft.block.Block;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -7,21 +9,14 @@ public abstract class EntityFlying extends EntityLiving
 {
     private static final String __OBFID = "CL_00001545";
 
-    public EntityFlying(World p_i1587_1_)
+    public EntityFlying(World worldIn)
     {
-        super(p_i1587_1_);
+        super(worldIn);
     }
 
-    /**
-     * Called when the mob is falling. Calculates and applies fall damage.
-     */
-    protected void fall(float p_70069_1_) {}
+    public void fall(float distance, float damageMultiplier) {}
 
-    /**
-     * Takes in the distance the entity has fallen this tick and whether its on the ground to update the fall distance
-     * and deal fall damage if landing on the ground.  Args: distanceFallenThisTick, onGround
-     */
-    protected void updateFallState(double p_70064_1_, boolean p_70064_3_) {}
+    protected void func_180433_a(double p_180433_1_, boolean p_180433_3_, Block p_180433_4_, BlockPos p_180433_5_) {}
 
     /**
      * Moves the entity based on the specified heading.  Args: strafe, forward
@@ -36,7 +31,7 @@ public abstract class EntityFlying extends EntityLiving
             this.motionY *= 0.800000011920929D;
             this.motionZ *= 0.800000011920929D;
         }
-        else if (this.handleLavaMovement())
+        else if (this.func_180799_ab())
         {
             this.moveFlying(p_70612_1_, p_70612_2_, 0.02F);
             this.moveEntity(this.motionX, this.motionY, this.motionZ);
@@ -50,7 +45,7 @@ public abstract class EntityFlying extends EntityLiving
 
             if (this.onGround)
             {
-                var3 = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).slipperiness * 0.91F;
+                var3 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(this.posZ))).getBlock().slipperiness * 0.91F;
             }
 
             float var4 = 0.16277136F / (var3 * var3 * var3);
@@ -59,7 +54,7 @@ public abstract class EntityFlying extends EntityLiving
 
             if (this.onGround)
             {
-                var3 = this.worldObj.getBlock(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.boundingBox.minY) - 1, MathHelper.floor_double(this.posZ)).slipperiness * 0.91F;
+                var3 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(this.posZ))).getBlock().slipperiness * 0.91F;
             }
 
             this.moveEntity(this.motionX, this.motionY, this.motionZ);

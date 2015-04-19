@@ -2,6 +2,8 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public abstract class WorldGenerator
@@ -15,7 +17,7 @@ public abstract class WorldGenerator
 
     public WorldGenerator()
     {
-        this.doBlockNotify = false;
+        this(false);
     }
 
     public WorldGenerator(boolean p_i2013_1_)
@@ -23,27 +25,29 @@ public abstract class WorldGenerator
         this.doBlockNotify = p_i2013_1_;
     }
 
-    public abstract boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_);
+    public abstract boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_);
 
-    /**
-     * Rescales the generator settings, only used in WorldGenBigTree
-     */
-    public void setScale(double p_76487_1_, double p_76487_3_, double p_76487_5_) {}
+    public void func_175904_e() {}
 
-    protected void func_150515_a(World p_150515_1_, int p_150515_2_, int p_150515_3_, int p_150515_4_, Block p_150515_5_)
+    protected void func_175906_a(World worldIn, BlockPos p_175906_2_, Block p_175906_3_)
     {
-        this.func_150516_a(p_150515_1_, p_150515_2_, p_150515_3_, p_150515_4_, p_150515_5_, 0);
+        this.func_175905_a(worldIn, p_175906_2_, p_175906_3_, 0);
     }
 
-    protected void func_150516_a(World p_150516_1_, int p_150516_2_, int p_150516_3_, int p_150516_4_, Block p_150516_5_, int p_150516_6_)
+    protected void func_175905_a(World worldIn, BlockPos p_175905_2_, Block p_175905_3_, int p_175905_4_)
+    {
+        this.func_175903_a(worldIn, p_175905_2_, p_175905_3_.getStateFromMeta(p_175905_4_));
+    }
+
+    protected void func_175903_a(World worldIn, BlockPos p_175903_2_, IBlockState p_175903_3_)
     {
         if (this.doBlockNotify)
         {
-            p_150516_1_.setBlock(p_150516_2_, p_150516_3_, p_150516_4_, p_150516_5_, p_150516_6_, 3);
+            worldIn.setBlockState(p_175903_2_, p_175903_3_, 3);
         }
         else
         {
-            p_150516_1_.setBlock(p_150516_2_, p_150516_3_, p_150516_4_, p_150516_5_, p_150516_6_, 2);
+            worldIn.setBlockState(p_175903_2_, p_175903_3_, 2);
         }
     }
 }

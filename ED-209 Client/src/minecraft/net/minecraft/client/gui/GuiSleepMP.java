@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.network.play.client.C0BPacketEntityAction;
@@ -18,47 +19,48 @@ public class GuiSleepMP extends GuiChat
     }
 
     /**
-     * Fired when a key is typed. This is the equivalent of KeyListener.keyTyped(KeyEvent e).
+     * Fired when a key is typed (except F11 who toggle full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
      */
-    protected void keyTyped(char p_73869_1_, int p_73869_2_)
+    protected void keyTyped(char typedChar, int keyCode) throws IOException
     {
-        if (p_73869_2_ == 1)
+        if (keyCode == 1)
         {
-            this.func_146418_g();
+            this.wakeFromSleep();
         }
-        else if (p_73869_2_ != 28 && p_73869_2_ != 156)
+        else if (keyCode != 28 && keyCode != 156)
         {
-            super.keyTyped(p_73869_1_, p_73869_2_);
+            super.keyTyped(typedChar, keyCode);
         }
         else
         {
-            String var3 = this.field_146415_a.getText().trim();
+            String var3 = this.inputField.getText().trim();
 
             if (!var3.isEmpty())
             {
                 this.mc.thePlayer.sendChatMessage(var3);
             }
 
-            this.field_146415_a.setText("");
+            this.inputField.setText("");
             this.mc.ingameGUI.getChatGUI().resetScroll();
         }
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.id == 1)
+        if (button.id == 1)
         {
-            this.func_146418_g();
+            this.wakeFromSleep();
         }
         else
         {
-            super.actionPerformed(p_146284_1_);
+            super.actionPerformed(button);
         }
     }
 
-    private void func_146418_g()
+    private void wakeFromSleep()
     {
         NetHandlerPlayClient var1 = this.mc.thePlayer.sendQueue;
-        var1.addToSendQueue(new C0BPacketEntityAction(this.mc.thePlayer, 3));
+        var1.addToSendQueue(new C0BPacketEntityAction(this.mc.thePlayer, C0BPacketEntityAction.Action.STOP_SLEEPING));
     }
 }

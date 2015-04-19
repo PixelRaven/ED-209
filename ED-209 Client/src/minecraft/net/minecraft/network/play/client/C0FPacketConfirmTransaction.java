@@ -6,67 +6,65 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayServer;
 
-public class C0FPacketConfirmTransaction extends Packet
+public class C0FPacketConfirmTransaction implements Packet
 {
-    private int field_149536_a;
-    private short field_149534_b;
-    private boolean field_149535_c;
+    private int id;
+    private short uid;
+    private boolean accepted;
     private static final String __OBFID = "CL_00001351";
 
     public C0FPacketConfirmTransaction() {}
 
     public C0FPacketConfirmTransaction(int p_i45244_1_, short p_i45244_2_, boolean p_i45244_3_)
     {
-        this.field_149536_a = p_i45244_1_;
-        this.field_149534_b = p_i45244_2_;
-        this.field_149535_c = p_i45244_3_;
+        this.id = p_i45244_1_;
+        this.uid = p_i45244_2_;
+        this.accepted = p_i45244_3_;
     }
 
-    public void processPacket(INetHandlerPlayServer p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayServer handler)
     {
-        p_148833_1_.processConfirmTransaction(this);
+        handler.processConfirmTransaction(this);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149536_a = p_148837_1_.readByte();
-        this.field_149534_b = p_148837_1_.readShort();
-        this.field_149535_c = p_148837_1_.readByte() != 0;
+        this.id = data.readByte();
+        this.uid = data.readShort();
+        this.accepted = data.readByte() != 0;
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeByte(this.field_149536_a);
-        p_148840_1_.writeShort(this.field_149534_b);
-        p_148840_1_.writeByte(this.field_149535_c ? 1 : 0);
+        data.writeByte(this.id);
+        data.writeShort(this.uid);
+        data.writeByte(this.accepted ? 1 : 0);
+    }
+
+    public int getId()
+    {
+        return this.id;
+    }
+
+    public short getUid()
+    {
+        return this.uid;
     }
 
     /**
-     * Returns a string formatted as comma separated [field]=[value] values. Used by Minecraft for logging purposes.
+     * Passes this Packet on to the NetHandler for processing.
      */
-    public String serialize()
+    public void processPacket(INetHandler handler)
     {
-        return String.format("id=%d, uid=%d, accepted=%b", new Object[] {Integer.valueOf(this.field_149536_a), Short.valueOf(this.field_149534_b), Boolean.valueOf(this.field_149535_c)});
-    }
-
-    public int func_149532_c()
-    {
-        return this.field_149536_a;
-    }
-
-    public short func_149533_d()
-    {
-        return this.field_149534_b;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerPlayServer)p_148833_1_);
+        this.processPacket((INetHandlerPlayServer)handler);
     }
 }

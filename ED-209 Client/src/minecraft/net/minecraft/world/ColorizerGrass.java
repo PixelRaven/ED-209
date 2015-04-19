@@ -19,6 +19,7 @@ public class ColorizerGrass
         p_77480_2_ *= p_77480_0_;
         int var4 = (int)((1.0D - p_77480_0_) * 255.0D);
         int var5 = (int)((1.0D - p_77480_2_) * 255.0D);
-        return grassBuffer[var5 << 8 | var4];
+        int var6 = var5 << 8 | var4;
+        return var6 > grassBuffer.length ? -65281 : grassBuffer[var6];
     }
 }

@@ -1,7 +1,8 @@
 package net.minecraft.entity;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -9,6 +10,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityEnderEye;
@@ -47,26 +49,24 @@ public class EntityTracker
     /**
      * List of tracked entities, used for iteration operations on tracked entities.
      */
-    private Set trackedEntities = new HashSet();
-    private IntHashMap trackedEntityIDs = new IntHashMap();
-    private int entityViewDistance;
+    private Set trackedEntities = Sets.newHashSet();
+
+    /** Used for identity lookup of tracked entities. */
+    private IntHashMap trackedEntityHashTable = new IntHashMap();
+    private int maxTrackingDistanceThreshold;
     private static final String __OBFID = "CL_00001431";
 
     public EntityTracker(WorldServer p_i1516_1_)
     {
         this.theWorld = p_i1516_1_;
-        this.entityViewDistance = p_i1516_1_.func_73046_m().getConfigurationManager().getEntityViewDistance();
+        this.maxTrackingDistanceThreshold = p_i1516_1_.func_73046_m().getConfigurationManager().getEntityViewDistance();
     }
 
-    /**
-     * if entity is a player sends all tracked events to the player, otherwise, adds with a visibility and update arate
-     * based on the class type
-     */
-    public void addEntityToTracker(Entity p_72786_1_)
+    public void trackEntity(Entity p_72786_1_)
     {
         if (p_72786_1_ instanceof EntityPlayerMP)
         {
-            this.addEntityToTracker(p_72786_1_, 512, 2);
+            this.trackEntity(p_72786_1_, 512, 2);
             EntityPlayerMP var2 = (EntityPlayerMP)p_72786_1_;
             Iterator var3 = this.trackedEntities.iterator();
 
@@ -74,9 +74,9 @@ public class EntityTracker
             {
                 EntityTrackerEntry var4 = (EntityTrackerEntry)var3.next();
 
-                if (var4.myEntity != var2)
+                if (var4.trackedEntity != var2)
                 {
-                    var4.tryStartWachingThis(var2);
+                    var4.updatePlayerEntity(var2);
                 }
             }
         }
@@ -148,13 +148,13 @@ public class EntityTracker
         {
             this.addEntityToTracker(p_72786_1_, 80, 3, false);
         }
-        else if (p_72786_1_ instanceof IAnimals)
-        {
-            this.addEntityToTracker(p_72786_1_, 80, 3, true);
-        }
         else if (p_72786_1_ instanceof EntityDragon)
         {
             this.addEntityToTracker(p_72786_1_, 160, 3, true);
+        }
+        else if (p_72786_1_ instanceof IAnimals)
+        {
+            this.addEntityToTracker(p_72786_1_, 80, 3, true);
         }
         else if (p_72786_1_ instanceof EntityTNTPrimed)
         {
@@ -168,6 +168,10 @@ public class EntityTracker
         {
             this.addEntityToTracker(p_72786_1_, 160, Integer.MAX_VALUE, false);
         }
+        else if (p_72786_1_ instanceof EntityArmorStand)
+        {
+            this.addEntityToTracker(p_72786_1_, 160, 3, true);
+        }
         else if (p_72786_1_ instanceof EntityXPOrb)
         {
             this.addEntityToTracker(p_72786_1_, 160, 20, true);
@@ -178,29 +182,32 @@ public class EntityTracker
         }
     }
 
-    public void addEntityToTracker(Entity p_72791_1_, int p_72791_2_, int p_72791_3_)
+    public void trackEntity(Entity p_72791_1_, int p_72791_2_, int p_72791_3_)
     {
         this.addEntityToTracker(p_72791_1_, p_72791_2_, p_72791_3_, false);
     }
 
+    /**
+     * Args : Entity, trackingRange, updateFrequency, sendVelocityUpdates
+     */
     public void addEntityToTracker(Entity p_72785_1_, int p_72785_2_, final int p_72785_3_, boolean p_72785_4_)
     {
-        if (p_72785_2_ > this.entityViewDistance)
+        if (p_72785_2_ > this.maxTrackingDistanceThreshold)
         {
-            p_72785_2_ = this.entityViewDistance;
+            p_72785_2_ = this.maxTrackingDistanceThreshold;
         }
 
         try
         {
-            if (this.trackedEntityIDs.containsItem(p_72785_1_.getEntityId()))
+            if (this.trackedEntityHashTable.containsItem(p_72785_1_.getEntityId()))
             {
                 throw new IllegalStateException("Entity is already tracked!");
             }
 
             EntityTrackerEntry var5 = new EntityTrackerEntry(p_72785_1_, p_72785_2_, p_72785_3_, p_72785_4_);
             this.trackedEntities.add(var5);
-            this.trackedEntityIDs.addKey(p_72785_1_.getEntityId(), var5);
-            var5.sendEventsToPlayers(this.theWorld.playerEntities);
+            this.trackedEntityHashTable.addKey(p_72785_1_.getEntityId(), var5);
+            var5.updatePlayerEntities(this.theWorld.playerEntities);
         }
         catch (Throwable var11)
         {
@@ -224,7 +231,7 @@ public class EntityTracker
             });
             p_72785_1_.addEntityCrashInfo(var7);
             CrashReportCategory var8 = var6.makeCategory("Entity That Is Already Tracked");
-            ((EntityTrackerEntry)this.trackedEntityIDs.lookup(p_72785_1_.getEntityId())).myEntity.addEntityCrashInfo(var8);
+            ((EntityTrackerEntry)this.trackedEntityHashTable.lookup(p_72785_1_.getEntityId())).trackedEntity.addEntityCrashInfo(var8);
 
             try
             {
@@ -237,7 +244,7 @@ public class EntityTracker
         }
     }
 
-    public void removeEntityFromAllTrackingPlayers(Entity p_72790_1_)
+    public void untrackEntity(Entity p_72790_1_)
     {
         if (p_72790_1_ instanceof EntityPlayerMP)
         {
@@ -247,32 +254,32 @@ public class EntityTracker
             while (var3.hasNext())
             {
                 EntityTrackerEntry var4 = (EntityTrackerEntry)var3.next();
-                var4.removeFromWatchingList(var2);
+                var4.removeFromTrackedPlayers(var2);
             }
         }
 
-        EntityTrackerEntry var5 = (EntityTrackerEntry)this.trackedEntityIDs.removeObject(p_72790_1_.getEntityId());
+        EntityTrackerEntry var5 = (EntityTrackerEntry)this.trackedEntityHashTable.removeObject(p_72790_1_.getEntityId());
 
         if (var5 != null)
         {
             this.trackedEntities.remove(var5);
-            var5.informAllAssociatedPlayersOfItemDestruction();
+            var5.sendDestroyEntityPacketToTrackedPlayers();
         }
     }
 
     public void updateTrackedEntities()
     {
-        ArrayList var1 = new ArrayList();
+        ArrayList var1 = Lists.newArrayList();
         Iterator var2 = this.trackedEntities.iterator();
 
         while (var2.hasNext())
         {
             EntityTrackerEntry var3 = (EntityTrackerEntry)var2.next();
-            var3.sendLocationToAllClients(this.theWorld.playerEntities);
+            var3.updatePlayerList(this.theWorld.playerEntities);
 
-            if (var3.playerEntitiesUpdated && var3.myEntity instanceof EntityPlayerMP)
+            if (var3.playerEntitiesUpdated && var3.trackedEntity instanceof EntityPlayerMP)
             {
-                var1.add((EntityPlayerMP)var3.myEntity);
+                var1.add((EntityPlayerMP)var3.trackedEntity);
             }
         }
 
@@ -285,17 +292,36 @@ public class EntityTracker
             {
                 EntityTrackerEntry var5 = (EntityTrackerEntry)var4.next();
 
-                if (var5.myEntity != var7)
+                if (var5.trackedEntity != var7)
                 {
-                    var5.tryStartWachingThis(var7);
+                    var5.updatePlayerEntity(var7);
                 }
             }
         }
     }
 
-    public void func_151247_a(Entity p_151247_1_, Packet p_151247_2_)
+    public void func_180245_a(EntityPlayerMP p_180245_1_)
     {
-        EntityTrackerEntry var3 = (EntityTrackerEntry)this.trackedEntityIDs.lookup(p_151247_1_.getEntityId());
+        Iterator var2 = this.trackedEntities.iterator();
+
+        while (var2.hasNext())
+        {
+            EntityTrackerEntry var3 = (EntityTrackerEntry)var2.next();
+
+            if (var3.trackedEntity == p_180245_1_)
+            {
+                var3.updatePlayerEntities(this.theWorld.playerEntities);
+            }
+            else
+            {
+                var3.updatePlayerEntity(p_180245_1_);
+            }
+        }
+    }
+
+    public void sendToAllTrackingEntity(Entity p_151247_1_, Packet p_151247_2_)
+    {
+        EntityTrackerEntry var3 = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(p_151247_1_.getEntityId());
 
         if (var3 != null)
         {
@@ -305,7 +331,7 @@ public class EntityTracker
 
     public void func_151248_b(Entity p_151248_1_, Packet p_151248_2_)
     {
-        EntityTrackerEntry var3 = (EntityTrackerEntry)this.trackedEntityIDs.lookup(p_151248_1_.getEntityId());
+        EntityTrackerEntry var3 = (EntityTrackerEntry)this.trackedEntityHashTable.lookup(p_151248_1_.getEntityId());
 
         if (var3 != null)
         {
@@ -320,7 +346,7 @@ public class EntityTracker
         while (var2.hasNext())
         {
             EntityTrackerEntry var3 = (EntityTrackerEntry)var2.next();
-            var3.removePlayerFromTracker(p_72787_1_);
+            var3.removeTrackedPlayerSymmetric(p_72787_1_);
         }
     }
 
@@ -332,9 +358,9 @@ public class EntityTracker
         {
             EntityTrackerEntry var4 = (EntityTrackerEntry)var3.next();
 
-            if (var4.myEntity != p_85172_1_ && var4.myEntity.chunkCoordX == p_85172_2_.xPosition && var4.myEntity.chunkCoordZ == p_85172_2_.zPosition)
+            if (var4.trackedEntity != p_85172_1_ && var4.trackedEntity.chunkCoordX == p_85172_2_.xPosition && var4.trackedEntity.chunkCoordZ == p_85172_2_.zPosition)
             {
-                var4.tryStartWachingThis(p_85172_1_);
+                var4.updatePlayerEntity(p_85172_1_);
             }
         }
     }

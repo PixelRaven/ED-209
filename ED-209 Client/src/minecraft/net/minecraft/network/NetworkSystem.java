@@ -1,5 +1,6 @@
 package net.minecraft.network;
 
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -7,7 +8,9 @@ import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalEventLoopGroup;
 import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -17,7 +20,6 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.SocketAddress;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +31,7 @@ import net.minecraft.network.play.server.S40PacketDisconnect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.LazyLoadBase;
 import net.minecraft.util.MessageDeserializer;
 import net.minecraft.util.MessageDeserializer2;
 import net.minecraft.util.MessageSerializer;
@@ -40,7 +43,30 @@ import org.apache.logging.log4j.Logger;
 public class NetworkSystem
 {
     private static final Logger logger = LogManager.getLogger();
-    private static final NioEventLoopGroup eventLoops = new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty IO #%d").setDaemon(true).build());
+    public static final LazyLoadBase eventLoops = new LazyLoadBase()
+    {
+        private static final String __OBFID = "CL_00001448";
+        protected NioEventLoopGroup genericLoad()
+        {
+            return new NioEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Server IO #%d").setDaemon(true).build());
+        }
+        protected Object load()
+        {
+            return this.genericLoad();
+        }
+    };
+    public static final LazyLoadBase SERVER_LOCAL_EVENTLOOP = new LazyLoadBase()
+    {
+        private static final String __OBFID = "CL_00001449";
+        protected LocalEventLoopGroup genericLoad()
+        {
+            return new LocalEventLoopGroup(0, (new ThreadFactoryBuilder()).setNameFormat("Netty Local Server IO #%d").setDaemon(true).build());
+        }
+        protected Object load()
+        {
+            return this.genericLoad();
+        }
+    };
 
     /** Reference to the MinecraftServer object. */
     private final MinecraftServer mcServer;
@@ -49,22 +75,22 @@ public class NetworkSystem
     public volatile boolean isAlive;
 
     /** Contains all endpoints added to this NetworkSystem */
-    private final List endpoints = Collections.synchronizedList(new ArrayList());
+    private final List endpoints = Collections.synchronizedList(Lists.newArrayList());
 
     /** A list containing all NetworkManager instances of all endpoints */
-    private final List networkManagers = Collections.synchronizedList(new ArrayList());
+    private final List networkManagers = Collections.synchronizedList(Lists.newArrayList());
     private static final String __OBFID = "CL_00001447";
 
-    public NetworkSystem(MinecraftServer p_i45292_1_)
+    public NetworkSystem(MinecraftServer server)
     {
-        this.mcServer = p_i45292_1_;
+        this.mcServer = server;
         this.isAlive = true;
     }
 
     /**
      * Adds a channel that listens on publicly accessible network ports
      */
-    public void addLanEndpoint(InetAddress p_151265_1_, int p_151265_2_) throws IOException
+    public void addLanEndpoint(InetAddress address, int port) throws IOException
     {
         List var3 = this.endpoints;
 
@@ -72,7 +98,7 @@ public class NetworkSystem
         {
             this.endpoints.add(((ServerBootstrap)((ServerBootstrap)(new ServerBootstrap()).channel(NioServerSocketChannel.class)).childHandler(new ChannelInitializer()
             {
-                private static final String __OBFID = "CL_00001448";
+                private static final String __OBFID = "CL_00001450";
                 protected void initChannel(Channel p_initChannel_1_)
                 {
                     try
@@ -93,13 +119,13 @@ public class NetworkSystem
                         ;
                     }
 
-                    p_initChannel_1_.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new PingResponseHandler(NetworkSystem.this)).addLast("splitter", new MessageDeserializer2()).addLast("decoder", new MessageDeserializer(NetworkManager.field_152462_h)).addLast("prepender", new MessageSerializer2()).addLast("encoder", new MessageSerializer(NetworkManager.field_152462_h));
-                    NetworkManager var2 = new NetworkManager(false);
+                    p_initChannel_1_.pipeline().addLast("timeout", new ReadTimeoutHandler(30)).addLast("legacy_query", new PingResponseHandler(NetworkSystem.this)).addLast("splitter", new MessageDeserializer2()).addLast("decoder", new MessageDeserializer(EnumPacketDirection.SERVERBOUND)).addLast("prepender", new MessageSerializer2()).addLast("encoder", new MessageSerializer(EnumPacketDirection.CLIENTBOUND));
+                    NetworkManager var2 = new NetworkManager(EnumPacketDirection.SERVERBOUND);
                     NetworkSystem.this.networkManagers.add(var2);
                     p_initChannel_1_.pipeline().addLast("packet_handler", var2);
                     var2.setNetHandler(new NetHandlerHandshakeTCP(NetworkSystem.this.mcServer, var2));
                 }
-            }).group(eventLoops).localAddress(p_151265_1_, p_151265_2_)).bind().syncUninterruptibly());
+            }).group((EventLoopGroup)eventLoops.getValue()).localAddress(address, port)).bind().syncUninterruptibly());
         }
     }
 
@@ -115,15 +141,15 @@ public class NetworkSystem
         {
             var1 = ((ServerBootstrap)((ServerBootstrap)(new ServerBootstrap()).channel(LocalServerChannel.class)).childHandler(new ChannelInitializer()
             {
-                private static final String __OBFID = "CL_00001449";
+                private static final String __OBFID = "CL_00001451";
                 protected void initChannel(Channel p_initChannel_1_)
                 {
-                    NetworkManager var2 = new NetworkManager(false);
+                    NetworkManager var2 = new NetworkManager(EnumPacketDirection.SERVERBOUND);
                     var2.setNetHandler(new NetHandlerHandshakeMemory(NetworkSystem.this.mcServer, var2));
                     NetworkSystem.this.networkManagers.add(var2);
                     p_initChannel_1_.pipeline().addLast("packet_handler", var2);
                 }
-            }).group(eventLoops).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
+            }).group((EventLoopGroup)eventLoops.getValue()).localAddress(LocalAddress.ANY)).bind().syncUninterruptibly();
             this.endpoints.add(var1);
         }
 
@@ -141,7 +167,15 @@ public class NetworkSystem
         while (var1.hasNext())
         {
             ChannelFuture var2 = (ChannelFuture)var1.next();
-            var2.channel().close().syncUninterruptibly();
+
+            try
+            {
+                var2.channel().close().sync();
+            }
+            catch (InterruptedException var4)
+            {
+                logger.error("Interrupted whilst closing channel");
+            }
         }
     }
 
@@ -161,61 +195,59 @@ public class NetworkSystem
             {
                 final NetworkManager var3 = (NetworkManager)var2.next();
 
-                if (!var3.isChannelOpen())
+                if (!var3.hasNoChannel())
                 {
-                    var2.remove();
-
-                    if (var3.getExitMessage() != null)
+                    if (!var3.isChannelOpen())
                     {
-                        var3.getNetHandler().onDisconnect(var3.getExitMessage());
+                        var2.remove();
+                        var3.checkDisconnected();
                     }
-                    else if (var3.getNetHandler() != null)
+                    else
                     {
-                        var3.getNetHandler().onDisconnect(new ChatComponentText("Disconnected"));
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        var3.processReceivedPackets();
-                    }
-                    catch (Exception var8)
-                    {
-                        if (var3.isLocalChannel())
+                        try
                         {
-                            CrashReport var10 = CrashReport.makeCrashReport(var8, "Ticking memory connection");
-                            CrashReportCategory var6 = var10.makeCategory("Ticking connection");
-                            var6.addCrashSectionCallable("Connection", new Callable()
-                            {
-                                private static final String __OBFID = "CL_00001450";
-                                public String call()
-                                {
-                                    return var3.toString();
-                                }
-                            });
-                            throw new ReportedException(var10);
+                            var3.processReceivedPackets();
                         }
-
-                        logger.warn("Failed to handle packet for " + var3.getSocketAddress(), var8);
-                        final ChatComponentText var5 = new ChatComponentText("Internal server error");
-                        var3.scheduleOutboundPacket(new S40PacketDisconnect(var5), new GenericFutureListener[] {new GenericFutureListener()
+                        catch (Exception var8)
+                        {
+                            if (var3.isLocalChannel())
                             {
-                                private static final String __OBFID = "CL_00001451";
+                                CrashReport var10 = CrashReport.makeCrashReport(var8, "Ticking memory connection");
+                                CrashReportCategory var6 = var10.makeCategory("Ticking connection");
+                                var6.addCrashSectionCallable("Connection", new Callable()
+                                {
+                                    private static final String __OBFID = "CL_00002272";
+                                    public String func_180229_a()
+                                    {
+                                        return var3.toString();
+                                    }
+                                    public Object call()
+                                    {
+                                        return this.func_180229_a();
+                                    }
+                                });
+                                throw new ReportedException(var10);
+                            }
+
+                            logger.warn("Failed to handle packet for " + var3.getRemoteAddress(), var8);
+                            final ChatComponentText var5 = new ChatComponentText("Internal server error");
+                            var3.sendPacket(new S40PacketDisconnect(var5), new GenericFutureListener()
+                            {
+                                private static final String __OBFID = "CL_00002271";
                                 public void operationComplete(Future p_operationComplete_1_)
                                 {
                                     var3.closeChannel(var5);
                                 }
-                            }
-                        });
-                        var3.disableAutoRead();
+                            }, new GenericFutureListener[0]);
+                            var3.disableAutoRead();
+                        }
                     }
                 }
             }
         }
     }
 
-    public MinecraftServer func_151267_d()
+    public MinecraftServer getServer()
     {
         return this.mcServer;
     }

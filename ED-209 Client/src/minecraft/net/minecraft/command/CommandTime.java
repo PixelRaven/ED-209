@@ -2,6 +2,7 @@ package net.minecraft.command;
 
 import java.util.List;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.WorldServer;
 
 public class CommandTime extends CommandBase
@@ -21,55 +22,71 @@ public class CommandTime extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.time.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length > 1)
+        if (args.length > 1)
         {
             int var3;
 
-            if (p_71515_2_[0].equals("set"))
+            if (args[0].equals("set"))
             {
-                if (p_71515_2_[1].equals("day"))
+                if (args[1].equals("day"))
                 {
                     var3 = 1000;
                 }
-                else if (p_71515_2_[1].equals("night"))
+                else if (args[1].equals("night"))
                 {
                     var3 = 13000;
                 }
                 else
                 {
-                    var3 = parseIntWithMin(p_71515_1_, p_71515_2_[1], 0);
+                    var3 = parseInt(args[1], 0);
                 }
 
-                this.setTime(p_71515_1_, var3);
-                func_152373_a(p_71515_1_, this, "commands.time.set", new Object[] {Integer.valueOf(var3)});
+                this.setTime(sender, var3);
+                notifyOperators(sender, this, "commands.time.set", new Object[] {Integer.valueOf(var3)});
                 return;
             }
 
-            if (p_71515_2_[0].equals("add"))
+            if (args[0].equals("add"))
             {
-                var3 = parseIntWithMin(p_71515_1_, p_71515_2_[1], 0);
-                this.addTime(p_71515_1_, var3);
-                func_152373_a(p_71515_1_, this, "commands.time.added", new Object[] {Integer.valueOf(var3)});
+                var3 = parseInt(args[1], 0);
+                this.addTime(sender, var3);
+                notifyOperators(sender, this, "commands.time.added", new Object[] {Integer.valueOf(var3)});
                 return;
+            }
+
+            if (args[0].equals("query"))
+            {
+                if (args[1].equals("daytime"))
+                {
+                    var3 = (int)(sender.getEntityWorld().getWorldTime() % 2147483647L);
+                    sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, var3);
+                    notifyOperators(sender, this, "commands.time.query", new Object[] {Integer.valueOf(var3)});
+                    return;
+                }
+
+                if (args[1].equals("gametime"))
+                {
+                    var3 = (int)(sender.getEntityWorld().getTotalWorldTime() % 2147483647L);
+                    sender.func_174794_a(CommandResultStats.Type.QUERY_RESULT, var3);
+                    notifyOperators(sender, this, "commands.time.query", new Object[] {Integer.valueOf(var3)});
+                    return;
+                }
             }
         }
 
         throw new WrongUsageException("commands.time.usage", new Object[0]);
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, new String[] {"set", "add"}): (p_71516_2_.length == 2 && p_71516_2_[0].equals("set") ? getListOfStringsMatchingLastWord(p_71516_2_, new String[] {"day", "night"}): null);
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, new String[] {"set", "add", "query"}): (args.length == 2 && args[0].equals("set") ? getListOfStringsMatchingLastWord(args, new String[] {"day", "night"}): (args.length == 2 && args[0].equals("query") ? getListOfStringsMatchingLastWord(args, new String[] {"daytime", "gametime"}): null));
     }
 
     /**

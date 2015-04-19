@@ -6,7 +6,7 @@ import net.minecraft.util.MathHelper;
 public class ModelCreeper extends ModelBase
 {
     public ModelRenderer head;
-    public ModelRenderer field_78133_b;
+    public ModelRenderer creeperArmor;
     public ModelRenderer body;
     public ModelRenderer leg1;
     public ModelRenderer leg2;
@@ -21,13 +21,13 @@ public class ModelCreeper extends ModelBase
 
     public ModelCreeper(float p_i46366_1_)
     {
-        byte var2 = 4;
+        byte var2 = 6;
         this.head = new ModelRenderer(this, 0, 0);
         this.head.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, p_i46366_1_);
         this.head.setRotationPoint(0.0F, (float)var2, 0.0F);
-        this.field_78133_b = new ModelRenderer(this, 32, 0);
-        this.field_78133_b.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, p_i46366_1_ + 0.5F);
-        this.field_78133_b.setRotationPoint(0.0F, (float)var2, 0.0F);
+        this.creeperArmor = new ModelRenderer(this, 32, 0);
+        this.creeperArmor.addBox(-4.0F, -8.0F, -4.0F, 8, 8, 8, p_i46366_1_ + 0.5F);
+        this.creeperArmor.setRotationPoint(0.0F, (float)var2, 0.0F);
         this.body = new ModelRenderer(this, 16, 16);
         this.body.addBox(-4.0F, 0.0F, -2.0F, 8, 12, 4, p_i46366_1_);
         this.body.setRotationPoint(0.0F, (float)var2, 0.0F);

@@ -2,29 +2,28 @@ package net.minecraft.world.gen.feature;
 
 import java.util.Random;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class WorldGenCactus extends WorldGenerator
 {
     private static final String __OBFID = "CL_00000404";
 
-    public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_)
+    public boolean generate(World worldIn, Random p_180709_2_, BlockPos p_180709_3_)
     {
-        for (int var6 = 0; var6 < 10; ++var6)
+        for (int var4 = 0; var4 < 10; ++var4)
         {
-            int var7 = p_76484_3_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
-            int var8 = p_76484_4_ + p_76484_2_.nextInt(4) - p_76484_2_.nextInt(4);
-            int var9 = p_76484_5_ + p_76484_2_.nextInt(8) - p_76484_2_.nextInt(8);
+            BlockPos var5 = p_180709_3_.add(p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8), p_180709_2_.nextInt(4) - p_180709_2_.nextInt(4), p_180709_2_.nextInt(8) - p_180709_2_.nextInt(8));
 
-            if (p_76484_1_.isAirBlock(var7, var8, var9))
+            if (worldIn.isAirBlock(var5))
             {
-                int var10 = 1 + p_76484_2_.nextInt(p_76484_2_.nextInt(3) + 1);
+                int var6 = 1 + p_180709_2_.nextInt(p_180709_2_.nextInt(3) + 1);
 
-                for (int var11 = 0; var11 < var10; ++var11)
+                for (int var7 = 0; var7 < var6; ++var7)
                 {
-                    if (Blocks.cactus.canBlockStay(p_76484_1_, var7, var8 + var11, var9))
+                    if (Blocks.cactus.canBlockStay(worldIn, var5))
                     {
-                        p_76484_1_.setBlock(var7, var8 + var11, var9, Blocks.cactus, 0, 2);
+                        worldIn.setBlockState(var5.offsetUp(var7), Blocks.cactus.getDefaultState(), 2);
                     }
                 }
             }

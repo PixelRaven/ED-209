@@ -1,8 +1,12 @@
 package net.minecraft.entity.monster;
 
+import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFlower;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -22,8 +26,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.village.Village;
 import net.minecraft.world.World;
@@ -37,11 +43,11 @@ public class EntityIronGolem extends EntityGolem
     private int holdRoseTick;
     private static final String __OBFID = "CL_00001652";
 
-    public EntityIronGolem(World p_i1694_1_)
+    public EntityIronGolem(World worldIn)
     {
-        super(p_i1694_1_);
+        super(worldIn);
         this.setSize(1.4F, 2.9F);
-        this.getNavigator().setAvoidsWater(true);
+        ((PathNavigateGround)this.getNavigator()).func_179690_a(true);
         this.tasks.addTask(1, new EntityAIAttackOnCollide(this, 1.0D, true));
         this.tasks.addTask(2, new EntityAIMoveTowardsTarget(this, 0.9D, 32.0F));
         this.tasks.addTask(3, new EntityAIMoveThroughVillage(this, 0.6D, true));
@@ -51,8 +57,8 @@ public class EntityIronGolem extends EntityGolem
         this.tasks.addTask(7, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(8, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new EntityAIDefendVillage(this));
-        this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false));
-        this.targetTasks.addTask(3, new EntityAINearestAttackableTarget(this, EntityLiving.class, 0, false, true, IMob.mobSelector));
+        this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, false, new Class[0]));
+        this.targetTasks.addTask(3, new EntityIronGolem.AINearestAttackableTargetNonCreeper(this, EntityLiving.class, 10, false, true, IMob.field_175450_e));
     }
 
     protected void entityInit()
@@ -61,23 +67,12 @@ public class EntityIronGolem extends EntityGolem
         this.dataWatcher.addObject(16, Byte.valueOf((byte)0));
     }
 
-    /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
-    {
-        return true;
-    }
-
-    /**
-     * main AI tick function, replaces updateEntityActionState
-     */
-    protected void updateAITick()
+    protected void updateAITasks()
     {
         if (--this.homeCheckTimer <= 0)
         {
             this.homeCheckTimer = 70 + this.rand.nextInt(50);
-            this.villageObj = this.worldObj.villageCollectionObj.findNearestVillage(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 32);
+            this.villageObj = this.worldObj.getVillageCollection().func_176056_a(new BlockPos(this), 32);
 
             if (this.villageObj == null)
             {
@@ -85,12 +80,12 @@ public class EntityIronGolem extends EntityGolem
             }
             else
             {
-                ChunkCoordinates var1 = this.villageObj.getCenter();
-                this.setHomeArea(var1.posX, var1.posY, var1.posZ, (int)((float)this.villageObj.getVillageRadius() * 0.6F));
+                BlockPos var1 = this.villageObj.func_180608_a();
+                this.func_175449_a(var1, (int)((float)this.villageObj.getVillageRadius() * 0.6F));
             }
         }
 
-        super.updateAITick();
+        super.updateAITasks();
     }
 
     protected void applyEntityAttributes()
@@ -139,13 +134,14 @@ public class EntityIronGolem extends EntityGolem
         if (this.motionX * this.motionX + this.motionZ * this.motionZ > 2.500000277905201E-7D && this.rand.nextInt(5) == 0)
         {
             int var1 = MathHelper.floor_double(this.posX);
-            int var2 = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double)this.yOffset);
+            int var2 = MathHelper.floor_double(this.posY - 0.20000000298023224D);
             int var3 = MathHelper.floor_double(this.posZ);
-            Block var4 = this.worldObj.getBlock(var1, var2, var3);
+            IBlockState var4 = this.worldObj.getBlockState(new BlockPos(var1, var2, var3));
+            Block var5 = var4.getBlock();
 
-            if (var4.getMaterial() != Material.air)
+            if (var5.getMaterial() != Material.air)
             {
-                this.worldObj.spawnParticle("blockcrack_" + Block.getIdFromBlock(var4) + "_" + this.worldObj.getBlockMetadata(var1, var2, var3), this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.boundingBox.minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, 4.0D * ((double)this.rand.nextFloat() - 0.5D), 0.5D, ((double)this.rand.nextFloat() - 0.5D) * 4.0D);
+                this.worldObj.spawnParticle(EnumParticleTypes.BLOCK_CRACK, this.posX + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, this.getEntityBoundingBox().minY + 0.1D, this.posZ + ((double)this.rand.nextFloat() - 0.5D) * (double)this.width, 4.0D * ((double)this.rand.nextFloat() - 0.5D), 0.5D, ((double)this.rand.nextFloat() - 0.5D) * 4.0D, new int[] {Block.getStateId(var4)});
             }
         }
     }
@@ -161,19 +157,19 @@ public class EntityIronGolem extends EntityGolem
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setBoolean("PlayerCreated", this.isPlayerCreated());
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setBoolean("PlayerCreated", this.isPlayerCreated());
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.setPlayerCreated(p_70037_1_.getBoolean("PlayerCreated"));
+        super.readEntityFromNBT(tagCompund);
+        this.setPlayerCreated(tagCompund.getBoolean("PlayerCreated"));
     }
 
     public boolean attackEntityAsMob(Entity p_70652_1_)
@@ -185,6 +181,7 @@ public class EntityIronGolem extends EntityGolem
         if (var2)
         {
             p_70652_1_.motionY += 0.4000000059604645D;
+            this.func_174815_a(this, p_70652_1_);
         }
 
         this.playSound("mob.irongolem.throw", 1.0F, 1.0F);
@@ -240,7 +237,7 @@ public class EntityIronGolem extends EntityGolem
         return "mob.irongolem.death";
     }
 
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.irongolem.walk", 1.0F, 1.0F);
     }
@@ -255,14 +252,14 @@ public class EntityIronGolem extends EntityGolem
 
         for (var4 = 0; var4 < var3; ++var4)
         {
-            this.func_145778_a(Item.getItemFromBlock(Blocks.red_flower), 1, 0.0F);
+            this.dropItemWithOffset(Item.getItemFromBlock(Blocks.red_flower), 1, (float)BlockFlower.EnumFlowerType.POPPY.func_176968_b());
         }
 
         var4 = 3 + this.rand.nextInt(3);
 
         for (int var5 = 0; var5 < var4; ++var5)
         {
-            this.func_145779_a(Items.iron_ingot, 1);
+            this.dropItem(Items.iron_ingot, 1);
         }
     }
 
@@ -293,13 +290,73 @@ public class EntityIronGolem extends EntityGolem
     /**
      * Called when the mob's health reaches 0.
      */
-    public void onDeath(DamageSource p_70645_1_)
+    public void onDeath(DamageSource cause)
     {
         if (!this.isPlayerCreated() && this.attackingPlayer != null && this.villageObj != null)
         {
-            this.villageObj.setReputationForPlayer(this.attackingPlayer.getCommandSenderName(), -5);
+            this.villageObj.setReputationForPlayer(this.attackingPlayer.getName(), -5);
         }
 
-        super.onDeath(p_70645_1_);
+        super.onDeath(cause);
+    }
+
+    static class AINearestAttackableTargetNonCreeper extends EntityAINearestAttackableTarget
+    {
+        private static final String __OBFID = "CL_00002231";
+
+        public AINearestAttackableTargetNonCreeper(final EntityCreature p_i45858_1_, Class p_i45858_2_, int p_i45858_3_, boolean p_i45858_4_, boolean p_i45858_5_, final Predicate p_i45858_6_)
+        {
+            super(p_i45858_1_, p_i45858_2_, p_i45858_3_, p_i45858_4_, p_i45858_5_, p_i45858_6_);
+            this.targetEntitySelector = new Predicate()
+            {
+                private static final String __OBFID = "CL_00002230";
+                public boolean func_180096_a(EntityLivingBase p_180096_1_)
+                {
+                    if (p_i45858_6_ != null && !p_i45858_6_.apply(p_180096_1_))
+                    {
+                        return false;
+                    }
+                    else if (p_180096_1_ instanceof EntityCreeper)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        if (p_180096_1_ instanceof EntityPlayer)
+                        {
+                            double var2 = AINearestAttackableTargetNonCreeper.this.getTargetDistance();
+
+                            if (p_180096_1_.isSneaking())
+                            {
+                                var2 *= 0.800000011920929D;
+                            }
+
+                            if (p_180096_1_.isInvisible())
+                            {
+                                float var4 = ((EntityPlayer)p_180096_1_).getArmorVisibility();
+
+                                if (var4 < 0.1F)
+                                {
+                                    var4 = 0.1F;
+                                }
+
+                                var2 *= (double)(0.7F * var4);
+                            }
+
+                            if ((double)p_180096_1_.getDistanceToEntity(p_i45858_1_) > var2)
+                            {
+                                return false;
+                            }
+                        }
+
+                        return AINearestAttackableTargetNonCreeper.this.isSuitableTarget(p_180096_1_, false);
+                    }
+                }
+                public boolean apply(Object p_apply_1_)
+                {
+                    return this.func_180096_a((EntityLivingBase)p_apply_1_);
+                }
+            };
+        }
     }
 }

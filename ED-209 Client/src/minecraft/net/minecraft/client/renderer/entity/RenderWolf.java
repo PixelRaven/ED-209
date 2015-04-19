@@ -1,58 +1,41 @@
 package net.minecraft.client.renderer.entity;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.layers.LayerWolfCollar;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class RenderWolf extends RenderLiving
 {
     private static final ResourceLocation wolfTextures = new ResourceLocation("textures/entity/wolf/wolf.png");
     private static final ResourceLocation tamedWolfTextures = new ResourceLocation("textures/entity/wolf/wolf_tame.png");
     private static final ResourceLocation anrgyWolfTextures = new ResourceLocation("textures/entity/wolf/wolf_angry.png");
-    private static final ResourceLocation wolfCollarTextures = new ResourceLocation("textures/entity/wolf/wolf_collar.png");
     private static final String __OBFID = "CL_00001036";
 
-    public RenderWolf(ModelBase p_i1269_1_, ModelBase p_i1269_2_, float p_i1269_3_)
+    public RenderWolf(RenderManager p_i46128_1_, ModelBase p_i46128_2_, float p_i46128_3_)
     {
-        super(p_i1269_1_, p_i1269_3_);
-        this.setRenderPassModel(p_i1269_2_);
+        super(p_i46128_1_, p_i46128_2_, p_i46128_3_);
+        this.addLayer(new LayerWolfCollar(this));
     }
 
-    /**
-     * Defines what float the third param in setRotationAngles of ModelBase is
-     */
-    protected float handleRotationFloat(EntityWolf p_77044_1_, float p_77044_2_)
+    protected float func_180593_a(EntityWolf p_180593_1_, float p_180593_2_)
     {
-        return p_77044_1_.getTailRotation();
+        return p_180593_1_.getTailRotation();
     }
 
-    /**
-     * Queries whether should render the specified pass or not.
-     */
-    protected int shouldRenderPass(EntityWolf p_77032_1_, int p_77032_2_, float p_77032_3_)
+    public void func_177135_a(EntityWolf p_177135_1_, double p_177135_2_, double p_177135_4_, double p_177135_6_, float p_177135_8_, float p_177135_9_)
     {
-        if (p_77032_2_ == 0 && p_77032_1_.getWolfShaking())
+        if (p_177135_1_.isWolfWet())
         {
-            float var5 = p_77032_1_.getBrightness(p_77032_3_) * p_77032_1_.getShadingWhileShaking(p_77032_3_);
-            this.bindTexture(wolfTextures);
-            GL11.glColor3f(var5, var5, var5);
-            return 1;
+            float var10 = p_177135_1_.getBrightness(p_177135_9_) * p_177135_1_.getShadingWhileWet(p_177135_9_);
+            GlStateManager.color(var10, var10, var10);
         }
-        else if (p_77032_2_ == 1 && p_77032_1_.isTamed())
-        {
-            this.bindTexture(wolfCollarTextures);
-            int var4 = p_77032_1_.getCollarColor();
-            GL11.glColor3f(EntitySheep.fleeceColorTable[var4][0], EntitySheep.fleeceColorTable[var4][1], EntitySheep.fleeceColorTable[var4][2]);
-            return 1;
-        }
-        else
-        {
-            return -1;
-        }
+
+        super.doRender((EntityLiving)p_177135_1_, p_177135_2_, p_177135_4_, p_177135_6_, p_177135_8_, p_177135_9_);
     }
 
     /**
@@ -64,11 +47,14 @@ public class RenderWolf extends RenderLiving
     }
 
     /**
-     * Queries whether should render the specified pass or not.
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
      */
-    protected int shouldRenderPass(EntityLivingBase p_77032_1_, int p_77032_2_, float p_77032_3_)
+    public void doRender(EntityLiving p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        return this.shouldRenderPass((EntityWolf)p_77032_1_, p_77032_2_, p_77032_3_);
+        this.func_177135_a((EntityWolf)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     /**
@@ -76,7 +62,18 @@ public class RenderWolf extends RenderLiving
      */
     protected float handleRotationFloat(EntityLivingBase p_77044_1_, float p_77044_2_)
     {
-        return this.handleRotationFloat((EntityWolf)p_77044_1_, p_77044_2_);
+        return this.func_180593_a((EntityWolf)p_77044_1_, p_77044_2_);
+    }
+
+    /**
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
+     */
+    public void doRender(EntityLivingBase p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
+    {
+        this.func_177135_a((EntityWolf)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     /**
@@ -85,5 +82,16 @@ public class RenderWolf extends RenderLiving
     protected ResourceLocation getEntityTexture(Entity p_110775_1_)
     {
         return this.getEntityTexture((EntityWolf)p_110775_1_);
+    }
+
+    /**
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
+     */
+    public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
+    {
+        this.func_177135_a((EntityWolf)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 }

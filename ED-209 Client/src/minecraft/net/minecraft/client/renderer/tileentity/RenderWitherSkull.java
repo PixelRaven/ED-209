@@ -1,12 +1,12 @@
 package net.minecraft.client.renderer.tileentity;
 
 import net.minecraft.client.model.ModelSkeletonHead;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 public class RenderWitherSkull extends Render
 {
@@ -16,6 +16,11 @@ public class RenderWitherSkull extends Render
     /** The Skeleton's head model. */
     private final ModelSkeletonHead skeletonHeadModel = new ModelSkeletonHead();
     private static final String __OBFID = "CL_00001035";
+
+    public RenderWitherSkull(RenderManager p_i46129_1_)
+    {
+        super(p_i46129_1_);
+    }
 
     private float func_82400_a(float p_82400_1_, float p_82400_2_, float p_82400_3_)
     {
@@ -42,26 +47,24 @@ public class RenderWitherSkull extends Render
      */
     public void doRender(EntityWitherSkull p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        GL11.glPushMatrix();
-        GL11.glDisable(GL11.GL_CULL_FACE);
+        GlStateManager.pushMatrix();
+        GlStateManager.disableCull();
         float var10 = this.func_82400_a(p_76986_1_.prevRotationYaw, p_76986_1_.rotationYaw, p_76986_9_);
         float var11 = p_76986_1_.prevRotationPitch + (p_76986_1_.rotationPitch - p_76986_1_.prevRotationPitch) * p_76986_9_;
-        GL11.glTranslatef((float)p_76986_2_, (float)p_76986_4_, (float)p_76986_6_);
+        GlStateManager.translate((float)p_76986_2_, (float)p_76986_4_, (float)p_76986_6_);
         float var12 = 0.0625F;
-        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        GL11.glScalef(-1.0F, -1.0F, 1.0F);
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GlStateManager.enableRescaleNormal();
+        GlStateManager.scale(-1.0F, -1.0F, 1.0F);
+        GlStateManager.enableAlpha();
         this.bindEntityTexture(p_76986_1_);
         this.skeletonHeadModel.render(p_76986_1_, 0.0F, 0.0F, 0.0F, var10, var11, var12);
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
+        super.doRender(p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
-    /**
-     * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
-     */
-    protected ResourceLocation getEntityTexture(EntityWitherSkull p_110775_1_)
+    protected ResourceLocation func_180564_a(EntityWitherSkull p_180564_1_)
     {
-        return p_110775_1_.isInvulnerable() ? invulnerableWitherTextures : witherTextures;
+        return p_180564_1_.isInvulnerable() ? invulnerableWitherTextures : witherTextures;
     }
 
     /**
@@ -69,7 +72,7 @@ public class RenderWitherSkull extends Render
      */
     protected ResourceLocation getEntityTexture(Entity p_110775_1_)
     {
-        return this.getEntityTexture((EntityWitherSkull)p_110775_1_);
+        return this.func_180564_a((EntityWitherSkull)p_110775_1_);
     }
 
     /**

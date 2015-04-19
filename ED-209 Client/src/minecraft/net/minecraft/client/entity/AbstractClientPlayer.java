@@ -1,114 +1,131 @@
 package net.minecraft.client.entity;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import java.io.File;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.client.renderer.ImageBufferDownload;
 import net.minecraft.client.renderer.ThreadDownloadImageData;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.SkinManager;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldSettings;
 
-public abstract class AbstractClientPlayer extends EntityPlayer implements SkinManager.SkinAvailableCallback
+public abstract class AbstractClientPlayer extends EntityPlayer
 {
-    public static final ResourceLocation locationStevePng = new ResourceLocation("textures/entity/steve.png");
-    private ResourceLocation locationSkin;
-    private ResourceLocation locationCape;
+    private NetworkPlayerInfo field_175157_a;
     private static final String __OBFID = "CL_00000935";
 
-    public AbstractClientPlayer(World p_i45074_1_, GameProfile p_i45074_2_)
+    public AbstractClientPlayer(World worldIn, GameProfile p_i45074_2_)
     {
-        super(p_i45074_1_, p_i45074_2_);
-        String var3 = this.getCommandSenderName();
+        super(worldIn, p_i45074_2_);
+    }
 
-        if (!var3.isEmpty())
+    public boolean func_175149_v()
+    {
+        NetworkPlayerInfo var1 = Minecraft.getMinecraft().getNetHandler().func_175102_a(this.getGameProfile().getId());
+        return var1 != null && var1.getGameType() == WorldSettings.GameType.SPECTATOR;
+    }
+
+    public boolean hasCape()
+    {
+        return this.func_175155_b() != null;
+    }
+
+    protected NetworkPlayerInfo func_175155_b()
+    {
+        if (this.field_175157_a == null)
         {
-            SkinManager var4 = Minecraft.getMinecraft().func_152342_ad();
-            var4.func_152790_a(p_i45074_2_, this, true);
+            this.field_175157_a = Minecraft.getMinecraft().getNetHandler().func_175102_a(this.getUniqueID());
         }
+
+        return this.field_175157_a;
     }
 
-    public boolean func_152122_n()
+    public boolean hasSkin()
     {
-        return this.locationCape != null;
-    }
-
-    public boolean func_152123_o()
-    {
-        return this.locationSkin != null;
+        NetworkPlayerInfo var1 = this.func_175155_b();
+        return var1 != null && var1.func_178856_e();
     }
 
     public ResourceLocation getLocationSkin()
     {
-        return this.locationSkin == null ? locationStevePng : this.locationSkin;
+        NetworkPlayerInfo var1 = this.func_175155_b();
+        return var1 == null ? DefaultPlayerSkin.func_177334_a(this.getUniqueID()) : var1.func_178837_g();
     }
 
     public ResourceLocation getLocationCape()
     {
-        return this.locationCape;
+        NetworkPlayerInfo var1 = this.func_175155_b();
+        return var1 == null ? null : var1.func_178861_h();
     }
 
-    public static ThreadDownloadImageData getDownloadImageSkin(ResourceLocation p_110304_0_, String p_110304_1_)
+    public static ThreadDownloadImageData getDownloadImageSkin(ResourceLocation resourceLocationIn, String username)
     {
         TextureManager var2 = Minecraft.getMinecraft().getTextureManager();
-        Object var3 = var2.getTexture(p_110304_0_);
+        Object var3 = var2.getTexture(resourceLocationIn);
 
         if (var3 == null)
         {
-            var3 = new ThreadDownloadImageData((File)null, String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", new Object[] {StringUtils.stripControlCodes(p_110304_1_)}), locationStevePng, new ImageBufferDownload());
-            var2.loadTexture(p_110304_0_, (ITextureObject)var3);
+            var3 = new ThreadDownloadImageData((File)null, String.format("http://skins.minecraft.net/MinecraftSkins/%s.png", new Object[] {StringUtils.stripControlCodes(username)}), DefaultPlayerSkin.func_177334_a(func_175147_b(username)), new ImageBufferDownload());
+            var2.loadTexture(resourceLocationIn, (ITextureObject)var3);
         }
 
         return (ThreadDownloadImageData)var3;
     }
 
-    public static ResourceLocation getLocationSkin(String p_110311_0_)
+    public static ResourceLocation getLocationSkin(String username)
     {
-        return new ResourceLocation("skins/" + StringUtils.stripControlCodes(p_110311_0_));
+        return new ResourceLocation("skins/" + StringUtils.stripControlCodes(username));
     }
 
-    public void func_152121_a(Type p_152121_1_, ResourceLocation p_152121_2_)
+    public String func_175154_l()
     {
-        switch (AbstractClientPlayer.SwitchType.field_152630_a[p_152121_1_.ordinal()])
-        {
-            case 1:
-                this.locationSkin = p_152121_2_;
-                break;
-
-            case 2:
-                this.locationCape = p_152121_2_;
-        }
+        NetworkPlayerInfo var1 = this.func_175155_b();
+        return var1 == null ? DefaultPlayerSkin.func_177332_b(this.getUniqueID()) : var1.func_178851_f();
     }
 
-    static final class SwitchType
+    public float func_175156_o()
     {
-        static final int[] field_152630_a = new int[Type.values().length];
-        private static final String __OBFID = "CL_00001832";
+        float var1 = 1.0F;
 
-        static
+        if (this.capabilities.isFlying)
         {
-            try
+            var1 *= 1.1F;
+        }
+
+        IAttributeInstance var2 = this.getEntityAttribute(SharedMonsterAttributes.movementSpeed);
+        var1 = (float)((double)var1 * ((var2.getAttributeValue() / (double)this.capabilities.getWalkSpeed() + 1.0D) / 2.0D));
+
+        if (this.capabilities.getWalkSpeed() == 0.0F || Float.isNaN(var1) || Float.isInfinite(var1))
+        {
+            var1 = 1.0F;
+        }
+
+        if (this.isUsingItem() && this.getItemInUse().getItem() == Items.bow)
+        {
+            int var3 = this.getItemInUseDuration();
+            float var4 = (float)var3 / 20.0F;
+
+            if (var4 > 1.0F)
             {
-                field_152630_a[Type.SKIN.ordinal()] = 1;
+                var4 = 1.0F;
             }
-            catch (NoSuchFieldError var2)
+            else
             {
-                ;
+                var4 *= var4;
             }
 
-            try
-            {
-                field_152630_a[Type.CAPE.ordinal()] = 2;
-            }
-            catch (NoSuchFieldError var1)
-            {
-                ;
-            }
+            var1 *= 1.0F - var4 * 0.15F;
         }
+
+        return var1;
     }
 }

@@ -1,12 +1,12 @@
 package net.minecraft.world.storage;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +21,15 @@ public class MapStorage
     private ISaveHandler saveHandler;
 
     /** Map of item data String id to loaded MapDataBases */
-    private Map loadedDataMap = new HashMap();
+    protected Map loadedDataMap = Maps.newHashMap();
 
     /** List of loaded MapDataBases. */
-    private List loadedDataList = new ArrayList();
+    private List loadedDataList = Lists.newArrayList();
 
     /**
      * Map of MapDataBase id String prefixes ('map' etc) to max known unique Short id (the 0 part etc) for that prefix
      */
-    private Map idCounts = new HashMap();
+    private Map idCounts = Maps.newHashMap();
     private static final String __OBFID = "CL_00000604";
 
     public MapStorage(ISaveHandler p_i2162_1_)
@@ -96,20 +96,13 @@ public class MapStorage
      */
     public void setData(String p_75745_1_, WorldSavedData p_75745_2_)
     {
-        if (p_75745_2_ == null)
+        if (this.loadedDataMap.containsKey(p_75745_1_))
         {
-            throw new RuntimeException("Can\'t set null data");
+            this.loadedDataList.remove(this.loadedDataMap.remove(p_75745_1_));
         }
-        else
-        {
-            if (this.loadedDataMap.containsKey(p_75745_1_))
-            {
-                this.loadedDataList.remove(this.loadedDataMap.remove(p_75745_1_));
-            }
 
-            this.loadedDataMap.put(p_75745_1_, p_75745_2_);
-            this.loadedDataList.add(p_75745_2_);
-        }
+        this.loadedDataMap.put(p_75745_1_, p_75745_2_);
+        this.loadedDataList.add(p_75745_2_);
     }
 
     /**
@@ -179,7 +172,7 @@ public class MapStorage
                 DataInputStream var2 = new DataInputStream(new FileInputStream(var1));
                 NBTTagCompound var3 = CompressedStreamTools.read(var2);
                 var2.close();
-                Iterator var4 = var3.func_150296_c().iterator();
+                Iterator var4 = var3.getKeySet().iterator();
 
                 while (var4.hasNext())
                 {
@@ -189,7 +182,7 @@ public class MapStorage
                     if (var6 instanceof NBTTagShort)
                     {
                         NBTTagShort var7 = (NBTTagShort)var6;
-                        short var9 = var7.func_150289_e();
+                        short var9 = var7.getShort();
                         this.idCounts.put(var5, Short.valueOf(var9));
                     }
                 }

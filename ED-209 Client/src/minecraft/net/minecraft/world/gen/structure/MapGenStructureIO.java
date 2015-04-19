@@ -1,6 +1,6 @@
 package net.minecraft.world.gen.structure;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
 import java.util.Map;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -10,19 +10,19 @@ import org.apache.logging.log4j.Logger;
 public class MapGenStructureIO
 {
     private static final Logger logger = LogManager.getLogger();
-    private static Map field_143040_a = new HashMap();
-    private static Map field_143038_b = new HashMap();
-    private static Map field_143039_c = new HashMap();
-    private static Map field_143037_d = new HashMap();
+    private static Map field_143040_a = Maps.newHashMap();
+    private static Map field_143038_b = Maps.newHashMap();
+    private static Map field_143039_c = Maps.newHashMap();
+    private static Map field_143037_d = Maps.newHashMap();
     private static final String __OBFID = "CL_00000509";
 
-    private static void func_143034_b(Class p_143034_0_, String p_143034_1_)
+    private static void registerStructure(Class p_143034_0_, String p_143034_1_)
     {
         field_143040_a.put(p_143034_1_, p_143034_0_);
         field_143038_b.put(p_143034_0_, p_143034_1_);
     }
 
-    static void func_143031_a(Class p_143031_0_, String p_143031_1_)
+    static void registerStructureComponent(Class p_143031_0_, String p_143031_1_)
     {
         field_143039_c.put(p_143031_1_, p_143031_0_);
         field_143037_d.put(p_143031_0_, p_143031_1_);
@@ -38,7 +38,7 @@ public class MapGenStructureIO
         return (String)field_143037_d.get(p_143036_0_.getClass());
     }
 
-    public static StructureStart func_143035_a(NBTTagCompound p_143035_0_, World p_143035_1_)
+    public static StructureStart func_143035_a(NBTTagCompound p_143035_0_, World worldIn)
     {
         StructureStart var2 = null;
 
@@ -59,7 +59,7 @@ public class MapGenStructureIO
 
         if (var2 != null)
         {
-            var2.func_143020_a(p_143035_1_, p_143035_0_);
+            var2.func_143020_a(worldIn, p_143035_0_);
         }
         else
         {
@@ -69,7 +69,7 @@ public class MapGenStructureIO
         return var2;
     }
 
-    public static StructureComponent func_143032_b(NBTTagCompound p_143032_0_, World p_143032_1_)
+    public static StructureComponent func_143032_b(NBTTagCompound p_143032_0_, World worldIn)
     {
         StructureComponent var2 = null;
 
@@ -90,7 +90,7 @@ public class MapGenStructureIO
 
         if (var2 != null)
         {
-            var2.func_143009_a(p_143032_1_, p_143032_0_);
+            var2.func_143009_a(worldIn, p_143032_0_);
         }
         else
         {
@@ -102,15 +102,17 @@ public class MapGenStructureIO
 
     static
     {
-        func_143034_b(StructureMineshaftStart.class, "Mineshaft");
-        func_143034_b(MapGenVillage.Start.class, "Village");
-        func_143034_b(MapGenNetherBridge.Start.class, "Fortress");
-        func_143034_b(MapGenStronghold.Start.class, "Stronghold");
-        func_143034_b(MapGenScatteredFeature.Start.class, "Temple");
-        StructureMineshaftPieces.func_143048_a();
-        StructureVillagePieces.func_143016_a();
-        StructureNetherBridgePieces.func_143049_a();
-        StructureStrongholdPieces.func_143046_a();
-        ComponentScatteredFeaturePieces.func_143045_a();
+        registerStructure(StructureMineshaftStart.class, "Mineshaft");
+        registerStructure(MapGenVillage.Start.class, "Village");
+        registerStructure(MapGenNetherBridge.Start.class, "Fortress");
+        registerStructure(MapGenStronghold.Start.class, "Stronghold");
+        registerStructure(MapGenScatteredFeature.Start.class, "Temple");
+        registerStructure(StructureOceanMonument.StartMonument.class, "Monument");
+        StructureMineshaftPieces.registerStructurePieces();
+        StructureVillagePieces.registerVillagePieces();
+        StructureNetherBridgePieces.registerNetherFortressPieces();
+        StructureStrongholdPieces.registerStrongholdPieces();
+        ComponentScatteredFeaturePieces.registerScatteredFeaturePieces();
+        StructureOceanMonumentPieces.func_175970_a();
     }
 }

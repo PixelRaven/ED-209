@@ -30,7 +30,7 @@ public class EntityAIFollowParent extends EntityAIBase
         }
         else
         {
-            List var1 = this.childAnimal.worldObj.getEntitiesWithinAABB(this.childAnimal.getClass(), this.childAnimal.boundingBox.expand(8.0D, 4.0D, 8.0D));
+            List var1 = this.childAnimal.worldObj.getEntitiesWithinAABB(this.childAnimal.getClass(), this.childAnimal.getEntityBoundingBox().expand(8.0D, 4.0D, 8.0D));
             EntityAnimal var2 = null;
             double var3 = Double.MAX_VALUE;
             Iterator var5 = var1.iterator();
@@ -72,7 +72,11 @@ public class EntityAIFollowParent extends EntityAIBase
      */
     public boolean continueExecuting()
     {
-        if (!this.parentAnimal.isEntityAlive())
+        if (this.childAnimal.getGrowingAge() >= 0)
+        {
+            return false;
+        }
+        else if (!this.parentAnimal.isEntityAlive())
         {
             return false;
         }

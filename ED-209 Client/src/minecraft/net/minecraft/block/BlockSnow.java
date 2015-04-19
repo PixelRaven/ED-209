@@ -2,7 +2,10 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -10,38 +13,39 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockSnow extends Block
 {
+    public static final PropertyInteger LAYERS_PROP = PropertyInteger.create("layers", 1, 8);
     private static final String __OBFID = "CL_00000309";
 
     protected BlockSnow()
     {
-        super(Material.field_151597_y);
+        super(Material.snow);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(LAYERS_PROP, Integer.valueOf(1)));
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.125F, 1.0F);
         this.setTickRandomly(true);
         this.setCreativeTab(CreativeTabs.tabDecorations);
-        this.func_150154_b(0);
+        this.setBlockBoundsForItemRender();
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    public boolean isPassable(IBlockAccess blockAccess, BlockPos pos)
     {
-        this.blockIcon = p_149651_1_.registerIcon("snow");
+        return ((Integer)blockAccess.getBlockState(pos).getValue(LAYERS_PROP)).intValue() < 5;
     }
 
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-        int var5 = p_149668_1_.getBlockMetadata(p_149668_2_, p_149668_3_, p_149668_4_) & 7;
-        float var6 = 0.125F;
-        return AxisAlignedBB.getBoundingBox((double)p_149668_2_ + this.field_149759_B, (double)p_149668_3_ + this.field_149760_C, (double)p_149668_4_ + this.field_149754_D, (double)p_149668_2_ + this.field_149755_E, (double)((float)p_149668_3_ + (float)var5 * var6), (double)p_149668_4_ + this.field_149757_G);
+        int var4 = ((Integer)state.getValue(LAYERS_PROP)).intValue() - 1;
+        float var5 = 0.125F;
+        return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)((float)pos.getY() + (float)var4 * var5), (double)pos.getZ() + this.maxZ);
     }
 
     public boolean isOpaqueCube()
@@ -49,7 +53,7 @@ public class BlockSnow extends Block
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
@@ -59,38 +63,38 @@ public class BlockSnow extends Block
      */
     public void setBlockBoundsForItemRender()
     {
-        this.func_150154_b(0);
+        this.getBoundsForLayers(0);
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
     {
-        this.func_150154_b(p_149719_1_.getBlockMetadata(p_149719_2_, p_149719_3_, p_149719_4_));
+        IBlockState var3 = access.getBlockState(pos);
+        this.getBoundsForLayers(((Integer)var3.getValue(LAYERS_PROP)).intValue());
     }
 
-    protected void func_150154_b(int p_150154_1_)
+    protected void getBoundsForLayers(int p_150154_1_)
     {
-        int var2 = p_150154_1_ & 7;
-        float var3 = (float)(2 * (1 + var2)) / 16.0F;
-        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, var3, 1.0F);
+        this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, (float)p_150154_1_ / 8.0F, 1.0F);
     }
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
-        Block var5 = p_149742_1_.getBlock(p_149742_2_, p_149742_3_ - 1, p_149742_4_);
-        return var5 != Blocks.ice && var5 != Blocks.packed_ice ? (var5.getMaterial() == Material.leaves ? true : (var5 == this && (p_149742_1_.getBlockMetadata(p_149742_2_, p_149742_3_ - 1, p_149742_4_) & 7) == 7 ? true : var5.isOpaqueCube() && var5.blockMaterial.blocksMovement())) : false;
+        IBlockState var3 = worldIn.getBlockState(pos.offsetDown());
+        Block var4 = var3.getBlock();
+        return var4 != Blocks.ice && var4 != Blocks.packed_ice ? (var4.getMaterial() == Material.leaves ? true : (var4 == this && ((Integer)var3.getValue(LAYERS_PROP)).intValue() == 7 ? true : var4.isOpaqueCube() && var4.blockMaterial.blocksMovement())) : false;
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
     {
-        this.func_150155_m(p_149695_1_, p_149695_2_, p_149695_3_, p_149695_4_);
+        this.checkAndDropBlock(worldIn, pos, state);
     }
 
-    private boolean func_150155_m(World p_150155_1_, int p_150155_2_, int p_150155_3_, int p_150155_4_)
+    private boolean checkAndDropBlock(World worldIn, BlockPos p_176314_2_, IBlockState p_176314_3_)
     {
-        if (!this.canPlaceBlockAt(p_150155_1_, p_150155_2_, p_150155_3_, p_150155_4_))
+        if (!this.canPlaceBlockAt(worldIn, p_176314_2_))
         {
-            this.dropBlockAsItem(p_150155_1_, p_150155_2_, p_150155_3_, p_150155_4_, p_150155_1_.getBlockMetadata(p_150155_2_, p_150155_3_, p_150155_4_), 0);
-            p_150155_1_.setBlockToAir(p_150155_2_, p_150155_3_, p_150155_4_);
+            this.dropBlockAsItem(worldIn, p_176314_2_, p_176314_3_, 0);
+            worldIn.setBlockToAir(p_176314_2_);
             return false;
         }
         else
@@ -99,15 +103,19 @@ public class BlockSnow extends Block
         }
     }
 
-    public void harvestBlock(World p_149636_1_, EntityPlayer p_149636_2_, int p_149636_3_, int p_149636_4_, int p_149636_5_, int p_149636_6_)
+    public void harvestBlock(World worldIn, EntityPlayer playerIn, BlockPos pos, IBlockState state, TileEntity te)
     {
-        int var7 = p_149636_6_ & 7;
-        this.dropBlockAsItem_do(p_149636_1_, p_149636_3_, p_149636_4_, p_149636_5_, new ItemStack(Items.snowball, var7 + 1, 0));
-        p_149636_1_.setBlockToAir(p_149636_3_, p_149636_4_, p_149636_5_);
-        p_149636_2_.addStat(StatList.mineBlockStatArray[Block.getIdFromBlock(this)], 1);
+        spawnAsEntity(worldIn, pos, new ItemStack(Items.snowball, ((Integer)state.getValue(LAYERS_PROP)).intValue() + 1, 0));
+        worldIn.setBlockToAir(pos);
+        playerIn.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Items.snowball;
     }
@@ -115,25 +123,51 @@ public class BlockSnow extends Block
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }
 
-    /**
-     * Ticks the block if it's been scheduled
-     */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        if (p_149674_1_.getSavedLightValue(EnumSkyBlock.Block, p_149674_2_, p_149674_3_, p_149674_4_) > 11)
+        if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11)
         {
-            this.dropBlockAsItem(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_), 0);
-            p_149674_1_.setBlockToAir(p_149674_2_, p_149674_3_, p_149674_4_);
+            this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
+            worldIn.setBlockToAir(pos);
         }
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess p_149646_1_, int p_149646_2_, int p_149646_3_, int p_149646_4_, int p_149646_5_)
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
-        return p_149646_5_ == 1 ? true : super.shouldSideBeRendered(p_149646_1_, p_149646_2_, p_149646_3_, p_149646_4_, p_149646_5_);
+        return side == EnumFacing.UP ? true : super.shouldSideBeRendered(worldIn, pos, side);
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        return this.getDefaultState().withProperty(LAYERS_PROP, Integer.valueOf((meta & 7) + 1));
+    }
+
+    /**
+     * Whether this Block can be replaced directly by other blocks (true for e.g. tall grass)
+     */
+    public boolean isReplaceable(World worldIn, BlockPos pos)
+    {
+        return ((Integer)worldIn.getBlockState(pos).getValue(LAYERS_PROP)).intValue() == 1;
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((Integer)state.getValue(LAYERS_PROP)).intValue() - 1;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {LAYERS_PROP});
     }
 }

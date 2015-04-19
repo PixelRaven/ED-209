@@ -1,11 +1,11 @@
 package net.minecraft.client.network;
 
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +53,7 @@ public class LanServerDetector
 
     public static class LanServerList
     {
-        private ArrayList listOfLanServers = new ArrayList();
+        private List listOfLanServers = Lists.newArrayList();
         boolean wasUpdated;
         private static final String __OBFID = "CL_00001136";
 

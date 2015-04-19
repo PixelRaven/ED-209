@@ -2,23 +2,23 @@ package net.minecraft.client.audio;
 
 public class SoundEventAccessor implements ISoundEventAccessor
 {
-    private final SoundPoolEntry field_148739_a;
-    private final int field_148738_b;
+    private final SoundPoolEntry entry;
+    private final int weight;
     private static final String __OBFID = "CL_00001153";
 
-    SoundEventAccessor(SoundPoolEntry p_i45123_1_, int p_i45123_2_)
+    SoundEventAccessor(SoundPoolEntry entry, int weight)
     {
-        this.field_148739_a = p_i45123_1_;
-        this.field_148738_b = p_i45123_2_;
+        this.entry = entry;
+        this.weight = weight;
     }
 
-    public int func_148721_a()
+    public int getWeight()
     {
-        return this.field_148738_b;
+        return this.weight;
     }
 
-    public SoundPoolEntry func_148720_g()
+    public SoundPoolEntry cloneEntry()
     {
-        return new SoundPoolEntry(this.field_148739_a);
+        return new SoundPoolEntry(this.entry);
     }
 }

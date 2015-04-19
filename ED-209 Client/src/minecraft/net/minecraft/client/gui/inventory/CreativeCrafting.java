@@ -4,19 +4,23 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 
 public class CreativeCrafting implements ICrafting
 {
-    private final Minecraft field_146109_a;
+    private final Minecraft mc;
     private static final String __OBFID = "CL_00000751";
 
-    public CreativeCrafting(Minecraft p_i46314_1_)
+    public CreativeCrafting(Minecraft mc)
     {
-        this.field_146109_a = p_i46314_1_;
+        this.mc = mc;
     }
 
-    public void sendContainerAndContentsToPlayer(Container p_71110_1_, List p_71110_2_) {}
+    /**
+     * update the crafting window inventory with the items in the list
+     */
+    public void updateCraftingInventory(Container p_71110_1_, List p_71110_2_) {}
 
     /**
      * Sends the contents of an inventory slot to the client-side Container. This doesn't have to match the actual
@@ -24,7 +28,7 @@ public class CreativeCrafting implements ICrafting
      */
     public void sendSlotContents(Container p_71111_1_, int p_71111_2_, ItemStack p_71111_3_)
     {
-        this.field_146109_a.playerController.sendSlotPacket(p_71111_3_, p_71111_2_);
+        this.mc.playerController.sendSlotPacket(p_71111_3_, p_71111_2_);
     }
 
     /**
@@ -33,4 +37,6 @@ public class CreativeCrafting implements ICrafting
      * value. Both are truncated to shorts in non-local SMP.
      */
     public void sendProgressBarUpdate(Container p_71112_1_, int p_71112_2_, int p_71112_3_) {}
+
+    public void func_175173_a(Container p_175173_1_, IInventory p_175173_2_) {}
 }

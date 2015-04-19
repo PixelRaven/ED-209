@@ -7,6 +7,7 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public class CommandPardonPlayer extends CommandBase
 {
@@ -25,7 +26,7 @@ public class CommandPardonPlayer extends CommandBase
         return 3;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.unban.usage";
     }
@@ -33,26 +34,26 @@ public class CommandPardonPlayer extends CommandBase
     /**
      * Returns true if the given command sender is allowed to use this command.
      */
-    public boolean canCommandSenderUseCommand(ICommandSender p_71519_1_)
+    public boolean canCommandSenderUseCommand(ICommandSender sender)
     {
-        return MinecraftServer.getServer().getConfigurationManager().func_152608_h().func_152689_b() && super.canCommandSenderUseCommand(p_71519_1_);
+        return MinecraftServer.getServer().getConfigurationManager().getBannedPlayers().isLanServer() && super.canCommandSenderUseCommand(sender);
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length == 1 && p_71515_2_[0].length() > 0)
+        if (args.length == 1 && args[0].length() > 0)
         {
             MinecraftServer var3 = MinecraftServer.getServer();
-            GameProfile var4 = var3.getConfigurationManager().func_152608_h().func_152703_a(p_71515_2_[0]);
+            GameProfile var4 = var3.getConfigurationManager().getBannedPlayers().isUsernameBanned(args[0]);
 
             if (var4 == null)
             {
-                throw new CommandException("commands.unban.failed", new Object[] {p_71515_2_[0]});
+                throw new CommandException("commands.unban.failed", new Object[] {args[0]});
             }
             else
             {
-                var3.getConfigurationManager().func_152608_h().func_152684_c(var4);
-                func_152373_a(p_71515_1_, this, "commands.unban.success", new Object[] {p_71515_2_[0]});
+                var3.getConfigurationManager().getBannedPlayers().removeEntry(var4);
+                notifyOperators(sender, this, "commands.unban.success", new Object[] {args[0]});
             }
         }
         else
@@ -61,11 +62,8 @@ public class CommandPardonPlayer extends CommandBase
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, MinecraftServer.getServer().getConfigurationManager().func_152608_h().func_152685_a()) : null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getConfigurationManager().getBannedPlayers().getKeys()) : null;
     }
 }

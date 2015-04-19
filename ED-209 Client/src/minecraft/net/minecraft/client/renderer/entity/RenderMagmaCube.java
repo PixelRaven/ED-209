@@ -1,20 +1,20 @@
 package net.minecraft.client.renderer.entity;
 
 import net.minecraft.client.model.ModelMagmaCube;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class RenderMagmaCube extends RenderLiving
 {
     private static final ResourceLocation magmaCubeTextures = new ResourceLocation("textures/entity/slime/magmacube.png");
     private static final String __OBFID = "CL_00001009";
 
-    public RenderMagmaCube()
+    public RenderMagmaCube(RenderManager p_i46159_1_)
     {
-        super(new ModelMagmaCube(), 0.25F);
+        super(p_i46159_1_, new ModelMagmaCube(), 0.25F);
     }
 
     /**
@@ -35,7 +35,7 @@ public class RenderMagmaCube extends RenderLiving
         float var4 = (p_77041_1_.prevSquishFactor + (p_77041_1_.squishFactor - p_77041_1_.prevSquishFactor) * p_77041_2_) / ((float)var3 * 0.5F + 1.0F);
         float var5 = 1.0F / (var4 + 1.0F);
         float var6 = (float)var3;
-        GL11.glScalef(var5 * var6, 1.0F / var5 * var6, var5 * var6);
+        GlStateManager.scale(var5 * var6, 1.0F / var5 * var6, var5 * var6);
     }
 
     /**

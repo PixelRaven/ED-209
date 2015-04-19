@@ -10,15 +10,18 @@ public class EntityEnchantmentTableParticleFX extends EntityFX
     private double field_70566_as;
     private static final String __OBFID = "CL_00000902";
 
-    public EntityEnchantmentTableParticleFX(World p_i1204_1_, double p_i1204_2_, double p_i1204_4_, double p_i1204_6_, double p_i1204_8_, double p_i1204_10_, double p_i1204_12_)
+    protected EntityEnchantmentTableParticleFX(World worldIn, double p_i1204_2_, double p_i1204_4_, double p_i1204_6_, double p_i1204_8_, double p_i1204_10_, double p_i1204_12_)
     {
-        super(p_i1204_1_, p_i1204_2_, p_i1204_4_, p_i1204_6_, p_i1204_8_, p_i1204_10_, p_i1204_12_);
+        super(worldIn, p_i1204_2_, p_i1204_4_, p_i1204_6_, p_i1204_8_, p_i1204_10_, p_i1204_12_);
         this.motionX = p_i1204_8_;
         this.motionY = p_i1204_10_;
         this.motionZ = p_i1204_12_;
-        this.field_70568_aq = this.posX = p_i1204_2_;
-        this.field_70567_ar = this.posY = p_i1204_4_;
-        this.field_70566_as = this.posZ = p_i1204_6_;
+        this.field_70568_aq = p_i1204_2_;
+        this.field_70567_ar = p_i1204_4_;
+        this.field_70566_as = p_i1204_6_;
+        this.posX = this.prevPosX = p_i1204_2_ + p_i1204_8_;
+        this.posY = this.prevPosY = p_i1204_4_ + p_i1204_10_;
+        this.posZ = this.prevPosZ = p_i1204_6_ + p_i1204_12_;
         float var14 = this.rand.nextFloat() * 0.6F + 0.4F;
         this.field_70565_a = this.particleScale = this.rand.nextFloat() * 0.5F + 0.2F;
         this.particleRed = this.particleGreen = this.particleBlue = 1.0F * var14;
@@ -79,6 +82,16 @@ public class EntityEnchantmentTableParticleFX extends EntityFX
         if (this.particleAge++ >= this.particleMaxAge)
         {
             this.setDead();
+        }
+    }
+
+    public static class EnchantmentTable implements IParticleFactory
+    {
+        private static final String __OBFID = "CL_00002605";
+
+        public EntityFX func_178902_a(int p_178902_1_, World worldIn, double p_178902_3_, double p_178902_5_, double p_178902_7_, double p_178902_9_, double p_178902_11_, double p_178902_13_, int ... p_178902_15_)
+        {
+            return new EntityEnchantmentTableParticleFX(worldIn, p_178902_3_, p_178902_5_, p_178902_7_, p_178902_9_, p_178902_11_, p_178902_13_);
         }
     }
 }

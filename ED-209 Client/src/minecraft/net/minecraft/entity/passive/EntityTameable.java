@@ -5,9 +5,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityOwnable;
 import net.minecraft.entity.ai.EntityAISit;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.management.PreYggdrasilConverter;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public abstract class EntityTameable extends EntityAnimal implements IEntityOwnable
@@ -15,9 +18,10 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
     protected EntityAISit aiSit = new EntityAISit(this);
     private static final String __OBFID = "CL_00001561";
 
-    public EntityTameable(World p_i1604_1_)
+    public EntityTameable(World worldIn)
     {
-        super(p_i1604_1_);
+        super(worldIn);
+        this.func_175544_ck();
     }
 
     protected void entityInit()
@@ -30,37 +34,37 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    public void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    public void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
+        super.writeEntityToNBT(tagCompound);
 
         if (this.func_152113_b() == null)
         {
-            p_70014_1_.setString("OwnerUUID", "");
+            tagCompound.setString("OwnerUUID", "");
         }
         else
         {
-            p_70014_1_.setString("OwnerUUID", this.func_152113_b());
+            tagCompound.setString("OwnerUUID", this.func_152113_b());
         }
 
-        p_70014_1_.setBoolean("Sitting", this.isSitting());
+        tagCompound.setBoolean("Sitting", this.isSitting());
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    public void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    public void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
+        super.readEntityFromNBT(tagCompund);
         String var2 = "";
 
-        if (p_70037_1_.func_150297_b("OwnerUUID", 8))
+        if (tagCompund.hasKey("OwnerUUID", 8))
         {
-            var2 = p_70037_1_.getString("OwnerUUID");
+            var2 = tagCompund.getString("OwnerUUID");
         }
         else
         {
-            String var3 = p_70037_1_.getString("Owner");
+            String var3 = tagCompund.getString("Owner");
             var2 = PreYggdrasilConverter.func_152719_a(var3);
         }
 
@@ -70,8 +74,8 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
             this.setTamed(true);
         }
 
-        this.aiSit.setSitting(p_70037_1_.getBoolean("Sitting"));
-        this.setSitting(p_70037_1_.getBoolean("Sitting"));
+        this.aiSit.setSitting(tagCompund.getBoolean("Sitting"));
+        this.setSitting(tagCompund.getBoolean("Sitting"));
     }
 
     /**
@@ -79,11 +83,11 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
      */
     protected void playTameEffect(boolean p_70908_1_)
     {
-        String var2 = "heart";
+        EnumParticleTypes var2 = EnumParticleTypes.HEART;
 
         if (!p_70908_1_)
         {
-            var2 = "smoke";
+            var2 = EnumParticleTypes.SMOKE_NORMAL;
         }
 
         for (int var3 = 0; var3 < 7; ++var3)
@@ -91,7 +95,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
             double var4 = this.rand.nextGaussian() * 0.02D;
             double var6 = this.rand.nextGaussian() * 0.02D;
             double var8 = this.rand.nextGaussian() * 0.02D;
-            this.worldObj.spawnParticle(var2, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, var4, var6, var8);
+            this.worldObj.spawnParticle(var2, this.posX + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, this.posY + 0.5D + (double)(this.rand.nextFloat() * this.height), this.posZ + (double)(this.rand.nextFloat() * this.width * 2.0F) - (double)this.width, var4, var6, var8, new int[0]);
         }
     }
 
@@ -128,7 +132,11 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         {
             this.dataWatcher.updateObject(16, Byte.valueOf((byte)(var2 & -5)));
         }
+
+        this.func_175544_ck();
     }
+
+    protected void func_175544_ck() {}
 
     public boolean isSitting()
     {
@@ -159,12 +167,12 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         this.dataWatcher.updateObject(17, p_152115_1_);
     }
 
-    public EntityLivingBase getOwner()
+    public EntityLivingBase func_180492_cm()
     {
         try
         {
             UUID var1 = UUID.fromString(this.func_152113_b());
-            return var1 == null ? null : this.worldObj.func_152378_a(var1);
+            return var1 == null ? null : this.worldObj.getPlayerEntityByUUID(var1);
         }
         catch (IllegalArgumentException var2)
         {
@@ -174,10 +182,13 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
 
     public boolean func_152114_e(EntityLivingBase p_152114_1_)
     {
-        return p_152114_1_ == this.getOwner();
+        return p_152114_1_ == this.func_180492_cm();
     }
 
-    public EntityAISit func_70907_r()
+    /**
+     * Returns the AITask responsible of the sit logic
+     */
+    public EntityAISit getAISit()
     {
         return this.aiSit;
     }
@@ -191,7 +202,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
     {
         if (this.isTamed())
         {
-            EntityLivingBase var1 = this.getOwner();
+            EntityLivingBase var1 = this.func_180492_cm();
 
             if (var1 != null)
             {
@@ -206,7 +217,7 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
     {
         if (this.isTamed())
         {
-            EntityLivingBase var2 = this.getOwner();
+            EntityLivingBase var2 = this.func_180492_cm();
 
             if (p_142014_1_ == var2)
             {
@@ -220,5 +231,23 @@ public abstract class EntityTameable extends EntityAnimal implements IEntityOwna
         }
 
         return super.isOnSameTeam(p_142014_1_);
+    }
+
+    /**
+     * Called when the mob's health reaches 0.
+     */
+    public void onDeath(DamageSource cause)
+    {
+        if (!this.worldObj.isRemote && this.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages") && this.hasCustomName() && this.func_180492_cm() instanceof EntityPlayerMP)
+        {
+            ((EntityPlayerMP)this.func_180492_cm()).addChatMessage(this.getCombatTracker().func_151521_b());
+        }
+
+        super.onDeath(cause);
+    }
+
+    public Entity getOwner()
+    {
+        return this.func_180492_cm();
     }
 }

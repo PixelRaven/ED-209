@@ -4,11 +4,21 @@ import net.minecraft.util.AxisAlignedBB;
 
 public class Frustrum implements ICamera
 {
-    private ClippingHelper clippingHelper = ClippingHelperImpl.getInstance();
+    private ClippingHelper clippingHelper;
     private double xPosition;
     private double yPosition;
     private double zPosition;
     private static final String __OBFID = "CL_00000976";
+
+    public Frustrum()
+    {
+        this(ClippingHelperImpl.getInstance());
+    }
+
+    public Frustrum(ClippingHelper p_i46196_1_)
+    {
+        this.clippingHelper = p_i46196_1_;
+    }
 
     public void setPosition(double p_78547_1_, double p_78547_3_, double p_78547_5_)
     {

@@ -1,12 +1,16 @@
 package net.minecraft.entity.item;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockFurnace;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
@@ -17,19 +21,19 @@ public class EntityMinecartFurnace extends EntityMinecart
     public double pushZ;
     private static final String __OBFID = "CL_00001675";
 
-    public EntityMinecartFurnace(World p_i1718_1_)
+    public EntityMinecartFurnace(World worldIn)
     {
-        super(p_i1718_1_);
+        super(worldIn);
     }
 
-    public EntityMinecartFurnace(World p_i1719_1_, double p_i1719_2_, double p_i1719_4_, double p_i1719_6_)
+    public EntityMinecartFurnace(World worldIn, double p_i1719_2_, double p_i1719_4_, double p_i1719_6_)
     {
-        super(p_i1719_1_, p_i1719_2_, p_i1719_4_, p_i1719_6_);
+        super(worldIn, p_i1719_2_, p_i1719_4_, p_i1719_6_);
     }
 
-    public int getMinecartType()
+    public EntityMinecart.EnumMinecartType func_180456_s()
     {
-        return 2;
+        return EntityMinecart.EnumMinecartType.FURNACE;
     }
 
     protected void entityInit()
@@ -59,8 +63,13 @@ public class EntityMinecartFurnace extends EntityMinecart
 
         if (this.isMinecartPowered() && this.rand.nextInt(4) == 0)
         {
-            this.worldObj.spawnParticle("largesmoke", this.posX, this.posY + 0.8D, this.posZ, 0.0D, 0.0D, 0.0D);
+            this.worldObj.spawnParticle(EnumParticleTypes.SMOKE_LARGE, this.posX, this.posY + 0.8D, this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
         }
+    }
+
+    protected double func_174898_m()
+    {
+        return 0.2D;
     }
 
     public void killMinecart(DamageSource p_94095_1_)
@@ -73,16 +82,16 @@ public class EntityMinecartFurnace extends EntityMinecart
         }
     }
 
-    protected void func_145821_a(int p_145821_1_, int p_145821_2_, int p_145821_3_, double p_145821_4_, double p_145821_6_, Block p_145821_8_, int p_145821_9_)
+    protected void func_180460_a(BlockPos p_180460_1_, IBlockState p_180460_2_)
     {
-        super.func_145821_a(p_145821_1_, p_145821_2_, p_145821_3_, p_145821_4_, p_145821_6_, p_145821_8_, p_145821_9_);
-        double var10 = this.pushX * this.pushX + this.pushZ * this.pushZ;
+        super.func_180460_a(p_180460_1_, p_180460_2_);
+        double var3 = this.pushX * this.pushX + this.pushZ * this.pushZ;
 
-        if (var10 > 1.0E-4D && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.001D)
+        if (var3 > 1.0E-4D && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.001D)
         {
-            var10 = (double)MathHelper.sqrt_double(var10);
-            this.pushX /= var10;
-            this.pushZ /= var10;
+            var3 = (double)MathHelper.sqrt_double(var3);
+            this.pushX /= var3;
+            this.pushZ /= var3;
 
             if (this.pushX * this.motionX + this.pushZ * this.motionZ < 0.0D)
             {
@@ -91,8 +100,9 @@ public class EntityMinecartFurnace extends EntityMinecart
             }
             else
             {
-                this.pushX = this.motionX;
-                this.pushZ = this.motionZ;
+                double var5 = var3 / this.func_174898_m();
+                this.pushX *= var5;
+                this.pushZ *= var5;
             }
         }
     }
@@ -106,7 +116,7 @@ public class EntityMinecartFurnace extends EntityMinecart
             var1 = (double)MathHelper.sqrt_double(var1);
             this.pushX /= var1;
             this.pushZ /= var1;
-            double var3 = 0.05D;
+            double var3 = 1.0D;
             this.motionX *= 0.800000011920929D;
             this.motionY *= 0.0D;
             this.motionZ *= 0.800000011920929D;
@@ -126,45 +136,45 @@ public class EntityMinecartFurnace extends EntityMinecart
     /**
      * First layer of player interaction
      */
-    public boolean interactFirst(EntityPlayer p_130002_1_)
+    public boolean interactFirst(EntityPlayer playerIn)
     {
-        ItemStack var2 = p_130002_1_.inventory.getCurrentItem();
+        ItemStack var2 = playerIn.inventory.getCurrentItem();
 
         if (var2 != null && var2.getItem() == Items.coal)
         {
-            if (!p_130002_1_.capabilities.isCreativeMode && --var2.stackSize == 0)
+            if (!playerIn.capabilities.isCreativeMode && --var2.stackSize == 0)
             {
-                p_130002_1_.inventory.setInventorySlotContents(p_130002_1_.inventory.currentItem, (ItemStack)null);
+                playerIn.inventory.setInventorySlotContents(playerIn.inventory.currentItem, (ItemStack)null);
             }
 
             this.fuel += 3600;
         }
 
-        this.pushX = this.posX - p_130002_1_.posX;
-        this.pushZ = this.posZ - p_130002_1_.posZ;
+        this.pushX = this.posX - playerIn.posX;
+        this.pushZ = this.posZ - playerIn.posZ;
         return true;
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setDouble("PushX", this.pushX);
-        p_70014_1_.setDouble("PushZ", this.pushZ);
-        p_70014_1_.setShort("Fuel", (short)this.fuel);
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setDouble("PushX", this.pushX);
+        tagCompound.setDouble("PushZ", this.pushZ);
+        tagCompound.setShort("Fuel", (short)this.fuel);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
-        this.pushX = p_70037_1_.getDouble("PushX");
-        this.pushZ = p_70037_1_.getDouble("PushZ");
-        this.fuel = p_70037_1_.getShort("Fuel");
+        super.readEntityFromNBT(tagCompund);
+        this.pushX = tagCompund.getDouble("PushX");
+        this.pushZ = tagCompund.getDouble("PushZ");
+        this.fuel = tagCompund.getShort("Fuel");
     }
 
     protected boolean isMinecartPowered()
@@ -184,13 +194,8 @@ public class EntityMinecartFurnace extends EntityMinecart
         }
     }
 
-    public Block func_145817_o()
+    public IBlockState func_180457_u()
     {
-        return Blocks.lit_furnace;
-    }
-
-    public int getDefaultDisplayTileData()
-    {
-        return 2;
+        return (this.isMinecartPowered() ? Blocks.lit_furnace : Blocks.furnace).getDefaultState().withProperty(BlockFurnace.FACING, EnumFacing.NORTH);
     }
 }

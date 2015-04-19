@@ -1,100 +1,93 @@
 package net.minecraft.block;
 
 import java.util.Random;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class BlockNetherWart extends BlockBush
 {
-    private IIcon[] field_149883_a;
+    public static final PropertyInteger AGE_PROP = PropertyInteger.create("age", 0, 3);
     private static final String __OBFID = "CL_00000274";
 
     protected BlockNetherWart()
     {
+        this.setDefaultState(this.blockState.getBaseState().withProperty(AGE_PROP, Integer.valueOf(0)));
         this.setTickRandomly(true);
         float var1 = 0.5F;
         this.setBlockBounds(0.5F - var1, 0.0F, 0.5F - var1, 0.5F + var1, 0.25F, 0.5F + var1);
         this.setCreativeTab((CreativeTabs)null);
     }
 
-    protected boolean func_149854_a(Block p_149854_1_)
+    /**
+     * is the block grass, dirt or farmland
+     */
+    protected boolean canPlaceBlockOn(Block ground)
     {
-        return p_149854_1_ == Blocks.soul_sand;
+        return ground == Blocks.soul_sand;
     }
 
-    /**
-     * Can this block stay at this position.  Similar to canPlaceBlockAt except gets checked often with plants.
-     */
-    public boolean canBlockStay(World p_149718_1_, int p_149718_2_, int p_149718_3_, int p_149718_4_)
+    public boolean canBlockStay(World worldIn, BlockPos p_180671_2_, IBlockState p_180671_3_)
     {
-        return this.func_149854_a(p_149718_1_.getBlock(p_149718_2_, p_149718_3_ - 1, p_149718_4_));
+        return this.canPlaceBlockOn(worldIn.getBlockState(p_180671_2_.offsetDown()).getBlock());
     }
 
-    /**
-     * Ticks the block if it's been scheduled
-     */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        int var6 = p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_);
+        int var5 = ((Integer)state.getValue(AGE_PROP)).intValue();
 
-        if (var6 < 3 && p_149674_5_.nextInt(10) == 0)
+        if (var5 < 3 && rand.nextInt(10) == 0)
         {
-            ++var6;
-            p_149674_1_.setBlockMetadataWithNotify(p_149674_2_, p_149674_3_, p_149674_4_, var6, 2);
+            state = state.withProperty(AGE_PROP, Integer.valueOf(var5 + 1));
+            worldIn.setBlockState(pos, state, 2);
         }
 
-        super.updateTick(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_5_);
+        super.updateTick(worldIn, pos, state, rand);
     }
 
     /**
-     * Gets the block's texture. Args: side, meta
+     * Spawns this Block's drops into the World as EntityItems.
+     *  
+     * @param chance The chance that each Item is actually spawned (1.0 = always, 0.0 = never)
+     * @param fortune The player's fortune level
      */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
     {
-        return p_149691_2_ >= 3 ? this.field_149883_a[2] : (p_149691_2_ > 0 ? this.field_149883_a[1] : this.field_149883_a[0]);
-    }
-
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
-    {
-        return 6;
-    }
-
-    /**
-     * Drops the block items with a specified chance of dropping the specified items
-     */
-    public void dropBlockAsItemWithChance(World p_149690_1_, int p_149690_2_, int p_149690_3_, int p_149690_4_, int p_149690_5_, float p_149690_6_, int p_149690_7_)
-    {
-        if (!p_149690_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            int var8 = 1;
+            int var6 = 1;
 
-            if (p_149690_5_ >= 3)
+            if (((Integer)state.getValue(AGE_PROP)).intValue() >= 3)
             {
-                var8 = 2 + p_149690_1_.rand.nextInt(3);
+                var6 = 2 + worldIn.rand.nextInt(3);
 
-                if (p_149690_7_ > 0)
+                if (fortune > 0)
                 {
-                    var8 += p_149690_1_.rand.nextInt(p_149690_7_ + 1);
+                    var6 += worldIn.rand.nextInt(fortune + 1);
                 }
             }
 
-            for (int var9 = 0; var9 < var8; ++var9)
+            for (int var7 = 0; var7 < var6; ++var7)
             {
-                this.dropBlockAsItem_do(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, new ItemStack(Items.nether_wart));
+                spawnAsEntity(worldIn, pos, new ItemStack(Items.nether_wart));
             }
         }
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return null;
     }
@@ -102,26 +95,34 @@ public class BlockNetherWart extends BlockBush
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }
 
-    /**
-     * Gets an item for the block being called on. Args: world, x, y, z
-     */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public Item getItem(World worldIn, BlockPos pos)
     {
         return Items.nether_wart;
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
     {
-        this.field_149883_a = new IIcon[3];
+        return this.getDefaultState().withProperty(AGE_PROP, Integer.valueOf(meta));
+    }
 
-        for (int var2 = 0; var2 < this.field_149883_a.length; ++var2)
-        {
-            this.field_149883_a[var2] = p_149651_1_.registerIcon(this.getTextureName() + "_stage_" + var2);
-        }
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((Integer)state.getValue(AGE_PROP)).intValue();
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {AGE_PROP});
     }
 }

@@ -3,11 +3,14 @@ package net.minecraft.command.server;
 import com.google.gson.JsonParseException;
 import java.util.List;
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.SyntaxErrorException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentProcessor;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -28,26 +31,26 @@ public class CommandMessageRaw extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.tellraw.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length < 2)
+        if (args.length < 2)
         {
             throw new WrongUsageException("commands.tellraw.usage", new Object[0]);
         }
         else
         {
-            EntityPlayerMP var3 = getPlayer(p_71515_1_, p_71515_2_[0]);
-            String var4 = func_82360_a(p_71515_1_, p_71515_2_, 1);
+            EntityPlayerMP var3 = getPlayer(sender, args[0]);
+            String var4 = func_180529_a(args, 1);
 
             try
             {
-                IChatComponent var5 = IChatComponent.Serializer.func_150699_a(var4);
-                var3.addChatMessage(var5);
+                IChatComponent var5 = IChatComponent.Serializer.jsonToComponent(var4);
+                var3.addChatMessage(ChatComponentProcessor.func_179985_a(sender, var5, var3));
             }
             catch (JsonParseException var7)
             {
@@ -57,19 +60,16 @@ public class CommandMessageRaw extends CommandBase
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length == 1 ? getListOfStringsMatchingLastWord(p_71516_2_, MinecraftServer.getServer().getAllUsernames()) : null;
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
     }
 
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 0;
+        return index == 0;
     }
 }

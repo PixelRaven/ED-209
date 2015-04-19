@@ -94,17 +94,7 @@ public class Timer
         this.lastSyncSysClock = var1;
         double var13 = (var7 - this.lastHRTime) * this.timeSyncAdjustment;
         this.lastHRTime = var7;
-
-        if (var13 < 0.0D)
-        {
-            var13 = 0.0D;
-        }
-
-        if (var13 > 1.0D)
-        {
-            var13 = 1.0D;
-        }
-
+        var13 = MathHelper.clamp_double(var13, 0.0D, 1.0D);
         this.elapsedPartialTicks = (float)((double)this.elapsedPartialTicks + var13 * (double)this.timerSpeed * (double)this.ticksPerSecond);
         this.elapsedTicks = (int)this.elapsedPartialTicks;
         this.elapsedPartialTicks -= (float)this.elapsedTicks;

@@ -1,5 +1,7 @@
 package net.minecraft.world;
 
+import net.minecraft.util.BlockPos;
+
 public class ChunkCoordIntPair
 {
     /** The X position of this Chunk Coordinate Pair */
@@ -9,18 +11,18 @@ public class ChunkCoordIntPair
     public final int chunkZPos;
     private static final String __OBFID = "CL_00000133";
 
-    public ChunkCoordIntPair(int p_i1947_1_, int p_i1947_2_)
+    public ChunkCoordIntPair(int x, int z)
     {
-        this.chunkXPos = p_i1947_1_;
-        this.chunkZPos = p_i1947_2_;
+        this.chunkXPos = x;
+        this.chunkZPos = z;
     }
 
     /**
      * converts a chunk coordinate pair to an integer (suitable for hashing)
      */
-    public static long chunkXZ2Int(int p_77272_0_, int p_77272_1_)
+    public static long chunkXZ2Int(int x, int z)
     {
-        return (long)p_77272_0_ & 4294967295L | ((long)p_77272_1_ & 4294967295L) << 32;
+        return (long)x & 4294967295L | ((long)z & 4294967295L) << 32;
     }
 
     public int hashCode()
@@ -57,9 +59,58 @@ public class ChunkCoordIntPair
         return (this.chunkZPos << 4) + 8;
     }
 
-    public ChunkPosition func_151349_a(int p_151349_1_)
+    /**
+     * Get the first world X coordinate that belongs to this Chunk
+     */
+    public int getXStart()
     {
-        return new ChunkPosition(this.getCenterXPos(), p_151349_1_, this.getCenterZPosition());
+        return this.chunkXPos << 4;
+    }
+
+    /**
+     * Get the first world Z coordinate that belongs to this Chunk
+     */
+    public int getZStart()
+    {
+        return this.chunkZPos << 4;
+    }
+
+    /**
+     * Get the last world X coordinate that belongs to this Chunk
+     */
+    public int getXEnd()
+    {
+        return (this.chunkXPos << 4) + 15;
+    }
+
+    /**
+     * Get the last world Z coordinate that belongs to this Chunk
+     */
+    public int getZEnd()
+    {
+        return (this.chunkZPos << 4) + 15;
+    }
+
+    /**
+     * Get the World coordinates of the Block with the given Chunk coordinates relative to this chunk
+     *  
+     * @param x X coordinate of the Block in this chunk (0-15)
+     * @param y Y coordinate of the Block
+     * @param z Z coordinate of the Block in this chunk (0-15)
+     */
+    public BlockPos getBlock(int x, int y, int z)
+    {
+        return new BlockPos((this.chunkXPos << 4) + x, y, (this.chunkZPos << 4) + z);
+    }
+
+    /**
+     * Get the coordinates of the Block in the center of this chunk with the given Y coordinate
+     *  
+     * @param y Y coordinate
+     */
+    public BlockPos getCenterBlock(int y)
+    {
+        return new BlockPos(this.getCenterXPos(), y, this.getCenterZPosition());
     }
 
     public String toString()

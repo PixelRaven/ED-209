@@ -3,7 +3,7 @@ package net.minecraft.command;
 import java.util.List;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 
 public class CommandSetSpawnpoint extends CommandBase
 {
@@ -22,55 +22,40 @@ public class CommandSetSpawnpoint extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.spawnpoint.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        EntityPlayerMP var3 = p_71515_2_.length == 0 ? getCommandSenderAsPlayer(p_71515_1_) : getPlayer(p_71515_1_, p_71515_2_[0]);
-
-        if (p_71515_2_.length == 4)
+        if (args.length > 0 && args.length < 4)
         {
-            if (var3.worldObj != null)
-            {
-                byte var4 = 1;
-                int var5 = 30000000;
-                int var9 = var4 + 1;
-                int var6 = parseIntBounded(p_71515_1_, p_71515_2_[var4], -var5, var5);
-                int var7 = parseIntBounded(p_71515_1_, p_71515_2_[var9++], 0, 256);
-                int var8 = parseIntBounded(p_71515_1_, p_71515_2_[var9++], -var5, var5);
-                var3.setSpawnChunk(new ChunkCoordinates(var6, var7, var8), true);
-                func_152373_a(p_71515_1_, this, "commands.spawnpoint.success", new Object[] {var3.getCommandSenderName(), Integer.valueOf(var6), Integer.valueOf(var7), Integer.valueOf(var8)});
-            }
+            throw new WrongUsageException("commands.spawnpoint.usage", new Object[0]);
         }
         else
         {
-            if (p_71515_2_.length > 1)
-            {
-                throw new WrongUsageException("commands.spawnpoint.usage", new Object[0]);
-            }
+            EntityPlayerMP var3 = args.length > 0 ? getPlayer(sender, args[0]) : getCommandSenderAsPlayer(sender);
+            BlockPos var4 = args.length > 3 ? func_175757_a(sender, args, 1, true) : var3.getPosition();
 
-            ChunkCoordinates var10 = var3.getPlayerCoordinates();
-            var3.setSpawnChunk(var10, true);
-            func_152373_a(p_71515_1_, this, "commands.spawnpoint.success", new Object[] {var3.getCommandSenderName(), Integer.valueOf(var10.posX), Integer.valueOf(var10.posY), Integer.valueOf(var10.posZ)});
+            if (var3.worldObj != null)
+            {
+                var3.func_180473_a(var4, true);
+                notifyOperators(sender, this, "commands.spawnpoint.success", new Object[] {var3.getName(), Integer.valueOf(var4.getX()), Integer.valueOf(var4.getY()), Integer.valueOf(var4.getZ())});
+            }
         }
     }
 
-    /**
-     * Adds the strings available in this command to the given list of tab completion options.
-     */
-    public List addTabCompletionOptions(ICommandSender p_71516_1_, String[] p_71516_2_)
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
     {
-        return p_71516_2_.length != 1 && p_71516_2_.length != 2 ? null : getListOfStringsMatchingLastWord(p_71516_2_, MinecraftServer.getServer().getAllUsernames());
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : (args.length > 1 && args.length <= 4 ? func_175771_a(args, 1, pos) : null);
     }
 
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 0;
+        return index == 0;
     }
 }

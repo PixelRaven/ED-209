@@ -1,7 +1,9 @@
 package net.minecraft.client.renderer.tileentity;
 
-import net.minecraft.client.renderer.OpenGlHelper;
+import java.util.List;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBeacon;
 import net.minecraft.util.MathHelper;
@@ -10,105 +12,112 @@ import org.lwjgl.opengl.GL11;
 
 public class TileEntityBeaconRenderer extends TileEntitySpecialRenderer
 {
-    private static final ResourceLocation field_147523_b = new ResourceLocation("textures/entity/beacon_beam.png");
+    private static final ResourceLocation beaconBeam = new ResourceLocation("textures/entity/beacon_beam.png");
     private static final String __OBFID = "CL_00000962";
 
-    public void renderTileEntityAt(TileEntityBeacon p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_)
+    public void func_180536_a(TileEntityBeacon p_180536_1_, double p_180536_2_, double p_180536_4_, double p_180536_6_, float p_180536_8_, int p_180536_9_)
     {
-        float var9 = p_147500_1_.func_146002_i();
-        GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
+        float var10 = p_180536_1_.shouldBeamRender();
+        GlStateManager.alphaFunc(516, 0.1F);
 
-        if (var9 > 0.0F)
+        if (var10 > 0.0F)
         {
-            Tessellator var10 = Tessellator.instance;
-            this.bindTexture(field_147523_b);
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, 10497.0F);
-            GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, 10497.0F);
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glDisable(GL11.GL_CULL_FACE);
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glDepthMask(true);
-            OpenGlHelper.glBlendFunc(770, 1, 1, 0);
-            float var11 = (float)p_147500_1_.getWorldObj().getTotalWorldTime() + p_147500_8_;
-            float var12 = -var11 * 0.2F - (float)MathHelper.floor_float(-var11 * 0.1F);
-            byte var13 = 1;
-            double var14 = (double)var11 * 0.025D * (1.0D - (double)(var13 & 1) * 2.5D);
-            var10.startDrawingQuads();
-            var10.setColorRGBA(255, 255, 255, 32);
-            double var16 = (double)var13 * 0.2D;
-            double var18 = 0.5D + Math.cos(var14 + 2.356194490192345D) * var16;
-            double var20 = 0.5D + Math.sin(var14 + 2.356194490192345D) * var16;
-            double var22 = 0.5D + Math.cos(var14 + (Math.PI / 4D)) * var16;
-            double var24 = 0.5D + Math.sin(var14 + (Math.PI / 4D)) * var16;
-            double var26 = 0.5D + Math.cos(var14 + 3.9269908169872414D) * var16;
-            double var28 = 0.5D + Math.sin(var14 + 3.9269908169872414D) * var16;
-            double var30 = 0.5D + Math.cos(var14 + 5.497787143782138D) * var16;
-            double var32 = 0.5D + Math.sin(var14 + 5.497787143782138D) * var16;
-            double var34 = (double)(256.0F * var9);
-            double var36 = 0.0D;
-            double var38 = 1.0D;
-            double var40 = (double)(-1.0F + var12);
-            double var42 = (double)(256.0F * var9) * (0.5D / var16) + var40;
-            var10.addVertexWithUV(p_147500_2_ + var18, p_147500_4_ + var34, p_147500_6_ + var20, var38, var42);
-            var10.addVertexWithUV(p_147500_2_ + var18, p_147500_4_, p_147500_6_ + var20, var38, var40);
-            var10.addVertexWithUV(p_147500_2_ + var22, p_147500_4_, p_147500_6_ + var24, var36, var40);
-            var10.addVertexWithUV(p_147500_2_ + var22, p_147500_4_ + var34, p_147500_6_ + var24, var36, var42);
-            var10.addVertexWithUV(p_147500_2_ + var30, p_147500_4_ + var34, p_147500_6_ + var32, var38, var42);
-            var10.addVertexWithUV(p_147500_2_ + var30, p_147500_4_, p_147500_6_ + var32, var38, var40);
-            var10.addVertexWithUV(p_147500_2_ + var26, p_147500_4_, p_147500_6_ + var28, var36, var40);
-            var10.addVertexWithUV(p_147500_2_ + var26, p_147500_4_ + var34, p_147500_6_ + var28, var36, var42);
-            var10.addVertexWithUV(p_147500_2_ + var22, p_147500_4_ + var34, p_147500_6_ + var24, var38, var42);
-            var10.addVertexWithUV(p_147500_2_ + var22, p_147500_4_, p_147500_6_ + var24, var38, var40);
-            var10.addVertexWithUV(p_147500_2_ + var30, p_147500_4_, p_147500_6_ + var32, var36, var40);
-            var10.addVertexWithUV(p_147500_2_ + var30, p_147500_4_ + var34, p_147500_6_ + var32, var36, var42);
-            var10.addVertexWithUV(p_147500_2_ + var26, p_147500_4_ + var34, p_147500_6_ + var28, var38, var42);
-            var10.addVertexWithUV(p_147500_2_ + var26, p_147500_4_, p_147500_6_ + var28, var38, var40);
-            var10.addVertexWithUV(p_147500_2_ + var18, p_147500_4_, p_147500_6_ + var20, var36, var40);
-            var10.addVertexWithUV(p_147500_2_ + var18, p_147500_4_ + var34, p_147500_6_ + var20, var36, var42);
-            var10.draw();
-            GL11.glEnable(GL11.GL_BLEND);
-            OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-            GL11.glDepthMask(false);
-            var10.startDrawingQuads();
-            var10.setColorRGBA(255, 255, 255, 32);
-            double var44 = 0.2D;
-            double var15 = 0.2D;
-            double var17 = 0.8D;
-            double var19 = 0.2D;
-            double var21 = 0.2D;
-            double var23 = 0.8D;
-            double var25 = 0.8D;
-            double var27 = 0.8D;
-            double var29 = (double)(256.0F * var9);
-            double var31 = 0.0D;
-            double var33 = 1.0D;
-            double var35 = (double)(-1.0F + var12);
-            double var37 = (double)(256.0F * var9) + var35;
-            var10.addVertexWithUV(p_147500_2_ + var44, p_147500_4_ + var29, p_147500_6_ + var15, var33, var37);
-            var10.addVertexWithUV(p_147500_2_ + var44, p_147500_4_, p_147500_6_ + var15, var33, var35);
-            var10.addVertexWithUV(p_147500_2_ + var17, p_147500_4_, p_147500_6_ + var19, var31, var35);
-            var10.addVertexWithUV(p_147500_2_ + var17, p_147500_4_ + var29, p_147500_6_ + var19, var31, var37);
-            var10.addVertexWithUV(p_147500_2_ + var25, p_147500_4_ + var29, p_147500_6_ + var27, var33, var37);
-            var10.addVertexWithUV(p_147500_2_ + var25, p_147500_4_, p_147500_6_ + var27, var33, var35);
-            var10.addVertexWithUV(p_147500_2_ + var21, p_147500_4_, p_147500_6_ + var23, var31, var35);
-            var10.addVertexWithUV(p_147500_2_ + var21, p_147500_4_ + var29, p_147500_6_ + var23, var31, var37);
-            var10.addVertexWithUV(p_147500_2_ + var17, p_147500_4_ + var29, p_147500_6_ + var19, var33, var37);
-            var10.addVertexWithUV(p_147500_2_ + var17, p_147500_4_, p_147500_6_ + var19, var33, var35);
-            var10.addVertexWithUV(p_147500_2_ + var25, p_147500_4_, p_147500_6_ + var27, var31, var35);
-            var10.addVertexWithUV(p_147500_2_ + var25, p_147500_4_ + var29, p_147500_6_ + var27, var31, var37);
-            var10.addVertexWithUV(p_147500_2_ + var21, p_147500_4_ + var29, p_147500_6_ + var23, var33, var37);
-            var10.addVertexWithUV(p_147500_2_ + var21, p_147500_4_, p_147500_6_ + var23, var33, var35);
-            var10.addVertexWithUV(p_147500_2_ + var44, p_147500_4_, p_147500_6_ + var15, var31, var35);
-            var10.addVertexWithUV(p_147500_2_ + var44, p_147500_4_ + var29, p_147500_6_ + var15, var31, var37);
-            var10.draw();
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glDepthMask(true);
+            Tessellator var11 = Tessellator.getInstance();
+            WorldRenderer var12 = var11.getWorldRenderer();
+            List var13 = p_180536_1_.func_174907_n();
+            int var14 = 0;
+
+            for (int var15 = 0; var15 < var13.size(); ++var15)
+            {
+                TileEntityBeacon.BeamSegment var16 = (TileEntityBeacon.BeamSegment)var13.get(var15);
+                int var17 = var14 + var16.func_177264_c();
+                this.bindTexture(beaconBeam);
+                GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, 10497.0F);
+                GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, 10497.0F);
+                GlStateManager.disableLighting();
+                GlStateManager.disableCull();
+                GlStateManager.disableBlend();
+                GlStateManager.depthMask(true);
+                GlStateManager.tryBlendFuncSeparate(770, 1, 1, 0);
+                float var18 = (float)p_180536_1_.getWorld().getTotalWorldTime() + p_180536_8_;
+                float var19 = -var18 * 0.2F - (float)MathHelper.floor_float(-var18 * 0.1F);
+                double var20 = (double)var18 * 0.025D * -1.5D;
+                var12.startDrawingQuads();
+                double var22 = 0.2D;
+                double var24 = 0.5D + Math.cos(var20 + 2.356194490192345D) * var22;
+                double var26 = 0.5D + Math.sin(var20 + 2.356194490192345D) * var22;
+                double var28 = 0.5D + Math.cos(var20 + (Math.PI / 4D)) * var22;
+                double var30 = 0.5D + Math.sin(var20 + (Math.PI / 4D)) * var22;
+                double var32 = 0.5D + Math.cos(var20 + 3.9269908169872414D) * var22;
+                double var34 = 0.5D + Math.sin(var20 + 3.9269908169872414D) * var22;
+                double var36 = 0.5D + Math.cos(var20 + 5.497787143782138D) * var22;
+                double var38 = 0.5D + Math.sin(var20 + 5.497787143782138D) * var22;
+                double var40 = 0.0D;
+                double var42 = 1.0D;
+                double var44 = (double)(-1.0F + var19);
+                double var46 = (double)((float)var16.func_177264_c() * var10) * (0.5D / var22) + var44;
+                var12.func_178960_a(var16.func_177263_b()[0], var16.func_177263_b()[1], var16.func_177263_b()[2], 0.125F);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var17, p_180536_6_ + var26, var42, var46);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var14, p_180536_6_ + var26, var42, var44);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var14, p_180536_6_ + var30, var40, var44);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var17, p_180536_6_ + var30, var40, var46);
+                var12.addVertexWithUV(p_180536_2_ + var36, p_180536_4_ + (double)var17, p_180536_6_ + var38, var42, var46);
+                var12.addVertexWithUV(p_180536_2_ + var36, p_180536_4_ + (double)var14, p_180536_6_ + var38, var42, var44);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var14, p_180536_6_ + var34, var40, var44);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var17, p_180536_6_ + var34, var40, var46);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var17, p_180536_6_ + var30, var42, var46);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var14, p_180536_6_ + var30, var42, var44);
+                var12.addVertexWithUV(p_180536_2_ + var36, p_180536_4_ + (double)var14, p_180536_6_ + var38, var40, var44);
+                var12.addVertexWithUV(p_180536_2_ + var36, p_180536_4_ + (double)var17, p_180536_6_ + var38, var40, var46);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var17, p_180536_6_ + var34, var42, var46);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var14, p_180536_6_ + var34, var42, var44);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var14, p_180536_6_ + var26, var40, var44);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var17, p_180536_6_ + var26, var40, var46);
+                var11.draw();
+                GlStateManager.enableBlend();
+                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+                GlStateManager.depthMask(false);
+                var12.startDrawingQuads();
+                var12.func_178960_a(var16.func_177263_b()[0], var16.func_177263_b()[1], var16.func_177263_b()[2], 0.125F);
+                var20 = 0.2D;
+                var22 = 0.2D;
+                var24 = 0.8D;
+                var26 = 0.2D;
+                var28 = 0.2D;
+                var30 = 0.8D;
+                var32 = 0.8D;
+                var34 = 0.8D;
+                var36 = 0.0D;
+                var38 = 1.0D;
+                var40 = (double)(-1.0F + var19);
+                var42 = (double)((float)var16.func_177264_c() * var10) + var40;
+                var12.addVertexWithUV(p_180536_2_ + var20, p_180536_4_ + (double)var17, p_180536_6_ + var22, var38, var42);
+                var12.addVertexWithUV(p_180536_2_ + var20, p_180536_4_ + (double)var14, p_180536_6_ + var22, var38, var40);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var14, p_180536_6_ + var26, var36, var40);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var17, p_180536_6_ + var26, var36, var42);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var17, p_180536_6_ + var34, var38, var42);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var14, p_180536_6_ + var34, var38, var40);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var14, p_180536_6_ + var30, var36, var40);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var17, p_180536_6_ + var30, var36, var42);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var17, p_180536_6_ + var26, var38, var42);
+                var12.addVertexWithUV(p_180536_2_ + var24, p_180536_4_ + (double)var14, p_180536_6_ + var26, var38, var40);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var14, p_180536_6_ + var34, var36, var40);
+                var12.addVertexWithUV(p_180536_2_ + var32, p_180536_4_ + (double)var17, p_180536_6_ + var34, var36, var42);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var17, p_180536_6_ + var30, var38, var42);
+                var12.addVertexWithUV(p_180536_2_ + var28, p_180536_4_ + (double)var14, p_180536_6_ + var30, var38, var40);
+                var12.addVertexWithUV(p_180536_2_ + var20, p_180536_4_ + (double)var14, p_180536_6_ + var22, var36, var40);
+                var12.addVertexWithUV(p_180536_2_ + var20, p_180536_4_ + (double)var17, p_180536_6_ + var22, var36, var42);
+                var11.draw();
+                GlStateManager.enableLighting();
+                GlStateManager.func_179098_w();
+                GlStateManager.depthMask(true);
+                var14 = var17;
+            }
         }
     }
 
-    public void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_)
+    public void renderTileEntityAt(TileEntity p_180535_1_, double p_180535_2_, double p_180535_4_, double p_180535_6_, float p_180535_8_, int p_180535_9_)
     {
-        this.renderTileEntityAt((TileEntityBeacon)p_147500_1_, p_147500_2_, p_147500_4_, p_147500_6_, p_147500_8_);
+        this.func_180536_a((TileEntityBeacon)p_180535_1_, p_180535_2_, p_180535_4_, p_180535_6_, p_180535_8_, p_180535_9_);
     }
 }

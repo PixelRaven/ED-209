@@ -1,8 +1,8 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
-import org.lwjgl.opengl.GL11;
 
 public class ModelChicken extends ModelBase
 {
@@ -55,21 +55,21 @@ public class ModelChicken extends ModelBase
         if (this.isChild)
         {
             float var8 = 2.0F;
-            GL11.glPushMatrix();
-            GL11.glTranslatef(0.0F, 5.0F * p_78088_7_, 2.0F * p_78088_7_);
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, 5.0F * p_78088_7_, 2.0F * p_78088_7_);
             this.head.render(p_78088_7_);
             this.bill.render(p_78088_7_);
             this.chin.render(p_78088_7_);
-            GL11.glPopMatrix();
-            GL11.glPushMatrix();
-            GL11.glScalef(1.0F / var8, 1.0F / var8, 1.0F / var8);
-            GL11.glTranslatef(0.0F, 24.0F * p_78088_7_, 0.0F);
+            GlStateManager.popMatrix();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(1.0F / var8, 1.0F / var8, 1.0F / var8);
+            GlStateManager.translate(0.0F, 24.0F * p_78088_7_, 0.0F);
             this.body.render(p_78088_7_);
             this.rightLeg.render(p_78088_7_);
             this.leftLeg.render(p_78088_7_);
             this.rightWing.render(p_78088_7_);
             this.leftWing.render(p_78088_7_);
-            GL11.glPopMatrix();
+            GlStateManager.popMatrix();
         }
         else
         {

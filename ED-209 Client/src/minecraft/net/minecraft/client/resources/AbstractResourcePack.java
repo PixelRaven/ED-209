@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import javax.imageio.ImageIO;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.data.IMetadataSection;
 import net.minecraft.client.resources.data.IMetadataSerializer;
 import net.minecraft.util.ResourceLocation;
@@ -87,7 +87,7 @@ public abstract class AbstractResourcePack implements IResourcePack
 
     public BufferedImage getPackImage() throws IOException
     {
-        return ImageIO.read(this.getInputStreamByName("pack.png"));
+        return TextureUtil.func_177053_a(this.getInputStreamByName("pack.png"));
     }
 
     public String getPackName()

@@ -1,6 +1,6 @@
 package net.minecraft.util;
 
-import java.util.ArrayList;
+import com.google.common.collect.Lists;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.block.Block;
@@ -13,7 +13,7 @@ import net.minecraft.item.ItemStack;
 public class CombatTracker
 {
     /** The CombatEntry objects that we've tracked so far. */
-    private final List combatEntries = new ArrayList();
+    private final List combatEntries = Lists.newArrayList();
 
     /** The entity tracked. */
     private final EntityLivingBase fighter;
@@ -36,7 +36,7 @@ public class CombatTracker
 
         if (this.fighter.isOnLadder())
         {
-            Block var1 = this.fighter.worldObj.getBlock(MathHelper.floor_double(this.fighter.posX), MathHelper.floor_double(this.fighter.boundingBox.minY), MathHelper.floor_double(this.fighter.posZ));
+            Block var1 = this.fighter.worldObj.getBlockState(new BlockPos(this.fighter.posX, this.fighter.getEntityBoundingBox().minY, this.fighter.posZ)).getBlock();
 
             if (var1 == Blocks.ladder)
             {
@@ -75,7 +75,7 @@ public class CombatTracker
     {
         if (this.combatEntries.size() == 0)
         {
-            return new ChatComponentTranslation("death.attack.generic", new Object[] {this.fighter.func_145748_c_()});
+            return new ChatComponentTranslation("death.attack.generic", new Object[] {this.fighter.getDisplayName()});
         }
         else
         {
@@ -98,11 +98,11 @@ public class CombatTracker
 
                         if (var8 != null && var8.hasDisplayName())
                         {
-                            var3 = new ChatComponentTranslation("death.fell.assist.item", new Object[] {this.fighter.func_145748_c_(), var6, var8.func_151000_E()});
+                            var3 = new ChatComponentTranslation("death.fell.assist.item", new Object[] {this.fighter.getDisplayName(), var6, var8.getChatComponent()});
                         }
                         else
                         {
-                            var3 = new ChatComponentTranslation("death.fell.assist", new Object[] {this.fighter.func_145748_c_(), var6});
+                            var3 = new ChatComponentTranslation("death.fell.assist", new Object[] {this.fighter.getDisplayName(), var6});
                         }
                     }
                     else if (var4 != null)
@@ -111,26 +111,26 @@ public class CombatTracker
 
                         if (var7 != null && var7.hasDisplayName())
                         {
-                            var3 = new ChatComponentTranslation("death.fell.finish.item", new Object[] {this.fighter.func_145748_c_(), var4, var7.func_151000_E()});
+                            var3 = new ChatComponentTranslation("death.fell.finish.item", new Object[] {this.fighter.getDisplayName(), var4, var7.getChatComponent()});
                         }
                         else
                         {
-                            var3 = new ChatComponentTranslation("death.fell.finish", new Object[] {this.fighter.func_145748_c_(), var4});
+                            var3 = new ChatComponentTranslation("death.fell.finish", new Object[] {this.fighter.getDisplayName(), var4});
                         }
                     }
                     else
                     {
-                        var3 = new ChatComponentTranslation("death.fell.killer", new Object[] {this.fighter.func_145748_c_()});
+                        var3 = new ChatComponentTranslation("death.fell.killer", new Object[] {this.fighter.getDisplayName()});
                     }
                 }
                 else
                 {
-                    var3 = new ChatComponentTranslation("death.fell.accident." + this.func_94548_b(var1), new Object[] {this.fighter.func_145748_c_()});
+                    var3 = new ChatComponentTranslation("death.fell.accident." + this.func_94548_b(var1), new Object[] {this.fighter.getDisplayName()});
                 }
             }
             else
             {
-                var3 = var2.getDamageSrc().func_151519_b(this.fighter);
+                var3 = var2.getDamageSrc().getDeathMessage(this.fighter);
             }
 
             return (IChatComponent)var3;
@@ -223,6 +223,11 @@ public class CombatTracker
         return p_94548_1_.func_94562_g() == null ? "generic" : p_94548_1_.func_94562_g();
     }
 
+    public int func_180134_f()
+    {
+        return this.field_94552_d ? this.fighter.ticksExisted - this.field_152775_d : this.field_152776_e - this.field_152775_d;
+    }
+
     private void func_94542_g()
     {
         this.field_94551_f = null;
@@ -246,5 +251,10 @@ public class CombatTracker
 
             this.combatEntries.clear();
         }
+    }
+
+    public EntityLivingBase func_180135_h()
+    {
+        return this.fighter;
     }
 }

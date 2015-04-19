@@ -11,37 +11,32 @@ public class ModelWither extends ModelBase
     private ModelRenderer[] field_82904_b;
     private static final String __OBFID = "CL_00000867";
 
-    public ModelWither()
+    public ModelWither(float p_i46302_1_)
     {
         this.textureWidth = 64;
         this.textureHeight = 64;
         this.field_82905_a = new ModelRenderer[3];
         this.field_82905_a[0] = new ModelRenderer(this, 0, 16);
-        this.field_82905_a[0].addBox(-10.0F, 3.9F, -0.5F, 20, 3, 3);
+        this.field_82905_a[0].addBox(-10.0F, 3.9F, -0.5F, 20, 3, 3, p_i46302_1_);
         this.field_82905_a[1] = (new ModelRenderer(this)).setTextureSize(this.textureWidth, this.textureHeight);
         this.field_82905_a[1].setRotationPoint(-2.0F, 6.9F, -0.5F);
-        this.field_82905_a[1].setTextureOffset(0, 22).addBox(0.0F, 0.0F, 0.0F, 3, 10, 3);
-        this.field_82905_a[1].setTextureOffset(24, 22).addBox(-4.0F, 1.5F, 0.5F, 11, 2, 2);
-        this.field_82905_a[1].setTextureOffset(24, 22).addBox(-4.0F, 4.0F, 0.5F, 11, 2, 2);
-        this.field_82905_a[1].setTextureOffset(24, 22).addBox(-4.0F, 6.5F, 0.5F, 11, 2, 2);
+        this.field_82905_a[1].setTextureOffset(0, 22).addBox(0.0F, 0.0F, 0.0F, 3, 10, 3, p_i46302_1_);
+        this.field_82905_a[1].setTextureOffset(24, 22).addBox(-4.0F, 1.5F, 0.5F, 11, 2, 2, p_i46302_1_);
+        this.field_82905_a[1].setTextureOffset(24, 22).addBox(-4.0F, 4.0F, 0.5F, 11, 2, 2, p_i46302_1_);
+        this.field_82905_a[1].setTextureOffset(24, 22).addBox(-4.0F, 6.5F, 0.5F, 11, 2, 2, p_i46302_1_);
         this.field_82905_a[2] = new ModelRenderer(this, 12, 22);
-        this.field_82905_a[2].addBox(0.0F, 0.0F, 0.0F, 3, 6, 3);
+        this.field_82905_a[2].addBox(0.0F, 0.0F, 0.0F, 3, 6, 3, p_i46302_1_);
         this.field_82904_b = new ModelRenderer[3];
         this.field_82904_b[0] = new ModelRenderer(this, 0, 0);
-        this.field_82904_b[0].addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8);
+        this.field_82904_b[0].addBox(-4.0F, -4.0F, -4.0F, 8, 8, 8, p_i46302_1_);
         this.field_82904_b[1] = new ModelRenderer(this, 32, 0);
-        this.field_82904_b[1].addBox(-4.0F, -4.0F, -4.0F, 6, 6, 6);
+        this.field_82904_b[1].addBox(-4.0F, -4.0F, -4.0F, 6, 6, 6, p_i46302_1_);
         this.field_82904_b[1].rotationPointX = -8.0F;
         this.field_82904_b[1].rotationPointY = 4.0F;
         this.field_82904_b[2] = new ModelRenderer(this, 32, 0);
-        this.field_82904_b[2].addBox(-4.0F, -4.0F, -4.0F, 6, 6, 6);
+        this.field_82904_b[2].addBox(-4.0F, -4.0F, -4.0F, 6, 6, 6, p_i46302_1_);
         this.field_82904_b[2].rotationPointX = 10.0F;
         this.field_82904_b[2].rotationPointY = 4.0F;
-    }
-
-    public int func_82903_a()
-    {
-        return 32;
     }
 
     /**

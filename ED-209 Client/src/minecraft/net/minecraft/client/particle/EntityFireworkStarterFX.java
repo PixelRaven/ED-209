@@ -1,7 +1,9 @@
 package net.minecraft.client.particle;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemDye;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.MathHelper;
@@ -15,9 +17,9 @@ public class EntityFireworkStarterFX extends EntityFX
     boolean twinkle;
     private static final String __OBFID = "CL_00000906";
 
-    public EntityFireworkStarterFX(World p_i46355_1_, double p_i46355_2_, double p_i46355_4_, double p_i46355_6_, double p_i46355_8_, double p_i46355_10_, double p_i46355_12_, EffectRenderer p_i46355_14_, NBTTagCompound p_i46355_15_)
+    public EntityFireworkStarterFX(World worldIn, double p_i46355_2_, double p_i46355_4_, double p_i46355_6_, double p_i46355_8_, double p_i46355_10_, double p_i46355_12_, EffectRenderer p_i46355_14_, NBTTagCompound p_i46355_15_)
     {
-        super(p_i46355_1_, p_i46355_2_, p_i46355_4_, p_i46355_6_, 0.0D, 0.0D, 0.0D);
+        super(worldIn, p_i46355_2_, p_i46355_4_, p_i46355_6_, 0.0D, 0.0D, 0.0D);
         this.motionX = p_i46355_8_;
         this.motionY = p_i46355_10_;
         this.motionZ = p_i46355_12_;
@@ -51,7 +53,7 @@ public class EntityFireworkStarterFX extends EntityFX
         }
     }
 
-    public void renderParticle(Tessellator p_70539_1_, float p_70539_2_, float p_70539_3_, float p_70539_4_, float p_70539_5_, float p_70539_6_, float p_70539_7_) {}
+    public void func_180434_a(WorldRenderer p_180434_1_, Entity p_180434_2_, float p_180434_3_, float p_180434_4_, float p_180434_5_, float p_180434_6_, float p_180434_7_, float p_180434_8_) {}
 
     /**
      * Called to update the entity's position/logic.
@@ -96,6 +98,11 @@ public class EntityFireworkStarterFX extends EntityFX
             boolean var5 = var14.getBoolean("Flicker");
             int[] var6 = var14.getIntArray("Colors");
             int[] var7 = var14.getIntArray("FadeColors");
+
+            if (var6.length == 0)
+            {
+                var6 = new int[] {ItemDye.dyeColors[0]};
+            }
 
             if (var17 == 1)
             {
@@ -145,7 +152,7 @@ public class EntityFireworkStarterFX extends EntityFX
     private boolean func_92037_i()
     {
         Minecraft var1 = Minecraft.getMinecraft();
-        return var1 == null || var1.renderViewEntity == null || var1.renderViewEntity.getDistanceSq(this.posX, this.posY, this.posZ) >= 256.0D;
+        return var1 == null || var1.func_175606_aa() == null || var1.func_175606_aa().getDistanceSq(this.posX, this.posY, this.posZ) >= 256.0D;
     }
 
     /**
@@ -155,6 +162,7 @@ public class EntityFireworkStarterFX extends EntityFX
     private void createParticle(double p_92034_1_, double p_92034_3_, double p_92034_5_, double p_92034_7_, double p_92034_9_, double p_92034_11_, int[] p_92034_13_, int[] p_92034_14_, boolean p_92034_15_, boolean p_92034_16_)
     {
         EntityFireworkSparkFX var17 = new EntityFireworkSparkFX(this.worldObj, p_92034_1_, p_92034_3_, p_92034_5_, p_92034_7_, p_92034_9_, p_92034_11_, this.theEffectRenderer);
+        var17.setAlphaF(0.99F);
         var17.setTrail(p_92034_15_);
         var17.setTwinkle(p_92034_16_);
         int var18 = this.rand.nextInt(p_92034_13_.length);

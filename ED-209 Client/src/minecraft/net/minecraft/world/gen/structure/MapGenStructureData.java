@@ -16,17 +16,17 @@ public class MapGenStructureData extends WorldSavedData
     /**
      * reads in data from the NBTTagCompound into this MapDataBase
      */
-    public void readFromNBT(NBTTagCompound p_76184_1_)
+    public void readFromNBT(NBTTagCompound nbt)
     {
-        this.field_143044_a = p_76184_1_.getCompoundTag("Features");
+        this.field_143044_a = nbt.getCompoundTag("Features");
     }
 
     /**
      * write data to NBTTagCompound from this MapDataBase, similar to Entities and TileEntities
      */
-    public void writeToNBT(NBTTagCompound p_76187_1_)
+    public void writeToNBT(NBTTagCompound nbt)
     {
-        p_76187_1_.setTag("Features", this.field_143044_a);
+        nbt.setTag("Features", this.field_143044_a);
     }
 
     public void func_143043_a(NBTTagCompound p_143043_1_, int p_143043_2_, int p_143043_3_)

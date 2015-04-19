@@ -1,22 +1,25 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 
 public class GuiVideoSettings extends GuiScreen
 {
-    private GuiScreen field_146498_f;
-    protected String field_146500_a = "Video Settings";
-    private GameSettings field_146499_g;
-    private GuiListExtended field_146501_h;
-    private static final GameSettings.Options[] field_146502_i = new GameSettings.Options[] {GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.ADVANCED_OPENGL, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.ANISOTROPIC_FILTERING};
+    private GuiScreen parentGuiScreen;
+    protected String screenTitle = "Video Settings";
+    private GameSettings guiGameSettings;
+    private GuiListExtended optionsRowList;
+
+    /** An array of all of GameSettings.Options's video options. */
+    private static final GameSettings.Options[] videoOptions = new GameSettings.Options[] {GameSettings.Options.GRAPHICS, GameSettings.Options.RENDER_DISTANCE, GameSettings.Options.AMBIENT_OCCLUSION, GameSettings.Options.FRAMERATE_LIMIT, GameSettings.Options.ANAGLYPH, GameSettings.Options.VIEW_BOBBING, GameSettings.Options.GUI_SCALE, GameSettings.Options.GAMMA, GameSettings.Options.RENDER_CLOUDS, GameSettings.Options.PARTICLES, GameSettings.Options.USE_FULLSCREEN, GameSettings.Options.ENABLE_VSYNC, GameSettings.Options.MIPMAP_LEVELS, GameSettings.Options.BLOCK_ALTERNATIVES, GameSettings.Options.USE_VBO};
     private static final String __OBFID = "CL_00000718";
 
     public GuiVideoSettings(GuiScreen p_i1062_1_, GameSettings p_i1062_2_)
     {
-        this.field_146498_f = p_i1062_1_;
-        this.field_146499_g = p_i1062_2_;
+        this.parentGuiScreen = p_i1062_1_;
+        this.guiGameSettings = p_i1062_2_;
     }
 
     /**
@@ -24,73 +27,69 @@ public class GuiVideoSettings extends GuiScreen
      */
     public void initGui()
     {
-        this.field_146500_a = I18n.format("options.videoTitle", new Object[0]);
+        this.screenTitle = I18n.format("options.videoTitle", new Object[0]);
         this.buttonList.clear();
         this.buttonList.add(new GuiButton(200, this.width / 2 - 100, this.height - 27, I18n.format("gui.done", new Object[0])));
 
-        if (OpenGlHelper.field_153197_d)
+        if (!OpenGlHelper.field_176083_O)
         {
-            this.field_146501_h = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, field_146502_i);
-        }
-        else
-        {
-            GameSettings.Options[] var1 = new GameSettings.Options[field_146502_i.length - 1];
+            GameSettings.Options[] var1 = new GameSettings.Options[videoOptions.length - 1];
             int var2 = 0;
-            GameSettings.Options[] var3 = field_146502_i;
+            GameSettings.Options[] var3 = videoOptions;
             int var4 = var3.length;
 
             for (int var5 = 0; var5 < var4; ++var5)
             {
                 GameSettings.Options var6 = var3[var5];
 
-                if (var6 != GameSettings.Options.ADVANCED_OPENGL)
+                if (var6 == GameSettings.Options.USE_VBO)
                 {
-                    var1[var2] = var6;
-                    ++var2;
+                    break;
                 }
+
+                var1[var2] = var6;
+                ++var2;
             }
 
-            this.field_146501_h = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, var1);
+            this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, var1);
+        }
+        else
+        {
+            this.optionsRowList = new GuiOptionsRowList(this.mc, this.width, this.height, 32, this.height - 32, 25, videoOptions);
         }
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    /**
+     * Handles mouse input.
+     */
+    public void handleMouseInput() throws IOException
     {
-        if (p_146284_1_.enabled)
+        super.handleMouseInput();
+        this.optionsRowList.func_178039_p();
+    }
+
+    protected void actionPerformed(GuiButton button) throws IOException
+    {
+        if (button.enabled)
         {
-            if (p_146284_1_.id == 200)
+            if (button.id == 200)
             {
                 this.mc.gameSettings.saveOptions();
-                this.mc.displayGuiScreen(this.field_146498_f);
+                this.mc.displayGuiScreen(this.parentGuiScreen);
             }
         }
     }
 
     /**
-     * Called when the mouse is clicked.
+     * Called when the mouse is clicked. Args : mouseX, mouseY, clickedButton
      */
-    protected void mouseClicked(int p_73864_1_, int p_73864_2_, int p_73864_3_)
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException
     {
-        int var4 = this.field_146499_g.guiScale;
-        super.mouseClicked(p_73864_1_, p_73864_2_, p_73864_3_);
-        this.field_146501_h.func_148179_a(p_73864_1_, p_73864_2_, p_73864_3_);
+        int var4 = this.guiGameSettings.guiScale;
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.optionsRowList.func_148179_a(mouseX, mouseY, mouseButton);
 
-        if (this.field_146499_g.guiScale != var4)
-        {
-            ScaledResolution var5 = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
-            int var6 = var5.getScaledWidth();
-            int var7 = var5.getScaledHeight();
-            this.setWorldAndResolution(this.mc, var6, var7);
-        }
-    }
-
-    protected void mouseMovedOrUp(int p_146286_1_, int p_146286_2_, int p_146286_3_)
-    {
-        int var4 = this.field_146499_g.guiScale;
-        super.mouseMovedOrUp(p_146286_1_, p_146286_2_, p_146286_3_);
-        this.field_146501_h.func_148181_b(p_146286_1_, p_146286_2_, p_146286_3_);
-
-        if (this.field_146499_g.guiScale != var4)
+        if (this.guiGameSettings.guiScale != var4)
         {
             ScaledResolution var5 = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
             int var6 = var5.getScaledWidth();
@@ -100,13 +99,31 @@ public class GuiVideoSettings extends GuiScreen
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Called when a mouse button is released.  Args : mouseX, mouseY, releaseButton
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    protected void mouseReleased(int mouseX, int mouseY, int state)
+    {
+        int var4 = this.guiGameSettings.guiScale;
+        super.mouseReleased(mouseX, mouseY, state);
+        this.optionsRowList.func_148181_b(mouseX, mouseY, state);
+
+        if (this.guiGameSettings.guiScale != var4)
+        {
+            ScaledResolution var5 = new ScaledResolution(this.mc, this.mc.displayWidth, this.mc.displayHeight);
+            int var6 = var5.getScaledWidth();
+            int var7 = var5.getScaledHeight();
+            this.setWorldAndResolution(this.mc, var6, var7);
+        }
+    }
+
+    /**
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
+     */
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
-        this.field_146501_h.func_148128_a(p_73863_1_, p_73863_2_, p_73863_3_);
-        this.drawCenteredString(this.fontRendererObj, this.field_146500_a, this.width / 2, 5, 16777215);
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        this.optionsRowList.drawScreen(mouseX, mouseY, partialTicks);
+        this.drawCenteredString(this.fontRendererObj, this.screenTitle, this.width / 2, 5, 16777215);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

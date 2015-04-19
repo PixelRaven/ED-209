@@ -2,271 +2,206 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 
 public class BlockFurnace extends BlockContainer
 {
-    private final Random field_149933_a = new Random();
-    private final boolean field_149932_b;
+    public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
+    private final boolean isBurning;
     private static boolean field_149934_M;
-    private IIcon field_149935_N;
-    private IIcon field_149936_O;
     private static final String __OBFID = "CL_00000248";
 
     protected BlockFurnace(boolean p_i45407_1_)
     {
         super(Material.rock);
-        this.field_149932_b = p_i45407_1_;
+        this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
+        this.isBurning = p_i45407_1_;
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return Item.getItemFromBlock(Blocks.furnace);
     }
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_)
+    public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state)
     {
-        super.onBlockAdded(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
-        this.func_149930_e(p_149726_1_, p_149726_2_, p_149726_3_, p_149726_4_);
+        this.func_176445_e(worldIn, pos, state);
     }
 
-    private void func_149930_e(World p_149930_1_, int p_149930_2_, int p_149930_3_, int p_149930_4_)
+    private void func_176445_e(World worldIn, BlockPos p_176445_2_, IBlockState p_176445_3_)
     {
-        if (!p_149930_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            Block var5 = p_149930_1_.getBlock(p_149930_2_, p_149930_3_, p_149930_4_ - 1);
-            Block var6 = p_149930_1_.getBlock(p_149930_2_, p_149930_3_, p_149930_4_ + 1);
-            Block var7 = p_149930_1_.getBlock(p_149930_2_ - 1, p_149930_3_, p_149930_4_);
-            Block var8 = p_149930_1_.getBlock(p_149930_2_ + 1, p_149930_3_, p_149930_4_);
-            byte var9 = 3;
+            Block var4 = worldIn.getBlockState(p_176445_2_.offsetNorth()).getBlock();
+            Block var5 = worldIn.getBlockState(p_176445_2_.offsetSouth()).getBlock();
+            Block var6 = worldIn.getBlockState(p_176445_2_.offsetWest()).getBlock();
+            Block var7 = worldIn.getBlockState(p_176445_2_.offsetEast()).getBlock();
+            EnumFacing var8 = (EnumFacing)p_176445_3_.getValue(FACING);
 
-            if (var5.func_149730_j() && !var6.func_149730_j())
+            if (var8 == EnumFacing.NORTH && var4.isFullBlock() && !var5.isFullBlock())
             {
-                var9 = 3;
+                var8 = EnumFacing.SOUTH;
+            }
+            else if (var8 == EnumFacing.SOUTH && var5.isFullBlock() && !var4.isFullBlock())
+            {
+                var8 = EnumFacing.NORTH;
+            }
+            else if (var8 == EnumFacing.WEST && var6.isFullBlock() && !var7.isFullBlock())
+            {
+                var8 = EnumFacing.EAST;
+            }
+            else if (var8 == EnumFacing.EAST && var7.isFullBlock() && !var6.isFullBlock())
+            {
+                var8 = EnumFacing.WEST;
             }
 
-            if (var6.func_149730_j() && !var5.func_149730_j())
-            {
-                var9 = 2;
-            }
-
-            if (var7.func_149730_j() && !var8.func_149730_j())
-            {
-                var9 = 5;
-            }
-
-            if (var8.func_149730_j() && !var7.func_149730_j())
-            {
-                var9 = 4;
-            }
-
-            p_149930_1_.setBlockMetadataWithNotify(p_149930_2_, p_149930_3_, p_149930_4_, var9, 2);
+            worldIn.setBlockState(p_176445_2_, p_176445_3_.withProperty(FACING, var8), 2);
         }
     }
 
-    /**
-     * Gets the block's texture. Args: side, meta
-     */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
+    public void randomDisplayTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        return p_149691_1_ == 1 ? this.field_149935_N : (p_149691_1_ == 0 ? this.field_149935_N : (p_149691_1_ != p_149691_2_ ? this.blockIcon : this.field_149936_O));
-    }
-
-    public void registerBlockIcons(IIconRegister p_149651_1_)
-    {
-        this.blockIcon = p_149651_1_.registerIcon("furnace_side");
-        this.field_149936_O = p_149651_1_.registerIcon(this.field_149932_b ? "furnace_front_on" : "furnace_front_off");
-        this.field_149935_N = p_149651_1_.registerIcon("furnace_top");
-    }
-
-    /**
-     * A randomly called display update to be able to add particles or other items for display
-     */
-    public void randomDisplayTick(World p_149734_1_, int p_149734_2_, int p_149734_3_, int p_149734_4_, Random p_149734_5_)
-    {
-        if (this.field_149932_b)
+        if (this.isBurning)
         {
-            int var6 = p_149734_1_.getBlockMetadata(p_149734_2_, p_149734_3_, p_149734_4_);
-            float var7 = (float)p_149734_2_ + 0.5F;
-            float var8 = (float)p_149734_3_ + 0.0F + p_149734_5_.nextFloat() * 6.0F / 16.0F;
-            float var9 = (float)p_149734_4_ + 0.5F;
-            float var10 = 0.52F;
-            float var11 = p_149734_5_.nextFloat() * 0.6F - 0.3F;
+            EnumFacing var5 = (EnumFacing)state.getValue(FACING);
+            double var6 = (double)pos.getX() + 0.5D;
+            double var8 = (double)pos.getY() + rand.nextDouble() * 6.0D / 16.0D;
+            double var10 = (double)pos.getZ() + 0.5D;
+            double var12 = 0.52D;
+            double var14 = rand.nextDouble() * 0.6D - 0.3D;
 
-            if (var6 == 4)
+            switch (BlockFurnace.SwitchEnumFacing.field_180356_a[var5.ordinal()])
             {
-                p_149734_1_.spawnParticle("smoke", (double)(var7 - var10), (double)var8, (double)(var9 + var11), 0.0D, 0.0D, 0.0D);
-                p_149734_1_.spawnParticle("flame", (double)(var7 - var10), (double)var8, (double)(var9 + var11), 0.0D, 0.0D, 0.0D);
-            }
-            else if (var6 == 5)
-            {
-                p_149734_1_.spawnParticle("smoke", (double)(var7 + var10), (double)var8, (double)(var9 + var11), 0.0D, 0.0D, 0.0D);
-                p_149734_1_.spawnParticle("flame", (double)(var7 + var10), (double)var8, (double)(var9 + var11), 0.0D, 0.0D, 0.0D);
-            }
-            else if (var6 == 2)
-            {
-                p_149734_1_.spawnParticle("smoke", (double)(var7 + var11), (double)var8, (double)(var9 - var10), 0.0D, 0.0D, 0.0D);
-                p_149734_1_.spawnParticle("flame", (double)(var7 + var11), (double)var8, (double)(var9 - var10), 0.0D, 0.0D, 0.0D);
-            }
-            else if (var6 == 3)
-            {
-                p_149734_1_.spawnParticle("smoke", (double)(var7 + var11), (double)var8, (double)(var9 + var10), 0.0D, 0.0D, 0.0D);
-                p_149734_1_.spawnParticle("flame", (double)(var7 + var11), (double)var8, (double)(var9 + var10), 0.0D, 0.0D, 0.0D);
+                case 1:
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 - var12, var8, var10 + var14, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.FLAME, var6 - var12, var8, var10 + var14, 0.0D, 0.0D, 0.0D, new int[0]);
+                    break;
+
+                case 2:
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + var12, var8, var10 + var14, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.FLAME, var6 + var12, var8, var10 + var14, 0.0D, 0.0D, 0.0D, new int[0]);
+                    break;
+
+                case 3:
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + var14, var8, var10 - var12, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.FLAME, var6 + var14, var8, var10 - var12, 0.0D, 0.0D, 0.0D, new int[0]);
+                    break;
+
+                case 4:
+                    worldIn.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, var6 + var14, var8, var10 + var12, 0.0D, 0.0D, 0.0D, new int[0]);
+                    worldIn.spawnParticle(EnumParticleTypes.FLAME, var6 + var14, var8, var10 + var12, 0.0D, 0.0D, 0.0D, new int[0]);
             }
         }
     }
 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (p_149727_1_.isClient)
+        if (worldIn.isRemote)
         {
             return true;
         }
         else
         {
-            TileEntityFurnace var10 = (TileEntityFurnace)p_149727_1_.getTileEntity(p_149727_2_, p_149727_3_, p_149727_4_);
+            TileEntity var9 = worldIn.getTileEntity(pos);
 
-            if (var10 != null)
+            if (var9 instanceof TileEntityFurnace)
             {
-                p_149727_5_.func_146101_a(var10);
+                playerIn.displayGUIChest((TileEntityFurnace)var9);
             }
 
             return true;
         }
     }
 
-    public static void func_149931_a(boolean p_149931_0_, World p_149931_1_, int p_149931_2_, int p_149931_3_, int p_149931_4_)
+    public static void func_176446_a(boolean p_176446_0_, World worldIn, BlockPos p_176446_2_)
     {
-        int var5 = p_149931_1_.getBlockMetadata(p_149931_2_, p_149931_3_, p_149931_4_);
-        TileEntity var6 = p_149931_1_.getTileEntity(p_149931_2_, p_149931_3_, p_149931_4_);
+        IBlockState var3 = worldIn.getBlockState(p_176446_2_);
+        TileEntity var4 = worldIn.getTileEntity(p_176446_2_);
         field_149934_M = true;
 
-        if (p_149931_0_)
+        if (p_176446_0_)
         {
-            p_149931_1_.setBlock(p_149931_2_, p_149931_3_, p_149931_4_, Blocks.lit_furnace);
+            worldIn.setBlockState(p_176446_2_, Blocks.lit_furnace.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
+            worldIn.setBlockState(p_176446_2_, Blocks.lit_furnace.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
         }
         else
         {
-            p_149931_1_.setBlock(p_149931_2_, p_149931_3_, p_149931_4_, Blocks.furnace);
+            worldIn.setBlockState(p_176446_2_, Blocks.furnace.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
+            worldIn.setBlockState(p_176446_2_, Blocks.furnace.getDefaultState().withProperty(FACING, var3.getValue(FACING)), 3);
         }
 
         field_149934_M = false;
-        p_149931_1_.setBlockMetadataWithNotify(p_149931_2_, p_149931_3_, p_149931_4_, var5, 2);
 
-        if (var6 != null)
+        if (var4 != null)
         {
-            var6.validate();
-            p_149931_1_.setTileEntity(p_149931_2_, p_149931_3_, p_149931_4_, var6);
+            var4.validate();
+            worldIn.setTileEntity(p_176446_2_, var4);
         }
     }
 
     /**
      * Returns a new instance of a block's tile entity class. Called on placing the block.
      */
-    public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_)
+    public TileEntity createNewTileEntity(World worldIn, int meta)
     {
         return new TileEntityFurnace();
     }
 
-    /**
-     * Called when the block is placed in the world.
-     */
-    public void onBlockPlacedBy(World p_149689_1_, int p_149689_2_, int p_149689_3_, int p_149689_4_, EntityLivingBase p_149689_5_, ItemStack p_149689_6_)
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer)
     {
-        int var7 = MathHelper.floor_double((double)(p_149689_5_.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        return this.getDefaultState().withProperty(FACING, placer.func_174811_aO().getOpposite());
+    }
 
-        if (var7 == 0)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 2, 2);
-        }
+    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack)
+    {
+        worldIn.setBlockState(pos, state.withProperty(FACING, placer.func_174811_aO().getOpposite()), 2);
 
-        if (var7 == 1)
+        if (stack.hasDisplayName())
         {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 5, 2);
-        }
+            TileEntity var6 = worldIn.getTileEntity(pos);
 
-        if (var7 == 2)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 3, 2);
-        }
-
-        if (var7 == 3)
-        {
-            p_149689_1_.setBlockMetadataWithNotify(p_149689_2_, p_149689_3_, p_149689_4_, 4, 2);
-        }
-
-        if (p_149689_6_.hasDisplayName())
-        {
-            ((TileEntityFurnace)p_149689_1_.getTileEntity(p_149689_2_, p_149689_3_, p_149689_4_)).func_145951_a(p_149689_6_.getDisplayName());
+            if (var6 instanceof TileEntityFurnace)
+            {
+                ((TileEntityFurnace)var6).setCustomInventoryName(stack.getDisplayName());
+            }
         }
     }
 
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
         if (!field_149934_M)
         {
-            TileEntityFurnace var7 = (TileEntityFurnace)p_149749_1_.getTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+            TileEntity var4 = worldIn.getTileEntity(pos);
 
-            if (var7 != null)
+            if (var4 instanceof TileEntityFurnace)
             {
-                for (int var8 = 0; var8 < var7.getSizeInventory(); ++var8)
-                {
-                    ItemStack var9 = var7.getStackInSlot(var8);
-
-                    if (var9 != null)
-                    {
-                        float var10 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-                        float var11 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-                        float var12 = this.field_149933_a.nextFloat() * 0.8F + 0.1F;
-
-                        while (var9.stackSize > 0)
-                        {
-                            int var13 = this.field_149933_a.nextInt(21) + 10;
-
-                            if (var13 > var9.stackSize)
-                            {
-                                var13 = var9.stackSize;
-                            }
-
-                            var9.stackSize -= var13;
-                            EntityItem var14 = new EntityItem(p_149749_1_, (double)((float)p_149749_2_ + var10), (double)((float)p_149749_3_ + var11), (double)((float)p_149749_4_ + var12), new ItemStack(var9.getItem(), var13, var9.getItemDamage()));
-
-                            if (var9.hasTagCompound())
-                            {
-                                var14.getEntityItem().setTagCompound((NBTTagCompound)var9.getTagCompound().copy());
-                            }
-
-                            float var15 = 0.05F;
-                            var14.motionX = (double)((float)this.field_149933_a.nextGaussian() * var15);
-                            var14.motionY = (double)((float)this.field_149933_a.nextGaussian() * var15 + 0.2F);
-                            var14.motionZ = (double)((float)this.field_149933_a.nextGaussian() * var15);
-                            p_149749_1_.spawnEntityInWorld(var14);
-                        }
-                    }
-                }
-
-                p_149749_1_.func_147453_f(p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_);
+                InventoryHelper.dropInventoryItems(worldIn, pos, (TileEntityFurnace)var4);
+                worldIn.updateComparatorOutputLevel(pos, this);
             }
         }
 
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
+        super.breakBlock(worldIn, pos, state);
     }
 
     public boolean hasComparatorInputOverride()
@@ -274,16 +209,102 @@ public class BlockFurnace extends BlockContainer
         return true;
     }
 
-    public int getComparatorInputOverride(World p_149736_1_, int p_149736_2_, int p_149736_3_, int p_149736_4_, int p_149736_5_)
+    public int getComparatorInputOverride(World worldIn, BlockPos pos)
     {
-        return Container.calcRedstoneFromInventory((IInventory)p_149736_1_.getTileEntity(p_149736_2_, p_149736_3_, p_149736_4_));
+        return Container.calcRedstoneFromInventory(worldIn.getTileEntity(pos));
+    }
+
+    public Item getItem(World worldIn, BlockPos pos)
+    {
+        return Item.getItemFromBlock(Blocks.furnace);
     }
 
     /**
-     * Gets an item for the block being called on. Args: world, x, y, z
+     * The type of render function that is called for this block
      */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public int getRenderType()
     {
-        return Item.getItemFromBlock(Blocks.furnace);
+        return 3;
+    }
+
+    /**
+     * Possibly modify the given BlockState before rendering it on an Entity (Minecarts, Endermen, ...)
+     */
+    public IBlockState getStateForEntityRender(IBlockState state)
+    {
+        return this.getDefaultState().withProperty(FACING, EnumFacing.SOUTH);
+    }
+
+    /**
+     * Convert the given metadata into a BlockState for this Block
+     */
+    public IBlockState getStateFromMeta(int meta)
+    {
+        EnumFacing var2 = EnumFacing.getFront(meta);
+
+        if (var2.getAxis() == EnumFacing.Axis.Y)
+        {
+            var2 = EnumFacing.NORTH;
+        }
+
+        return this.getDefaultState().withProperty(FACING, var2);
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        return ((EnumFacing)state.getValue(FACING)).getIndex();
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {FACING});
+    }
+
+    static final class SwitchEnumFacing
+    {
+        static final int[] field_180356_a = new int[EnumFacing.values().length];
+        private static final String __OBFID = "CL_00002111";
+
+        static
+        {
+            try
+            {
+                field_180356_a[EnumFacing.WEST.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
+            }
+
+            try
+            {
+                field_180356_a[EnumFacing.EAST.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                field_180356_a[EnumFacing.NORTH.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                field_180356_a[EnumFacing.SOUTH.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
+        }
     }
 }

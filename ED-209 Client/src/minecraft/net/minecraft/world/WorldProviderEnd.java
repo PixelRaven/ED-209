@@ -1,6 +1,6 @@
 package net.minecraft.world;
 
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -53,24 +53,14 @@ public class WorldProviderEnd extends WorldProvider
     {
         int var3 = 10518688;
         float var4 = MathHelper.cos(p_76562_1_ * (float)Math.PI * 2.0F) * 2.0F + 0.5F;
-
-        if (var4 < 0.0F)
-        {
-            var4 = 0.0F;
-        }
-
-        if (var4 > 1.0F)
-        {
-            var4 = 1.0F;
-        }
-
+        var4 = MathHelper.clamp_float(var4, 0.0F, 1.0F);
         float var5 = (float)(var3 >> 16 & 255) / 255.0F;
         float var6 = (float)(var3 >> 8 & 255) / 255.0F;
         float var7 = (float)(var3 & 255) / 255.0F;
         var5 *= var4 * 0.0F + 0.15F;
         var6 *= var4 * 0.0F + 0.15F;
         var7 *= var4 * 0.0F + 0.15F;
-        return Vec3.createVectorHelper((double)var5, (double)var6, (double)var7);
+        return new Vec3((double)var5, (double)var6, (double)var7);
     }
 
     public boolean isSkyColored()
@@ -105,17 +95,14 @@ public class WorldProviderEnd extends WorldProvider
     /**
      * Will check if the x, z position specified is alright to be set as the map spawn point
      */
-    public boolean canCoordinateBeSpawn(int p_76566_1_, int p_76566_2_)
+    public boolean canCoordinateBeSpawn(int x, int z)
     {
-        return this.worldObj.getTopBlock(p_76566_1_, p_76566_2_).getMaterial().blocksMovement();
+        return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
     }
 
-    /**
-     * Gets the hard-coded portal location to use when entering this dimension.
-     */
-    public ChunkCoordinates getEntrancePortalLocation()
+    public BlockPos func_177496_h()
     {
-        return new ChunkCoordinates(100, 50, 0);
+        return new BlockPos(100, 50, 0);
     }
 
     public int getAverageGroundLevel()
@@ -137,5 +124,10 @@ public class WorldProviderEnd extends WorldProvider
     public String getDimensionName()
     {
         return "The End";
+    }
+
+    public String getInternalNameSuffix()
+    {
+        return "_end";
     }
 }

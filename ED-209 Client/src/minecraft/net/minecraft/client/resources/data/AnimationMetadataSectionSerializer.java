@@ -21,12 +21,12 @@ public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSeria
     public AnimationMetadataSection deserialize(JsonElement p_deserialize_1_, Type p_deserialize_2_, JsonDeserializationContext p_deserialize_3_)
     {
         ArrayList var4 = Lists.newArrayList();
-        JsonObject var5 = JsonUtils.getJsonElementAsJsonObject(p_deserialize_1_, "metadata section");
+        JsonObject var5 = JsonUtils.getElementAsJsonObject(p_deserialize_1_, "metadata section");
         int var6 = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(var5, "frametime", 1);
 
         if (var6 != 1)
         {
-            Validate.inclusiveBetween(Integer.valueOf(1), Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(var6), "Invalid default frame time", new Object[0]);
+            Validate.inclusiveBetween(1L, 2147483647L, (long)var6, "Invalid default frame time");
         }
 
         int var8;
@@ -59,15 +59,16 @@ public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSeria
 
         if (var12 != -1)
         {
-            Validate.inclusiveBetween(Integer.valueOf(1), Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(var12), "Invalid width", new Object[0]);
+            Validate.inclusiveBetween(1L, 2147483647L, (long)var12, "Invalid width");
         }
 
         if (var8 != -1)
         {
-            Validate.inclusiveBetween(Integer.valueOf(1), Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(var8), "Invalid height", new Object[0]);
+            Validate.inclusiveBetween(1L, 2147483647L, (long)var8, "Invalid height");
         }
 
-        return new AnimationMetadataSection(var4, var12, var8, var6);
+        boolean var13 = JsonUtils.getJsonObjectBooleanFieldValueOrDefault(var5, "interpolate", false);
+        return new AnimationMetadataSection(var4, var12, var8, var6, var13);
     }
 
     private AnimationFrame parseAnimationFrame(int p_110492_1_, JsonElement p_110492_2_)
@@ -78,16 +79,16 @@ public class AnimationMetadataSectionSerializer extends BaseMetadataSectionSeria
         }
         else if (p_110492_2_.isJsonObject())
         {
-            JsonObject var3 = JsonUtils.getJsonElementAsJsonObject(p_110492_2_, "frames[" + p_110492_1_ + "]");
+            JsonObject var3 = JsonUtils.getElementAsJsonObject(p_110492_2_, "frames[" + p_110492_1_ + "]");
             int var4 = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(var3, "time", -1);
 
             if (var3.has("time"))
             {
-                Validate.inclusiveBetween(Integer.valueOf(1), Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(var4), "Invalid frame time", new Object[0]);
+                Validate.inclusiveBetween(1L, 2147483647L, (long)var4, "Invalid frame time");
             }
 
             int var5 = JsonUtils.getJsonObjectIntegerFieldValue(var3, "index");
-            Validate.inclusiveBetween(Integer.valueOf(0), Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(var5), "Invalid frame index", new Object[0]);
+            Validate.inclusiveBetween(0L, 2147483647L, (long)var5, "Invalid frame index");
             return new AnimationFrame(var5, var4);
         }
         else

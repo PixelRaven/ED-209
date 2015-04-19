@@ -4,6 +4,7 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.pathfinding.PathNavigateGround;
 
 public class EntityAITempt extends EntityAIBase
 {
@@ -49,6 +50,11 @@ public class EntityAITempt extends EntityAIBase
         this.field_151484_k = p_i45316_4_;
         this.scaredByPlayerMovement = p_i45316_5_;
         this.setMutexBits(3);
+
+        if (!(p_i45316_1_.getNavigator() instanceof PathNavigateGround))
+        {
+            throw new IllegalArgumentException("Unsupported mob type for TemptGoal");
+        }
     }
 
     /**
@@ -119,8 +125,8 @@ public class EntityAITempt extends EntityAIBase
         this.targetY = this.temptingPlayer.posY;
         this.targetZ = this.temptingPlayer.posZ;
         this.isRunning = true;
-        this.field_75286_m = this.temptedEntity.getNavigator().getAvoidsWater();
-        this.temptedEntity.getNavigator().setAvoidsWater(false);
+        this.field_75286_m = ((PathNavigateGround)this.temptedEntity.getNavigator()).func_179689_e();
+        ((PathNavigateGround)this.temptedEntity.getNavigator()).func_179690_a(false);
     }
 
     /**
@@ -132,7 +138,7 @@ public class EntityAITempt extends EntityAIBase
         this.temptedEntity.getNavigator().clearPathEntity();
         this.delayTemptCounter = 100;
         this.isRunning = false;
-        this.temptedEntity.getNavigator().setAvoidsWater(this.field_75286_m);
+        ((PathNavigateGround)this.temptedEntity.getNavigator()).func_179690_a(this.field_75286_m);
     }
 
     /**

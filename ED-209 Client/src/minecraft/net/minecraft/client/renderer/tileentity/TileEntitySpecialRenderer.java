@@ -8,14 +8,15 @@ import net.minecraft.world.World;
 
 public abstract class TileEntitySpecialRenderer
 {
-    protected TileEntityRendererDispatcher field_147501_a;
+    protected static final ResourceLocation[] DESTROY_STAGES = new ResourceLocation[] {new ResourceLocation("textures/blocks/destroy_stage_0.png"), new ResourceLocation("textures/blocks/destroy_stage_1.png"), new ResourceLocation("textures/blocks/destroy_stage_2.png"), new ResourceLocation("textures/blocks/destroy_stage_3.png"), new ResourceLocation("textures/blocks/destroy_stage_4.png"), new ResourceLocation("textures/blocks/destroy_stage_5.png"), new ResourceLocation("textures/blocks/destroy_stage_6.png"), new ResourceLocation("textures/blocks/destroy_stage_7.png"), new ResourceLocation("textures/blocks/destroy_stage_8.png"), new ResourceLocation("textures/blocks/destroy_stage_9.png")};
+    protected TileEntityRendererDispatcher rendererDispatcher;
     private static final String __OBFID = "CL_00000964";
 
-    public abstract void renderTileEntityAt(TileEntity p_147500_1_, double p_147500_2_, double p_147500_4_, double p_147500_6_, float p_147500_8_);
+    public abstract void renderTileEntityAt(TileEntity p_180535_1_, double p_180535_2_, double p_180535_4_, double p_180535_6_, float p_180535_8_, int p_180535_9_);
 
     protected void bindTexture(ResourceLocation p_147499_1_)
     {
-        TextureManager var2 = this.field_147501_a.field_147553_e;
+        TextureManager var2 = this.rendererDispatcher.renderEngine;
 
         if (var2 != null)
         {
@@ -23,15 +24,18 @@ public abstract class TileEntitySpecialRenderer
         }
     }
 
-    public void func_147497_a(TileEntityRendererDispatcher p_147497_1_)
+    protected World getWorld()
     {
-        this.field_147501_a = p_147497_1_;
+        return this.rendererDispatcher.worldObj;
     }
 
-    public void func_147496_a(World p_147496_1_) {}
-
-    public FontRenderer func_147498_b()
+    public void setRendererDispatcher(TileEntityRendererDispatcher p_147497_1_)
     {
-        return this.field_147501_a.func_147548_a();
+        this.rendererDispatcher = p_147497_1_;
+    }
+
+    public FontRenderer getFontRenderer()
+    {
+        return this.rendererDispatcher.getFontRenderer();
     }
 }

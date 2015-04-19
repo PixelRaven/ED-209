@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.client.resources.I18n;
@@ -7,23 +8,25 @@ import net.minecraft.util.IChatComponent;
 
 public class GuiDisconnected extends GuiScreen
 {
-    private String field_146306_a;
-    private IChatComponent field_146304_f;
-    private List field_146305_g;
-    private final GuiScreen field_146307_h;
+    private String reason;
+    private IChatComponent message;
+    private List multilineMessage;
+    private final GuiScreen parentScreen;
+    private int field_175353_i;
     private static final String __OBFID = "CL_00000693";
 
     public GuiDisconnected(GuiScreen p_i45020_1_, String p_i45020_2_, IChatComponent p_i45020_3_)
     {
-        this.field_146307_h = p_i45020_1_;
-        this.field_146306_a = I18n.format(p_i45020_2_, new Object[0]);
-        this.field_146304_f = p_i45020_3_;
+        this.parentScreen = p_i45020_1_;
+        this.reason = I18n.format(p_i45020_2_, new Object[0]);
+        this.message = p_i45020_3_;
     }
 
     /**
-     * Fired when a key is typed. This is the equivalent of KeyListener.keyTyped(KeyEvent e).
+     * Fired when a key is typed (except F11 who toggle full screen). This is the equivalent of
+     * KeyListener.keyTyped(KeyEvent e). Args : character (character on the key), keyCode (lwjgl Keyboard key code)
      */
-    protected void keyTyped(char p_73869_1_, int p_73869_2_) {}
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {}
 
     /**
      * Adds the buttons (and other controls) to the screen in question.
@@ -31,36 +34,37 @@ public class GuiDisconnected extends GuiScreen
     public void initGui()
     {
         this.buttonList.clear();
-        this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120 + 12, I18n.format("gui.toMenu", new Object[0])));
-        this.field_146305_g = this.fontRendererObj.listFormattedStringToWidth(this.field_146304_f.getFormattedText(), this.width - 50);
+        this.multilineMessage = this.fontRendererObj.listFormattedStringToWidth(this.message.getFormattedText(), this.width - 50);
+        this.field_175353_i = this.multilineMessage.size() * this.fontRendererObj.FONT_HEIGHT;
+        this.buttonList.add(new GuiButton(0, this.width / 2 - 100, this.height / 2 + this.field_175353_i / 2 + this.fontRendererObj.FONT_HEIGHT, I18n.format("gui.toMenu", new Object[0])));
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
-        if (p_146284_1_.id == 0)
+        if (button.id == 0)
         {
-            this.mc.displayGuiScreen(this.field_146307_h);
+            this.mc.displayGuiScreen(this.parentScreen);
         }
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
         this.drawDefaultBackground();
-        this.drawCenteredString(this.fontRendererObj, this.field_146306_a, this.width / 2, this.height / 2 - 50, 11184810);
-        int var4 = this.height / 2 - 30;
+        this.drawCenteredString(this.fontRendererObj, this.reason, this.width / 2, this.height / 2 - this.field_175353_i / 2 - this.fontRendererObj.FONT_HEIGHT * 2, 11184810);
+        int var4 = this.height / 2 - this.field_175353_i / 2;
 
-        if (this.field_146305_g != null)
+        if (this.multilineMessage != null)
         {
-            for (Iterator var5 = this.field_146305_g.iterator(); var5.hasNext(); var4 += this.fontRendererObj.FONT_HEIGHT)
+            for (Iterator var5 = this.multilineMessage.iterator(); var5.hasNext(); var4 += this.fontRendererObj.FONT_HEIGHT)
             {
                 String var6 = (String)var5.next();
                 this.drawCenteredString(this.fontRendererObj, var6, this.width / 2, var4, 16777215);
             }
         }
 
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
     }
 }

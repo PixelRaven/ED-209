@@ -13,15 +13,17 @@ public class WorldType
 
     /** Large Biome world Type. */
     public static final WorldType LARGE_BIOMES = new WorldType(2, "largeBiomes");
-    public static final WorldType field_151360_e = (new WorldType(3, "amplified")).func_151358_j();
+
+    /** amplified world type */
+    public static final WorldType AMPLIFIED = (new WorldType(3, "amplified")).setNotificationData();
+    public static final WorldType CUSTOMIZED = new WorldType(4, "customized");
+    public static final WorldType DEBUG_WORLD = new WorldType(5, "debug_all_block_states");
 
     /** Default (1.1) world type. */
     public static final WorldType DEFAULT_1_1 = (new WorldType(8, "default_1_1", 0)).setCanBeCreated(false);
 
     /** ID for this world type. */
     private final int worldTypeId;
-
-    /** 'default' or 'flat' */
     private final String worldType;
 
     /** The int version of the ChunkProvider that generated this world. */
@@ -34,21 +36,21 @@ public class WorldType
 
     /** Whether this WorldType has a version or not. */
     private boolean isWorldTypeVersioned;
-    private boolean field_151361_l;
+    private boolean hasNotificationData;
     private static final String __OBFID = "CL_00000150";
 
-    private WorldType(int p_i1959_1_, String p_i1959_2_)
+    private WorldType(int id, String name)
     {
-        this(p_i1959_1_, p_i1959_2_, 0);
+        this(id, name, 0);
     }
 
-    private WorldType(int p_i1960_1_, String p_i1960_2_, int p_i1960_3_)
+    private WorldType(int id, String name, int version)
     {
-        this.worldType = p_i1960_2_;
-        this.generatorVersion = p_i1960_3_;
+        this.worldType = name;
+        this.generatorVersion = version;
         this.canBeCreated = true;
-        this.worldTypeId = p_i1960_1_;
-        worldTypes[p_i1960_1_] = this;
+        this.worldTypeId = id;
+        worldTypes[id] = this;
     }
 
     public String getWorldTypeName()
@@ -77,17 +79,17 @@ public class WorldType
         return this.generatorVersion;
     }
 
-    public WorldType getWorldTypeForGeneratorVersion(int p_77132_1_)
+    public WorldType getWorldTypeForGeneratorVersion(int version)
     {
-        return this == DEFAULT && p_77132_1_ == 0 ? DEFAULT_1_1 : this;
+        return this == DEFAULT && version == 0 ? DEFAULT_1_1 : this;
     }
 
     /**
      * Sets canBeCreated to the provided value, and returns this.
      */
-    private WorldType setCanBeCreated(boolean p_77124_1_)
+    private WorldType setCanBeCreated(boolean enable)
     {
-        this.canBeCreated = p_77124_1_;
+        this.canBeCreated = enable;
         return this;
     }
 
@@ -116,11 +118,11 @@ public class WorldType
         return this.isWorldTypeVersioned;
     }
 
-    public static WorldType parseWorldType(String p_77130_0_)
+    public static WorldType parseWorldType(String type)
     {
         for (int var1 = 0; var1 < worldTypes.length; ++var1)
         {
-            if (worldTypes[var1] != null && worldTypes[var1].worldType.equalsIgnoreCase(p_77130_0_))
+            if (worldTypes[var1] != null && worldTypes[var1].worldType.equalsIgnoreCase(type))
             {
                 return worldTypes[var1];
             }
@@ -134,14 +136,21 @@ public class WorldType
         return this.worldTypeId;
     }
 
-    public boolean func_151357_h()
+    /**
+     * returns true if selecting this worldtype from the customize menu should display the generator.[worldtype].info
+     * message
+     */
+    public boolean showWorldInfoNotice()
     {
-        return this.field_151361_l;
+        return this.hasNotificationData;
     }
 
-    private WorldType func_151358_j()
+    /**
+     * enables the display of generator.[worldtype].info message on the customize world menu
+     */
+    private WorldType setNotificationData()
     {
-        this.field_151361_l = true;
+        this.hasNotificationData = true;
         return this;
     }
 }

@@ -10,14 +10,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import javax.imageio.ImageIO;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.IResourceManagerReloadListener;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.util.ResourceLocation;
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.GL11;
 
 public class FontRenderer implements IResourceManagerReloadListener
@@ -150,7 +153,7 @@ public class FontRenderer implements IResourceManagerReloadListener
 
         try
         {
-            var1 = ImageIO.read(Minecraft.getMinecraft().getResourceManager().getResource(this.locationFontTexture).getInputStream());
+            var1 = TextureUtil.func_177053_a(Minecraft.getMinecraft().getResourceManager().getResource(this.locationFontTexture).getInputStream());
         }
         catch (IOException var17)
         {
@@ -213,14 +216,20 @@ public class FontRenderer implements IResourceManagerReloadListener
 
     private void readGlyphSizes()
     {
+        InputStream var1 = null;
+
         try
         {
-            InputStream var1 = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation("font/glyph_sizes.bin")).getInputStream();
+            var1 = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation("font/glyph_sizes.bin")).getInputStream();
             var1.read(this.glyphWidth);
         }
-        catch (IOException var2)
+        catch (IOException var6)
         {
-            throw new RuntimeException(var2);
+            throw new RuntimeException(var6);
+        }
+        finally
+        {
+            IOUtils.closeQuietly(var1);
         }
     }
 
@@ -308,45 +317,42 @@ public class FontRenderer implements IResourceManagerReloadListener
         }
     }
 
-    /**
-     * Draws the specified string with a shadow.
-     */
-    public int drawStringWithShadow(String p_78261_1_, int p_78261_2_, int p_78261_3_, int p_78261_4_)
+    public int func_175063_a(String p_175063_1_, float p_175063_2_, float p_175063_3_, int p_175063_4_)
     {
-        return this.drawString(p_78261_1_, p_78261_2_, p_78261_3_, p_78261_4_, true);
+        return this.func_175065_a(p_175063_1_, p_175063_2_, p_175063_3_, p_175063_4_, true);
     }
 
     /**
      * Draws the specified string.
      */
-    public int drawString(String p_78276_1_, int p_78276_2_, int p_78276_3_, int p_78276_4_)
+    public int drawString(String text, int x, int y, int color)
     {
-        return this.drawString(p_78276_1_, p_78276_2_, p_78276_3_, p_78276_4_, false);
+        return this.func_175065_a(text, (float)x, (float)y, color, false);
     }
 
-    /**
-     * Draws the specified string. Args: string, x, y, color, dropShadow
-     */
-    public int drawString(String p_85187_1_, int p_85187_2_, int p_85187_3_, int p_85187_4_, boolean p_85187_5_)
+    public int func_175065_a(String p_175065_1_, float p_175065_2_, float p_175065_3_, int p_175065_4_, boolean p_175065_5_)
     {
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GlStateManager.enableAlpha();
         this.resetStyles();
         int var6;
 
-        if (p_85187_5_)
+        if (p_175065_5_)
         {
-            var6 = this.renderString(p_85187_1_, p_85187_2_ + 1, p_85187_3_ + 1, p_85187_4_, true);
-            var6 = Math.max(var6, this.renderString(p_85187_1_, p_85187_2_, p_85187_3_, p_85187_4_, false));
+            var6 = this.func_180455_b(p_175065_1_, p_175065_2_ + 1.0F, p_175065_3_ + 1.0F, p_175065_4_, true);
+            var6 = Math.max(var6, this.func_180455_b(p_175065_1_, p_175065_2_, p_175065_3_, p_175065_4_, false));
         }
         else
         {
-            var6 = this.renderString(p_85187_1_, p_85187_2_, p_85187_3_, p_85187_4_, false);
+            var6 = this.func_180455_b(p_175065_1_, p_175065_2_, p_175065_3_, p_175065_4_, false);
         }
 
         return var6;
     }
 
-    private String func_147647_b(String p_147647_1_)
+    /**
+     * Apply Unicode Bidirectional Algorithm to string and return a new possibly reordered string for visual rendering.
+     */
+    private String bidiReorder(String p_147647_1_)
     {
         try
         {
@@ -407,7 +413,7 @@ public class FontRenderer implements IResourceManagerReloadListener
 
                     var6 = this.colorCode[var5];
                     this.textColor = var6;
-                    GL11.glColor4f((float)(var6 >> 16) / 255.0F, (float)(var6 >> 8 & 255) / 255.0F, (float)(var6 & 255) / 255.0F, this.alpha);
+                    GlStateManager.color((float)(var6 >> 16) / 255.0F, (float)(var6 >> 8 & 255) / 255.0F, (float)(var6 & 255) / 255.0F, this.alpha);
                 }
                 else if (var5 == 16)
                 {
@@ -436,7 +442,7 @@ public class FontRenderer implements IResourceManagerReloadListener
                     this.strikethroughStyle = false;
                     this.underlineStyle = false;
                     this.italicStyle = false;
-                    GL11.glColor4f(this.red, this.blue, this.green, this.alpha);
+                    GlStateManager.color(this.red, this.blue, this.green, this.alpha);
                 }
 
                 ++var3;
@@ -456,72 +462,75 @@ public class FontRenderer implements IResourceManagerReloadListener
                     var5 = var6;
                 }
 
-                float var11 = this.unicodeFlag ? 0.5F : 1.0F;
+                float var12 = this.unicodeFlag ? 0.5F : 1.0F;
                 boolean var7 = (var4 == 0 || var5 == -1 || this.unicodeFlag) && p_78255_2_;
 
                 if (var7)
                 {
-                    this.posX -= var11;
-                    this.posY -= var11;
+                    this.posX -= var12;
+                    this.posY -= var12;
                 }
 
                 float var8 = this.renderCharAtPos(var5, var4, this.italicStyle);
 
                 if (var7)
                 {
-                    this.posX += var11;
-                    this.posY += var11;
+                    this.posX += var12;
+                    this.posY += var12;
                 }
 
                 if (this.boldStyle)
                 {
-                    this.posX += var11;
+                    this.posX += var12;
 
                     if (var7)
                     {
-                        this.posX -= var11;
-                        this.posY -= var11;
+                        this.posX -= var12;
+                        this.posY -= var12;
                     }
 
                     this.renderCharAtPos(var5, var4, this.italicStyle);
-                    this.posX -= var11;
+                    this.posX -= var12;
 
                     if (var7)
                     {
-                        this.posX += var11;
-                        this.posY += var11;
+                        this.posX += var12;
+                        this.posY += var12;
                     }
 
                     ++var8;
                 }
 
                 Tessellator var9;
+                WorldRenderer var10;
 
                 if (this.strikethroughStyle)
                 {
-                    var9 = Tessellator.instance;
-                    GL11.glDisable(GL11.GL_TEXTURE_2D);
-                    var9.startDrawingQuads();
-                    var9.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
-                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
-                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
-                    var9.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
+                    var9 = Tessellator.getInstance();
+                    var10 = var9.getWorldRenderer();
+                    GlStateManager.func_179090_x();
+                    var10.startDrawingQuads();
+                    var10.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
+                    var10.addVertex((double)(this.posX + var8), (double)(this.posY + (float)(this.FONT_HEIGHT / 2)), 0.0D);
+                    var10.addVertex((double)(this.posX + var8), (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
+                    var10.addVertex((double)this.posX, (double)(this.posY + (float)(this.FONT_HEIGHT / 2) - 1.0F), 0.0D);
                     var9.draw();
-                    GL11.glEnable(GL11.GL_TEXTURE_2D);
+                    GlStateManager.func_179098_w();
                 }
 
                 if (this.underlineStyle)
                 {
-                    var9 = Tessellator.instance;
-                    GL11.glDisable(GL11.GL_TEXTURE_2D);
-                    var9.startDrawingQuads();
-                    int var10 = this.underlineStyle ? -1 : 0;
-                    var9.addVertex((double)(this.posX + (float)var10), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
-                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
-                    var9.addVertex((double)(this.posX + var8), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
-                    var9.addVertex((double)(this.posX + (float)var10), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
+                    var9 = Tessellator.getInstance();
+                    var10 = var9.getWorldRenderer();
+                    GlStateManager.func_179090_x();
+                    var10.startDrawingQuads();
+                    int var11 = this.underlineStyle ? -1 : 0;
+                    var10.addVertex((double)(this.posX + (float)var11), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
+                    var10.addVertex((double)(this.posX + var8), (double)(this.posY + (float)this.FONT_HEIGHT), 0.0D);
+                    var10.addVertex((double)(this.posX + var8), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
+                    var10.addVertex((double)(this.posX + (float)var11), (double)(this.posY + (float)this.FONT_HEIGHT - 1.0F), 0.0D);
                     var9.draw();
-                    GL11.glEnable(GL11.GL_TEXTURE_2D);
+                    GlStateManager.func_179098_w();
                 }
 
                 this.posX += (float)((int)var8);
@@ -536,19 +545,16 @@ public class FontRenderer implements IResourceManagerReloadListener
     {
         if (this.bidiFlag)
         {
-            int var7 = this.getStringWidth(this.func_147647_b(p_78274_1_));
+            int var7 = this.getStringWidth(this.bidiReorder(p_78274_1_));
             p_78274_2_ = p_78274_2_ + p_78274_4_ - var7;
         }
 
-        return this.renderString(p_78274_1_, p_78274_2_, p_78274_3_, p_78274_5_, p_78274_6_);
+        return this.func_180455_b(p_78274_1_, (float)p_78274_2_, (float)p_78274_3_, p_78274_5_, p_78274_6_);
     }
 
-    /**
-     * Render single line string by setting GL color, current (posX,posY), and calling renderStringAtPos()
-     */
-    private int renderString(String p_78258_1_, int p_78258_2_, int p_78258_3_, int p_78258_4_, boolean p_78258_5_)
+    private int func_180455_b(String p_180455_1_, float p_180455_2_, float p_180455_3_, int p_180455_4_, boolean p_180455_5_)
     {
-        if (p_78258_1_ == null)
+        if (p_180455_1_ == null)
         {
             return 0;
         }
@@ -556,27 +562,27 @@ public class FontRenderer implements IResourceManagerReloadListener
         {
             if (this.bidiFlag)
             {
-                p_78258_1_ = this.func_147647_b(p_78258_1_);
+                p_180455_1_ = this.bidiReorder(p_180455_1_);
             }
 
-            if ((p_78258_4_ & -67108864) == 0)
+            if ((p_180455_4_ & -67108864) == 0)
             {
-                p_78258_4_ |= -16777216;
+                p_180455_4_ |= -16777216;
             }
 
-            if (p_78258_5_)
+            if (p_180455_5_)
             {
-                p_78258_4_ = (p_78258_4_ & 16579836) >> 2 | p_78258_4_ & -16777216;
+                p_180455_4_ = (p_180455_4_ & 16579836) >> 2 | p_180455_4_ & -16777216;
             }
 
-            this.red = (float)(p_78258_4_ >> 16 & 255) / 255.0F;
-            this.blue = (float)(p_78258_4_ >> 8 & 255) / 255.0F;
-            this.green = (float)(p_78258_4_ & 255) / 255.0F;
-            this.alpha = (float)(p_78258_4_ >> 24 & 255) / 255.0F;
-            GL11.glColor4f(this.red, this.blue, this.green, this.alpha);
-            this.posX = (float)p_78258_2_;
-            this.posY = (float)p_78258_3_;
-            this.renderStringAtPos(p_78258_1_, p_78258_5_);
+            this.red = (float)(p_180455_4_ >> 16 & 255) / 255.0F;
+            this.blue = (float)(p_180455_4_ >> 8 & 255) / 255.0F;
+            this.green = (float)(p_180455_4_ & 255) / 255.0F;
+            this.alpha = (float)(p_180455_4_ >> 24 & 255) / 255.0F;
+            GlStateManager.color(this.red, this.blue, this.green, this.alpha);
+            this.posX = p_180455_2_;
+            this.posY = p_180455_3_;
+            this.renderStringAtPos(p_180455_1_, p_180455_5_);
             return (int)this.posX;
         }
     }
@@ -763,26 +769,26 @@ public class FontRenderer implements IResourceManagerReloadListener
     /**
      * Splits and draws a String with wordwrap (maximum length is parameter k)
      */
-    public void drawSplitString(String p_78279_1_, int p_78279_2_, int p_78279_3_, int p_78279_4_, int p_78279_5_)
+    public void drawSplitString(String str, int x, int y, int wrapWidth, int textColor)
     {
         this.resetStyles();
-        this.textColor = p_78279_5_;
-        p_78279_1_ = this.trimStringNewline(p_78279_1_);
-        this.renderSplitString(p_78279_1_, p_78279_2_, p_78279_3_, p_78279_4_, false);
+        this.textColor = textColor;
+        str = this.trimStringNewline(str);
+        this.renderSplitString(str, x, y, wrapWidth, false);
     }
 
     /**
      * Perform actual work of rendering a multi-line string with wordwrap and with darker drop shadow color if flag is
      * set
      */
-    private void renderSplitString(String p_78268_1_, int p_78268_2_, int p_78268_3_, int p_78268_4_, boolean p_78268_5_)
+    private void renderSplitString(String str, int x, int y, int wrapWidth, boolean addShadow)
     {
-        List var6 = this.listFormattedStringToWidth(p_78268_1_, p_78268_4_);
+        List var6 = this.listFormattedStringToWidth(str, wrapWidth);
 
-        for (Iterator var7 = var6.iterator(); var7.hasNext(); p_78268_3_ += this.FONT_HEIGHT)
+        for (Iterator var7 = var6.iterator(); var7.hasNext(); y += this.FONT_HEIGHT)
         {
             String var8 = (String)var7.next();
-            this.renderStringAligned(var8, p_78268_2_, p_78268_3_, p_78268_4_, this.textColor, p_78268_5_);
+            this.renderStringAligned(var8, x, y, wrapWidth, this.textColor, addShadow);
         }
     }
 
@@ -823,45 +829,45 @@ public class FontRenderer implements IResourceManagerReloadListener
     /**
      * Breaks a string into a list of pieces that will fit a specified width.
      */
-    public List listFormattedStringToWidth(String p_78271_1_, int p_78271_2_)
+    public List listFormattedStringToWidth(String str, int wrapWidth)
     {
-        return Arrays.asList(this.wrapFormattedStringToWidth(p_78271_1_, p_78271_2_).split("\n"));
+        return Arrays.asList(this.wrapFormattedStringToWidth(str, wrapWidth).split("\n"));
     }
 
     /**
      * Inserts newline and formatting into a string to wrap it within the specified width.
      */
-    String wrapFormattedStringToWidth(String p_78280_1_, int p_78280_2_)
+    String wrapFormattedStringToWidth(String str, int wrapWidth)
     {
-        int var3 = this.sizeStringToWidth(p_78280_1_, p_78280_2_);
+        int var3 = this.sizeStringToWidth(str, wrapWidth);
 
-        if (p_78280_1_.length() <= var3)
+        if (str.length() <= var3)
         {
-            return p_78280_1_;
+            return str;
         }
         else
         {
-            String var4 = p_78280_1_.substring(0, var3);
-            char var5 = p_78280_1_.charAt(var3);
+            String var4 = str.substring(0, var3);
+            char var5 = str.charAt(var3);
             boolean var6 = var5 == 32 || var5 == 10;
-            String var7 = getFormatFromString(var4) + p_78280_1_.substring(var3 + (var6 ? 1 : 0));
-            return var4 + "\n" + this.wrapFormattedStringToWidth(var7, p_78280_2_);
+            String var7 = getFormatFromString(var4) + str.substring(var3 + (var6 ? 1 : 0));
+            return var4 + "\n" + this.wrapFormattedStringToWidth(var7, wrapWidth);
         }
     }
 
     /**
      * Determines how many characters from the string will fit into the specified width.
      */
-    private int sizeStringToWidth(String p_78259_1_, int p_78259_2_)
+    private int sizeStringToWidth(String str, int wrapWidth)
     {
-        int var3 = p_78259_1_.length();
+        int var3 = str.length();
         int var4 = 0;
         int var5 = 0;
         int var6 = -1;
 
         for (boolean var7 = false; var5 < var3; ++var5)
         {
-            char var8 = p_78259_1_.charAt(var5);
+            char var8 = str.charAt(var5);
 
             switch (var8)
             {
@@ -873,7 +879,7 @@ public class FontRenderer implements IResourceManagerReloadListener
                     if (var5 < var3 - 1)
                     {
                         ++var5;
-                        char var9 = p_78259_1_.charAt(var5);
+                        char var9 = str.charAt(var5);
 
                         if (var9 != 108 && var9 != 76)
                         {
@@ -909,7 +915,7 @@ public class FontRenderer implements IResourceManagerReloadListener
                 break;
             }
 
-            if (var4 > p_78259_2_)
+            if (var4 > wrapWidth)
             {
                 break;
             }
@@ -921,23 +927,23 @@ public class FontRenderer implements IResourceManagerReloadListener
     /**
      * Checks if the char code is a hexadecimal character, used to set colour.
      */
-    private static boolean isFormatColor(char p_78272_0_)
+    private static boolean isFormatColor(char colorChar)
     {
-        return p_78272_0_ >= 48 && p_78272_0_ <= 57 || p_78272_0_ >= 97 && p_78272_0_ <= 102 || p_78272_0_ >= 65 && p_78272_0_ <= 70;
+        return colorChar >= 48 && colorChar <= 57 || colorChar >= 97 && colorChar <= 102 || colorChar >= 65 && colorChar <= 70;
     }
 
     /**
      * Checks if the char code is O-K...lLrRk-o... used to set special formatting.
      */
-    private static boolean isFormatSpecial(char p_78270_0_)
+    private static boolean isFormatSpecial(char formatChar)
     {
-        return p_78270_0_ >= 107 && p_78270_0_ <= 111 || p_78270_0_ >= 75 && p_78270_0_ <= 79 || p_78270_0_ == 114 || p_78270_0_ == 82;
+        return formatChar >= 107 && formatChar <= 111 || formatChar >= 75 && formatChar <= 79 || formatChar == 114 || formatChar == 82;
     }
 
     /**
      * Digests a string for nonprinting formatting characters then returns a string containing only that formatting.
      */
-    private static String getFormatFromString(String p_78282_0_)
+    public static String getFormatFromString(String p_78282_0_)
     {
         String var1 = "";
         int var2 = -1;
@@ -969,5 +975,10 @@ public class FontRenderer implements IResourceManagerReloadListener
     public boolean getBidiFlag()
     {
         return this.bidiFlag;
+    }
+
+    public int func_175064_b(char p_175064_1_)
+    {
+        return this.colorCode["0123456789abcdef".indexOf(p_175064_1_)];
     }
 }

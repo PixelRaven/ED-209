@@ -6,7 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
@@ -28,34 +28,30 @@ public class EntityLightningBolt extends EntityWeatherEffect
     private int boltLivingTime;
     private static final String __OBFID = "CL_00001666";
 
-    public EntityLightningBolt(World p_i1703_1_, double p_i1703_2_, double p_i1703_4_, double p_i1703_6_)
+    public EntityLightningBolt(World worldIn, double p_i1703_2_, double p_i1703_4_, double p_i1703_6_)
     {
-        super(p_i1703_1_);
+        super(worldIn);
         this.setLocationAndAngles(p_i1703_2_, p_i1703_4_, p_i1703_6_, 0.0F, 0.0F);
         this.lightningState = 2;
         this.boltVertex = this.rand.nextLong();
         this.boltLivingTime = this.rand.nextInt(3) + 1;
 
-        if (!p_i1703_1_.isClient && p_i1703_1_.getGameRules().getGameRuleBooleanValue("doFireTick") && (p_i1703_1_.difficultySetting == EnumDifficulty.NORMAL || p_i1703_1_.difficultySetting == EnumDifficulty.HARD) && p_i1703_1_.doChunksNearChunkExist(MathHelper.floor_double(p_i1703_2_), MathHelper.floor_double(p_i1703_4_), MathHelper.floor_double(p_i1703_6_), 10))
+        if (!worldIn.isRemote && worldIn.getGameRules().getGameRuleBooleanValue("doFireTick") && (worldIn.getDifficulty() == EnumDifficulty.NORMAL || worldIn.getDifficulty() == EnumDifficulty.HARD) && worldIn.isAreaLoaded(new BlockPos(this), 10))
         {
-            int var8 = MathHelper.floor_double(p_i1703_2_);
-            int var9 = MathHelper.floor_double(p_i1703_4_);
-            int var10 = MathHelper.floor_double(p_i1703_6_);
+            BlockPos var8 = new BlockPos(this);
 
-            if (p_i1703_1_.getBlock(var8, var9, var10).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(p_i1703_1_, var8, var9, var10))
+            if (worldIn.getBlockState(var8).getBlock().getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(worldIn, var8))
             {
-                p_i1703_1_.setBlock(var8, var9, var10, Blocks.fire);
+                worldIn.setBlockState(var8, Blocks.fire.getDefaultState());
             }
 
-            for (var8 = 0; var8 < 4; ++var8)
+            for (int var9 = 0; var9 < 4; ++var9)
             {
-                var9 = MathHelper.floor_double(p_i1703_2_) + this.rand.nextInt(3) - 1;
-                var10 = MathHelper.floor_double(p_i1703_4_) + this.rand.nextInt(3) - 1;
-                int var11 = MathHelper.floor_double(p_i1703_6_) + this.rand.nextInt(3) - 1;
+                BlockPos var10 = var8.add(this.rand.nextInt(3) - 1, this.rand.nextInt(3) - 1, this.rand.nextInt(3) - 1);
 
-                if (p_i1703_1_.getBlock(var9, var10, var11).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(p_i1703_1_, var9, var10, var11))
+                if (worldIn.getBlockState(var10).getBlock().getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(worldIn, var10))
                 {
-                    p_i1703_1_.setBlock(var9, var10, var11, Blocks.fire);
+                    worldIn.setBlockState(var10, Blocks.fire.getDefaultState());
                 }
             }
         }
@@ -87,35 +83,29 @@ public class EntityLightningBolt extends EntityWeatherEffect
                 --this.boltLivingTime;
                 this.lightningState = 1;
                 this.boltVertex = this.rand.nextLong();
+                BlockPos var1 = new BlockPos(this);
 
-                if (!this.worldObj.isClient && this.worldObj.getGameRules().getGameRuleBooleanValue("doFireTick") && this.worldObj.doChunksNearChunkExist(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.posY), MathHelper.floor_double(this.posZ), 10))
+                if (!this.worldObj.isRemote && this.worldObj.getGameRules().getGameRuleBooleanValue("doFireTick") && this.worldObj.isAreaLoaded(var1, 10) && this.worldObj.getBlockState(var1).getBlock().getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(this.worldObj, var1))
                 {
-                    int var1 = MathHelper.floor_double(this.posX);
-                    int var2 = MathHelper.floor_double(this.posY);
-                    int var3 = MathHelper.floor_double(this.posZ);
-
-                    if (this.worldObj.getBlock(var1, var2, var3).getMaterial() == Material.air && Blocks.fire.canPlaceBlockAt(this.worldObj, var1, var2, var3))
-                    {
-                        this.worldObj.setBlock(var1, var2, var3, Blocks.fire);
-                    }
+                    this.worldObj.setBlockState(var1, Blocks.fire.getDefaultState());
                 }
             }
         }
 
         if (this.lightningState >= 0)
         {
-            if (this.worldObj.isClient)
+            if (this.worldObj.isRemote)
             {
-                this.worldObj.lastLightningBolt = 2;
+                this.worldObj.setLastLightningBolt(2);
             }
             else
             {
                 double var6 = 3.0D;
-                List var7 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(this.posX - var6, this.posY - var6, this.posZ - var6, this.posX + var6, this.posY + 6.0D + var6, this.posZ + var6));
+                List var3 = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, new AxisAlignedBB(this.posX - var6, this.posY - var6, this.posZ - var6, this.posX + var6, this.posY + 6.0D + var6, this.posZ + var6));
 
-                for (int var4 = 0; var4 < var7.size(); ++var4)
+                for (int var4 = 0; var4 < var3.size(); ++var4)
                 {
-                    Entity var5 = (Entity)var7.get(var4);
+                    Entity var5 = (Entity)var3.get(var4);
                     var5.onStruckByLightning(this);
                 }
             }
@@ -127,10 +117,10 @@ public class EntityLightningBolt extends EntityWeatherEffect
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_) {}
+    protected void readEntityFromNBT(NBTTagCompound tagCompund) {}
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_) {}
+    protected void writeEntityToNBT(NBTTagCompound tagCompound) {}
 }

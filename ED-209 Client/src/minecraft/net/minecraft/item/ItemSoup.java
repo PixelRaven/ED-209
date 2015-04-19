@@ -14,9 +14,13 @@ public class ItemSoup extends ItemFood
         this.setMaxStackSize(1);
     }
 
-    public ItemStack onEaten(ItemStack p_77654_1_, World p_77654_2_, EntityPlayer p_77654_3_)
+    /**
+     * Called when the player finishes using this Item (E.g. finishes eating.). Not called when the player stops using
+     * the Item before the action is complete.
+     */
+    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityPlayer playerIn)
     {
-        super.onEaten(p_77654_1_, p_77654_2_, p_77654_3_);
+        super.onItemUseFinish(stack, worldIn, playerIn);
         return new ItemStack(Items.bowl);
     }
 }

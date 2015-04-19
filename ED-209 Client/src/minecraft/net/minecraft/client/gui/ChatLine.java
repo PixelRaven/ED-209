@@ -21,7 +21,7 @@ public class ChatLine
         this.chatLineID = p_i45000_3_;
     }
 
-    public IChatComponent func_151461_a()
+    public IChatComponent getChatComponent()
     {
         return this.lineString;
     }

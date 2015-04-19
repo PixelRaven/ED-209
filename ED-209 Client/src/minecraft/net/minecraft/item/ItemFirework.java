@@ -1,11 +1,14 @@
 package net.minecraft.item;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -14,19 +17,21 @@ public class ItemFirework extends Item
     private static final String __OBFID = "CL_00000031";
 
     /**
-     * Callback for item usage. If the item does something special on right clicking, he will have one of those. Return
-     * True if something happen and false if it don't. This is for ITEMS, not BLOCKS
+     * Called when a Block is right-clicked with this Item
+     *  
+     * @param pos The block being right-clicked
+     * @param side The side being right-clicked
      */
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!p_77648_3_.isClient)
+        if (!worldIn.isRemote)
         {
-            EntityFireworkRocket var11 = new EntityFireworkRocket(p_77648_3_, (double)((float)p_77648_4_ + p_77648_8_), (double)((float)p_77648_5_ + p_77648_9_), (double)((float)p_77648_6_ + p_77648_10_), p_77648_1_);
-            p_77648_3_.spawnEntityInWorld(var11);
+            EntityFireworkRocket var9 = new EntityFireworkRocket(worldIn, (double)((float)pos.getX() + hitX), (double)((float)pos.getY() + hitY), (double)((float)pos.getZ() + hitZ), stack);
+            worldIn.spawnEntityInWorld(var9);
 
-            if (!p_77648_2_.capabilities.isCreativeMode)
+            if (!playerIn.capabilities.isCreativeMode)
             {
-                --p_77648_1_.stackSize;
+                --stack.stackSize;
             }
 
             return true;
@@ -39,18 +44,21 @@ public class ItemFirework extends Item
 
     /**
      * allows items to add custom lines of information to the mouseover description
+     *  
+     * @param tooltip All lines to display in the Item's tooltip. This is a List of Strings.
+     * @param advanced Whether the setting "Advanced tooltips" is enabled
      */
-    public void addInformation(ItemStack p_77624_1_, EntityPlayer p_77624_2_, List p_77624_3_, boolean p_77624_4_)
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced)
     {
-        if (p_77624_1_.hasTagCompound())
+        if (stack.hasTagCompound())
         {
-            NBTTagCompound var5 = p_77624_1_.getTagCompound().getCompoundTag("Fireworks");
+            NBTTagCompound var5 = stack.getTagCompound().getCompoundTag("Fireworks");
 
             if (var5 != null)
             {
-                if (var5.func_150297_b("Flight", 99))
+                if (var5.hasKey("Flight", 99))
                 {
-                    p_77624_3_.add(StatCollector.translateToLocal("item.fireworks.flight") + " " + var5.getByte("Flight"));
+                    tooltip.add(StatCollector.translateToLocal("item.fireworks.flight") + " " + var5.getByte("Flight"));
                 }
 
                 NBTTagList var6 = var5.getTagList("Explosions", 10);
@@ -60,7 +68,7 @@ public class ItemFirework extends Item
                     for (int var7 = 0; var7 < var6.tagCount(); ++var7)
                     {
                         NBTTagCompound var8 = var6.getCompoundTagAt(var7);
-                        ArrayList var9 = new ArrayList();
+                        ArrayList var9 = Lists.newArrayList();
                         ItemFireworkCharge.func_150902_a(var8, var9);
 
                         if (var9.size() > 0)
@@ -70,7 +78,7 @@ public class ItemFirework extends Item
                                 var9.set(var10, "  " + (String)var9.get(var10));
                             }
 
-                            p_77624_3_.addAll(var9);
+                            tooltip.addAll(var9);
                         }
                     }
                 }

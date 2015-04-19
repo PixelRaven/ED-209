@@ -6,6 +6,7 @@ import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
@@ -13,9 +14,9 @@ public class EntityCaveSpider extends EntitySpider
 {
     private static final String __OBFID = "CL_00001683";
 
-    public EntityCaveSpider(World p_i1732_1_)
+    public EntityCaveSpider(World worldIn)
     {
-        super(p_i1732_1_);
+        super(worldIn);
         this.setSize(0.7F, 0.5F);
     }
 
@@ -33,11 +34,11 @@ public class EntityCaveSpider extends EntitySpider
             {
                 byte var2 = 0;
 
-                if (this.worldObj.difficultySetting == EnumDifficulty.NORMAL)
+                if (this.worldObj.getDifficulty() == EnumDifficulty.NORMAL)
                 {
                     var2 = 7;
                 }
-                else if (this.worldObj.difficultySetting == EnumDifficulty.HARD)
+                else if (this.worldObj.getDifficulty() == EnumDifficulty.HARD)
                 {
                     var2 = 15;
                 }
@@ -56,8 +57,13 @@ public class EntityCaveSpider extends EntitySpider
         }
     }
 
-    public IEntityLivingData onSpawnWithEgg(IEntityLivingData p_110161_1_)
+    public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, IEntityLivingData p_180482_2_)
     {
-        return p_110161_1_;
+        return p_180482_2_;
+    }
+
+    public float getEyeHeight()
+    {
+        return 0.45F;
     }
 }

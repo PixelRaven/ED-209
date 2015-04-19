@@ -25,9 +25,9 @@ import org.lwjgl.opengl.GL11;
 
 public class ShaderGroup
 {
-    private final Framebuffer mainFramebuffer;
-    private final IResourceManager resourceManager;
-    private final String shaderGroupName;
+    private Framebuffer mainFramebuffer;
+    private IResourceManager resourceManager;
+    private String shaderGroupName;
     private final List listShaders = Lists.newArrayList();
     private final Map mapFramebuffers = Maps.newHashMap();
     private final List listFramebuffers = Lists.newArrayList();
@@ -48,10 +48,10 @@ public class ShaderGroup
         this.mainFramebufferHeight = p_i1050_3_.framebufferHeight;
         this.shaderGroupName = p_i1050_4_.toString();
         this.resetProjectionMatrix();
-        this.func_152765_a(p_i1050_1_, p_i1050_4_);
+        this.parseGroup(p_i1050_1_, p_i1050_4_);
     }
 
-    public void func_152765_a(TextureManager p_152765_1_, ResourceLocation p_152765_2_) throws JsonException
+    public void parseGroup(TextureManager p_152765_1_, ResourceLocation p_152765_2_) throws JsonException
     {
         JsonParser var3 = new JsonParser();
         InputStream var4 = null;
@@ -100,7 +100,7 @@ public class ShaderGroup
 
                     try
                     {
-                        this.func_152764_a(p_152765_1_, var10);
+                        this.parsePass(p_152765_1_, var10);
                     }
                     catch (Exception var18)
                     {
@@ -131,7 +131,7 @@ public class ShaderGroup
         }
         else
         {
-            JsonObject var2 = JsonUtils.getJsonElementAsJsonObject(p_148027_1_, "target");
+            JsonObject var2 = JsonUtils.getElementAsJsonObject(p_148027_1_, "target");
             String var3 = JsonUtils.getJsonObjectStringFieldValue(var2, "name");
             int var4 = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(var2, "width", this.mainFramebufferWidth);
             int var5 = JsonUtils.getJsonObjectIntegerFieldValueOrDefault(var2, "height", this.mainFramebufferHeight);
@@ -145,9 +145,9 @@ public class ShaderGroup
         }
     }
 
-    private void func_152764_a(TextureManager p_152764_1_, JsonElement p_152764_2_) throws JsonException
+    private void parsePass(TextureManager p_152764_1_, JsonElement p_152764_2_) throws JsonException
     {
-        JsonObject var3 = JsonUtils.getJsonElementAsJsonObject(p_152764_2_, "pass");
+        JsonObject var3 = JsonUtils.getElementAsJsonObject(p_152764_2_, "pass");
         String var4 = JsonUtils.getJsonObjectStringFieldValue(var3, "name");
         String var5 = JsonUtils.getJsonObjectStringFieldValue(var3, "intarget");
         String var6 = JsonUtils.getJsonObjectStringFieldValue(var3, "outtarget");
@@ -177,7 +177,7 @@ public class ShaderGroup
 
                     try
                     {
-                        JsonObject var14 = JsonUtils.getJsonElementAsJsonObject(var13, "auxtarget");
+                        JsonObject var14 = JsonUtils.getElementAsJsonObject(var13, "auxtarget");
                         String var30 = JsonUtils.getJsonObjectStringFieldValue(var14, "name");
                         String var16 = JsonUtils.getJsonObjectStringFieldValue(var14, "id");
                         Framebuffer var17 = this.getFramebuffer(var16);
@@ -255,9 +255,9 @@ public class ShaderGroup
 
     private void initUniform(JsonElement p_148028_1_) throws JsonException
     {
-        JsonObject var2 = JsonUtils.getJsonElementAsJsonObject(p_148028_1_, "uniform");
+        JsonObject var2 = JsonUtils.getElementAsJsonObject(p_148028_1_, "uniform");
         String var3 = JsonUtils.getJsonObjectStringFieldValue(var2, "name");
-        ShaderUniform var4 = ((Shader)this.listShaders.get(this.listShaders.size() - 1)).getShaderManager().func_147991_a(var3);
+        ShaderUniform var4 = ((Shader)this.listShaders.get(this.listShaders.size() - 1)).getShaderManager().getShaderUniform(var3);
 
         if (var4 == null)
         {
@@ -292,21 +292,26 @@ public class ShaderGroup
                     break;
 
                 case 1:
-                    var4.func_148090_a(var5[0]);
+                    var4.set(var5[0]);
                     break;
 
                 case 2:
-                    var4.func_148087_a(var5[0], var5[1]);
+                    var4.set(var5[0], var5[1]);
                     break;
 
                 case 3:
-                    var4.func_148095_a(var5[0], var5[1], var5[2]);
+                    var4.set(var5[0], var5[1], var5[2]);
                     break;
 
                 case 4:
-                    var4.func_148081_a(var5[0], var5[1], var5[2], var5[3]);
+                    var4.set(var5[0], var5[1], var5[2], var5[3]);
             }
         }
+    }
+
+    public Framebuffer func_177066_a(String p_177066_1_)
+    {
+        return (Framebuffer)this.mapFramebuffers.get(p_177066_1_);
     }
 
     public void addFramebuffer(String p_148020_1_, int p_148020_2_, int p_148020_3_)

@@ -6,7 +6,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S00PacketKeepAlive extends Packet
+public class S00PacketKeepAlive implements Packet
 {
     private int field_149136_a;
     private static final String __OBFID = "CL_00001303";
@@ -18,34 +18,28 @@ public class S00PacketKeepAlive extends Packet
         this.field_149136_a = p_i45195_1_;
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleKeepAlive(this);
+        handler.handleKeepAlive(this);
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149136_a = p_148837_1_.readInt();
+        this.field_149136_a = data.readVarIntFromBuffer();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149136_a);
-    }
-
-    /**
-     * If true, the network manager will process the packet immediately when received, otherwise it will queue it for
-     * processing. Currently true for: Disconnect, LoginSuccess, KeepAlive, ServerQuery/Info, Ping/Pong
-     */
-    public boolean hasPriority()
-    {
-        return true;
+        data.writeVarIntToBuffer(this.field_149136_a);
     }
 
     public int func_149134_c()
@@ -53,8 +47,11 @@ public class S00PacketKeepAlive extends Packet
         return this.field_149136_a;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

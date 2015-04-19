@@ -1,12 +1,14 @@
 package net.minecraft.enchantment;
 
+import net.minecraft.util.ResourceLocation;
+
 public class EnchantmentOxygen extends Enchantment
 {
     private static final String __OBFID = "CL_00000120";
 
-    public EnchantmentOxygen(int p_i1935_1_, int p_i1935_2_)
+    public EnchantmentOxygen(int p_i45766_1_, ResourceLocation p_i45766_2_, int p_i45766_3_)
     {
-        super(p_i1935_1_, p_i1935_2_, EnumEnchantmentType.armor_head);
+        super(p_i45766_1_, p_i45766_2_, p_i45766_3_, EnumEnchantmentType.ARMOR_HEAD);
         this.setName("oxygen");
     }
 

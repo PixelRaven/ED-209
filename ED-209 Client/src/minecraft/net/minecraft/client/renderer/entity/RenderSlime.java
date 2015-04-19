@@ -1,51 +1,29 @@
 package net.minecraft.client.renderer.entity;
 
 import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.entity.layers.LayerSlimeGel;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class RenderSlime extends RenderLiving
 {
     private static final ResourceLocation slimeTextures = new ResourceLocation("textures/entity/slime/slime.png");
-    private ModelBase scaleAmount;
     private static final String __OBFID = "CL_00001024";
 
-    public RenderSlime(ModelBase p_i1267_1_, ModelBase p_i1267_2_, float p_i1267_3_)
+    public RenderSlime(RenderManager p_i46141_1_, ModelBase p_i46141_2_, float p_i46141_3_)
     {
-        super(p_i1267_1_, p_i1267_3_);
-        this.scaleAmount = p_i1267_2_;
+        super(p_i46141_1_, p_i46141_2_, p_i46141_3_);
+        this.addLayer(new LayerSlimeGel(this));
     }
 
-    /**
-     * Queries whether should render the specified pass or not.
-     */
-    protected int shouldRenderPass(EntitySlime p_77032_1_, int p_77032_2_, float p_77032_3_)
+    public void doRender(EntitySlime p_177124_1_, double p_177124_2_, double p_177124_4_, double p_177124_6_, float p_177124_8_, float p_177124_9_)
     {
-        if (p_77032_1_.isInvisible())
-        {
-            return 0;
-        }
-        else if (p_77032_2_ == 0)
-        {
-            this.setRenderPassModel(this.scaleAmount);
-            GL11.glEnable(GL11.GL_NORMALIZE);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            return 1;
-        }
-        else
-        {
-            if (p_77032_2_ == 1)
-            {
-                GL11.glDisable(GL11.GL_BLEND);
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-
-            return -1;
-        }
+        this.shadowSize = 0.25F * (float)p_177124_1_.getSlimeSize();
+        super.doRender((EntityLiving)p_177124_1_, p_177124_2_, p_177124_4_, p_177124_6_, p_177124_8_, p_177124_9_);
     }
 
     /**
@@ -57,7 +35,7 @@ public class RenderSlime extends RenderLiving
         float var3 = (float)p_77041_1_.getSlimeSize();
         float var4 = (p_77041_1_.prevSquishFactor + (p_77041_1_.squishFactor - p_77041_1_.prevSquishFactor) * p_77041_2_) / (var3 * 0.5F + 1.0F);
         float var5 = 1.0F / (var4 + 1.0F);
-        GL11.glScalef(var5 * var3, 1.0F / var5 * var3, var5 * var3);
+        GlStateManager.scale(var5 * var3, 1.0F / var5 * var3, var5 * var3);
     }
 
     /**
@@ -66,6 +44,17 @@ public class RenderSlime extends RenderLiving
     protected ResourceLocation getEntityTexture(EntitySlime p_110775_1_)
     {
         return slimeTextures;
+    }
+
+    /**
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
+     */
+    public void doRender(EntityLiving p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
+    {
+        this.doRender((EntitySlime)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     /**
@@ -78,11 +67,14 @@ public class RenderSlime extends RenderLiving
     }
 
     /**
-     * Queries whether should render the specified pass or not.
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
      */
-    protected int shouldRenderPass(EntityLivingBase p_77032_1_, int p_77032_2_, float p_77032_3_)
+    public void doRender(EntityLivingBase p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        return this.shouldRenderPass((EntitySlime)p_77032_1_, p_77032_2_, p_77032_3_);
+        this.doRender((EntitySlime)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 
     /**
@@ -91,5 +83,16 @@ public class RenderSlime extends RenderLiving
     protected ResourceLocation getEntityTexture(Entity p_110775_1_)
     {
         return this.getEntityTexture((EntitySlime)p_110775_1_);
+    }
+
+    /**
+     * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
+     * handing it off to a worker function which does the actual work. In all probabilty, the class Render is generic
+     * (Render<T extends Entity) and this method has signature public void doRender(T entity, double d, double d1,
+     * double d2, float f, float f1). But JAD is pre 1.5 so doesn't do that.
+     */
+    public void doRender(Entity p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
+    {
+        this.doRender((EntitySlime)p_76986_1_, p_76986_2_, p_76986_4_, p_76986_6_, p_76986_8_, p_76986_9_);
     }
 }

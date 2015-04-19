@@ -1,5 +1,6 @@
 package net.minecraft.realms;
 
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +66,7 @@ public class RealmsAnvilLevelStorageSource
 
     public List getLevelList() throws AnvilConverterException
     {
-        ArrayList var1 = new ArrayList();
+        ArrayList var1 = Lists.newArrayList();
         Iterator var2 = this.levelStorageSource.getSaveList().iterator();
 
         while (var2.hasNext())

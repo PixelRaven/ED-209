@@ -4,65 +4,67 @@ import net.minecraft.util.ResourceLocation;
 
 public abstract class PositionedSound implements ISound
 {
-    protected final ResourceLocation field_147664_a;
-    protected float field_147662_b = 1.0F;
-    protected float field_147663_c = 1.0F;
-    protected float field_147660_d;
-    protected float field_147661_e;
-    protected float field_147658_f;
-    protected boolean field_147659_g = false;
-    protected int field_147665_h = 0;
-    protected ISound.AttenuationType field_147666_i;
+    protected final ResourceLocation positionedSoundLocation;
+    protected float volume = 1.0F;
+    protected float pitch = 1.0F;
+    protected float xPosF;
+    protected float yPosF;
+    protected float zPosF;
+    protected boolean repeat = false;
+
+    /** The number of ticks between repeating the sound */
+    protected int repeatDelay = 0;
+    protected ISound.AttenuationType attenuationType;
     private static final String __OBFID = "CL_00001116";
 
-    protected PositionedSound(ResourceLocation p_i45103_1_)
+    protected PositionedSound(ResourceLocation soundResource)
     {
-        this.field_147666_i = ISound.AttenuationType.LINEAR;
-        this.field_147664_a = p_i45103_1_;
+        this.attenuationType = ISound.AttenuationType.LINEAR;
+        this.positionedSoundLocation = soundResource;
     }
 
-    public ResourceLocation func_147650_b()
+    public ResourceLocation getSoundLocation()
     {
-        return this.field_147664_a;
+        return this.positionedSoundLocation;
     }
 
-    public boolean func_147657_c()
+    public boolean canRepeat()
     {
-        return this.field_147659_g;
+        return this.repeat;
     }
 
-    public int func_147652_d()
+    public int getRepeatDelay()
     {
-        return this.field_147665_h;
+        return this.repeatDelay;
     }
 
-    public float func_147653_e()
+    public float getVolume()
     {
-        return this.field_147662_b;
+        return this.volume;
     }
 
-    public float func_147655_f()
+    public float getPitch()
     {
-        return this.field_147663_c;
+        return this.pitch;
     }
 
-    public float func_147649_g()
+    public float getXPosF()
     {
-        return this.field_147660_d;
+        return this.xPosF;
     }
 
-    public float func_147654_h()
+    public float getYPosF()
     {
-        return this.field_147661_e;
+        return this.yPosF;
     }
 
-    public float func_147651_i()
+    public float getZPosF()
     {
-        return this.field_147658_f;
+        return this.zPosF;
     }
 
-    public ISound.AttenuationType func_147656_j()
+    public ISound.AttenuationType getAttenuationType()
     {
-        return this.field_147666_i;
+        return this.attenuationType;
     }
 }

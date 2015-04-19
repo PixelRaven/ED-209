@@ -1,51 +1,48 @@
 package net.minecraft.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public enum EnumChatFormatting
 {
-    BLACK('0'),
-    DARK_BLUE('1'),
-    DARK_GREEN('2'),
-    DARK_AQUA('3'),
-    DARK_RED('4'),
-    DARK_PURPLE('5'),
-    GOLD('6'),
-    GRAY('7'),
-    DARK_GRAY('8'),
-    BLUE('9'),
-    GREEN('a'),
-    AQUA('b'),
-    RED('c'),
-    LIGHT_PURPLE('d'),
-    YELLOW('e'),
-    WHITE('f'),
-    OBFUSCATED('k', true),
-    BOLD('l', true),
-    STRIKETHROUGH('m', true),
-    UNDERLINE('n', true),
-    ITALIC('o', true),
-    RESET('r');
-
-    /**
-     * Maps a formatting code (e.g., 'f') to its corresponding enum value (e.g., WHITE).
-     */
-    private static final Map formattingCodeMapping = new HashMap();
+    BLACK("BLACK", '0', 0),
+    DARK_BLUE("DARK_BLUE", '1', 1),
+    DARK_GREEN("DARK_GREEN", '2', 2),
+    DARK_AQUA("DARK_AQUA", '3', 3),
+    DARK_RED("DARK_RED", '4', 4),
+    DARK_PURPLE("DARK_PURPLE", '5', 5),
+    GOLD("GOLD", '6', 6),
+    GRAY("GRAY", '7', 7),
+    DARK_GRAY("DARK_GRAY", '8', 8),
+    BLUE("BLUE", '9', 9),
+    GREEN("GREEN", 'a', 10),
+    AQUA("AQUA", 'b', 11),
+    RED("RED", 'c', 12),
+    LIGHT_PURPLE("LIGHT_PURPLE", 'd', 13),
+    YELLOW("YELLOW", 'e', 14),
+    WHITE("WHITE", 'f', 15),
+    OBFUSCATED("OBFUSCATED", 'k', true),
+    BOLD("BOLD", 'l', true),
+    STRIKETHROUGH("STRIKETHROUGH", 'm', true),
+    UNDERLINE("UNDERLINE", 'n', true),
+    ITALIC("ITALIC", 'o', true),
+    RESET("RESET", 'r', -1);
 
     /**
      * Maps a name (e.g., 'underline') to its corresponding enum value (e.g., UNDERLINE).
      */
-    private static final Map nameMapping = new HashMap();
+    private static final Map nameMapping = Maps.newHashMap();
 
     /**
      * Matches formatting codes that indicate that the client should treat the following text as bold, recolored,
      * obfuscated, etc.
      */
     private static final Pattern formattingCodePattern = Pattern.compile("(?i)" + String.valueOf('\u00a7') + "[0-9A-FK-OR]");
+    private final String field_175748_y;
 
     /** The formatting code that produces this format. */
     private final char formattingCode;
@@ -56,26 +53,36 @@ public enum EnumChatFormatting
      * subsequent text in this format.
      */
     private final String controlString;
+    private final int field_175747_C;
     private static final String __OBFID = "CL_00000342";
 
-    private EnumChatFormatting(char p_i1336_3_)
+    private static String func_175745_c(String p_175745_0_)
     {
-        this(p_i1336_3_, false);
+        return p_175745_0_.toLowerCase().replaceAll("[^a-z]", "");
     }
 
-    private EnumChatFormatting(char p_i1337_3_, boolean p_i1337_4_)
+    private EnumChatFormatting(String p_i46291_3_, char p_i46291_4_, int p_i46291_5_)
     {
-        this.formattingCode = p_i1337_3_;
-        this.fancyStyling = p_i1337_4_;
-        this.controlString = "\u00a7" + p_i1337_3_;
+        this(p_i46291_3_, p_i46291_4_, false, p_i46291_5_);
     }
 
-    /**
-     * Gets the formatting code that produces this format.
-     */
-    public char getFormattingCode()
+    private EnumChatFormatting(String p_i46292_3_, char p_i46292_4_, boolean p_i46292_5_)
     {
-        return this.formattingCode;
+        this(p_i46292_3_, p_i46292_4_, p_i46292_5_, -1);
+    }
+
+    private EnumChatFormatting(String p_i46293_3_, char p_i46293_4_, boolean p_i46293_5_, int p_i46293_6_)
+    {
+        this.field_175748_y = p_i46293_3_;
+        this.formattingCode = p_i46293_4_;
+        this.fancyStyling = p_i46293_5_;
+        this.field_175747_C = p_i46293_6_;
+        this.controlString = "\u00a7" + p_i46293_4_;
+    }
+
+    public int func_175746_b()
+    {
+        return this.field_175747_C;
     }
 
     /**
@@ -87,7 +94,7 @@ public enum EnumChatFormatting
     }
 
     /**
-     * Checks if typo is a color.
+     * Checks if this is a color code.
      */
     public boolean isColor()
     {
@@ -120,7 +127,32 @@ public enum EnumChatFormatting
      */
     public static EnumChatFormatting getValueByName(String p_96300_0_)
     {
-        return p_96300_0_ == null ? null : (EnumChatFormatting)nameMapping.get(p_96300_0_.toLowerCase());
+        return p_96300_0_ == null ? null : (EnumChatFormatting)nameMapping.get(func_175745_c(p_96300_0_));
+    }
+
+    public static EnumChatFormatting func_175744_a(int p_175744_0_)
+    {
+        if (p_175744_0_ < 0)
+        {
+            return RESET;
+        }
+        else
+        {
+            EnumChatFormatting[] var1 = values();
+            int var2 = var1.length;
+
+            for (int var3 = 0; var3 < var2; ++var3)
+            {
+                EnumChatFormatting var4 = var1[var3];
+
+                if (var4.func_175746_b() == p_175744_0_)
+                {
+                    return var4;
+                }
+            }
+
+            return null;
+        }
     }
 
     /**
@@ -129,7 +161,7 @@ public enum EnumChatFormatting
      */
     public static Collection getValidValues(boolean p_96296_0_, boolean p_96296_1_)
     {
-        ArrayList var2 = new ArrayList();
+        ArrayList var2 = Lists.newArrayList();
         EnumChatFormatting[] var3 = values();
         int var4 = var3.length;
 
@@ -153,8 +185,7 @@ public enum EnumChatFormatting
         for (int var2 = 0; var2 < var1; ++var2)
         {
             EnumChatFormatting var3 = var0[var2];
-            formattingCodeMapping.put(Character.valueOf(var3.getFormattingCode()), var3);
-            nameMapping.put(var3.getFriendlyName(), var3);
+            nameMapping.put(func_175745_c(var3.field_175748_y), var3);
         }
     }
 }

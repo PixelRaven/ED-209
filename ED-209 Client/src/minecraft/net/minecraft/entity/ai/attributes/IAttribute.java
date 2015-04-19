@@ -9,4 +9,6 @@ public interface IAttribute
     double getDefaultValue();
 
     boolean getShouldWatch();
+
+    IAttribute func_180372_d();
 }

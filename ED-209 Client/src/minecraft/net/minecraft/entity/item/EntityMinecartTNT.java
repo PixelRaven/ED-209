@@ -1,11 +1,15 @@
 package net.minecraft.entity.item;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockRailBase;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
@@ -14,24 +18,24 @@ public class EntityMinecartTNT extends EntityMinecart
     private int minecartTNTFuse = -1;
     private static final String __OBFID = "CL_00001680";
 
-    public EntityMinecartTNT(World p_i1727_1_)
+    public EntityMinecartTNT(World worldIn)
     {
-        super(p_i1727_1_);
+        super(worldIn);
     }
 
-    public EntityMinecartTNT(World p_i1728_1_, double p_i1728_2_, double p_i1728_4_, double p_i1728_6_)
+    public EntityMinecartTNT(World worldIn, double p_i1728_2_, double p_i1728_4_, double p_i1728_6_)
     {
-        super(p_i1728_1_, p_i1728_2_, p_i1728_4_, p_i1728_6_);
+        super(worldIn, p_i1728_2_, p_i1728_4_, p_i1728_6_);
     }
 
-    public int getMinecartType()
+    public EntityMinecart.EnumMinecartType func_180456_s()
     {
-        return 3;
+        return EntityMinecart.EnumMinecartType.TNT;
     }
 
-    public Block func_145817_o()
+    public IBlockState func_180457_u()
     {
-        return Blocks.tnt;
+        return Blocks.tnt.getDefaultState();
     }
 
     /**
@@ -44,7 +48,7 @@ public class EntityMinecartTNT extends EntityMinecart
         if (this.minecartTNTFuse > 0)
         {
             --this.minecartTNTFuse;
-            this.worldObj.spawnParticle("smoke", this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
+            this.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D, new int[0]);
         }
         else if (this.minecartTNTFuse == 0)
         {
@@ -60,6 +64,26 @@ public class EntityMinecartTNT extends EntityMinecart
                 this.explodeCart(var1);
             }
         }
+    }
+
+    /**
+     * Called when the entity is attacked.
+     */
+    public boolean attackEntityFrom(DamageSource source, float amount)
+    {
+        Entity var3 = source.getSourceOfDamage();
+
+        if (var3 instanceof EntityArrow)
+        {
+            EntityArrow var4 = (EntityArrow)var3;
+
+            if (var4.isBurning())
+            {
+                this.explodeCart(var4.motionX * var4.motionX + var4.motionY * var4.motionY + var4.motionZ * var4.motionZ);
+            }
+        }
+
+        return super.attackEntityFrom(source, amount);
     }
 
     public void killMinecart(DamageSource p_94095_1_)
@@ -83,7 +107,7 @@ public class EntityMinecartTNT extends EntityMinecart
      */
     protected void explodeCart(double p_94103_1_)
     {
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             double var3 = Math.sqrt(p_94103_1_);
 
@@ -97,18 +121,15 @@ public class EntityMinecartTNT extends EntityMinecart
         }
     }
 
-    /**
-     * Called when the mob is falling. Calculates and applies fall damage.
-     */
-    protected void fall(float p_70069_1_)
+    public void fall(float distance, float damageMultiplier)
     {
-        if (p_70069_1_ >= 3.0F)
+        if (distance >= 3.0F)
         {
-            float var2 = p_70069_1_ / 10.0F;
-            this.explodeCart((double)(var2 * var2));
+            float var3 = distance / 10.0F;
+            this.explodeCart((double)(var3 * var3));
         }
 
-        super.fall(p_70069_1_);
+        super.fall(distance, damageMultiplier);
     }
 
     /**
@@ -141,10 +162,14 @@ public class EntityMinecartTNT extends EntityMinecart
     {
         this.minecartTNTFuse = 80;
 
-        if (!this.worldObj.isClient)
+        if (!this.worldObj.isRemote)
         {
             this.worldObj.setEntityState(this, (byte)10);
-            this.worldObj.playSoundAtEntity(this, "game.tnt.primed", 1.0F, 1.0F);
+
+            if (!this.isSlient())
+            {
+                this.worldObj.playSoundAtEntity(this, "game.tnt.primed", 1.0F, 1.0F);
+            }
         }
     }
 
@@ -161,35 +186,38 @@ public class EntityMinecartTNT extends EntityMinecart
         return this.minecartTNTFuse > -1;
     }
 
-    public float func_145772_a(Explosion p_145772_1_, World p_145772_2_, int p_145772_3_, int p_145772_4_, int p_145772_5_, Block p_145772_6_)
+    /**
+     * Explosion resistance of a block relative to this entity
+     */
+    public float getExplosionResistance(Explosion p_180428_1_, World worldIn, BlockPos p_180428_3_, IBlockState p_180428_4_)
     {
-        return this.isIgnited() && (BlockRailBase.func_150051_a(p_145772_6_) || BlockRailBase.func_150049_b_(p_145772_2_, p_145772_3_, p_145772_4_ + 1, p_145772_5_)) ? 0.0F : super.func_145772_a(p_145772_1_, p_145772_2_, p_145772_3_, p_145772_4_, p_145772_5_, p_145772_6_);
+        return this.isIgnited() && (BlockRailBase.func_176563_d(p_180428_4_) || BlockRailBase.func_176562_d(worldIn, p_180428_3_.offsetUp())) ? 0.0F : super.getExplosionResistance(p_180428_1_, worldIn, p_180428_3_, p_180428_4_);
     }
 
-    public boolean func_145774_a(Explosion p_145774_1_, World p_145774_2_, int p_145774_3_, int p_145774_4_, int p_145774_5_, Block p_145774_6_, float p_145774_7_)
+    public boolean func_174816_a(Explosion p_174816_1_, World worldIn, BlockPos p_174816_3_, IBlockState p_174816_4_, float p_174816_5_)
     {
-        return this.isIgnited() && (BlockRailBase.func_150051_a(p_145774_6_) || BlockRailBase.func_150049_b_(p_145774_2_, p_145774_3_, p_145774_4_ + 1, p_145774_5_)) ? false : super.func_145774_a(p_145774_1_, p_145774_2_, p_145774_3_, p_145774_4_, p_145774_5_, p_145774_6_, p_145774_7_);
+        return this.isIgnited() && (BlockRailBase.func_176563_d(p_174816_4_) || BlockRailBase.func_176562_d(worldIn, p_174816_3_.offsetUp())) ? false : super.func_174816_a(p_174816_1_, worldIn, p_174816_3_, p_174816_4_, p_174816_5_);
     }
 
     /**
      * (abstract) Protected helper method to read subclass entity data from NBT.
      */
-    protected void readEntityFromNBT(NBTTagCompound p_70037_1_)
+    protected void readEntityFromNBT(NBTTagCompound tagCompund)
     {
-        super.readEntityFromNBT(p_70037_1_);
+        super.readEntityFromNBT(tagCompund);
 
-        if (p_70037_1_.func_150297_b("TNTFuse", 99))
+        if (tagCompund.hasKey("TNTFuse", 99))
         {
-            this.minecartTNTFuse = p_70037_1_.getInteger("TNTFuse");
+            this.minecartTNTFuse = tagCompund.getInteger("TNTFuse");
         }
     }
 
     /**
      * (abstract) Protected helper method to write subclass entity data to NBT.
      */
-    protected void writeEntityToNBT(NBTTagCompound p_70014_1_)
+    protected void writeEntityToNBT(NBTTagCompound tagCompound)
     {
-        super.writeEntityToNBT(p_70014_1_);
-        p_70014_1_.setInteger("TNTFuse", this.minecartTNTFuse);
+        super.writeEntityToNBT(tagCompound);
+        tagCompound.setInteger("TNTFuse", this.minecartTNTFuse);
     }
 }

@@ -3,97 +3,71 @@ package net.minecraft.block;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Facing;
-import net.minecraft.util.IIcon;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockPistonExtension extends Block
 {
-    private IIcon field_150088_a;
+    public static final PropertyDirection field_176326_a = PropertyDirection.create("facing");
+    public static final PropertyEnum field_176325_b = PropertyEnum.create("type", BlockPistonExtension.EnumPistonType.class);
+    public static final PropertyBool field_176327_M = PropertyBool.create("short");
     private static final String __OBFID = "CL_00000367";
 
     public BlockPistonExtension()
     {
         super(Material.piston);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176326_a, EnumFacing.NORTH).withProperty(field_176325_b, BlockPistonExtension.EnumPistonType.DEFAULT).withProperty(field_176327_M, Boolean.valueOf(false)));
         this.setStepSound(soundTypePiston);
         this.setHardness(0.5F);
     }
 
-    public void func_150086_a(IIcon p_150086_1_)
+    public void onBlockHarvested(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn)
     {
-        this.field_150088_a = p_150086_1_;
-    }
-
-    public void func_150087_e()
-    {
-        this.field_150088_a = null;
-    }
-
-    /**
-     * Called when the block is attempted to be harvested
-     */
-    public void onBlockHarvested(World p_149681_1_, int p_149681_2_, int p_149681_3_, int p_149681_4_, int p_149681_5_, EntityPlayer p_149681_6_)
-    {
-        if (p_149681_6_.capabilities.isCreativeMode)
+        if (playerIn.capabilities.isCreativeMode)
         {
-            int var7 = func_150085_b(p_149681_5_);
-            Block var8 = p_149681_1_.getBlock(p_149681_2_ - Facing.offsetsXForSide[var7], p_149681_3_ - Facing.offsetsYForSide[var7], p_149681_4_ - Facing.offsetsZForSide[var7]);
+            EnumFacing var5 = (EnumFacing)state.getValue(field_176326_a);
 
-            if (var8 == Blocks.piston || var8 == Blocks.sticky_piston)
+            if (var5 != null)
             {
-                p_149681_1_.setBlockToAir(p_149681_2_ - Facing.offsetsXForSide[var7], p_149681_3_ - Facing.offsetsYForSide[var7], p_149681_4_ - Facing.offsetsZForSide[var7]);
+                BlockPos var6 = pos.offset(var5.getOpposite());
+                Block var7 = worldIn.getBlockState(var6).getBlock();
+
+                if (var7 == Blocks.piston || var7 == Blocks.sticky_piston)
+                {
+                    worldIn.setBlockToAir(var6);
+                }
             }
         }
 
-        super.onBlockHarvested(p_149681_1_, p_149681_2_, p_149681_3_, p_149681_4_, p_149681_5_, p_149681_6_);
+        super.onBlockHarvested(worldIn, pos, state, playerIn);
     }
 
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
     {
-        super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
-        int var7 = Facing.oppositeSide[func_150085_b(p_149749_6_)];
-        p_149749_2_ += Facing.offsetsXForSide[var7];
-        p_149749_3_ += Facing.offsetsYForSide[var7];
-        p_149749_4_ += Facing.offsetsZForSide[var7];
-        Block var8 = p_149749_1_.getBlock(p_149749_2_, p_149749_3_, p_149749_4_);
+        super.breakBlock(worldIn, pos, state);
+        EnumFacing var4 = ((EnumFacing)state.getValue(field_176326_a)).getOpposite();
+        pos = pos.offset(var4);
+        IBlockState var5 = worldIn.getBlockState(pos);
 
-        if (var8 == Blocks.piston || var8 == Blocks.sticky_piston)
+        if ((var5.getBlock() == Blocks.piston || var5.getBlock() == Blocks.sticky_piston) && ((Boolean)var5.getValue(BlockPistonBase.EXTENDED)).booleanValue())
         {
-            p_149749_6_ = p_149749_1_.getBlockMetadata(p_149749_2_, p_149749_3_, p_149749_4_);
-
-            if (BlockPistonBase.func_150075_c(p_149749_6_))
-            {
-                var8.dropBlockAsItem(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_6_, 0);
-                p_149749_1_.setBlockToAir(p_149749_2_, p_149749_3_, p_149749_4_);
-            }
+            var5.getBlock().dropBlockAsItem(worldIn, pos, var5, 0);
+            worldIn.setBlockToAir(pos);
         }
-    }
-
-    /**
-     * Gets the block's texture. Args: side, meta
-     */
-    public IIcon getIcon(int p_149691_1_, int p_149691_2_)
-    {
-        int var3 = func_150085_b(p_149691_2_);
-        return p_149691_1_ == var3 ? (this.field_150088_a != null ? this.field_150088_a : ((p_149691_2_ & 8) != 0 ? BlockPistonBase.func_150074_e("piston_top_sticky") : BlockPistonBase.func_150074_e("piston_top_normal"))) : (var3 < 6 && p_149691_1_ == Facing.oppositeSide[var3] ? BlockPistonBase.func_150074_e("piston_top_normal") : BlockPistonBase.func_150074_e("piston_side"));
-    }
-
-    public void registerBlockIcons(IIconRegister p_149651_1_) {}
-
-    /**
-     * The type of render function that is called for this block
-     */
-    public int getRenderType()
-    {
-        return 17;
     }
 
     public boolean isOpaqueCube()
@@ -101,20 +75,20 @@ public class BlockPistonExtension extends Block
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
         return false;
     }
 
     /**
-     * checks to see if you can place this block can be placed on that side of a block: BlockLever overrides
+     * Check whether this Block can be placed on the given side
      */
-    public boolean canPlaceBlockOnSide(World p_149707_1_, int p_149707_2_, int p_149707_3_, int p_149707_4_, int p_149707_5_)
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
         return false;
     }
@@ -122,125 +96,246 @@ public class BlockPistonExtension extends Block
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }
 
-    public void addCollisionBoxesToList(World p_149743_1_, int p_149743_2_, int p_149743_3_, int p_149743_4_, AxisAlignedBB p_149743_5_, List p_149743_6_, Entity p_149743_7_)
+    /**
+     * Add all collision boxes of this Block to the list that intersect with the given mask.
+     *  
+     * @param collidingEntity the Entity colliding with this Block
+     */
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity)
     {
-        int var8 = p_149743_1_.getBlockMetadata(p_149743_2_, p_149743_3_, p_149743_4_);
-        float var9 = 0.25F;
-        float var10 = 0.375F;
-        float var11 = 0.625F;
-        float var12 = 0.25F;
-        float var13 = 0.75F;
-
-        switch (func_150085_b(var8))
-        {
-            case 0:
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.25F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                this.setBlockBounds(0.375F, 0.25F, 0.375F, 0.625F, 1.0F, 0.625F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                break;
-
-            case 1:
-                this.setBlockBounds(0.0F, 0.75F, 0.0F, 1.0F, 1.0F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                this.setBlockBounds(0.375F, 0.0F, 0.375F, 0.625F, 0.75F, 0.625F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                break;
-
-            case 2:
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.25F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                this.setBlockBounds(0.25F, 0.375F, 0.25F, 0.75F, 0.625F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                break;
-
-            case 3:
-                this.setBlockBounds(0.0F, 0.0F, 0.75F, 1.0F, 1.0F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                this.setBlockBounds(0.25F, 0.375F, 0.0F, 0.75F, 0.625F, 0.75F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                break;
-
-            case 4:
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 0.25F, 1.0F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                this.setBlockBounds(0.375F, 0.25F, 0.25F, 0.625F, 0.75F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                break;
-
-            case 5:
-                this.setBlockBounds(0.75F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-                this.setBlockBounds(0.0F, 0.375F, 0.25F, 0.75F, 0.625F, 0.75F);
-                super.addCollisionBoxesToList(p_149743_1_, p_149743_2_, p_149743_3_, p_149743_4_, p_149743_5_, p_149743_6_, p_149743_7_);
-        }
-
+        this.func_176324_d(state);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        this.func_176323_e(state);
+        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
         this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    private void func_176323_e(IBlockState p_176323_1_)
     {
-        int var5 = p_149719_1_.getBlockMetadata(p_149719_2_, p_149719_3_, p_149719_4_);
-        float var6 = 0.25F;
+        float var2 = 0.25F;
+        float var3 = 0.375F;
+        float var4 = 0.625F;
+        float var5 = 0.25F;
+        float var6 = 0.75F;
 
-        switch (func_150085_b(var5))
+        switch (BlockPistonExtension.SwitchEnumFacing.field_177247_a[((EnumFacing)p_176323_1_.getValue(field_176326_a)).ordinal()])
         {
-            case 0:
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.25F, 1.0F);
-                break;
-
             case 1:
-                this.setBlockBounds(0.0F, 0.75F, 0.0F, 1.0F, 1.0F, 1.0F);
+                this.setBlockBounds(0.375F, 0.25F, 0.375F, 0.625F, 1.0F, 0.625F);
                 break;
 
             case 2:
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.25F);
+                this.setBlockBounds(0.375F, 0.0F, 0.375F, 0.625F, 0.75F, 0.625F);
                 break;
 
             case 3:
-                this.setBlockBounds(0.0F, 0.0F, 0.75F, 1.0F, 1.0F, 1.0F);
+                this.setBlockBounds(0.25F, 0.375F, 0.25F, 0.75F, 0.625F, 1.0F);
                 break;
 
             case 4:
-                this.setBlockBounds(0.0F, 0.0F, 0.0F, 0.25F, 1.0F, 1.0F);
+                this.setBlockBounds(0.25F, 0.375F, 0.0F, 0.75F, 0.625F, 0.75F);
                 break;
 
             case 5:
-                this.setBlockBounds(0.75F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+                this.setBlockBounds(0.375F, 0.25F, 0.25F, 0.625F, 0.75F, 1.0F);
+                break;
+
+            case 6:
+                this.setBlockBounds(0.0F, 0.375F, 0.25F, 0.75F, 0.625F, 0.75F);
         }
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
     {
-        int var6 = func_150085_b(p_149695_1_.getBlockMetadata(p_149695_2_, p_149695_3_, p_149695_4_));
-        Block var7 = p_149695_1_.getBlock(p_149695_2_ - Facing.offsetsXForSide[var6], p_149695_3_ - Facing.offsetsYForSide[var6], p_149695_4_ - Facing.offsetsZForSide[var6]);
+        this.func_176324_d(access.getBlockState(pos));
+    }
 
-        if (var7 != Blocks.piston && var7 != Blocks.sticky_piston)
+    public void func_176324_d(IBlockState p_176324_1_)
+    {
+        float var2 = 0.25F;
+        EnumFacing var3 = (EnumFacing)p_176324_1_.getValue(field_176326_a);
+
+        if (var3 != null)
         {
-            p_149695_1_.setBlockToAir(p_149695_2_, p_149695_3_, p_149695_4_);
+            switch (BlockPistonExtension.SwitchEnumFacing.field_177247_a[var3.ordinal()])
+            {
+                case 1:
+                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 0.25F, 1.0F);
+                    break;
+
+                case 2:
+                    this.setBlockBounds(0.0F, 0.75F, 0.0F, 1.0F, 1.0F, 1.0F);
+                    break;
+
+                case 3:
+                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 0.25F);
+                    break;
+
+                case 4:
+                    this.setBlockBounds(0.0F, 0.0F, 0.75F, 1.0F, 1.0F, 1.0F);
+                    break;
+
+                case 5:
+                    this.setBlockBounds(0.0F, 0.0F, 0.0F, 0.25F, 1.0F, 1.0F);
+                    break;
+
+                case 6:
+                    this.setBlockBounds(0.75F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F);
+            }
+        }
+    }
+
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    {
+        EnumFacing var5 = (EnumFacing)state.getValue(field_176326_a);
+        BlockPos var6 = pos.offset(var5.getOpposite());
+        IBlockState var7 = worldIn.getBlockState(var6);
+
+        if (var7.getBlock() != Blocks.piston && var7.getBlock() != Blocks.sticky_piston)
+        {
+            worldIn.setBlockToAir(pos);
         }
         else
         {
-            var7.onNeighborBlockChange(p_149695_1_, p_149695_2_ - Facing.offsetsXForSide[var6], p_149695_3_ - Facing.offsetsYForSide[var6], p_149695_4_ - Facing.offsetsZForSide[var6], p_149695_5_);
+            var7.getBlock().onNeighborBlockChange(worldIn, var6, var7, neighborBlock);
         }
     }
 
-    public static int func_150085_b(int p_150085_0_)
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
     {
-        return MathHelper.clamp_int(p_150085_0_ & 7, 0, Facing.offsetsXForSide.length - 1);
+        return true;
+    }
+
+    public static EnumFacing func_176322_b(int p_176322_0_)
+    {
+        int var1 = p_176322_0_ & 7;
+        return var1 > 5 ? null : EnumFacing.getFront(var1);
+    }
+
+    public Item getItem(World worldIn, BlockPos pos)
+    {
+        return worldIn.getBlockState(pos).getValue(field_176325_b) == BlockPistonExtension.EnumPistonType.STICKY ? Item.getItemFromBlock(Blocks.sticky_piston) : Item.getItemFromBlock(Blocks.piston);
     }
 
     /**
-     * Gets an item for the block being called on. Args: world, x, y, z
+     * Convert the given metadata into a BlockState for this Block
      */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public IBlockState getStateFromMeta(int meta)
     {
-        int var5 = p_149694_1_.getBlockMetadata(p_149694_2_, p_149694_3_, p_149694_4_);
-        return (var5 & 8) != 0 ? Item.getItemFromBlock(Blocks.sticky_piston) : Item.getItemFromBlock(Blocks.piston);
+        return this.getDefaultState().withProperty(field_176326_a, func_176322_b(meta)).withProperty(field_176325_b, (meta & 8) > 0 ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT);
+    }
+
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
+    {
+        byte var2 = 0;
+        int var3 = var2 | ((EnumFacing)state.getValue(field_176326_a)).getIndex();
+
+        if (state.getValue(field_176325_b) == BlockPistonExtension.EnumPistonType.STICKY)
+        {
+            var3 |= 8;
+        }
+
+        return var3;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {field_176326_a, field_176325_b, field_176327_M});
+    }
+
+    public static enum EnumPistonType implements IStringSerializable
+    {
+        DEFAULT("DEFAULT", 0, "normal"),
+        STICKY("STICKY", 1, "sticky");
+        private final String field_176714_c;
+
+        private static final BlockPistonExtension.EnumPistonType[] $VALUES = new BlockPistonExtension.EnumPistonType[]{DEFAULT, STICKY};
+        private static final String __OBFID = "CL_00002035";
+
+        private EnumPistonType(String p_i45666_1_, int p_i45666_2_, String p_i45666_3_)
+        {
+            this.field_176714_c = p_i45666_3_;
+        }
+
+        public String toString()
+        {
+            return this.field_176714_c;
+        }
+
+        public String getName()
+        {
+            return this.field_176714_c;
+        }
+    }
+
+    static final class SwitchEnumFacing
+    {
+        static final int[] field_177247_a = new int[EnumFacing.values().length];
+        private static final String __OBFID = "CL_00002036";
+
+        static
+        {
+            try
+            {
+                field_177247_a[EnumFacing.DOWN.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError var6)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177247_a[EnumFacing.UP.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError var5)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177247_a[EnumFacing.NORTH.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError var4)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177247_a[EnumFacing.SOUTH.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError var3)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177247_a[EnumFacing.WEST.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError var2)
+            {
+                ;
+            }
+
+            try
+            {
+                field_177247_a[EnumFacing.EAST.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError var1)
+            {
+                ;
+            }
+        }
     }
 }

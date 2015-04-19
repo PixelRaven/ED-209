@@ -6,14 +6,15 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentThorns extends Enchantment
 {
     private static final String __OBFID = "CL_00000122";
 
-    public EnchantmentThorns(int p_i1937_1_, int p_i1937_2_)
+    public EnchantmentThorns(int p_i45764_1_, ResourceLocation p_i45764_2_, int p_i45764_3_)
     {
-        super(p_i1937_1_, p_i1937_2_, EnumEnchantmentType.armor_torso);
+        super(p_i45764_1_, p_i45764_2_, p_i45764_3_, EnumEnchantmentType.ARMOR_TORSO);
         this.setName("thorns");
     }
 

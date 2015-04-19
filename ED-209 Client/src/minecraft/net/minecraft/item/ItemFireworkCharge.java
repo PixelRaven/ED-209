@@ -1,41 +1,34 @@
 package net.minecraft.item;
 
 import java.util.List;
-import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagIntArray;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 
 public class ItemFireworkCharge extends Item
 {
-    private IIcon field_150904_a;
     private static final String __OBFID = "CL_00000030";
 
-    /**
-     * Gets an icon index based on an item's damage value and the given render pass
-     */
-    public IIcon getIconFromDamageForRenderPass(int p_77618_1_, int p_77618_2_)
+    public int getColorFromItemStack(ItemStack stack, int renderPass)
     {
-        return p_77618_2_ > 0 ? this.field_150904_a : super.getIconFromDamageForRenderPass(p_77618_1_, p_77618_2_);
-    }
-
-    public int getColorFromItemStack(ItemStack p_82790_1_, int p_82790_2_)
-    {
-        if (p_82790_2_ != 1)
+        if (renderPass != 1)
         {
-            return super.getColorFromItemStack(p_82790_1_, p_82790_2_);
+            return super.getColorFromItemStack(stack, renderPass);
         }
         else
         {
-            NBTBase var3 = func_150903_a(p_82790_1_, "Colors");
+            NBTBase var3 = func_150903_a(stack, "Colors");
 
-            if (var3 != null && var3 instanceof NBTTagIntArray)
+            if (!(var3 instanceof NBTTagIntArray))
+            {
+                return 9079434;
+            }
+            else
             {
                 NBTTagIntArray var4 = (NBTTagIntArray)var3;
-                int[] var5 = var4.func_150302_c();
+                int[] var5 = var4.getIntArray();
 
                 if (var5.length == 1)
                 {
@@ -63,16 +56,7 @@ public class ItemFireworkCharge extends Item
                     return var6 << 16 | var7 << 8 | var8;
                 }
             }
-            else
-            {
-                return 9079434;
-            }
         }
-    }
-
-    public boolean requiresMultipleRenderPasses()
-    {
-        return true;
     }
 
     public static NBTBase func_150903_a(ItemStack p_150903_0_, String p_150903_1_)
@@ -92,16 +76,19 @@ public class ItemFireworkCharge extends Item
 
     /**
      * allows items to add custom lines of information to the mouseover description
+     *  
+     * @param tooltip All lines to display in the Item's tooltip. This is a List of Strings.
+     * @param advanced Whether the setting "Advanced tooltips" is enabled
      */
-    public void addInformation(ItemStack p_77624_1_, EntityPlayer p_77624_2_, List p_77624_3_, boolean p_77624_4_)
+    public void addInformation(ItemStack stack, EntityPlayer playerIn, List tooltip, boolean advanced)
     {
-        if (p_77624_1_.hasTagCompound())
+        if (stack.hasTagCompound())
         {
-            NBTTagCompound var5 = p_77624_1_.getTagCompound().getCompoundTag("Explosion");
+            NBTTagCompound var5 = stack.getTagCompound().getCompoundTag("Explosion");
 
             if (var5 != null)
             {
-                func_150902_a(var5, p_77624_3_);
+                func_150902_a(var5, tooltip);
             }
         }
     }
@@ -142,12 +129,12 @@ public class ItemFireworkCharge extends Item
                 var4 = false;
                 boolean var10 = false;
 
-                for (int var11 = 0; var11 < 16; ++var11)
+                for (int var11 = 0; var11 < ItemDye.dyeColors.length; ++var11)
                 {
-                    if (var9 == ItemDye.field_150922_c[var11])
+                    if (var9 == ItemDye.dyeColors[var11])
                     {
                         var10 = true;
-                        var5 = var5 + StatCollector.translateToLocal("item.fireworksCharge." + ItemDye.field_150923_a[var11]);
+                        var5 = var5 + StatCollector.translateToLocal("item.fireworksCharge." + EnumDyeColor.func_176766_a(var11).func_176762_d());
                         break;
                     }
                 }
@@ -185,10 +172,10 @@ public class ItemFireworkCharge extends Item
 
                 for (int var12 = 0; var12 < 16; ++var12)
                 {
-                    if (var18 == ItemDye.field_150922_c[var12])
+                    if (var18 == ItemDye.dyeColors[var12])
                     {
                         var19 = true;
-                        var15 = var15 + StatCollector.translateToLocal("item.fireworksCharge." + ItemDye.field_150923_a[var12]);
+                        var15 = var15 + StatCollector.translateToLocal("item.fireworksCharge." + EnumDyeColor.func_176766_a(var12).func_176762_d());
                         break;
                     }
                 }
@@ -215,11 +202,5 @@ public class ItemFireworkCharge extends Item
         {
             p_150902_1_.add(StatCollector.translateToLocal("item.fireworksCharge.flicker"));
         }
-    }
-
-    public void registerIcons(IIconRegister p_94581_1_)
-    {
-        super.registerIcons(p_94581_1_);
-        this.field_150904_a = p_94581_1_.registerIcon(this.getIconString() + "_overlay");
     }
 }

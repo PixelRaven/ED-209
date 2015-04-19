@@ -36,7 +36,7 @@ public class EntityAIPlay extends EntityAIBase
         }
         else
         {
-            List var1 = this.villagerObj.worldObj.getEntitiesWithinAABB(EntityVillager.class, this.villagerObj.boundingBox.expand(6.0D, 3.0D, 6.0D));
+            List var1 = this.villagerObj.worldObj.getEntitiesWithinAABB(EntityVillager.class, this.villagerObj.getEntityBoundingBox().expand(6.0D, 3.0D, 6.0D));
             double var2 = Double.MAX_VALUE;
             Iterator var4 = var1.iterator();
 

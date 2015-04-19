@@ -3,7 +3,7 @@ package net.minecraft.client.entity;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
@@ -20,10 +20,9 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
     private double otherPlayerMPPitch;
     private static final String __OBFID = "CL_00000939";
 
-    public EntityOtherPlayerMP(World p_i45075_1_, GameProfile p_i45075_2_)
+    public EntityOtherPlayerMP(World worldIn, GameProfile p_i45075_2_)
     {
-        super(p_i45075_1_, p_i45075_2_);
-        this.yOffset = 0.0F;
+        super(worldIn, p_i45075_2_);
         this.stepHeight = 0.0F;
         this.noClip = true;
         this.field_71082_cx = 0.25F;
@@ -31,33 +30,21 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
     }
 
     /**
-     * sets the players height back to normal after doing things like sleeping and dieing
-     */
-    protected void resetHeight()
-    {
-        this.yOffset = 0.0F;
-    }
-
-    /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource p_70097_1_, float p_70097_2_)
+    public boolean attackEntityFrom(DamageSource source, float amount)
     {
         return true;
     }
 
-    /**
-     * Sets the position and rotation. Only difference from the other one is no bounding on the rotation. Args: posX,
-     * posY, posZ, yaw, pitch
-     */
-    public void setPositionAndRotation2(double p_70056_1_, double p_70056_3_, double p_70056_5_, float p_70056_7_, float p_70056_8_, int p_70056_9_)
+    public void func_180426_a(double p_180426_1_, double p_180426_3_, double p_180426_5_, float p_180426_7_, float p_180426_8_, int p_180426_9_, boolean p_180426_10_)
     {
-        this.otherPlayerMPX = p_70056_1_;
-        this.otherPlayerMPY = p_70056_3_;
-        this.otherPlayerMPZ = p_70056_5_;
-        this.otherPlayerMPYaw = (double)p_70056_7_;
-        this.otherPlayerMPPitch = (double)p_70056_8_;
-        this.otherPlayerMPPosRotationIncrements = p_70056_9_;
+        this.otherPlayerMPX = p_180426_1_;
+        this.otherPlayerMPY = p_180426_3_;
+        this.otherPlayerMPZ = p_180426_5_;
+        this.otherPlayerMPYaw = (double)p_180426_7_;
+        this.otherPlayerMPPitch = (double)p_180426_8_;
+        this.otherPlayerMPPosRotationIncrements = p_180426_9_;
     }
 
     /**
@@ -93,19 +80,12 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
         }
     }
 
-    public float getShadowSize()
-    {
-        return 0.0F;
-    }
-
     /**
      * Called frequently so the entity can update its state every tick as required. For example, zombies and skeletons
      * use this to react to sunlight and start to burn.
      */
     public void onLivingUpdate()
     {
-        super.updateEntityActionState();
-
         if (this.otherPlayerMPPosRotationIncrements > 0)
         {
             double var1 = this.posX + (this.otherPlayerMPX - this.posX) / (double)this.otherPlayerMPPosRotationIncrements;
@@ -131,6 +111,7 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
         }
 
         this.prevCameraYaw = this.cameraYaw;
+        this.updateArmSwingProgress();
         float var9 = MathHelper.sqrt_double(this.motionX * this.motionX + this.motionZ * this.motionZ);
         float var2 = (float)Math.atan(-this.motionY * 0.20000000298023224D) * 15.0F;
 
@@ -156,21 +137,16 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
     /**
      * Sets the held item, or an armor slot. Slot 0 is held item. Slot 1-4 is armor. Params: Item, slot
      */
-    public void setCurrentItemOrArmor(int p_70062_1_, ItemStack p_70062_2_)
+    public void setCurrentItemOrArmor(int slotIn, ItemStack itemStackIn)
     {
-        if (p_70062_1_ == 0)
+        if (slotIn == 0)
         {
-            this.inventory.mainInventory[this.inventory.currentItem] = p_70062_2_;
+            this.inventory.mainInventory[this.inventory.currentItem] = itemStackIn;
         }
         else
         {
-            this.inventory.armorInventory[p_70062_1_ - 1] = p_70062_2_;
+            this.inventory.armorInventory[slotIn - 1] = itemStackIn;
         }
-    }
-
-    public float getEyeHeight()
-    {
-        return 1.82F;
     }
 
     /**
@@ -179,24 +155,21 @@ public class EntityOtherPlayerMP extends AbstractClientPlayer
      * (like "I fetched this block for you by ID, but I'd like you to know that every time you do this, I die a little
      * inside"), and errors (like "it's not called iron_pixacke, silly").
      */
-    public void addChatMessage(IChatComponent p_145747_1_)
+    public void addChatMessage(IChatComponent message)
     {
-        Minecraft.getMinecraft().ingameGUI.getChatGUI().func_146227_a(p_145747_1_);
+        Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(message);
     }
 
     /**
      * Returns true if the command sender is allowed to use the given command.
      */
-    public boolean canCommandSenderUseCommand(int p_70003_1_, String p_70003_2_)
+    public boolean canCommandSenderUseCommand(int permissionLevel, String command)
     {
         return false;
     }
 
-    /**
-     * Return the position for this command sender.
-     */
-    public ChunkCoordinates getPlayerCoordinates()
+    public BlockPos getPosition()
     {
-        return new ChunkCoordinates(MathHelper.floor_double(this.posX + 0.5D), MathHelper.floor_double(this.posY + 0.5D), MathHelper.floor_double(this.posZ + 0.5D));
+        return new BlockPos(this.posX + 0.5D, this.posY + 0.5D, this.posZ + 0.5D);
     }
 }

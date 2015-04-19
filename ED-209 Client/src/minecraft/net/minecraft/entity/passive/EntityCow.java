@@ -15,17 +15,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.pathfinding.PathNavigateGround;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class EntityCow extends EntityAnimal
 {
     private static final String __OBFID = "CL_00001640";
 
-    public EntityCow(World p_i1683_1_)
+    public EntityCow(World worldIn)
     {
-        super(p_i1683_1_);
+        super(worldIn);
         this.setSize(0.9F, 1.3F);
-        this.getNavigator().setAvoidsWater(true);
+        ((PathNavigateGround)this.getNavigator()).func_179690_a(true);
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIPanic(this, 2.0D));
         this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
@@ -34,14 +36,6 @@ public class EntityCow extends EntityAnimal
         this.tasks.addTask(5, new EntityAIWander(this, 1.0D));
         this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(7, new EntityAILookIdle(this));
-    }
-
-    /**
-     * Returns true if the newer Entity AI code should be run
-     */
-    public boolean isAIEnabled()
-    {
-        return true;
     }
 
     protected void applyEntityAttributes()
@@ -75,7 +69,7 @@ public class EntityCow extends EntityAnimal
         return "mob.cow.hurt";
     }
 
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.cow.step", 0.15F, 1.0F);
     }
@@ -88,7 +82,7 @@ public class EntityCow extends EntityAnimal
         return 0.4F;
     }
 
-    protected Item func_146068_u()
+    protected Item getDropItem()
     {
         return Items.leather;
     }
@@ -103,7 +97,7 @@ public class EntityCow extends EntityAnimal
 
         for (var4 = 0; var4 < var3; ++var4)
         {
-            this.func_145779_a(Items.leather, 1);
+            this.dropItem(Items.leather, 1);
         }
 
         var3 = this.rand.nextInt(3) + 1 + this.rand.nextInt(1 + p_70628_2_);
@@ -112,11 +106,11 @@ public class EntityCow extends EntityAnimal
         {
             if (this.isBurning())
             {
-                this.func_145779_a(Items.cooked_beef, 1);
+                this.dropItem(Items.cooked_beef, 1);
             }
             else
             {
-                this.func_145779_a(Items.beef, 1);
+                this.dropItem(Items.beef, 1);
             }
         }
     }
@@ -150,5 +144,10 @@ public class EntityCow extends EntityAnimal
     public EntityCow createChild(EntityAgeable p_90011_1_)
     {
         return new EntityCow(this.worldObj);
+    }
+
+    public float getEyeHeight()
+    {
+        return this.height;
     }
 }

@@ -1,8 +1,10 @@
 package net.minecraft.world.biome;
 
 import java.util.Random;
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.entity.passive.EntityWolf;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
@@ -32,7 +34,7 @@ public class BiomeGenForest extends BiomeGenBase
             this.theBiomeDecorator.grassPerChunk = 1;
         }
 
-        this.func_76733_a(5159473);
+        this.setFillerBlockMetadata(5159473);
         this.setTemperatureRainfall(0.7F, 0.8F);
 
         if (this.field_150632_aF == 2)
@@ -73,152 +75,142 @@ public class BiomeGenForest extends BiomeGenBase
         }
     }
 
-    public WorldGenAbstractTree func_150567_a(Random p_150567_1_)
+    public WorldGenAbstractTree genBigTreeChance(Random p_150567_1_)
     {
         return (WorldGenAbstractTree)(this.field_150632_aF == 3 && p_150567_1_.nextInt(3) > 0 ? field_150631_aE : (this.field_150632_aF != 2 && p_150567_1_.nextInt(5) != 0 ? this.worldGeneratorTrees : field_150630_aD));
     }
 
-    public String func_150572_a(Random p_150572_1_, int p_150572_2_, int p_150572_3_, int p_150572_4_)
+    public BlockFlower.EnumFlowerType pickRandomFlower(Random p_180623_1_, BlockPos p_180623_2_)
     {
         if (this.field_150632_aF == 1)
         {
-            double var5 = MathHelper.clamp_double((1.0D + field_150606_ad.func_151601_a((double)p_150572_2_ / 48.0D, (double)p_150572_4_ / 48.0D)) / 2.0D, 0.0D, 0.9999D);
-            int var7 = (int)(var5 * (double)BlockFlower.field_149859_a.length);
-
-            if (var7 == 1)
-            {
-                var7 = 0;
-            }
-
-            return BlockFlower.field_149859_a[var7];
+            double var3 = MathHelper.clamp_double((1.0D + field_180281_af.func_151601_a((double)p_180623_2_.getX() / 48.0D, (double)p_180623_2_.getZ() / 48.0D)) / 2.0D, 0.0D, 0.9999D);
+            BlockFlower.EnumFlowerType var5 = BlockFlower.EnumFlowerType.values()[(int)(var3 * (double)BlockFlower.EnumFlowerType.values().length)];
+            return var5 == BlockFlower.EnumFlowerType.BLUE_ORCHID ? BlockFlower.EnumFlowerType.POPPY : var5;
         }
         else
         {
-            return super.func_150572_a(p_150572_1_, p_150572_2_, p_150572_3_, p_150572_4_);
+            return super.pickRandomFlower(p_180623_1_, p_180623_2_);
         }
     }
 
-    public void decorate(World p_76728_1_, Random p_76728_2_, int p_76728_3_, int p_76728_4_)
+    public void func_180624_a(World worldIn, Random p_180624_2_, BlockPos p_180624_3_)
     {
+        int var4;
         int var5;
         int var6;
         int var7;
-        int var8;
-        int var9;
 
         if (this.field_150632_aF == 3)
         {
-            for (var5 = 0; var5 < 4; ++var5)
+            for (var4 = 0; var4 < 4; ++var4)
             {
-                for (var6 = 0; var6 < 4; ++var6)
+                for (var5 = 0; var5 < 4; ++var5)
                 {
-                    var7 = p_76728_3_ + var5 * 4 + 1 + 8 + p_76728_2_.nextInt(3);
-                    var8 = p_76728_4_ + var6 * 4 + 1 + 8 + p_76728_2_.nextInt(3);
-                    var9 = p_76728_1_.getHeightValue(var7, var8);
+                    var6 = var4 * 4 + 1 + 8 + p_180624_2_.nextInt(3);
+                    var7 = var5 * 4 + 1 + 8 + p_180624_2_.nextInt(3);
+                    BlockPos var8 = worldIn.getHorizon(p_180624_3_.add(var6, 0, var7));
 
-                    if (p_76728_2_.nextInt(20) == 0)
+                    if (p_180624_2_.nextInt(20) == 0)
                     {
-                        WorldGenBigMushroom var10 = new WorldGenBigMushroom();
-                        var10.generate(p_76728_1_, p_76728_2_, var7, var9, var8);
+                        WorldGenBigMushroom var9 = new WorldGenBigMushroom();
+                        var9.generate(worldIn, p_180624_2_, var8);
                     }
                     else
                     {
-                        WorldGenAbstractTree var12 = this.func_150567_a(p_76728_2_);
-                        var12.setScale(1.0D, 1.0D, 1.0D);
+                        WorldGenAbstractTree var12 = this.genBigTreeChance(p_180624_2_);
+                        var12.func_175904_e();
 
-                        if (var12.generate(p_76728_1_, p_76728_2_, var7, var9, var8))
+                        if (var12.generate(worldIn, p_180624_2_, var8))
                         {
-                            var12.func_150524_b(p_76728_1_, p_76728_2_, var7, var9, var8);
+                            var12.func_180711_a(worldIn, p_180624_2_, var8);
                         }
                     }
                 }
             }
         }
 
-        var5 = p_76728_2_.nextInt(5) - 3;
+        var4 = p_180624_2_.nextInt(5) - 3;
 
         if (this.field_150632_aF == 1)
         {
-            var5 += 2;
+            var4 += 2;
         }
 
-        var6 = 0;
+        var5 = 0;
 
-        while (var6 < var5)
+        while (var5 < var4)
         {
-            var7 = p_76728_2_.nextInt(3);
+            var6 = p_180624_2_.nextInt(3);
 
-            if (var7 == 0)
+            if (var6 == 0)
             {
-                field_150610_ae.func_150548_a(1);
+                field_180280_ag.func_180710_a(BlockDoublePlant.EnumPlantType.SYRINGA);
             }
-            else if (var7 == 1)
+            else if (var6 == 1)
             {
-                field_150610_ae.func_150548_a(4);
+                field_180280_ag.func_180710_a(BlockDoublePlant.EnumPlantType.ROSE);
             }
-            else if (var7 == 2)
+            else if (var6 == 2)
             {
-                field_150610_ae.func_150548_a(5);
+                field_180280_ag.func_180710_a(BlockDoublePlant.EnumPlantType.PAEONIA);
             }
 
-            var8 = 0;
+            var7 = 0;
 
             while (true)
             {
-                if (var8 < 5)
+                if (var7 < 5)
                 {
-                    var9 = p_76728_3_ + p_76728_2_.nextInt(16) + 8;
-                    int var13 = p_76728_4_ + p_76728_2_.nextInt(16) + 8;
-                    int var11 = p_76728_2_.nextInt(p_76728_1_.getHeightValue(var9, var13) + 32);
+                    int var11 = p_180624_2_.nextInt(16) + 8;
+                    int var13 = p_180624_2_.nextInt(16) + 8;
+                    int var10 = p_180624_2_.nextInt(worldIn.getHorizon(p_180624_3_.add(var11, 0, var13)).getY() + 32);
 
-                    if (!field_150610_ae.generate(p_76728_1_, p_76728_2_, var9, var11, var13))
+                    if (!field_180280_ag.generate(worldIn, p_180624_2_, new BlockPos(p_180624_3_.getX() + var11, var10, p_180624_3_.getZ() + var13)))
                     {
-                        ++var8;
+                        ++var7;
                         continue;
                     }
                 }
 
-                ++var6;
+                ++var5;
                 break;
             }
         }
 
-        super.decorate(p_76728_1_, p_76728_2_, p_76728_3_, p_76728_4_);
+        super.func_180624_a(worldIn, p_180624_2_, p_180624_3_);
     }
 
-    /**
-     * Provides the basic grass color based on the biome temperature and rainfall
-     */
-    public int getBiomeGrassColor(int p_150558_1_, int p_150558_2_, int p_150558_3_)
+    public int func_180627_b(BlockPos p_180627_1_)
     {
-        int var4 = super.getBiomeGrassColor(p_150558_1_, p_150558_2_, p_150558_3_);
-        return this.field_150632_aF == 3 ? (var4 & 16711422) + 2634762 >> 1 : var4;
+        int var2 = super.func_180627_b(p_180627_1_);
+        return this.field_150632_aF == 3 ? (var2 & 16711422) + 2634762 >> 1 : var2;
     }
 
-    protected BiomeGenBase func_150566_k()
+    protected BiomeGenBase createMutatedBiome(final int p_180277_1_)
     {
         if (this.biomeID == BiomeGenBase.forest.biomeID)
         {
-            BiomeGenForest var1 = new BiomeGenForest(this.biomeID + 128, 1);
-            var1.func_150570_a(new BiomeGenBase.Height(this.minHeight, this.maxHeight + 0.2F));
-            var1.setBiomeName("Flower Forest");
-            var1.func_150557_a(6976549, true);
-            var1.func_76733_a(8233509);
-            return var1;
+            BiomeGenForest var2 = new BiomeGenForest(p_180277_1_, 1);
+            var2.setHeight(new BiomeGenBase.Height(this.minHeight, this.maxHeight + 0.2F));
+            var2.setBiomeName("Flower Forest");
+            var2.func_150557_a(6976549, true);
+            var2.setFillerBlockMetadata(8233509);
+            return var2;
         }
         else
         {
-            return this.biomeID != BiomeGenBase.field_150583_P.biomeID && this.biomeID != BiomeGenBase.field_150582_Q.biomeID ? new BiomeGenMutated(this.biomeID + 128, this)
+            return this.biomeID != BiomeGenBase.birchForest.biomeID && this.biomeID != BiomeGenBase.birchForestHills.biomeID ? new BiomeGenMutated(p_180277_1_, this)
             {
                 private static final String __OBFID = "CL_00000172";
-                public void decorate(World p_76728_1_, Random p_76728_2_, int p_76728_3_, int p_76728_4_)
+                public void func_180624_a(World worldIn, Random p_180624_2_, BlockPos p_180624_3_)
                 {
-                    this.field_150611_aD.decorate(p_76728_1_, p_76728_2_, p_76728_3_, p_76728_4_);
+                    this.baseBiome.func_180624_a(worldIn, p_180624_2_, p_180624_3_);
                 }
-            }: new BiomeGenMutated(this.biomeID + 128, this)
+            }: new BiomeGenMutated(p_180277_1_, this)
             {
                 private static final String __OBFID = "CL_00001861";
-                public WorldGenAbstractTree func_150567_a(Random p_150567_1_)
+                public WorldGenAbstractTree genBigTreeChance(Random p_150567_1_)
                 {
                     return p_150567_1_.nextBoolean() ? BiomeGenForest.field_150629_aC : BiomeGenForest.field_150630_aD;
                 }

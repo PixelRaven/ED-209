@@ -1,9 +1,16 @@
 package net.minecraft.command.server;
 
+import java.util.List;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public class CommandTestFor extends CommandBase
 {
@@ -22,32 +29,59 @@ public class CommandTestFor extends CommandBase
         return 2;
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.testfor.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length != 1)
+        if (args.length < 1)
         {
             throw new WrongUsageException("commands.testfor.usage", new Object[0]);
         }
-        else if (!(p_71515_1_ instanceof CommandBlockLogic))
-        {
-            throw new CommandException("commands.testfor.failed", new Object[0]);
-        }
         else
         {
-            getPlayer(p_71515_1_, p_71515_2_[0]);
+            Entity var3 = func_175768_b(sender, args[0]);
+            NBTTagCompound var4 = null;
+
+            if (args.length >= 2)
+            {
+                try
+                {
+                    var4 = JsonToNBT.func_180713_a(func_180529_a(args, 1));
+                }
+                catch (NBTException var6)
+                {
+                    throw new CommandException("commands.testfor.tagError", new Object[] {var6.getMessage()});
+                }
+            }
+
+            if (var4 != null)
+            {
+                NBTTagCompound var5 = new NBTTagCompound();
+                var3.writeToNBT(var5);
+
+                if (!CommandTestForBlock.func_175775_a(var4, var5, true))
+                {
+                    throw new CommandException("commands.testfor.failure", new Object[] {var3.getName()});
+                }
+            }
+
+            notifyOperators(sender, this, "commands.testfor.success", new Object[] {var3.getName()});
         }
     }
 
     /**
      * Return whether the specified command parameter index is a username parameter.
      */
-    public boolean isUsernameIndex(String[] p_82358_1_, int p_82358_2_)
+    public boolean isUsernameIndex(String[] args, int index)
     {
-        return p_82358_2_ == 0;
+        return index == 0;
+    }
+
+    public List addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos)
+    {
+        return args.length == 1 ? getListOfStringsMatchingLastWord(args, MinecraftServer.getServer().getAllUsernames()) : null;
     }
 }

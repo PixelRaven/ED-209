@@ -1,15 +1,21 @@
 package net.minecraft.client.renderer.entity;
 
 import java.util.Random;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.util.ResourceLocation;
-import org.lwjgl.opengl.GL11;
 
 public class RenderLightningBolt extends Render
 {
     private static final String __OBFID = "CL_00001011";
+
+    public RenderLightningBolt(RenderManager p_i46157_1_)
+    {
+        super(p_i46157_1_);
+    }
 
     /**
      * Actually renders the given argument. This is a synthetic bridge method, always casting down its argument and then
@@ -19,110 +25,111 @@ public class RenderLightningBolt extends Render
      */
     public void doRender(EntityLightningBolt p_76986_1_, double p_76986_2_, double p_76986_4_, double p_76986_6_, float p_76986_8_, float p_76986_9_)
     {
-        Tessellator var10 = Tessellator.instance;
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
-        double[] var11 = new double[8];
+        Tessellator var10 = Tessellator.getInstance();
+        WorldRenderer var11 = var10.getWorldRenderer();
+        GlStateManager.func_179090_x();
+        GlStateManager.disableLighting();
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(770, 1);
         double[] var12 = new double[8];
-        double var13 = 0.0D;
-        double var15 = 0.0D;
-        Random var17 = new Random(p_76986_1_.boltVertex);
+        double[] var13 = new double[8];
+        double var14 = 0.0D;
+        double var16 = 0.0D;
+        Random var18 = new Random(p_76986_1_.boltVertex);
 
-        for (int var18 = 7; var18 >= 0; --var18)
+        for (int var19 = 7; var19 >= 0; --var19)
         {
-            var11[var18] = var13;
-            var12[var18] = var15;
-            var13 += (double)(var17.nextInt(11) - 5);
-            var15 += (double)(var17.nextInt(11) - 5);
+            var12[var19] = var14;
+            var13[var19] = var16;
+            var14 += (double)(var18.nextInt(11) - 5);
+            var16 += (double)(var18.nextInt(11) - 5);
         }
 
-        for (int var45 = 0; var45 < 4; ++var45)
+        for (int var46 = 0; var46 < 4; ++var46)
         {
-            Random var46 = new Random(p_76986_1_.boltVertex);
+            Random var47 = new Random(p_76986_1_.boltVertex);
 
-            for (int var19 = 0; var19 < 3; ++var19)
+            for (int var20 = 0; var20 < 3; ++var20)
             {
-                int var20 = 7;
-                int var21 = 0;
+                int var21 = 7;
+                int var22 = 0;
 
-                if (var19 > 0)
+                if (var20 > 0)
                 {
-                    var20 = 7 - var19;
+                    var21 = 7 - var20;
                 }
 
-                if (var19 > 0)
+                if (var20 > 0)
                 {
-                    var21 = var20 - 2;
+                    var22 = var21 - 2;
                 }
 
-                double var22 = var11[var20] - var13;
-                double var24 = var12[var20] - var15;
+                double var23 = var12[var21] - var14;
+                double var25 = var13[var21] - var16;
 
-                for (int var26 = var20; var26 >= var21; --var26)
+                for (int var27 = var21; var27 >= var22; --var27)
                 {
-                    double var27 = var22;
-                    double var29 = var24;
+                    double var28 = var23;
+                    double var30 = var25;
 
-                    if (var19 == 0)
+                    if (var20 == 0)
                     {
-                        var22 += (double)(var46.nextInt(11) - 5);
-                        var24 += (double)(var46.nextInt(11) - 5);
+                        var23 += (double)(var47.nextInt(11) - 5);
+                        var25 += (double)(var47.nextInt(11) - 5);
                     }
                     else
                     {
-                        var22 += (double)(var46.nextInt(31) - 15);
-                        var24 += (double)(var46.nextInt(31) - 15);
+                        var23 += (double)(var47.nextInt(31) - 15);
+                        var25 += (double)(var47.nextInt(31) - 15);
                     }
 
-                    var10.startDrawing(5);
-                    float var31 = 0.5F;
-                    var10.setColorRGBA_F(0.9F * var31, 0.9F * var31, 1.0F * var31, 0.3F);
-                    double var32 = 0.1D + (double)var45 * 0.2D;
+                    var11.startDrawing(5);
+                    float var32 = 0.5F;
+                    var11.func_178960_a(0.9F * var32, 0.9F * var32, 1.0F * var32, 0.3F);
+                    double var33 = 0.1D + (double)var46 * 0.2D;
 
-                    if (var19 == 0)
+                    if (var20 == 0)
                     {
-                        var32 *= (double)var26 * 0.1D + 1.0D;
+                        var33 *= (double)var27 * 0.1D + 1.0D;
                     }
 
-                    double var34 = 0.1D + (double)var45 * 0.2D;
+                    double var35 = 0.1D + (double)var46 * 0.2D;
 
-                    if (var19 == 0)
+                    if (var20 == 0)
                     {
-                        var34 *= (double)(var26 - 1) * 0.1D + 1.0D;
+                        var35 *= (double)(var27 - 1) * 0.1D + 1.0D;
                     }
 
-                    for (int var36 = 0; var36 < 5; ++var36)
+                    for (int var37 = 0; var37 < 5; ++var37)
                     {
-                        double var37 = p_76986_2_ + 0.5D - var32;
-                        double var39 = p_76986_6_ + 0.5D - var32;
+                        double var38 = p_76986_2_ + 0.5D - var33;
+                        double var40 = p_76986_6_ + 0.5D - var33;
 
-                        if (var36 == 1 || var36 == 2)
+                        if (var37 == 1 || var37 == 2)
                         {
-                            var37 += var32 * 2.0D;
+                            var38 += var33 * 2.0D;
                         }
 
-                        if (var36 == 2 || var36 == 3)
+                        if (var37 == 2 || var37 == 3)
                         {
-                            var39 += var32 * 2.0D;
+                            var40 += var33 * 2.0D;
                         }
 
-                        double var41 = p_76986_2_ + 0.5D - var34;
-                        double var43 = p_76986_6_ + 0.5D - var34;
+                        double var42 = p_76986_2_ + 0.5D - var35;
+                        double var44 = p_76986_6_ + 0.5D - var35;
 
-                        if (var36 == 1 || var36 == 2)
+                        if (var37 == 1 || var37 == 2)
                         {
-                            var41 += var34 * 2.0D;
+                            var42 += var35 * 2.0D;
                         }
 
-                        if (var36 == 2 || var36 == 3)
+                        if (var37 == 2 || var37 == 3)
                         {
-                            var43 += var34 * 2.0D;
+                            var44 += var35 * 2.0D;
                         }
 
-                        var10.addVertex(var41 + var22, p_76986_4_ + (double)(var26 * 16), var43 + var24);
-                        var10.addVertex(var37 + var27, p_76986_4_ + (double)((var26 + 1) * 16), var39 + var29);
+                        var11.addVertex(var42 + var23, p_76986_4_ + (double)(var27 * 16), var44 + var25);
+                        var11.addVertex(var38 + var28, p_76986_4_ + (double)((var27 + 1) * 16), var40 + var30);
                     }
 
                     var10.draw();
@@ -130,9 +137,9 @@ public class RenderLightningBolt extends Render
             }
         }
 
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_LIGHTING);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GlStateManager.disableBlend();
+        GlStateManager.enableLighting();
+        GlStateManager.func_179098_w();
     }
 
     /**

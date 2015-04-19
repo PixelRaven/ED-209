@@ -1,24 +1,25 @@
 package net.minecraft.client.gui;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ContainerMerchant;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 public class GuiMerchant extends GuiContainer
 {
@@ -28,14 +29,14 @@ public class GuiMerchant extends GuiContainer
     private GuiMerchant.MerchantButton field_147043_x;
     private GuiMerchant.MerchantButton field_147042_y;
     private int field_147041_z;
-    private String field_147040_A;
+    private IChatComponent field_147040_A;
     private static final String __OBFID = "CL_00000762";
 
-    public GuiMerchant(InventoryPlayer p_i46380_1_, IMerchant p_i46380_2_, World p_i46380_3_, String p_i46380_4_)
+    public GuiMerchant(InventoryPlayer p_i45500_1_, IMerchant p_i45500_2_, World worldIn)
     {
-        super(new ContainerMerchant(p_i46380_1_, p_i46380_2_, p_i46380_3_));
-        this.field_147037_w = p_i46380_2_;
-        this.field_147040_A = p_i46380_4_ != null && p_i46380_4_.length() >= 1 ? p_i46380_4_ : I18n.format("entity.Villager.name", new Object[0]);
+        super(new ContainerMerchant(p_i45500_1_, p_i45500_2_, worldIn));
+        this.field_147037_w = p_i45500_2_;
+        this.field_147040_A = p_i45500_2_.getDisplayName();
     }
 
     /**
@@ -44,18 +45,22 @@ public class GuiMerchant extends GuiContainer
     public void initGui()
     {
         super.initGui();
-        int var1 = (this.width - this.field_146999_f) / 2;
-        int var2 = (this.height - this.field_147000_g) / 2;
+        int var1 = (this.width - this.xSize) / 2;
+        int var2 = (this.height - this.ySize) / 2;
         this.buttonList.add(this.field_147043_x = new GuiMerchant.MerchantButton(1, var1 + 120 + 27, var2 + 24 - 1, true));
         this.buttonList.add(this.field_147042_y = new GuiMerchant.MerchantButton(2, var1 + 36 - 19, var2 + 24 - 1, false));
         this.field_147043_x.enabled = false;
         this.field_147042_y.enabled = false;
     }
 
-    protected void func_146979_b(int p_146979_1_, int p_146979_2_)
+    /**
+     * Draw the foreground layer for the GuiContainer (everything in front of the items). Args : mouseX, mouseY
+     */
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        this.fontRendererObj.drawString(this.field_147040_A, this.field_146999_f / 2 - this.fontRendererObj.getStringWidth(this.field_147040_A) / 2, 6, 4210752);
-        this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.field_147000_g - 96 + 2, 4210752);
+        String var3 = this.field_147040_A.getUnformattedText();
+        this.fontRendererObj.drawString(var3, this.xSize / 2 - this.fontRendererObj.getStringWidth(var3) / 2, 6, 4210752);
+        this.fontRendererObj.drawString(I18n.format("container.inventory", new Object[0]), 8, this.ySize - 96 + 2, 4210752);
     }
 
     /**
@@ -73,126 +78,140 @@ public class GuiMerchant extends GuiContainer
         }
     }
 
-    protected void actionPerformed(GuiButton p_146284_1_)
+    protected void actionPerformed(GuiButton button) throws IOException
     {
         boolean var2 = false;
 
-        if (p_146284_1_ == this.field_147043_x)
+        if (button == this.field_147043_x)
         {
             ++this.field_147041_z;
+            MerchantRecipeList var3 = this.field_147037_w.getRecipes(this.mc.thePlayer);
+
+            if (var3 != null && this.field_147041_z >= var3.size())
+            {
+                this.field_147041_z = var3.size() - 1;
+            }
+
             var2 = true;
         }
-        else if (p_146284_1_ == this.field_147042_y)
+        else if (button == this.field_147042_y)
         {
             --this.field_147041_z;
+
+            if (this.field_147041_z < 0)
+            {
+                this.field_147041_z = 0;
+            }
+
             var2 = true;
         }
 
         if (var2)
         {
-            ((ContainerMerchant)this.field_147002_h).setCurrentRecipeIndex(this.field_147041_z);
-            ByteBuf var3 = Unpooled.buffer();
-
-            try
-            {
-                var3.writeInt(this.field_147041_z);
-                this.mc.getNetHandler().addToSendQueue(new C17PacketCustomPayload("MC|TrSel", var3));
-            }
-            catch (Exception var8)
-            {
-                logger.error("Couldn\'t send trade info", var8);
-            }
-            finally
-            {
-                var3.release();
-            }
+            ((ContainerMerchant)this.inventorySlots).setCurrentRecipeIndex(this.field_147041_z);
+            PacketBuffer var4 = new PacketBuffer(Unpooled.buffer());
+            var4.writeInt(this.field_147041_z);
+            this.mc.getNetHandler().addToSendQueue(new C17PacketCustomPayload("MC|TrSel", var4));
         }
     }
 
-    protected void func_146976_a(float p_146976_1_, int p_146976_2_, int p_146976_3_)
+    /**
+     * Args : renderPartialTicks, mouseX, mouseY
+     */
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
     {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.getTextureManager().bindTexture(field_147038_v);
-        int var4 = (this.width - this.field_146999_f) / 2;
-        int var5 = (this.height - this.field_147000_g) / 2;
-        this.drawTexturedModalRect(var4, var5, 0, 0, this.field_146999_f, this.field_147000_g);
+        int var4 = (this.width - this.xSize) / 2;
+        int var5 = (this.height - this.ySize) / 2;
+        this.drawTexturedModalRect(var4, var5, 0, 0, this.xSize, this.ySize);
         MerchantRecipeList var6 = this.field_147037_w.getRecipes(this.mc.thePlayer);
 
         if (var6 != null && !var6.isEmpty())
         {
             int var7 = this.field_147041_z;
+
+            if (var7 < 0 || var7 >= var6.size())
+            {
+                return;
+            }
+
             MerchantRecipe var8 = (MerchantRecipe)var6.get(var7);
 
             if (var8.isRecipeDisabled())
             {
                 this.mc.getTextureManager().bindTexture(field_147038_v);
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                GL11.glDisable(GL11.GL_LIGHTING);
-                this.drawTexturedModalRect(this.field_147003_i + 83, this.field_147009_r + 21, 212, 0, 28, 21);
-                this.drawTexturedModalRect(this.field_147003_i + 83, this.field_147009_r + 51, 212, 0, 28, 21);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GlStateManager.disableLighting();
+                this.drawTexturedModalRect(this.guiLeft + 83, this.guiTop + 21, 212, 0, 28, 21);
+                this.drawTexturedModalRect(this.guiLeft + 83, this.guiTop + 51, 212, 0, 28, 21);
             }
         }
     }
 
     /**
-     * Draws the screen and all the components in it.
+     * Draws the screen and all the components in it. Args : mouseX, mouseY, renderPartialTicks
      */
-    public void drawScreen(int p_73863_1_, int p_73863_2_, float p_73863_3_)
+    public void drawScreen(int mouseX, int mouseY, float partialTicks)
     {
-        super.drawScreen(p_73863_1_, p_73863_2_, p_73863_3_);
+        super.drawScreen(mouseX, mouseY, partialTicks);
         MerchantRecipeList var4 = this.field_147037_w.getRecipes(this.mc.thePlayer);
 
         if (var4 != null && !var4.isEmpty())
         {
-            int var5 = (this.width - this.field_146999_f) / 2;
-            int var6 = (this.height - this.field_147000_g) / 2;
+            int var5 = (this.width - this.xSize) / 2;
+            int var6 = (this.height - this.ySize) / 2;
             int var7 = this.field_147041_z;
             MerchantRecipe var8 = (MerchantRecipe)var4.get(var7);
-            GL11.glPushMatrix();
             ItemStack var9 = var8.getItemToBuy();
             ItemStack var10 = var8.getSecondItemToBuy();
             ItemStack var11 = var8.getItemToSell();
+            GlStateManager.pushMatrix();
             RenderHelper.enableGUIStandardItemLighting();
-            GL11.glDisable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-            GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-            GL11.glEnable(GL11.GL_LIGHTING);
-            itemRender.zLevel = 100.0F;
-            itemRender.renderItemAndEffectIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), var9, var5 + 36, var6 + 24);
-            itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), var9, var5 + 36, var6 + 24);
+            GlStateManager.disableLighting();
+            GlStateManager.enableRescaleNormal();
+            GlStateManager.enableColorMaterial();
+            GlStateManager.enableLighting();
+            this.itemRender.zLevel = 100.0F;
+            this.itemRender.func_180450_b(var9, var5 + 36, var6 + 24);
+            this.itemRender.func_175030_a(this.fontRendererObj, var9, var5 + 36, var6 + 24);
 
             if (var10 != null)
             {
-                itemRender.renderItemAndEffectIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), var10, var5 + 62, var6 + 24);
-                itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), var10, var5 + 62, var6 + 24);
+                this.itemRender.func_180450_b(var10, var5 + 62, var6 + 24);
+                this.itemRender.func_175030_a(this.fontRendererObj, var10, var5 + 62, var6 + 24);
             }
 
-            itemRender.renderItemAndEffectIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), var11, var5 + 120, var6 + 24);
-            itemRender.renderItemOverlayIntoGUI(this.fontRendererObj, this.mc.getTextureManager(), var11, var5 + 120, var6 + 24);
-            itemRender.zLevel = 0.0F;
-            GL11.glDisable(GL11.GL_LIGHTING);
+            this.itemRender.func_180450_b(var11, var5 + 120, var6 + 24);
+            this.itemRender.func_175030_a(this.fontRendererObj, var11, var5 + 120, var6 + 24);
+            this.itemRender.zLevel = 0.0F;
+            GlStateManager.disableLighting();
 
-            if (this.func_146978_c(36, 24, 16, 16, p_73863_1_, p_73863_2_))
+            if (this.isPointInRegion(36, 24, 16, 16, mouseX, mouseY) && var9 != null)
             {
-                this.func_146285_a(var9, p_73863_1_, p_73863_2_);
+                this.renderToolTip(var9, mouseX, mouseY);
             }
-            else if (var10 != null && this.func_146978_c(62, 24, 16, 16, p_73863_1_, p_73863_2_))
+            else if (var10 != null && this.isPointInRegion(62, 24, 16, 16, mouseX, mouseY) && var10 != null)
             {
-                this.func_146285_a(var10, p_73863_1_, p_73863_2_);
+                this.renderToolTip(var10, mouseX, mouseY);
             }
-            else if (this.func_146978_c(120, 24, 16, 16, p_73863_1_, p_73863_2_))
+            else if (var11 != null && this.isPointInRegion(120, 24, 16, 16, mouseX, mouseY) && var11 != null)
             {
-                this.func_146285_a(var11, p_73863_1_, p_73863_2_);
+                this.renderToolTip(var11, mouseX, mouseY);
+            }
+            else if (var8.isRecipeDisabled() && (this.isPointInRegion(83, 21, 28, 21, mouseX, mouseY) || this.isPointInRegion(83, 51, 28, 21, mouseX, mouseY)))
+            {
+                this.drawCreativeTabHoveringText(I18n.format("merchant.deprecated", new Object[0]), mouseX, mouseY);
             }
 
-            GL11.glPopMatrix();
-            GL11.glEnable(GL11.GL_LIGHTING);
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GlStateManager.popMatrix();
+            GlStateManager.enableLighting();
+            GlStateManager.enableDepth();
             RenderHelper.enableStandardItemLighting();
         }
     }
 
-    public IMerchant func_147035_g()
+    public IMerchant getMerchant()
     {
         return this.field_147037_w;
     }
@@ -208,31 +227,31 @@ public class GuiMerchant extends GuiContainer
             this.field_146157_o = p_i1095_4_;
         }
 
-        public void drawButton(Minecraft p_146112_1_, int p_146112_2_, int p_146112_3_)
+        public void drawButton(Minecraft mc, int mouseX, int mouseY)
         {
-            if (this.field_146125_m)
+            if (this.visible)
             {
-                p_146112_1_.getTextureManager().bindTexture(GuiMerchant.field_147038_v);
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-                boolean var4 = p_146112_2_ >= this.field_146128_h && p_146112_3_ >= this.field_146129_i && p_146112_2_ < this.field_146128_h + this.field_146120_f && p_146112_3_ < this.field_146129_i + this.field_146121_g;
+                mc.getTextureManager().bindTexture(GuiMerchant.field_147038_v);
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                boolean var4 = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
                 int var5 = 0;
                 int var6 = 176;
 
                 if (!this.enabled)
                 {
-                    var6 += this.field_146120_f * 2;
+                    var6 += this.width * 2;
                 }
                 else if (var4)
                 {
-                    var6 += this.field_146120_f;
+                    var6 += this.width;
                 }
 
                 if (!this.field_146157_o)
                 {
-                    var5 += this.field_146121_g;
+                    var5 += this.height;
                 }
 
-                this.drawTexturedModalRect(this.field_146128_h, this.field_146129_i, var6, var5, this.field_146120_f, this.field_146121_g);
+                this.drawTexturedModalRect(this.xPosition, this.yPosition, var6, var5, this.width, this.height);
             }
         }
     }

@@ -8,7 +8,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.util.MathHelper;
 
-public class S18PacketEntityTeleport extends Packet
+public class S18PacketEntityTeleport implements Packet
 {
     private int field_149458_a;
     private int field_149456_b;
@@ -16,6 +16,7 @@ public class S18PacketEntityTeleport extends Packet
     private int field_149454_d;
     private byte field_149455_e;
     private byte field_149453_f;
+    private boolean field_179698_g;
     private static final String __OBFID = "CL_00001340";
 
     public S18PacketEntityTeleport() {}
@@ -28,47 +29,54 @@ public class S18PacketEntityTeleport extends Packet
         this.field_149454_d = MathHelper.floor_double(p_i45233_1_.posZ * 32.0D);
         this.field_149455_e = (byte)((int)(p_i45233_1_.rotationYaw * 256.0F / 360.0F));
         this.field_149453_f = (byte)((int)(p_i45233_1_.rotationPitch * 256.0F / 360.0F));
+        this.field_179698_g = p_i45233_1_.onGround;
     }
 
-    public S18PacketEntityTeleport(int p_i45234_1_, int p_i45234_2_, int p_i45234_3_, int p_i45234_4_, byte p_i45234_5_, byte p_i45234_6_)
+    public S18PacketEntityTeleport(int p_i45949_1_, int p_i45949_2_, int p_i45949_3_, int p_i45949_4_, byte p_i45949_5_, byte p_i45949_6_, boolean p_i45949_7_)
     {
-        this.field_149458_a = p_i45234_1_;
-        this.field_149456_b = p_i45234_2_;
-        this.field_149457_c = p_i45234_3_;
-        this.field_149454_d = p_i45234_4_;
-        this.field_149455_e = p_i45234_5_;
-        this.field_149453_f = p_i45234_6_;
+        this.field_149458_a = p_i45949_1_;
+        this.field_149456_b = p_i45949_2_;
+        this.field_149457_c = p_i45949_3_;
+        this.field_149454_d = p_i45949_4_;
+        this.field_149455_e = p_i45949_5_;
+        this.field_149453_f = p_i45949_6_;
+        this.field_179698_g = p_i45949_7_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149458_a = p_148837_1_.readInt();
-        this.field_149456_b = p_148837_1_.readInt();
-        this.field_149457_c = p_148837_1_.readInt();
-        this.field_149454_d = p_148837_1_.readInt();
-        this.field_149455_e = p_148837_1_.readByte();
-        this.field_149453_f = p_148837_1_.readByte();
+        this.field_149458_a = data.readVarIntFromBuffer();
+        this.field_149456_b = data.readInt();
+        this.field_149457_c = data.readInt();
+        this.field_149454_d = data.readInt();
+        this.field_149455_e = data.readByte();
+        this.field_149453_f = data.readByte();
+        this.field_179698_g = data.readBoolean();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149458_a);
-        p_148840_1_.writeInt(this.field_149456_b);
-        p_148840_1_.writeInt(this.field_149457_c);
-        p_148840_1_.writeInt(this.field_149454_d);
-        p_148840_1_.writeByte(this.field_149455_e);
-        p_148840_1_.writeByte(this.field_149453_f);
+        data.writeVarIntToBuffer(this.field_149458_a);
+        data.writeInt(this.field_149456_b);
+        data.writeInt(this.field_149457_c);
+        data.writeInt(this.field_149454_d);
+        data.writeByte(this.field_149455_e);
+        data.writeByte(this.field_149453_f);
+        data.writeBoolean(this.field_179698_g);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleEntityTeleport(this);
+        handler.handleEntityTeleport(this);
     }
 
     public int func_149451_c()
@@ -101,8 +109,16 @@ public class S18PacketEntityTeleport extends Packet
         return this.field_149453_f;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    public boolean func_179697_g()
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        return this.field_179698_g;
+    }
+
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
+    {
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

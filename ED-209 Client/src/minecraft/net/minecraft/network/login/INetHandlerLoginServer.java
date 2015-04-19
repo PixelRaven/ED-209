@@ -6,7 +6,7 @@ import net.minecraft.network.login.client.C01PacketEncryptionResponse;
 
 public interface INetHandlerLoginServer extends INetHandler
 {
-    void processLoginStart(C00PacketLoginStart p_147316_1_);
+    void processLoginStart(C00PacketLoginStart packetIn);
 
-    void processEncryptionResponse(C01PacketEncryptionResponse p_147315_1_);
+    void processEncryptionResponse(C01PacketEncryptionResponse packetIn);
 }

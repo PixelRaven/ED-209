@@ -22,6 +22,7 @@ public class MerchantRecipe
 
     /** Maximum times this trade can be used. */
     private int maxTradeUses;
+    private boolean field_180323_f;
     private static final String __OBFID = "CL_00000126";
 
     public MerchantRecipe(NBTTagCompound p_i1940_1_)
@@ -31,10 +32,17 @@ public class MerchantRecipe
 
     public MerchantRecipe(ItemStack p_i1941_1_, ItemStack p_i1941_2_, ItemStack p_i1941_3_)
     {
-        this.itemToBuy = p_i1941_1_;
-        this.secondItemToBuy = p_i1941_2_;
-        this.itemToSell = p_i1941_3_;
-        this.maxTradeUses = 7;
+        this(p_i1941_1_, p_i1941_2_, p_i1941_3_, 0, 7);
+    }
+
+    public MerchantRecipe(ItemStack p_i45760_1_, ItemStack p_i45760_2_, ItemStack p_i45760_3_, int p_i45760_4_, int p_i45760_5_)
+    {
+        this.itemToBuy = p_i45760_1_;
+        this.secondItemToBuy = p_i45760_2_;
+        this.itemToSell = p_i45760_3_;
+        this.toolUses = p_i45760_4_;
+        this.maxTradeUses = p_i45760_5_;
+        this.field_180323_f = true;
     }
 
     public MerchantRecipe(ItemStack p_i1942_1_, ItemStack p_i1942_2_)
@@ -79,20 +87,14 @@ public class MerchantRecipe
         return this.itemToSell;
     }
 
-    /**
-     * checks if both the first and second ItemToBuy IDs are the same
-     */
-    public boolean hasSameIDsAs(MerchantRecipe p_77393_1_)
+    public int func_180321_e()
     {
-        return this.itemToBuy.getItem() == p_77393_1_.itemToBuy.getItem() && this.itemToSell.getItem() == p_77393_1_.itemToSell.getItem() ? this.secondItemToBuy == null && p_77393_1_.secondItemToBuy == null || this.secondItemToBuy != null && p_77393_1_.secondItemToBuy != null && this.secondItemToBuy.getItem() == p_77393_1_.secondItemToBuy.getItem() : false;
+        return this.toolUses;
     }
 
-    /**
-     * checks first and second ItemToBuy ID's and count. Calls hasSameIDs
-     */
-    public boolean hasSameItemsAs(MerchantRecipe p_77391_1_)
+    public int func_180320_f()
     {
-        return this.hasSameIDsAs(p_77391_1_) && (this.itemToBuy.stackSize < p_77391_1_.itemToBuy.stackSize || this.secondItemToBuy != null && this.secondItemToBuy.stackSize < p_77391_1_.secondItemToBuy.stackSize);
+        return this.maxTradeUses;
     }
 
     public void incrementToolUses()
@@ -115,6 +117,11 @@ public class MerchantRecipe
         this.toolUses = this.maxTradeUses;
     }
 
+    public boolean func_180322_j()
+    {
+        return this.field_180323_f;
+    }
+
     public void readFromTags(NBTTagCompound p_77390_1_)
     {
         NBTTagCompound var2 = p_77390_1_.getCompoundTag("buy");
@@ -122,23 +129,32 @@ public class MerchantRecipe
         NBTTagCompound var3 = p_77390_1_.getCompoundTag("sell");
         this.itemToSell = ItemStack.loadItemStackFromNBT(var3);
 
-        if (p_77390_1_.func_150297_b("buyB", 10))
+        if (p_77390_1_.hasKey("buyB", 10))
         {
             this.secondItemToBuy = ItemStack.loadItemStackFromNBT(p_77390_1_.getCompoundTag("buyB"));
         }
 
-        if (p_77390_1_.func_150297_b("uses", 99))
+        if (p_77390_1_.hasKey("uses", 99))
         {
             this.toolUses = p_77390_1_.getInteger("uses");
         }
 
-        if (p_77390_1_.func_150297_b("maxUses", 99))
+        if (p_77390_1_.hasKey("maxUses", 99))
         {
             this.maxTradeUses = p_77390_1_.getInteger("maxUses");
         }
         else
         {
             this.maxTradeUses = 7;
+        }
+
+        if (p_77390_1_.hasKey("rewardExp", 1))
+        {
+            this.field_180323_f = p_77390_1_.getBoolean("rewardExp");
+        }
+        else
+        {
+            this.field_180323_f = true;
         }
     }
 
@@ -155,6 +171,7 @@ public class MerchantRecipe
 
         var1.setInteger("uses", this.toolUses);
         var1.setInteger("maxUses", this.maxTradeUses);
+        var1.setBoolean("rewardExp", this.field_180323_f);
         return var1;
     }
 }

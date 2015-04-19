@@ -1,6 +1,7 @@
 package net.minecraft.client.renderer.texture;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.MathHelper;
 
 public class TextureClock extends TextureAtlasSprite
 {
@@ -43,16 +44,7 @@ public class TextureClock extends TextureAtlasSprite
                 --var7;
             }
 
-            if (var7 < -1.0D)
-            {
-                var7 = -1.0D;
-            }
-
-            if (var7 > 1.0D)
-            {
-                var7 = 1.0D;
-            }
-
+            var7 = MathHelper.clamp_double(var7, -1.0D, 1.0D);
             this.field_94240_i += var7 * 0.1D;
             this.field_94240_i *= 0.8D;
             this.field_94239_h += this.field_94240_i;
@@ -66,7 +58,7 @@ public class TextureClock extends TextureAtlasSprite
             if (var6 != this.frameCounter)
             {
                 this.frameCounter = var6;
-                TextureUtil.func_147955_a((int[][])this.framesTextureData.get(this.frameCounter), this.width, this.height, this.originX, this.originY, false, false);
+                TextureUtil.uploadTextureMipmap((int[][])this.framesTextureData.get(this.frameCounter), this.width, this.height, this.originX, this.originY, false, false);
             }
         }
     }

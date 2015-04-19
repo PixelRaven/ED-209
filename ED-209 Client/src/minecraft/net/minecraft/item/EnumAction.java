@@ -2,10 +2,10 @@ package net.minecraft.item;
 
 public enum EnumAction
 {
-    none,
-    eat,
-    drink,
-    block,
-    bow;
+    NONE,
+    EAT,
+    DRINK,
+    BLOCK,
+    BOW;
     private static final String __OBFID = "CL_00000073";
 }

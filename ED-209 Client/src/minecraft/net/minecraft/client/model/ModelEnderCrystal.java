@@ -1,7 +1,7 @@
 package net.minecraft.client.model;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
-import org.lwjgl.opengl.GL11;
 
 public class ModelEnderCrystal extends ModelBase
 {
@@ -33,28 +33,28 @@ public class ModelEnderCrystal extends ModelBase
      */
     public void render(Entity p_78088_1_, float p_78088_2_, float p_78088_3_, float p_78088_4_, float p_78088_5_, float p_78088_6_, float p_78088_7_)
     {
-        GL11.glPushMatrix();
-        GL11.glScalef(2.0F, 2.0F, 2.0F);
-        GL11.glTranslatef(0.0F, -0.5F, 0.0F);
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(2.0F, 2.0F, 2.0F);
+        GlStateManager.translate(0.0F, -0.5F, 0.0F);
 
         if (this.base != null)
         {
             this.base.render(p_78088_7_);
         }
 
-        GL11.glRotatef(p_78088_3_, 0.0F, 1.0F, 0.0F);
-        GL11.glTranslatef(0.0F, 0.8F + p_78088_4_, 0.0F);
-        GL11.glRotatef(60.0F, 0.7071F, 0.0F, 0.7071F);
+        GlStateManager.rotate(p_78088_3_, 0.0F, 1.0F, 0.0F);
+        GlStateManager.translate(0.0F, 0.8F + p_78088_4_, 0.0F);
+        GlStateManager.rotate(60.0F, 0.7071F, 0.0F, 0.7071F);
         this.glass.render(p_78088_7_);
         float var8 = 0.875F;
-        GL11.glScalef(var8, var8, var8);
-        GL11.glRotatef(60.0F, 0.7071F, 0.0F, 0.7071F);
-        GL11.glRotatef(p_78088_3_, 0.0F, 1.0F, 0.0F);
+        GlStateManager.scale(var8, var8, var8);
+        GlStateManager.rotate(60.0F, 0.7071F, 0.0F, 0.7071F);
+        GlStateManager.rotate(p_78088_3_, 0.0F, 1.0F, 0.0F);
         this.glass.render(p_78088_7_);
-        GL11.glScalef(var8, var8, var8);
-        GL11.glRotatef(60.0F, 0.7071F, 0.0F, 0.7071F);
-        GL11.glRotatef(p_78088_3_, 0.0F, 1.0F, 0.0F);
+        GlStateManager.scale(var8, var8, var8);
+        GlStateManager.rotate(60.0F, 0.7071F, 0.0F, 0.7071F);
+        GlStateManager.rotate(p_78088_3_, 0.0F, 1.0F, 0.0F);
         this.cube.render(p_78088_7_);
-        GL11.glPopMatrix();
+        GlStateManager.popMatrix();
     }
 }

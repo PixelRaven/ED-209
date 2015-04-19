@@ -15,22 +15,22 @@ public class CommandDefaultGameMode extends CommandGameMode
         return "defaultgamemode";
     }
 
-    public String getCommandUsage(ICommandSender p_71518_1_)
+    public String getCommandUsage(ICommandSender sender)
     {
         return "commands.defaultgamemode.usage";
     }
 
-    public void processCommand(ICommandSender p_71515_1_, String[] p_71515_2_)
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
-        if (p_71515_2_.length > 0)
+        if (args.length <= 0)
         {
-            WorldSettings.GameType var3 = this.getGameModeFromCommand(p_71515_1_, p_71515_2_[0]);
-            this.setGameType(var3);
-            func_152373_a(p_71515_1_, this, "commands.defaultgamemode.success", new Object[] {new ChatComponentTranslation("gameMode." + var3.getName(), new Object[0])});
+            throw new WrongUsageException("commands.defaultgamemode.usage", new Object[0]);
         }
         else
         {
-            throw new WrongUsageException("commands.defaultgamemode.usage", new Object[0]);
+            WorldSettings.GameType var3 = this.getGameModeFromCommand(sender, args[0]);
+            this.setGameType(var3);
+            notifyOperators(sender, this, "commands.defaultgamemode.success", new Object[] {new ChatComponentTranslation("gameMode." + var3.getName(), new Object[0])});
         }
     }
 

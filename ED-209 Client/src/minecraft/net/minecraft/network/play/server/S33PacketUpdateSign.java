@@ -5,83 +5,76 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.world.World;
 
-public class S33PacketUpdateSign extends Packet
+public class S33PacketUpdateSign implements Packet
 {
-    private int field_149352_a;
-    private int field_149350_b;
-    private int field_149351_c;
-    private String[] field_149349_d;
+    private World field_179706_a;
+    private BlockPos field_179705_b;
+    private IChatComponent[] field_149349_d;
     private static final String __OBFID = "CL_00001338";
 
     public S33PacketUpdateSign() {}
 
-    public S33PacketUpdateSign(int p_i45231_1_, int p_i45231_2_, int p_i45231_3_, String[] p_i45231_4_)
+    public S33PacketUpdateSign(World worldIn, BlockPos p_i45951_2_, IChatComponent[] p_i45951_3_)
     {
-        this.field_149352_a = p_i45231_1_;
-        this.field_149350_b = p_i45231_2_;
-        this.field_149351_c = p_i45231_3_;
-        this.field_149349_d = new String[] {p_i45231_4_[0], p_i45231_4_[1], p_i45231_4_[2], p_i45231_4_[3]};
+        this.field_179706_a = worldIn;
+        this.field_179705_b = p_i45951_2_;
+        this.field_149349_d = new IChatComponent[] {p_i45951_3_[0], p_i45951_3_[1], p_i45951_3_[2], p_i45951_3_[3]};
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149352_a = p_148837_1_.readInt();
-        this.field_149350_b = p_148837_1_.readShort();
-        this.field_149351_c = p_148837_1_.readInt();
-        this.field_149349_d = new String[4];
+        this.field_179705_b = data.readBlockPos();
+        this.field_149349_d = new IChatComponent[4];
 
         for (int var2 = 0; var2 < 4; ++var2)
         {
-            this.field_149349_d[var2] = p_148837_1_.readStringFromBuffer(15);
+            this.field_149349_d[var2] = data.readChatComponent();
         }
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149352_a);
-        p_148840_1_.writeShort(this.field_149350_b);
-        p_148840_1_.writeInt(this.field_149351_c);
+        data.writeBlockPos(this.field_179705_b);
 
         for (int var2 = 0; var2 < 4; ++var2)
         {
-            p_148840_1_.writeStringToBuffer(this.field_149349_d[var2]);
+            data.writeChatComponent(this.field_149349_d[var2]);
         }
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandlerPlayClient handler)
     {
-        p_148833_1_.handleUpdateSign(this);
+        handler.handleUpdateSign(this);
     }
 
-    public int func_149346_c()
+    public BlockPos func_179704_a()
     {
-        return this.field_149352_a;
+        return this.field_179705_b;
     }
 
-    public int func_149345_d()
-    {
-        return this.field_149350_b;
-    }
-
-    public int func_149344_e()
-    {
-        return this.field_149351_c;
-    }
-
-    public String[] func_149347_f()
+    public IChatComponent[] func_180753_b()
     {
         return this.field_149349_d;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.processPacket((INetHandlerPlayClient)handler);
     }
 }

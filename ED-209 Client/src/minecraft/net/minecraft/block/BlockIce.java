@@ -2,14 +2,17 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumWorldBlockLayer;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockIce extends BlockBreakable
@@ -18,54 +21,46 @@ public class BlockIce extends BlockBreakable
 
     public BlockIce()
     {
-        super("ice", Material.ice, false);
+        super(Material.ice, false);
         this.slipperiness = 0.98F;
         this.setTickRandomly(true);
         this.setCreativeTab(CreativeTabs.tabBlock);
     }
 
-    /**
-     * Returns which pass should this block be rendered on. 0 for solids and 1 for alpha
-     */
-    public int getRenderBlockPass()
+    public EnumWorldBlockLayer getBlockLayer()
     {
-        return 1;
+        return EnumWorldBlockLayer.TRANSLUCENT;
     }
 
-    public boolean shouldSideBeRendered(IBlockAccess p_149646_1_, int p_149646_2_, int p_149646_3_, int p_149646_4_, int p_149646_5_)
+    public void harvestBlock(World worldIn, EntityPlayer playerIn, BlockPos pos, IBlockState state, TileEntity te)
     {
-        return super.shouldSideBeRendered(p_149646_1_, p_149646_2_, p_149646_3_, p_149646_4_, 1 - p_149646_5_);
-    }
+        playerIn.triggerAchievement(StatList.mineBlockStatArray[Block.getIdFromBlock(this)]);
+        playerIn.addExhaustion(0.025F);
 
-    public void harvestBlock(World p_149636_1_, EntityPlayer p_149636_2_, int p_149636_3_, int p_149636_4_, int p_149636_5_, int p_149636_6_)
-    {
-        p_149636_2_.addStat(StatList.mineBlockStatArray[Block.getIdFromBlock(this)], 1);
-        p_149636_2_.addExhaustion(0.025F);
-
-        if (this.canSilkHarvest() && EnchantmentHelper.getSilkTouchModifier(p_149636_2_))
+        if (this.canSilkHarvest() && EnchantmentHelper.getSilkTouchModifier(playerIn))
         {
-            ItemStack var9 = this.createStackedBlock(p_149636_6_);
+            ItemStack var8 = this.createStackedBlock(state);
 
-            if (var9 != null)
+            if (var8 != null)
             {
-                this.dropBlockAsItem_do(p_149636_1_, p_149636_3_, p_149636_4_, p_149636_5_, var9);
+                spawnAsEntity(worldIn, pos, var8);
             }
         }
         else
         {
-            if (p_149636_1_.provider.isHellWorld)
+            if (worldIn.provider.func_177500_n())
             {
-                p_149636_1_.setBlockToAir(p_149636_3_, p_149636_4_, p_149636_5_);
+                worldIn.setBlockToAir(pos);
                 return;
             }
 
-            int var7 = EnchantmentHelper.getFortuneModifier(p_149636_2_);
-            this.dropBlockAsItem(p_149636_1_, p_149636_3_, p_149636_4_, p_149636_5_, p_149636_6_, var7);
-            Material var8 = p_149636_1_.getBlock(p_149636_3_, p_149636_4_ - 1, p_149636_5_).getMaterial();
+            int var6 = EnchantmentHelper.getFortuneModifier(playerIn);
+            this.dropBlockAsItem(worldIn, pos, state, var6);
+            Material var7 = worldIn.getBlockState(pos.offsetDown()).getBlock().getMaterial();
 
-            if (var8.blocksMovement() || var8.isLiquid())
+            if (var7.blocksMovement() || var7.isLiquid())
             {
-                p_149636_1_.setBlock(p_149636_3_, p_149636_4_, p_149636_5_, Blocks.flowing_water);
+                worldIn.setBlockState(pos, Blocks.flowing_water.getDefaultState());
             }
         }
     }
@@ -73,26 +68,24 @@ public class BlockIce extends BlockBreakable
     /**
      * Returns the quantity of items to drop on block destruction.
      */
-    public int quantityDropped(Random p_149745_1_)
+    public int quantityDropped(Random random)
     {
         return 0;
     }
 
-    /**
-     * Ticks the block if it's been scheduled
-     */
-    public void updateTick(World p_149674_1_, int p_149674_2_, int p_149674_3_, int p_149674_4_, Random p_149674_5_)
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand)
     {
-        if (p_149674_1_.getSavedLightValue(EnumSkyBlock.Block, p_149674_2_, p_149674_3_, p_149674_4_) > 11 - this.getLightOpacity())
+        if (worldIn.getLightFor(EnumSkyBlock.BLOCK, pos) > 11 - this.getLightOpacity())
         {
-            if (p_149674_1_.provider.isHellWorld)
+            if (worldIn.provider.func_177500_n())
             {
-                p_149674_1_.setBlockToAir(p_149674_2_, p_149674_3_, p_149674_4_);
-                return;
+                worldIn.setBlockToAir(pos);
             }
-
-            this.dropBlockAsItem(p_149674_1_, p_149674_2_, p_149674_3_, p_149674_4_, p_149674_1_.getBlockMetadata(p_149674_2_, p_149674_3_, p_149674_4_), 0);
-            p_149674_1_.setBlock(p_149674_2_, p_149674_3_, p_149674_4_, Blocks.water);
+            else
+            {
+                this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
+                worldIn.setBlockState(pos, Blocks.water.getDefaultState());
+            }
         }
     }
 

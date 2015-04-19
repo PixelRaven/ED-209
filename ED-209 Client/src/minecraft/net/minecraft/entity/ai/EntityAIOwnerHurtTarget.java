@@ -28,7 +28,7 @@ public class EntityAIOwnerHurtTarget extends EntityAITarget
         }
         else
         {
-            EntityLivingBase var1 = this.theEntityTameable.getOwner();
+            EntityLivingBase var1 = this.theEntityTameable.func_180492_cm();
 
             if (var1 == null)
             {
@@ -49,7 +49,7 @@ public class EntityAIOwnerHurtTarget extends EntityAITarget
     public void startExecuting()
     {
         this.taskOwner.setAttackTarget(this.theTarget);
-        EntityLivingBase var1 = this.theEntityTameable.getOwner();
+        EntityLivingBase var1 = this.theEntityTameable.func_180492_cm();
 
         if (var1 != null)
         {

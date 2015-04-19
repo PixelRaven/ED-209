@@ -26,32 +26,32 @@ public class SoundPoolEntry
         this.field_148654_b = p_i45114_1_.field_148654_b;
     }
 
-    public ResourceLocation func_148652_a()
+    public ResourceLocation getSoundPoolEntryLocation()
     {
         return this.field_148656_a;
     }
 
-    public double func_148650_b()
+    public double getPitch()
     {
         return this.field_148655_c;
     }
 
-    public void func_148651_a(double p_148651_1_)
+    public void setPitch(double p_148651_1_)
     {
         this.field_148655_c = p_148651_1_;
     }
 
-    public double func_148649_c()
+    public double getVolume()
     {
         return this.field_148653_d;
     }
 
-    public void func_148647_b(double p_148647_1_)
+    public void setVolume(double p_148647_1_)
     {
         this.field_148653_d = p_148647_1_;
     }
 
-    public boolean func_148648_d()
+    public boolean isStreamingSound()
     {
         return this.field_148654_b;
     }

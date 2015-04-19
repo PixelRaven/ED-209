@@ -2,69 +2,89 @@ package net.minecraft.block;
 
 import java.util.Random;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Facing;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockPistonMoving extends BlockContainer
 {
+    public static final PropertyDirection field_176426_a = BlockPistonExtension.field_176326_a;
+    public static final PropertyEnum field_176425_b = BlockPistonExtension.field_176325_b;
     private static final String __OBFID = "CL_00000368";
 
     public BlockPistonMoving()
     {
         super(Material.piston);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(field_176426_a, EnumFacing.NORTH).withProperty(field_176425_b, BlockPistonExtension.EnumPistonType.DEFAULT));
         this.setHardness(-1.0F);
     }
 
     /**
      * Returns a new instance of a block's tile entity class. Called on placing the block.
      */
-    public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_)
+    public TileEntity createNewTileEntity(World worldIn, int meta)
     {
         return null;
     }
 
-    public void onBlockAdded(World p_149726_1_, int p_149726_2_, int p_149726_3_, int p_149726_4_) {}
-
-    public void breakBlock(World p_149749_1_, int p_149749_2_, int p_149749_3_, int p_149749_4_, Block p_149749_5_, int p_149749_6_)
+    public static TileEntity func_176423_a(IBlockState p_176423_0_, EnumFacing p_176423_1_, boolean p_176423_2_, boolean p_176423_3_)
     {
-        TileEntity var7 = p_149749_1_.getTileEntity(p_149749_2_, p_149749_3_, p_149749_4_);
+        return new TileEntityPiston(p_176423_0_, p_176423_1_, p_176423_2_, p_176423_3_);
+    }
 
-        if (var7 instanceof TileEntityPiston)
+    public void breakBlock(World worldIn, BlockPos pos, IBlockState state)
+    {
+        TileEntity var4 = worldIn.getTileEntity(pos);
+
+        if (var4 instanceof TileEntityPiston)
         {
-            ((TileEntityPiston)var7).func_145866_f();
+            ((TileEntityPiston)var4).clearPistonTileEntity();
         }
         else
         {
-            super.breakBlock(p_149749_1_, p_149749_2_, p_149749_3_, p_149749_4_, p_149749_5_, p_149749_6_);
+            super.breakBlock(worldIn, pos, state);
         }
     }
 
-    public boolean canPlaceBlockAt(World p_149742_1_, int p_149742_2_, int p_149742_3_, int p_149742_4_)
+    public boolean canPlaceBlockAt(World worldIn, BlockPos pos)
     {
         return false;
     }
 
     /**
-     * checks to see if you can place this block can be placed on that side of a block: BlockLever overrides
+     * Check whether this Block can be placed on the given side
      */
-    public boolean canPlaceBlockOnSide(World p_149707_1_, int p_149707_2_, int p_149707_3_, int p_149707_4_, int p_149707_5_)
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side)
     {
         return false;
     }
 
     /**
-     * The type of render function that is called for this block
+     * Called when a player destroys this Block
      */
-    public int getRenderType()
+    public void onBlockDestroyedByPlayer(World worldIn, BlockPos pos, IBlockState state)
     {
-        return -1;
+        BlockPos var4 = pos.offset(((EnumFacing)state.getValue(field_176426_a)).getOpposite());
+        IBlockState var5 = worldIn.getBlockState(var4);
+
+        if (var5.getBlock() instanceof BlockPistonBase && ((Boolean)var5.getValue(BlockPistonBase.EXTENDED)).booleanValue())
+        {
+            worldIn.setBlockToAir(var4);
+        }
     }
 
     public boolean isOpaqueCube()
@@ -72,19 +92,16 @@ public class BlockPistonMoving extends BlockContainer
         return false;
     }
 
-    public boolean renderAsNormalBlock()
+    public boolean isFullCube()
     {
         return false;
     }
 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
-    public boolean onBlockActivated(World p_149727_1_, int p_149727_2_, int p_149727_3_, int p_149727_4_, EntityPlayer p_149727_5_, int p_149727_6_, float p_149727_7_, float p_149727_8_, float p_149727_9_)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        if (!p_149727_1_.isClient && p_149727_1_.getTileEntity(p_149727_2_, p_149727_3_, p_149727_4_) == null)
+        if (!worldIn.isRemote && worldIn.getTileEntity(pos) == null)
         {
-            p_149727_1_.setBlockToAir(p_149727_2_, p_149727_3_, p_149727_4_);
+            worldIn.setBlockToAir(pos);
             return true;
         }
         else
@@ -93,136 +110,161 @@ public class BlockPistonMoving extends BlockContainer
         }
     }
 
-    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
+    /**
+     * Get the Item that this Block should drop when harvested.
+     *  
+     * @param fortune the level of the Fortune enchantment on the player's tool
+     */
+    public Item getItemDropped(IBlockState state, Random rand, int fortune)
     {
         return null;
     }
 
     /**
-     * Drops the block items with a specified chance of dropping the specified items
+     * Spawns this Block's drops into the World as EntityItems.
+     *  
+     * @param chance The chance that each Item is actually spawned (1.0 = always, 0.0 = never)
+     * @param fortune The player's fortune level
      */
-    public void dropBlockAsItemWithChance(World p_149690_1_, int p_149690_2_, int p_149690_3_, int p_149690_4_, int p_149690_5_, float p_149690_6_, int p_149690_7_)
+    public void dropBlockAsItemWithChance(World worldIn, BlockPos pos, IBlockState state, float chance, int fortune)
     {
-        if (!p_149690_1_.isClient)
+        if (!worldIn.isRemote)
         {
-            TileEntityPiston var8 = this.func_149963_e(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_);
+            TileEntityPiston var6 = this.func_176422_e(worldIn, pos);
 
-            if (var8 != null)
+            if (var6 != null)
             {
-                var8.func_145861_a().dropBlockAsItem(p_149690_1_, p_149690_2_, p_149690_3_, p_149690_4_, var8.getBlockMetadata(), 0);
+                IBlockState var7 = var6.func_174927_b();
+                var7.getBlock().dropBlockAsItem(worldIn, pos, var7, 0);
             }
         }
     }
 
-    public void onNeighborBlockChange(World p_149695_1_, int p_149695_2_, int p_149695_3_, int p_149695_4_, Block p_149695_5_)
+    /**
+     * Ray traces through the blocks collision from start vector to end vector returning a ray trace hit.
+     *  
+     * @param start The start vector
+     * @param end The end vector
+     */
+    public MovingObjectPosition collisionRayTrace(World worldIn, BlockPos pos, Vec3 start, Vec3 end)
     {
-        if (!p_149695_1_.isClient)
+        return null;
+    }
+
+    public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock)
+    {
+        if (!worldIn.isRemote)
         {
-            p_149695_1_.getTileEntity(p_149695_2_, p_149695_3_, p_149695_4_);
+            worldIn.getTileEntity(pos);
         }
     }
 
-    public static TileEntity func_149962_a(Block p_149962_0_, int p_149962_1_, int p_149962_2_, boolean p_149962_3_, boolean p_149962_4_)
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-        return new TileEntityPiston(p_149962_0_, p_149962_1_, p_149962_2_, p_149962_3_, p_149962_4_);
-    }
+        TileEntityPiston var4 = this.func_176422_e(worldIn, pos);
 
-    /**
-     * Returns a bounding box from the pool of bounding boxes (this means this box can change after the pool has been
-     * cleared to be reused)
-     */
-    public AxisAlignedBB getCollisionBoundingBoxFromPool(World p_149668_1_, int p_149668_2_, int p_149668_3_, int p_149668_4_)
-    {
-        TileEntityPiston var5 = this.func_149963_e(p_149668_1_, p_149668_2_, p_149668_3_, p_149668_4_);
-
-        if (var5 == null)
+        if (var4 == null)
         {
             return null;
         }
         else
         {
-            float var6 = var5.func_145860_a(0.0F);
+            float var5 = var4.func_145860_a(0.0F);
 
-            if (var5.func_145868_b())
+            if (var4.isExtending())
             {
-                var6 = 1.0F - var6;
+                var5 = 1.0F - var5;
             }
 
-            return this.func_149964_a(p_149668_1_, p_149668_2_, p_149668_3_, p_149668_4_, var5.func_145861_a(), var6, var5.func_145864_c());
+            return this.func_176424_a(worldIn, pos, var4.func_174927_b(), var5, var4.func_174930_e());
         }
     }
 
-    public void setBlockBoundsBasedOnState(IBlockAccess p_149719_1_, int p_149719_2_, int p_149719_3_, int p_149719_4_)
+    public void setBlockBoundsBasedOnState(IBlockAccess access, BlockPos pos)
     {
-        TileEntityPiston var5 = this.func_149963_e(p_149719_1_, p_149719_2_, p_149719_3_, p_149719_4_);
+        TileEntityPiston var3 = this.func_176422_e(access, pos);
 
-        if (var5 != null)
+        if (var3 != null)
         {
-            Block var6 = var5.func_145861_a();
+            IBlockState var4 = var3.func_174927_b();
+            Block var5 = var4.getBlock();
 
-            if (var6 == this || var6.getMaterial() == Material.air)
+            if (var5 == this || var5.getMaterial() == Material.air)
             {
                 return;
             }
 
-            var6.setBlockBoundsBasedOnState(p_149719_1_, p_149719_2_, p_149719_3_, p_149719_4_);
-            float var7 = var5.func_145860_a(0.0F);
+            float var6 = var3.func_145860_a(0.0F);
 
-            if (var5.func_145868_b())
+            if (var3.isExtending())
             {
-                var7 = 1.0F - var7;
+                var6 = 1.0F - var6;
             }
 
-            int var8 = var5.func_145864_c();
-            this.field_149759_B = var6.getBlockBoundsMinX() - (double)((float)Facing.offsetsXForSide[var8] * var7);
-            this.field_149760_C = var6.getBlockBoundsMinY() - (double)((float)Facing.offsetsYForSide[var8] * var7);
-            this.field_149754_D = var6.getBlockBoundsMinZ() - (double)((float)Facing.offsetsZForSide[var8] * var7);
-            this.field_149755_E = var6.getBlockBoundsMaxX() - (double)((float)Facing.offsetsXForSide[var8] * var7);
-            this.field_149756_F = var6.getBlockBoundsMaxY() - (double)((float)Facing.offsetsYForSide[var8] * var7);
-            this.field_149757_G = var6.getBlockBoundsMaxZ() - (double)((float)Facing.offsetsZForSide[var8] * var7);
+            var5.setBlockBoundsBasedOnState(access, pos);
+
+            if (var5 == Blocks.piston || var5 == Blocks.sticky_piston)
+            {
+                var6 = 0.0F;
+            }
+
+            EnumFacing var7 = var3.func_174930_e();
+            this.minX = var5.getBlockBoundsMinX() - (double)((float)var7.getFrontOffsetX() * var6);
+            this.minY = var5.getBlockBoundsMinY() - (double)((float)var7.getFrontOffsetY() * var6);
+            this.minZ = var5.getBlockBoundsMinZ() - (double)((float)var7.getFrontOffsetZ() * var6);
+            this.maxX = var5.getBlockBoundsMaxX() - (double)((float)var7.getFrontOffsetX() * var6);
+            this.maxY = var5.getBlockBoundsMaxY() - (double)((float)var7.getFrontOffsetY() * var6);
+            this.maxZ = var5.getBlockBoundsMaxZ() - (double)((float)var7.getFrontOffsetZ() * var6);
         }
     }
 
-    public AxisAlignedBB func_149964_a(World p_149964_1_, int p_149964_2_, int p_149964_3_, int p_149964_4_, Block p_149964_5_, float p_149964_6_, int p_149964_7_)
+    public AxisAlignedBB func_176424_a(World worldIn, BlockPos p_176424_2_, IBlockState p_176424_3_, float p_176424_4_, EnumFacing p_176424_5_)
     {
-        if (p_149964_5_ != this && p_149964_5_.getMaterial() != Material.air)
+        if (p_176424_3_.getBlock() != this && p_176424_3_.getBlock().getMaterial() != Material.air)
         {
-            AxisAlignedBB var8 = p_149964_5_.getCollisionBoundingBoxFromPool(p_149964_1_, p_149964_2_, p_149964_3_, p_149964_4_);
+            AxisAlignedBB var6 = p_176424_3_.getBlock().getCollisionBoundingBox(worldIn, p_176424_2_, p_176424_3_);
 
-            if (var8 == null)
+            if (var6 == null)
             {
                 return null;
             }
             else
             {
-                if (Facing.offsetsXForSide[p_149964_7_] < 0)
+                double var7 = var6.minX;
+                double var9 = var6.minY;
+                double var11 = var6.minZ;
+                double var13 = var6.maxX;
+                double var15 = var6.maxY;
+                double var17 = var6.maxZ;
+
+                if (p_176424_5_.getFrontOffsetX() < 0)
                 {
-                    var8.minX -= (double)((float)Facing.offsetsXForSide[p_149964_7_] * p_149964_6_);
+                    var7 -= (double)((float)p_176424_5_.getFrontOffsetX() * p_176424_4_);
                 }
                 else
                 {
-                    var8.maxX -= (double)((float)Facing.offsetsXForSide[p_149964_7_] * p_149964_6_);
+                    var13 -= (double)((float)p_176424_5_.getFrontOffsetX() * p_176424_4_);
                 }
 
-                if (Facing.offsetsYForSide[p_149964_7_] < 0)
+                if (p_176424_5_.getFrontOffsetY() < 0)
                 {
-                    var8.minY -= (double)((float)Facing.offsetsYForSide[p_149964_7_] * p_149964_6_);
+                    var9 -= (double)((float)p_176424_5_.getFrontOffsetY() * p_176424_4_);
                 }
                 else
                 {
-                    var8.maxY -= (double)((float)Facing.offsetsYForSide[p_149964_7_] * p_149964_6_);
+                    var15 -= (double)((float)p_176424_5_.getFrontOffsetY() * p_176424_4_);
                 }
 
-                if (Facing.offsetsZForSide[p_149964_7_] < 0)
+                if (p_176424_5_.getFrontOffsetZ() < 0)
                 {
-                    var8.minZ -= (double)((float)Facing.offsetsZForSide[p_149964_7_] * p_149964_6_);
+                    var11 -= (double)((float)p_176424_5_.getFrontOffsetZ() * p_176424_4_);
                 }
                 else
                 {
-                    var8.maxZ -= (double)((float)Facing.offsetsZForSide[p_149964_7_] * p_149964_6_);
+                    var17 -= (double)((float)p_176424_5_.getFrontOffsetZ() * p_176424_4_);
                 }
 
-                return var8;
+                return new AxisAlignedBB(var7, var9, var11, var13, var15, var17);
             }
         }
         else
@@ -231,22 +273,43 @@ public class BlockPistonMoving extends BlockContainer
         }
     }
 
-    private TileEntityPiston func_149963_e(IBlockAccess p_149963_1_, int p_149963_2_, int p_149963_3_, int p_149963_4_)
+    private TileEntityPiston func_176422_e(IBlockAccess p_176422_1_, BlockPos p_176422_2_)
     {
-        TileEntity var5 = p_149963_1_.getTileEntity(p_149963_2_, p_149963_3_, p_149963_4_);
-        return var5 instanceof TileEntityPiston ? (TileEntityPiston)var5 : null;
+        TileEntity var3 = p_176422_1_.getTileEntity(p_176422_2_);
+        return var3 instanceof TileEntityPiston ? (TileEntityPiston)var3 : null;
+    }
+
+    public Item getItem(World worldIn, BlockPos pos)
+    {
+        return null;
     }
 
     /**
-     * Gets an item for the block being called on. Args: world, x, y, z
+     * Convert the given metadata into a BlockState for this Block
      */
-    public Item getItem(World p_149694_1_, int p_149694_2_, int p_149694_3_, int p_149694_4_)
+    public IBlockState getStateFromMeta(int meta)
     {
-        return Item.getItemById(0);
+        return this.getDefaultState().withProperty(field_176426_a, BlockPistonExtension.func_176322_b(meta)).withProperty(field_176425_b, (meta & 8) > 0 ? BlockPistonExtension.EnumPistonType.STICKY : BlockPistonExtension.EnumPistonType.DEFAULT);
     }
 
-    public void registerBlockIcons(IIconRegister p_149651_1_)
+    /**
+     * Convert the BlockState into the correct metadata value
+     */
+    public int getMetaFromState(IBlockState state)
     {
-        this.blockIcon = p_149651_1_.registerIcon("piston_top_normal");
+        byte var2 = 0;
+        int var3 = var2 | ((EnumFacing)state.getValue(field_176426_a)).getIndex();
+
+        if (state.getValue(field_176425_b) == BlockPistonExtension.EnumPistonType.STICKY)
+        {
+            var3 |= 8;
+        }
+
+        return var3;
+    }
+
+    protected BlockState createBlockState()
+    {
+        return new BlockState(this, new IProperty[] {field_176426_a, field_176425_b});
     }
 }

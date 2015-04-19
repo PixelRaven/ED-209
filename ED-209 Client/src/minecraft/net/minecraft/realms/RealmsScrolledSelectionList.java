@@ -14,7 +14,7 @@ public class RealmsScrolledSelectionList
 
     public void render(int p_render_1_, int p_render_2_, float p_render_3_)
     {
-        this.proxy.func_148128_a(p_render_1_, p_render_2_, p_render_3_);
+        this.proxy.drawScreen(p_render_1_, p_render_2_, p_render_3_);
     }
 
     public int width()
@@ -62,4 +62,21 @@ public class RealmsScrolledSelectionList
     {
         return this.proxy.func_154338_k() / 2 + 124;
     }
+
+    public void mouseEvent()
+    {
+        this.proxy.func_178039_p();
+    }
+
+    public void scroll(int p_scroll_1_)
+    {
+        this.proxy.scrollBy(p_scroll_1_);
+    }
+
+    public int getScroll()
+    {
+        return this.proxy.getAmountScrolled();
+    }
+
+    protected void renderList(int p_renderList_1_, int p_renderList_2_, int p_renderList_3_, int p_renderList_4_) {}
 }

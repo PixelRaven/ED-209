@@ -5,92 +5,82 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
+import net.minecraft.util.BlockPos;
 
-public class S28PacketEffect extends Packet
+public class S28PacketEffect implements Packet
 {
-    private int field_149251_a;
-    private int field_149249_b;
-    private int field_149250_c;
-    private int field_149247_d;
-    private int field_149248_e;
-    private boolean field_149246_f;
+    private int soundType;
+    private BlockPos field_179747_b;
+
+    /** can be a block/item id or other depending on the soundtype */
+    private int soundData;
+
+    /** If true the sound is played across the server */
+    private boolean serverWide;
     private static final String __OBFID = "CL_00001307";
 
     public S28PacketEffect() {}
 
-    public S28PacketEffect(int p_i45198_1_, int p_i45198_2_, int p_i45198_3_, int p_i45198_4_, int p_i45198_5_, boolean p_i45198_6_)
+    public S28PacketEffect(int p_i45978_1_, BlockPos p_i45978_2_, int p_i45978_3_, boolean p_i45978_4_)
     {
-        this.field_149251_a = p_i45198_1_;
-        this.field_149250_c = p_i45198_2_;
-        this.field_149247_d = p_i45198_3_;
-        this.field_149248_e = p_i45198_4_;
-        this.field_149249_b = p_i45198_5_;
-        this.field_149246_f = p_i45198_6_;
+        this.soundType = p_i45978_1_;
+        this.field_179747_b = p_i45978_2_;
+        this.soundData = p_i45978_3_;
+        this.serverWide = p_i45978_4_;
     }
 
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149251_a = p_148837_1_.readInt();
-        this.field_149250_c = p_148837_1_.readInt();
-        this.field_149247_d = p_148837_1_.readByte() & 255;
-        this.field_149248_e = p_148837_1_.readInt();
-        this.field_149249_b = p_148837_1_.readInt();
-        this.field_149246_f = p_148837_1_.readBoolean();
+        this.soundType = data.readInt();
+        this.field_179747_b = data.readBlockPos();
+        this.soundData = data.readInt();
+        this.serverWide = data.readBoolean();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeInt(this.field_149251_a);
-        p_148840_1_.writeInt(this.field_149250_c);
-        p_148840_1_.writeByte(this.field_149247_d & 255);
-        p_148840_1_.writeInt(this.field_149248_e);
-        p_148840_1_.writeInt(this.field_149249_b);
-        p_148840_1_.writeBoolean(this.field_149246_f);
+        data.writeInt(this.soundType);
+        data.writeBlockPos(this.field_179747_b);
+        data.writeInt(this.soundData);
+        data.writeBoolean(this.serverWide);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180739_a(INetHandlerPlayClient p_180739_1_)
     {
-        p_148833_1_.handleEffect(this);
+        p_180739_1_.handleEffect(this);
     }
 
-    public boolean func_149244_c()
+    public boolean isSoundServerwide()
     {
-        return this.field_149246_f;
+        return this.serverWide;
     }
 
-    public int func_149242_d()
+    public int getSoundType()
     {
-        return this.field_149251_a;
+        return this.soundType;
     }
 
-    public int func_149241_e()
+    public int getSoundData()
     {
-        return this.field_149249_b;
+        return this.soundData;
     }
 
-    public int func_149240_f()
+    public BlockPos func_179746_d()
     {
-        return this.field_149250_c;
+        return this.field_179747_b;
     }
 
-    public int func_149243_g()
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        return this.field_149247_d;
-    }
-
-    public int func_149239_h()
-    {
-        return this.field_149248_e;
-    }
-
-    public void processPacket(INetHandler p_148833_1_)
-    {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180739_a((INetHandlerPlayClient)handler);
     }
 }

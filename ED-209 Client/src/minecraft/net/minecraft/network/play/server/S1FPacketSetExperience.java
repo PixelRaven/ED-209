@@ -6,7 +6,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.INetHandlerPlayClient;
 
-public class S1FPacketSetExperience extends Packet
+public class S1FPacketSetExperience implements Packet
 {
     private float field_149401_a;
     private int field_149399_b;
@@ -25,26 +25,26 @@ public class S1FPacketSetExperience extends Packet
     /**
      * Reads the raw packet data from the data stream.
      */
-    public void readPacketData(PacketBuffer p_148837_1_) throws IOException
+    public void readPacketData(PacketBuffer data) throws IOException
     {
-        this.field_149401_a = p_148837_1_.readFloat();
-        this.field_149400_c = p_148837_1_.readShort();
-        this.field_149399_b = p_148837_1_.readShort();
+        this.field_149401_a = data.readFloat();
+        this.field_149400_c = data.readVarIntFromBuffer();
+        this.field_149399_b = data.readVarIntFromBuffer();
     }
 
     /**
      * Writes the raw packet data to the data stream.
      */
-    public void writePacketData(PacketBuffer p_148840_1_) throws IOException
+    public void writePacketData(PacketBuffer data) throws IOException
     {
-        p_148840_1_.writeFloat(this.field_149401_a);
-        p_148840_1_.writeShort(this.field_149400_c);
-        p_148840_1_.writeShort(this.field_149399_b);
+        data.writeFloat(this.field_149401_a);
+        data.writeVarIntToBuffer(this.field_149400_c);
+        data.writeVarIntToBuffer(this.field_149399_b);
     }
 
-    public void processPacket(INetHandlerPlayClient p_148833_1_)
+    public void func_180749_a(INetHandlerPlayClient p_180749_1_)
     {
-        p_148833_1_.handleSetExperience(this);
+        p_180749_1_.handleSetExperience(this);
     }
 
     public float func_149397_c()
@@ -62,8 +62,11 @@ public class S1FPacketSetExperience extends Packet
         return this.field_149400_c;
     }
 
-    public void processPacket(INetHandler p_148833_1_)
+    /**
+     * Passes this Packet on to the NetHandler for processing.
+     */
+    public void processPacket(INetHandler handler)
     {
-        this.processPacket((INetHandlerPlayClient)p_148833_1_);
+        this.func_180749_a((INetHandlerPlayClient)handler);
     }
 }

@@ -12,9 +12,9 @@ public class Path
     /**
      * Adds a point to the path
      */
-    public PathPoint addPoint(PathPoint p_75849_1_)
+    public PathPoint addPoint(PathPoint point)
     {
-        if (p_75849_1_.index >= 0)
+        if (point.index >= 0)
         {
             throw new IllegalStateException("OW KNOWS!");
         }
@@ -27,10 +27,10 @@ public class Path
                 this.pathPoints = var2;
             }
 
-            this.pathPoints[this.count] = p_75849_1_;
-            p_75849_1_.index = this.count;
+            this.pathPoints[this.count] = point;
+            point.index = this.count;
             this.sortBack(this.count++);
-            return p_75849_1_;
+            return point;
         }
     }
 

@@ -1,39 +1,53 @@
 package net.minecraft.entity.monster;
 
+import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockSilverfish;
-import net.minecraft.entity.Entity;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.EntityAIAttackOnCollide;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
+import net.minecraft.entity.ai.EntityAISwimming;
+import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.Facing;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class EntitySilverfish extends EntityMob
 {
-    /**
-     * A cooldown before this entity will search for another Silverfish to join them in battle.
-     */
-    private int allySummonCooldown;
+    private EntitySilverfish.AISummonSilverfish field_175460_b;
     private static final String __OBFID = "CL_00001696";
 
-    public EntitySilverfish(World p_i1740_1_)
+    public EntitySilverfish(World worldIn)
     {
-        super(p_i1740_1_);
-        this.setSize(0.3F, 0.7F);
+        super(worldIn);
+        this.setSize(0.4F, 0.3F);
+        this.tasks.addTask(1, new EntityAISwimming(this));
+        this.tasks.addTask(3, this.field_175460_b = new EntitySilverfish.AISummonSilverfish());
+        this.tasks.addTask(4, new EntityAIAttackOnCollide(this, EntityPlayer.class, 1.0D, false));
+        this.tasks.addTask(5, new EntitySilverfish.AIHideInStone());
+        this.targetTasks.addTask(1, new EntityAIHurtByTarget(this, true, new Class[0]));
+        this.targetTasks.addTask(2, new EntityAINearestAttackableTarget(this, EntityPlayer.class, true));
+    }
+
+    public float getEyeHeight()
+    {
+        return 0.1F;
     }
 
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(8.0D);
-        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.6000000238418579D);
+        this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).setBaseValue(0.25D);
         this.getEntityAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
     }
 
@@ -44,16 +58,6 @@ public class EntitySilverfish extends EntityMob
     protected boolean canTriggerWalking()
     {
         return false;
-    }
-
-    /**
-     * Finds the closest player within 16 blocks to attack, or null if this Entity isn't interested in attacking
-     * (Animals, Spiders at day, peaceful PigZombies).
-     */
-    protected Entity findPlayerToAttack()
-    {
-        double var1 = 8.0D;
-        return this.worldObj.getClosestVulnerablePlayerToEntity(this, var1);
     }
 
     /**
@@ -83,43 +87,31 @@ public class EntitySilverfish extends EntityMob
     /**
      * Called when the entity is attacked.
      */
-    public boolean attackEntityFrom(DamageSource p_70097_1_, float p_70097_2_)
+    public boolean attackEntityFrom(DamageSource source, float amount)
     {
-        if (this.isEntityInvulnerable())
+        if (this.func_180431_b(source))
         {
             return false;
         }
         else
         {
-            if (this.allySummonCooldown <= 0 && (p_70097_1_ instanceof EntityDamageSource || p_70097_1_ == DamageSource.magic))
+            if (source instanceof EntityDamageSource || source == DamageSource.magic)
             {
-                this.allySummonCooldown = 20;
+                this.field_175460_b.func_179462_f();
             }
 
-            return super.attackEntityFrom(p_70097_1_, p_70097_2_);
+            return super.attackEntityFrom(source, amount);
         }
     }
 
-    /**
-     * Basic mob attack. Default to touch of death in EntityCreature. Overridden by each mob to define their attack.
-     */
-    protected void attackEntity(Entity p_70785_1_, float p_70785_2_)
-    {
-        if (this.attackTime <= 0 && p_70785_2_ < 1.2F && p_70785_1_.boundingBox.maxY > this.boundingBox.minY && p_70785_1_.boundingBox.minY < this.boundingBox.maxY)
-        {
-            this.attackTime = 20;
-            this.attackEntityAsMob(p_70785_1_);
-        }
-    }
-
-    protected void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_)
+    protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
     {
         this.playSound("mob.silverfish.step", 0.15F, 1.0F);
     }
 
-    protected Item func_146068_u()
+    protected Item getDropItem()
     {
-        return Item.getItemById(0);
+        return null;
     }
 
     /**
@@ -131,95 +123,9 @@ public class EntitySilverfish extends EntityMob
         super.onUpdate();
     }
 
-    protected void updateEntityActionState()
+    public float func_180484_a(BlockPos p_180484_1_)
     {
-        super.updateEntityActionState();
-
-        if (!this.worldObj.isClient)
-        {
-            int var1;
-            int var2;
-            int var3;
-            int var6;
-
-            if (this.allySummonCooldown > 0)
-            {
-                --this.allySummonCooldown;
-
-                if (this.allySummonCooldown == 0)
-                {
-                    var1 = MathHelper.floor_double(this.posX);
-                    var2 = MathHelper.floor_double(this.posY);
-                    var3 = MathHelper.floor_double(this.posZ);
-                    boolean var4 = false;
-
-                    for (int var5 = 0; !var4 && var5 <= 5 && var5 >= -5; var5 = var5 <= 0 ? 1 - var5 : 0 - var5)
-                    {
-                        for (var6 = 0; !var4 && var6 <= 10 && var6 >= -10; var6 = var6 <= 0 ? 1 - var6 : 0 - var6)
-                        {
-                            for (int var7 = 0; !var4 && var7 <= 10 && var7 >= -10; var7 = var7 <= 0 ? 1 - var7 : 0 - var7)
-                            {
-                                if (this.worldObj.getBlock(var1 + var6, var2 + var5, var3 + var7) == Blocks.monster_egg)
-                                {
-                                    if (!this.worldObj.getGameRules().getGameRuleBooleanValue("mobGriefing"))
-                                    {
-                                        int var8 = this.worldObj.getBlockMetadata(var1 + var6, var2 + var5, var3 + var7);
-                                        ImmutablePair var9 = BlockSilverfish.func_150197_b(var8);
-                                        this.worldObj.setBlock(var1 + var6, var2 + var5, var3 + var7, (Block)var9.getLeft(), ((Integer)var9.getRight()).intValue(), 3);
-                                    }
-                                    else
-                                    {
-                                        this.worldObj.func_147480_a(var1 + var6, var2 + var5, var3 + var7, false);
-                                    }
-
-                                    Blocks.monster_egg.onBlockDestroyedByPlayer(this.worldObj, var1 + var6, var2 + var5, var3 + var7, 0);
-
-                                    if (this.rand.nextBoolean())
-                                    {
-                                        var4 = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (this.entityToAttack == null && !this.hasPath())
-            {
-                var1 = MathHelper.floor_double(this.posX);
-                var2 = MathHelper.floor_double(this.posY + 0.5D);
-                var3 = MathHelper.floor_double(this.posZ);
-                int var10 = this.rand.nextInt(6);
-                Block var11 = this.worldObj.getBlock(var1 + Facing.offsetsXForSide[var10], var2 + Facing.offsetsYForSide[var10], var3 + Facing.offsetsZForSide[var10]);
-                var6 = this.worldObj.getBlockMetadata(var1 + Facing.offsetsXForSide[var10], var2 + Facing.offsetsYForSide[var10], var3 + Facing.offsetsZForSide[var10]);
-
-                if (BlockSilverfish.func_150196_a(var11))
-                {
-                    this.worldObj.setBlock(var1 + Facing.offsetsXForSide[var10], var2 + Facing.offsetsYForSide[var10], var3 + Facing.offsetsZForSide[var10], Blocks.monster_egg, BlockSilverfish.func_150195_a(var11, var6), 3);
-                    this.spawnExplosionParticle();
-                    this.setDead();
-                }
-                else
-                {
-                    this.updateWanderPath();
-                }
-            }
-            else if (this.entityToAttack != null && !this.hasPath())
-            {
-                this.entityToAttack = null;
-            }
-        }
-    }
-
-    /**
-     * Takes a coordinate in and returns a weight to determine how likely this creature will try to path to the block.
-     * Args: x, y, z
-     */
-    public float getBlockPathWeight(int p_70783_1_, int p_70783_2_, int p_70783_3_)
-    {
-        return this.worldObj.getBlock(p_70783_1_, p_70783_2_ - 1, p_70783_3_) == Blocks.stone ? 10.0F : super.getBlockPathWeight(p_70783_1_, p_70783_2_, p_70783_3_);
+        return this.worldObj.getBlockState(p_180484_1_.offsetDown()).getBlock() == Blocks.stone ? 10.0F : super.func_180484_a(p_180484_1_);
     }
 
     /**
@@ -252,5 +158,137 @@ public class EntitySilverfish extends EntityMob
     public EnumCreatureAttribute getCreatureAttribute()
     {
         return EnumCreatureAttribute.ARTHROPOD;
+    }
+
+    class AIHideInStone extends EntityAIWander
+    {
+        private EnumFacing field_179483_b;
+        private boolean field_179484_c;
+        private static final String __OBFID = "CL_00002205";
+
+        public AIHideInStone()
+        {
+            super(EntitySilverfish.this, 1.0D, 10);
+            this.setMutexBits(1);
+        }
+
+        public boolean shouldExecute()
+        {
+            if (EntitySilverfish.this.getAttackTarget() != null)
+            {
+                return false;
+            }
+            else if (!EntitySilverfish.this.getNavigator().noPath())
+            {
+                return false;
+            }
+            else
+            {
+                Random var1 = EntitySilverfish.this.getRNG();
+
+                if (var1.nextInt(10) == 0)
+                {
+                    this.field_179483_b = EnumFacing.random(var1);
+                    BlockPos var2 = (new BlockPos(EntitySilverfish.this.posX, EntitySilverfish.this.posY + 0.5D, EntitySilverfish.this.posZ)).offset(this.field_179483_b);
+                    IBlockState var3 = EntitySilverfish.this.worldObj.getBlockState(var2);
+
+                    if (BlockSilverfish.func_176377_d(var3))
+                    {
+                        this.field_179484_c = true;
+                        return true;
+                    }
+                }
+
+                this.field_179484_c = false;
+                return super.shouldExecute();
+            }
+        }
+
+        public boolean continueExecuting()
+        {
+            return this.field_179484_c ? false : super.continueExecuting();
+        }
+
+        public void startExecuting()
+        {
+            if (!this.field_179484_c)
+            {
+                super.startExecuting();
+            }
+            else
+            {
+                World var1 = EntitySilverfish.this.worldObj;
+                BlockPos var2 = (new BlockPos(EntitySilverfish.this.posX, EntitySilverfish.this.posY + 0.5D, EntitySilverfish.this.posZ)).offset(this.field_179483_b);
+                IBlockState var3 = var1.getBlockState(var2);
+
+                if (BlockSilverfish.func_176377_d(var3))
+                {
+                    var1.setBlockState(var2, Blocks.monster_egg.getDefaultState().withProperty(BlockSilverfish.VARIANT_PROP, BlockSilverfish.EnumType.func_176878_a(var3)), 3);
+                    EntitySilverfish.this.spawnExplosionParticle();
+                    EntitySilverfish.this.setDead();
+                }
+            }
+        }
+    }
+
+    class AISummonSilverfish extends EntityAIBase
+    {
+        private EntitySilverfish field_179464_a = EntitySilverfish.this;
+        private int field_179463_b;
+        private static final String __OBFID = "CL_00002204";
+
+        public void func_179462_f()
+        {
+            if (this.field_179463_b == 0)
+            {
+                this.field_179463_b = 20;
+            }
+        }
+
+        public boolean shouldExecute()
+        {
+            return this.field_179463_b > 0;
+        }
+
+        public void updateTask()
+        {
+            --this.field_179463_b;
+
+            if (this.field_179463_b <= 0)
+            {
+                World var1 = this.field_179464_a.worldObj;
+                Random var2 = this.field_179464_a.getRNG();
+                BlockPos var3 = new BlockPos(this.field_179464_a);
+
+                for (int var4 = 0; var4 <= 5 && var4 >= -5; var4 = var4 <= 0 ? 1 - var4 : 0 - var4)
+                {
+                    for (int var5 = 0; var5 <= 10 && var5 >= -10; var5 = var5 <= 0 ? 1 - var5 : 0 - var5)
+                    {
+                        for (int var6 = 0; var6 <= 10 && var6 >= -10; var6 = var6 <= 0 ? 1 - var6 : 0 - var6)
+                        {
+                            BlockPos var7 = var3.add(var5, var4, var6);
+                            IBlockState var8 = var1.getBlockState(var7);
+
+                            if (var8.getBlock() == Blocks.monster_egg)
+                            {
+                                if (var1.getGameRules().getGameRuleBooleanValue("mobGriefing"))
+                                {
+                                    var1.destroyBlock(var7, true);
+                                }
+                                else
+                                {
+                                    var1.setBlockState(var7, ((BlockSilverfish.EnumType)var8.getValue(BlockSilverfish.VARIANT_PROP)).func_176883_d(), 3);
+                                }
+
+                                if (var2.nextBoolean())
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -2,8 +2,8 @@ package net.minecraft.world.chunk;
 
 import java.util.List;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IProgressUpdate;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 public interface IChunkProvider
@@ -19,15 +19,14 @@ public interface IChunkProvider
      */
     Chunk provideChunk(int p_73154_1_, int p_73154_2_);
 
-    /**
-     * loads or generates the chunk at the chunk location specified
-     */
-    Chunk loadChunk(int p_73158_1_, int p_73158_2_);
+    Chunk func_177459_a(BlockPos p_177459_1_);
 
     /**
      * Populates chunk with ores etc etc
      */
     void populate(IChunkProvider p_73153_1_, int p_73153_2_, int p_73153_3_);
+
+    boolean func_177460_a(IChunkProvider p_177460_1_, Chunk p_177460_2_, int p_177460_3_, int p_177460_4_);
 
     /**
      * Two modes of operation: if passed true, save all Chunks in one go.  If passed false, save up to two chunks.
@@ -50,16 +49,13 @@ public interface IChunkProvider
      */
     String makeString();
 
-    /**
-     * Returns a list of creatures of the specified type that can spawn at the given location.
-     */
-    List getPossibleCreatures(EnumCreatureType p_73155_1_, int p_73155_2_, int p_73155_3_, int p_73155_4_);
+    List func_177458_a(EnumCreatureType p_177458_1_, BlockPos p_177458_2_);
 
-    ChunkPosition func_147416_a(World p_147416_1_, String p_147416_2_, int p_147416_3_, int p_147416_4_, int p_147416_5_);
+    BlockPos func_180513_a(World worldIn, String p_180513_2_, BlockPos p_180513_3_);
 
     int getLoadedChunkCount();
 
-    void recreateStructures(int p_82695_1_, int p_82695_2_);
+    void func_180514_a(Chunk p_180514_1_, int p_180514_2_, int p_180514_3_);
 
     /**
      * Save extra data not associated with any Chunk.  Not saved during autosave, only during world unload.  Currently
