@@ -1,0 +1,18 @@
+package disconnected.utils;
+
+import net.pixelraven.ed209;
+import disconnected.module.Category;
+import disconnected.module.Module;
+
+public class CategoryCountUtils {
+	public static int getCount(Category category) {
+		int amount = 0;
+		
+		for(final Module module : Disconnected.DC.moduleManager.activeModules) {
+			if (module.getCategory() == category)
+				amount ++;
+		}
+		
+		return amount;
+	}
+}

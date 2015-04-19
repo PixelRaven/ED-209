@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="disconnected.ui.ClientGuiManager"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.ModuleManager"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.Category"/>
+<fullyQualifiedTypeName name="disconnected.module.Module"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.Module"/>
+</qualifiedTypeNameHistroy>
