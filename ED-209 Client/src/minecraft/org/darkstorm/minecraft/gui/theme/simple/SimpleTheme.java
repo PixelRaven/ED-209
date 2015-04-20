@@ -11,7 +11,8 @@ public class SimpleTheme extends AbstractTheme {
 	private final FontRenderer fontRenderer;
 
 	public SimpleTheme() {
-		fontRenderer = new UnicodeFontRenderer(new Font("Trebuchet MS", Font.PLAIN, 15));
+		//TODO ED-209: Removed arguments
+		fontRenderer = new UnicodeFontRenderer();
 
 		installUI(new SimpleFrameUI(this));
 		installUI(new SimplePanelUI(this));

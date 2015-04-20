@@ -198,7 +198,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage
     private ServerData currentServerData;
 
     /** The RenderEngine instance used by Minecraft */
-    private TextureManager renderEngine;
+    //TODO ED209: Changed to public
+    public TextureManager renderEngine;
 
     /**
      * Set to 'this' in Minecraft constructor; used by some settings get methods

@@ -1,13 +1,40 @@
-[22:31:28] [Client thread/INFO]: Setting user: Player901
-[22:31:28] [Client thread/INFO]: (Session ID is token:0:Player901)
-[22:31:31] [Client thread/INFO]: LWJGL Version: 2.9.2
-[22:31:31] [Client thread/INFO]: Reloading ResourceManager: Default
-[22:31:31] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[22:31:31] [Thread-12/INFO]: Initializing LWJGL OpenAL
-[22:31:31] [Thread-12/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[22:31:32] [Thread-12/INFO]: OpenAL initialized.
-[22:31:32] [Sound Library Loader/INFO]: Sound engine started
-[22:31:37] [Client thread/INFO]: Created: 512x512 textures-atlas
-[22:31:54] [Client thread/INFO]: Stopping!
-[22:31:54] [Client thread/INFO]: SoundSystem shutting down...
-[22:31:55] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[14:25:12] [Client thread/INFO]: Setting user: Player515
+[14:25:12] [Client thread/INFO]: (Session ID is token:0:Player515)
+[14:25:14] [Client thread/INFO]: LWJGL Version: 2.9.2
+[14:25:15] [Client thread/INFO]: Reloading ResourceManager: Default
+[14:25:15] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[14:25:15] [Thread-11/INFO]: Initializing LWJGL OpenAL
+[14:25:15] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[14:25:15] [Thread-11/INFO]: OpenAL initialized.
+[14:25:16] [Sound Library Loader/INFO]: Sound engine started
+[14:25:18] [Client thread/INFO]: Created: 512x512 textures-atlas
+[14:25:27] [Server thread/INFO]: Starting integrated minecraft server version 1.8
+[14:25:27] [Server thread/INFO]: Generating keypair
+[14:25:27] [Server thread/INFO]: Preparing start region for level 0
+[14:25:28] [Server thread/INFO]: Preparing spawn area: 5%
+[14:25:29] [Server thread/INFO]: Preparing spawn area: 13%
+[14:25:30] [Server thread/INFO]: Preparing spawn area: 23%
+[14:25:31] [Server thread/INFO]: Preparing spawn area: 34%
+[14:25:32] [Server thread/INFO]: Preparing spawn area: 48%
+[14:25:33] [Server thread/INFO]: Preparing spawn area: 62%
+[14:25:34] [Server thread/INFO]: Preparing spawn area: 77%
+[14:25:35] [Server thread/INFO]: Preparing spawn area: 92%
+[14:25:36] [Server thread/INFO]: Changing view distance to 12, from 10
+[14:25:36] [Server thread/INFO]: Player515[local:E:dbe0cd77] logged in with entity id 115 at (584.5, 68.0, 175.5)
+[14:25:36] [Server thread/INFO]: Player515 joined the game
+[14:25:40] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2597ms behind, skipping 51 tick(s)
+[14:25:45] [Server thread/INFO]: Player515 has just earned the achievement [Taking Inventory]
+[14:25:45] [Client thread/INFO]: [CHAT] Player515 has just earned the achievement [Taking Inventory]
+[14:25:54] [Server thread/INFO]: Saving and pausing game...
+[14:25:54] [Server thread/INFO]: Saving chunks for level 'mcpworld'/Overworld
+[14:25:55] [Server thread/INFO]: Saving chunks for level 'mcpworld'/Nether
+[14:25:55] [Server thread/INFO]: Saving chunks for level 'mcpworld'/The End
+[14:25:58] [Server thread/INFO]: Stopping server
+[14:25:58] [Server thread/INFO]: Saving players
+[14:25:58] [Server thread/INFO]: Saving worlds
+[14:25:58] [Server thread/INFO]: Saving chunks for level 'mcpworld'/Overworld
+[14:25:58] [Server thread/INFO]: Saving chunks for level 'mcpworld'/Nether
+[14:25:58] [Server thread/INFO]: Saving chunks for level 'mcpworld'/The End
+[14:25:58] [Client thread/INFO]: Stopping!
+[14:25:58] [Client thread/INFO]: SoundSystem shutting down...
+[14:25:59] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com

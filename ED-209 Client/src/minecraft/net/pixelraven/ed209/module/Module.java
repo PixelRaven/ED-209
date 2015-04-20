@@ -1,8 +1,7 @@
 package net.pixelraven.ed209.module;
 
 import org.lwjgl.input.Keyboard;
-
-import disconnected.ui.ClientGuiManager;
+import net.pixelraven.ed209.ui.ClientGuiManager;
 
 public class Module {
 	private String moduleName, moduleUsage = "None";

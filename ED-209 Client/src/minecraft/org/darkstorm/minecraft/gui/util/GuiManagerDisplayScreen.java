@@ -1,6 +1,7 @@
 package org.darkstorm.minecraft.gui.util;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 
 import net.minecraft.client.gui.GuiScreen;
 

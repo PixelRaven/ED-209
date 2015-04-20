@@ -1,12 +1,11 @@
-package disconnected.font;
+package net.pixelraven.ed209.font;
 
 import java.awt.Font;
 
-import disconnected.ui.UIRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ResourceLocation;
-
+import net.pixelraven.ed209.ui.UIRenderer;
 
 public class UnicodeFontRenderer extends FontRenderer {
 	public UnicodeFontRenderer() {

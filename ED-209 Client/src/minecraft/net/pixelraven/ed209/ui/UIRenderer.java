@@ -2,15 +2,11 @@ package net.pixelraven.ed209.ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.pixelraven.ed209.module.Module;
+import net.pixelraven.ed209.module.ModuleManager;
 
 import org.darkstorm.minecraft.gui.component.Frame;
 import org.darkstorm.minecraft.gui.util.GuiManagerDisplayScreen;
-
-import disconnected.Disconnected;
-//import disconnected.font.Fonts;
-import disconnected.module.Module;
-import disconnected.module.ModuleManager;
-import disconnected.module.modules.ClickGui;
 
 public class UIRenderer {
 	public static void renderUI() {
@@ -20,7 +16,7 @@ public class UIRenderer {
 //		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("c", 16, 2, 255 << 16);
 //		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("onnected", 22, 2, (255 << 16) + (255 << 8));
 //		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("V" + Float.toString(Disconnected.DC.CLIENT_PRETTYVERSION), Minecraft.getMinecraft().displayWidth/2-22, 2, (255 << 16));
-		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("Shrekt", 2, 2, (255 << 8));
+//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("Shrekt", 2, 2, (255 << 8));
 		renderArrayList();
 		
 		for(Module module : ModuleManager.activeModules) {
@@ -29,11 +25,11 @@ public class UIRenderer {
 	}
 	
 	private static void renderAndUpdateFrames() {
-		for(Frame moduleFrame : net.pixelraven.ed209.guiManager.getFrames()) {
+		for(Frame moduleFrame : net.pixelraven.ed209.ED209.guiManager.getFrames()) {
 			moduleFrame.update();
 		}
 
-		for(Frame moduleFrame : Disconnected.DC.guiManager.getFrames()) {
+		for(Frame moduleFrame : net.pixelraven.ed209.ED209.guiManager.getFrames()) {
 			if(moduleFrame.isPinned() || Minecraft.getMinecraft().currentScreen instanceof GuiManagerDisplayScreen) {
 				moduleFrame.render();
 			}
@@ -58,18 +54,18 @@ public class UIRenderer {
 				i += 15;
 				s = string.substring(i, i+1);
 			}
-			Minecraft.getMinecraft().fontRenderer.drawStringWithShadow(s, x+w, y, color);
-			w += Minecraft.getMinecraft().fontRenderer.getStringWidth(s);
+			Minecraft.getMinecraft().fontRendererObj.drawString(s, x+w, y, color);
+			w += Minecraft.getMinecraft().fontRendererObj.getStringWidth(s);
 		}
 	}
 	
 	public static int textWidth(String string) {
-		return Minecraft.getMinecraft().fontRenderer.getStringWidth(string);
+		return Minecraft.getMinecraft().fontRendererObj.getStringWidth(string);
 	}
 	
 	private static void renderArrayList() {
 		int yCount = 8;
-		for(Module module : Disconnected.DC.moduleManager.activeModules) {
+		for(Module module : ModuleManager.activeModules) {
 			if(module.getToggled()) {
 				drawText(module.getName(), 2, yCount, (255 << 8));
 				yCount += 8;
