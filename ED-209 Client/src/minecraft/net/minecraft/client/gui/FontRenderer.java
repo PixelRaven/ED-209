@@ -329,7 +329,13 @@ public class FontRenderer implements IResourceManagerReloadListener
     {
         return this.func_175065_a(text, (float)x, (float)y, color, false);
     }
-
+    
+    //TODO ED-209: Added drawStringWithShadow
+    public int drawStringWithShadow(String text, int x, int y, int color)
+    {
+        return this.func_175065_a(text, (float)x, (float)y, color, true);
+    }
+    
     public int func_175065_a(String p_175065_1_, float p_175065_2_, float p_175065_3_, int p_175065_4_, boolean p_175065_5_)
     {
         GlStateManager.enableAlpha();

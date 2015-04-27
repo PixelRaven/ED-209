@@ -3,11 +3,15 @@ package net.minecraft.client.gui;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
+
+import org.lwjgl.opengl.GL11;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -42,6 +46,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.world.border.WorldBorder;
+import net.pixelraven.ed209.ui.UIRenderer;
 
 public class GuiIngame extends Gui
 {
@@ -221,6 +226,11 @@ public class GuiIngame extends Gui
             this.func_175185_b(var2);
         }
 
+        //TODO ED-209: render our GUI
+        GL11.glPushMatrix();
+        UIRenderer.renderUI();
+        GL11.glPopMatrix();
+        
         if (this.mc.gameSettings.showDebugInfo)
         {
             this.overlayDebug.func_175237_a(var2);

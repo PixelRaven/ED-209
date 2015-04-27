@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="disconnected.ui.ClientGuiManager"/>
+<fullyQualifiedTypeName name="disconnected.module.Module"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.utils.CategoryCountUtils"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.ClientGuiManager"/>
+<fullyQualifiedTypeName name="net.minecraft.client.renderer.WorldRenderer"/>
+<fullyQualifiedTypeName name="java.io.IOException"/>
+<fullyQualifiedTypeName name="net.minecraft.client.gui.FontRenderer"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.ClickGui"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.UIRenderer"/>
+<fullyQualifiedTypeName name="org.lwjgl.opengl.GL11"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.ModuleManager"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.Category"/>
-<fullyQualifiedTypeName name="disconnected.module.Module"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.Module"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Sneak"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Step"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Sprint"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Fly"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 </qualifiedTypeNameHistroy>

@@ -2,6 +2,7 @@ package net.pixelraven.ed209.ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.pixelraven.ed209.ED209;
 import net.pixelraven.ed209.module.Module;
 import net.pixelraven.ed209.module.ModuleManager;
 
@@ -10,13 +11,10 @@ import org.darkstorm.minecraft.gui.util.GuiManagerDisplayScreen;
 
 public class UIRenderer {
 	public static void renderUI() {
-		//Disconnected name
-//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("D", 2, 2, 255 << 16);
-//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("is", 8, 2, (255 << 16) + (255 << 8));
-//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("c", 16, 2, 255 << 16);
-//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("onnected", 22, 2, (255 << 16) + (255 << 8));
-//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("V" + Float.toString(Disconnected.DC.CLIENT_PRETTYVERSION), Minecraft.getMinecraft().displayWidth/2-22, 2, (255 << 16));
-//		Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("Shrekt", 2, 2, (255 << 8));
+		//ED-209 name and version
+		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("ED-", 2, 2, (255 << 4) + (255 << 4));
+		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 12, 2, (255 << 16));
+		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("V" + ED209.ED.CLIENT_PRETTYVERSION, Minecraft.getMinecraft().displayWidth/2-28, 2, (255 << 16));
 		renderArrayList();
 		
 		for(Module module : ModuleManager.activeModules) {
@@ -54,7 +52,7 @@ public class UIRenderer {
 				i += 15;
 				s = string.substring(i, i+1);
 			}
-			Minecraft.getMinecraft().fontRendererObj.drawString(s, x+w, y, color);
+			Minecraft.getMinecraft().fontRendererObj.drawString(s, x+w, y, 0);
 			w += Minecraft.getMinecraft().fontRendererObj.getStringWidth(s);
 		}
 	}

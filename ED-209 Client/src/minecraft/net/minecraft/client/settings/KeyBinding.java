@@ -19,7 +19,8 @@ public class KeyBinding implements Comparable
     private int keyCode;
 
     /** because _303 wanted me to call it that(Caironater) */
-    private boolean pressed;
+    //TODO ED-209: Changed from private to public
+    public boolean pressed;
     private int pressTime;
     private static final String __OBFID = "CL_00000628";
 

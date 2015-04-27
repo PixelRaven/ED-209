@@ -22,7 +22,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.pixelraven.ed209.ui;
+package disconnected.ui;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -31,10 +31,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.minecraft.client.Minecraft;
-import net.pixelraven.ed209.module.Category;
-import net.pixelraven.ed209.module.Module;
-import net.pixelraven.ed209.module.ModuleManager;
-import net.pixelraven.ed209.utils.CategoryCountUtils;
 
 import org.darkstorm.minecraft.gui.AbstractGuiManager;
 import org.darkstorm.minecraft.gui.component.Button;
@@ -51,6 +47,11 @@ import org.darkstorm.minecraft.gui.listener.ButtonListener;
 import org.darkstorm.minecraft.gui.theme.Theme;
 import org.lwjgl.input.Keyboard;
 
+import disconnected.Disconnected;
+import disconnected.module.Category;
+import disconnected.module.Module;
+import disconnected.module.ModuleManager;
+
 /**
  * Minecraft GUI API
  * 
@@ -66,7 +67,7 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		}
 
 		private ModuleFrame(String title, Category category) {
-			super(title + " @r000@g255@b000[" + CategoryCountUtils.getCount(category) + "]");
+			super(title + " @r000@g255@b000[" + disconnected.utils.CategoryCountUtils.getCount(category) + "]");
 		}
 
 		private ModuleFrame(String title) {
@@ -83,7 +84,7 @@ public final class ClientGuiManager extends AbstractGuiManager {
 	public void bindFrame() {
 		ModuleFrame frame;
 		frame = new ModuleFrame("Binds");
-		frame.setTheme(getTheme());
+		frame.setTheme(theme);
 		frame.setLayoutManager(new GridLayoutManager(6, 0));
 		frame.setVisible(true);
 		frame.setClosable(false);
@@ -121,7 +122,7 @@ public final class ClientGuiManager extends AbstractGuiManager {
 	public void keyFrame() {
 		ModuleFrame frame;
 		frame = new ModuleFrame("Colour Key");
-		frame.setTheme(getTheme());
+		frame.setTheme(theme);
 		frame.setLayoutManager(new GridLayoutManager(1, 0));
 		frame.setVisible(true);
 		frame.setClosable(false);
@@ -153,7 +154,7 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		keyFrame();
 		
 		final Map<Category, ModuleFrame> categoryFrames = new HashMap<Category, ModuleFrame>();
-		for(final Module module : ModuleManager.activeModules) {
+		for(final Module module : Disconnected.DC.moduleManager.activeModules) {
 			final String moduleCol;
 			switch (module.getBlockedState()) {
 				case 0:
@@ -178,7 +179,7 @@ public final class ClientGuiManager extends AbstractGuiManager {
 				name = Character.toUpperCase(name.charAt(0))
 						+ name.substring(1);
 				frame = new ModuleFrame(name, module.getCategory());
-				frame.setTheme(getTheme());
+				frame.setTheme(theme);
 				frame.setLayoutManager(new GridLayoutManager(2, 0));
 				frame.setVisible(!name.equals("None"));
 				frame.setClosable(false);

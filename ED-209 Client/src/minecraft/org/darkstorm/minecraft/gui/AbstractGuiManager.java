@@ -30,6 +30,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.darkstorm.minecraft.gui.component.Frame;
 import org.darkstorm.minecraft.gui.theme.Theme;
 
+import net.pixelraven.ed209.module.Module;
+import net.pixelraven.ed209.module.ModuleManager;
+
 /**
  * Minecraft GUI API
  * 
@@ -38,7 +41,7 @@ import org.darkstorm.minecraft.gui.theme.Theme;
 public abstract class AbstractGuiManager implements GuiManager {
 	private final List<Frame> frames;
 
-	private Theme theme;
+	protected Theme theme;
 
 	public AbstractGuiManager() {
 		frames = new CopyOnWriteArrayList<Frame>();
@@ -86,6 +89,9 @@ public abstract class AbstractGuiManager implements GuiManager {
 
 	@Override
 	public void render() {
+		for(Module module : ModuleManager.activeModules) {
+			module.listenBind();
+		}
 		Frame[] frames = getFrames();
 		for(int i = frames.length - 1; i >= 0; i--)
 			frames[i].render();
@@ -104,5 +110,6 @@ public abstract class AbstractGuiManager implements GuiManager {
 		Frame[] frames = getFrames();
 		for(int i = frames.length - 1; i >= 0; i--)
 			frames[i].update();
+
 	}
 }

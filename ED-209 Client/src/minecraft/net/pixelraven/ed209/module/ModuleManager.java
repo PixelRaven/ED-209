@@ -3,6 +3,11 @@ package net.pixelraven.ed209.module;
 import java.util.ArrayList;
 
 import net.minecraft.client.Minecraft;
+import net.pixelraven.ed209.module.modules.ClickGui;
+import net.pixelraven.ed209.module.modules.Fly;
+import net.pixelraven.ed209.module.modules.Sneak;
+import net.pixelraven.ed209.module.modules.Sprint;
+import net.pixelraven.ed209.module.modules.Step;
 
 public class ModuleManager {
 	public static ArrayList<Module> activeModules = new ArrayList<Module>();
@@ -14,7 +19,7 @@ public class ModuleManager {
 	//public static BowAimBot bowAimBotModule;
 	
 	public ModuleManager() {
-		//this.activeModules.add(new ClickGui());
+		this.activeModules.add(new ClickGui());
 		
 		//this.activeModules.add(new Absorption());
 		//this.activeModules.add(new AntiAFK());
@@ -33,7 +38,7 @@ public class ModuleManager {
 		//this.activeModules.add(new FastPlace());
 		//this.activeModules.add(new FastSwing());
 		//this.activeModules.add(new FastWalk());
-		//this.activeModules.add(new Fly());
+		this.activeModules.add(new Fly());
 		//this.activeModules.add(new ForceField()); 
 		//this.activeModules.add(new FullBright());
 		//this.activeModules.add(new Glide());
@@ -55,11 +60,11 @@ public class ModuleManager {
 		//this.activeModules.add(new PlayerTracers());
 		//this.activeModules.add(new PortalTrapped());
 		//this.activeModules.add(new Regen());
-		//this.activeModules.add(new Sneak());
+		this.activeModules.add(new Sneak());
 		//this.activeModules.add(new Spam());
 		//this.activeModules.add(new Spider());
-		//this.activeModules.add(new Sprint());
-		//this.activeModules.add(new Step());
+		this.activeModules.add(new Sprint());
+		this.activeModules.add(new Step());
 		//this.activeModules.add(new StepJump());
 		//this.activeModules.add(new Strafe360());
 		//this.activeModules.add(new Swim());

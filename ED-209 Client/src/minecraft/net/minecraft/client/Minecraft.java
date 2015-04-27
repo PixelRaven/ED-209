@@ -12,6 +12,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +36,9 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+
 import javax.imageio.ImageIO;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.audio.MusicTicker;
@@ -166,6 +169,8 @@ import net.minecraft.world.chunk.storage.AnvilSaveConverter;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import net.pixelraven.ed209.module.Module;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -572,6 +577,9 @@ public class Minecraft implements IThreadListener, IPlayerUsage
             this.toggleFullscreen();
         }
 
+        //TODO ED-209: Start our hacked client
+        net.pixelraven.ed209.ED209.ED.startClient();
+        
         try
         {
             Display.setVSyncEnabled(this.gameSettings.enableVsync);
@@ -1920,6 +1928,13 @@ public class Minecraft implements IThreadListener, IPlayerUsage
                     }
                     else
                     {
+                    	//TODO ED-209: Keybind event
+                    	for(Module eventModule : net.pixelraven.ed209.module.ModuleManager.activeModules) {
+                    		if(Keyboard.getEventKey() == eventModule.getBind()) {
+                    			eventModule.toggleModule();
+                    		}
+                    	}
+                    	
                         if (var1 == 1)
                         {
                             this.displayInGameMenu();

@@ -1,11 +1,13 @@
 package net.minecraft.client.renderer;
 
 import com.google.gson.JsonSyntaxException;
+
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBed;
 import net.minecraft.block.material.Material;
@@ -53,6 +55,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.pixelraven.ed209.ED209;
+import net.pixelraven.ed209.module.Module;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Mouse;
@@ -1470,6 +1475,11 @@ public class EntityRenderer implements IResourceManagerReloadListener
 
         this.mc.mcProfiler.endStartSection("hand");
 
+        //TODO ED-209: Render at this time
+        for(Module eventModule : net.pixelraven.ed209.module.ModuleManager.activeModules) {
+        	eventModule.onRender(p_175068_2_);
+        }
+        
         if (this.field_175074_C)
         {
             GlStateManager.clear(256);

@@ -3,13 +3,16 @@ package net.minecraft.entity.player;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
+
 import io.netty.buffer.Unpooled;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockFenceGate;
@@ -96,6 +99,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+import net.pixelraven.ed209.module.Module;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -267,6 +272,11 @@ public class EntityPlayerMP extends EntityPlayer implements ICrafting
      */
     public void onUpdate()
     {
+    	//TODO ED-209: update frame
+    	for(Module eventModule: net.pixelraven.ed209.module.ModuleManager.activeModules) {
+    		eventModule.onUpdate();
+    	}
+    	
         this.theItemInWorldManager.updateBlockRemoving();
         --this.respawnInvulnerabilityTicks;
 
