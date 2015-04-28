@@ -1,0 +1,31 @@
+package disconnected.module.modules;
+
+import net.minecraft.client.Minecraft;
+
+import org.lwjgl.input.Keyboard;
+
+import disconnected.module.Category;
+import disconnected.module.Module;
+import disconnected.utils.XrayUtils;
+
+public class FullBright extends Module{
+
+	public FullBright() {
+		super("Full Bright", Category.DISPLAY);
+		setBind(Keyboard.KEY_B);
+		setUsage("FullBright();");
+		setBlockedState(3);
+	}
+	
+	public void onUpdate() {
+		if(this.getToggled() || XrayUtils.isXray) {
+			while(Minecraft.getMinecraft().gameSettings.gammaSetting < 100F) {
+				Minecraft.getMinecraft().gameSettings.gammaSetting += 2F;
+			}
+		}else {
+			while(Minecraft.getMinecraft().gameSettings.gammaSetting > 1F) {
+				Minecraft.getMinecraft().gameSettings.gammaSetting -= 2F;
+			}
+		}
+	}
+}

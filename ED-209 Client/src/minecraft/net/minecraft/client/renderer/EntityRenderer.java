@@ -168,7 +168,8 @@ public class EntityRenderer implements IResourceManagerReloadListener
     private float fogColor1;
     private int field_175079_V = 0;
     private boolean field_175078_W = false;
-    private double cameraZoom = 1.0D;
+    //TODO ED-209: Changed cameraZoom to public
+    public double cameraZoom = 1.0D;
     private double cameraYaw;
     private double cameraPitch;
     private ShaderGroup theShaderGroup;

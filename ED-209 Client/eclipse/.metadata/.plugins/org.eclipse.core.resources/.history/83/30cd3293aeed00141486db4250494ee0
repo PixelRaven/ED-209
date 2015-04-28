@@ -1,0 +1,17 @@
+package disconnected.module.modules;
+
+import net.minecraft.client.Minecraft;
+import disconnected.module.Category;
+import disconnected.module.Module;
+
+public class Exit extends Module{
+	public Exit() {
+		super("Exit", Category.OTHER);
+		setUseType(1);
+		setUsage("Disconnect();");
+	}
+	
+	public void onUse() {
+		Minecraft.getMinecraft().shutdownMinecraftApplet();
+	}
+}

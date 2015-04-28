@@ -1,0 +1,23 @@
+package disconnected.module.modules;
+
+import net.minecraft.client.Minecraft;
+
+import org.lwjgl.input.Keyboard;
+
+import disconnected.module.Category;
+import disconnected.module.Module;
+
+public class FastPlace extends Module{
+
+	public FastPlace() {
+		super("Fast Place", Category.BUILDING);
+		setUsage("FastPlace();");
+		setBlockedState(2);
+	}
+	
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		Minecraft.getMinecraft().rightClickDelayTimer = 0;
+	}
+}
