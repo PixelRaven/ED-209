@@ -13,7 +13,7 @@ public class UIRenderer {
 	public static void renderUI() {
 		//ED-209 name and version
 		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("ED-", 2, 2, (255 << 4) + (255 << 4));
-		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 12, 2, (255 << 16));
+		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 14, 2, (255 << 16));
 		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("V" + ED209.ED.CLIENT_PRETTYVERSION, Minecraft.getMinecraft().displayWidth/2-28, 2, (255 << 16));
 		renderArrayList();
 		
@@ -52,7 +52,7 @@ public class UIRenderer {
 				i += 15;
 				s = string.substring(i, i+1);
 			}
-			Minecraft.getMinecraft().fontRendererObj.drawString(s, x+w, y, 0);
+			Minecraft.getMinecraft().fontRendererObj.drawString(s, x+w, y, color);
 			w += Minecraft.getMinecraft().fontRendererObj.getStringWidth(s);
 		}
 	}
