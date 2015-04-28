@@ -13,7 +13,7 @@ public class UIRenderer {
 	public static void renderUI() {
 		//ED-209 name and version
 		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("ED-", 2, 2, (255 << 4) + (255 << 4));
-		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 14, 2, (255 << 16));
+		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 18, 2, (255 << 16));
 		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("V" + ED209.ED.CLIENT_PRETTYVERSION, Minecraft.getMinecraft().displayWidth/2-28, 2, (255 << 16));
 		renderArrayList();
 		
@@ -36,6 +36,7 @@ public class UIRenderer {
 	
 	public static void drawText(String string, int x, int y, int color) {
 		int w = 0;
+		color = (255 << 16) + (255 << 8) + (255); //Default to white
 		for(int i = 0; i < string.length(); i++) {
 			String s = string.substring(i, i+1);
 			if(s.equals("@") && string.length() > i + 15) {
