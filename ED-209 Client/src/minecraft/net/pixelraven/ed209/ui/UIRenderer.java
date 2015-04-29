@@ -63,11 +63,11 @@ public class UIRenderer {
 	}
 	
 	private static void renderArrayList() {
-		int yCount = 8;
+		int yCount = 12;
 		for(Module module : ModuleManager.activeModules) {
 			if(module.getToggled()) {
 				drawText(module.getName(), 2, yCount, (255 << 8));
-				yCount += 8;
+				yCount += 12;
 			}
 		}
 	}

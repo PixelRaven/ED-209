@@ -3,13 +3,13 @@ package net.pixelraven.ed209.module.modules;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-//import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.util.BlockPos;
 import net.pixelraven.ed209.module.Category;
 import net.pixelraven.ed209.module.Module;
 
 public class MagicCarpet extends Module{
-	double buildRadius = 3.0D;
+	double buildRadius = 4.0D;
 	int xPos = -1, yPos = -1, zPos = -1;
 	
 	public MagicCarpet() {
@@ -19,22 +19,21 @@ public class MagicCarpet extends Module{
 	}
 	
 	public void onUpdate() {
-		/*if(!this.getToggled())
+		if(!this.getToggled())
 			return;
-		//for(int yRadius = (int)this.buildRadius; yRadius >= (-this.buildRadius); yRadius--) {
-			for(int zRadius = (int)(-this.buildRadius); zRadius <= this.buildRadius; zRadius++) {
-				for(int xRadius = (int)(-this.buildRadius); xRadius <= this.buildRadius; xRadius++) {
-					this.xPos = (int)Math.round(Minecraft.getMinecraft().thePlayer.posX + xRadius);
-					this.yPos = (int)Math.round(Minecraft.getMinecraft().thePlayer.posY - 4);// + yRadius);
-					this.zPos = (int)Math.round(Minecraft.getMinecraft().thePlayer.posZ + zRadius);
-		
-					Block currentBlock = Minecraft.getMinecraft().theWorld.getBlock(this.xPos, this.yPos, this.zPos);
+		for(int zRadius = (int)(-this.buildRadius); zRadius <= this.buildRadius; zRadius++) {
+			for(int xRadius = (int)(-this.buildRadius); xRadius <= this.buildRadius; xRadius++) {
+				this.xPos = (int)Math.round(Minecraft.getMinecraft().thePlayer.posX);// + xRadius);
+				this.yPos = (int)Math.round(Minecraft.getMinecraft().thePlayer.posY - 2);
+				this.zPos = (int)Math.round(Minecraft.getMinecraft().thePlayer.posZ);// + zRadius);
+				BlockPos bp = new BlockPos(this.xPos, this.yPos, this.zPos);
+				
+				Block currentBlock = Minecraft.getMinecraft().theWorld.getChunkFromBlockCoords(bp).getBlock(bp);
 					
-					if(currentBlock.getMaterial() != Material.air) {		
-						Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(this.xPos, this.yPos, this.zPos, (int)(Math.random()*6), null, 0, 0, 0));
-					}
+				if(currentBlock.getMaterial() != Material.air) {		
+					Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C08PacketPlayerBlockPlacement(bp, (int)(Math.random()*6), null, (int)(Math.random()*6), 0, (int)(Math.random()*6)));
 				}
 			}
-		//}*/
+		}
 	}
 }

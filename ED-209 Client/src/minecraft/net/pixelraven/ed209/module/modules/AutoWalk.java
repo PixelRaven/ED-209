@@ -18,8 +18,13 @@ public class AutoWalk extends Module{
 		if(!this.getToggled())
 			return;
 		
-		Minecraft.getMinecraft().thePlayer.moveForward = 1;
-		Minecraft.getMinecraft().thePlayer.motionX = Math.cos((90+PlayerVars.getYawLookAngle())/57.3)*speed;
-		Minecraft.getMinecraft().thePlayer.motionZ = Math.sin((90+PlayerVars.getYawLookAngle())/57.3)*speed;
+		//Minecraft.getMinecraft().thePlayer.moveForward = 1;
+		//Minecraft.getMinecraft().thePlayer.motionX = Math.cos((90+PlayerVars.getYawLookAngle())/57.3)*speed;
+		//Minecraft.getMinecraft().thePlayer.motionZ = Math.sin((90+PlayerVars.getYawLookAngle())/57.3)*speed;
+		Minecraft.getMinecraft().gameSettings.keyBindForward.pressed = true;
+	}
+	
+	public void onDisable() {
+		Minecraft.getMinecraft().gameSettings.keyBindForward.pressed = false;
 	}
 }

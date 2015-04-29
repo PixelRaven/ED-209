@@ -1,0 +1,29 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
+import net.minecraft.network.play.client.C07PacketPlayerDigging.Action;
+import net.minecraft.util.EnumFacing;
+
+import org.lwjgl.input.Keyboard;
+
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class PacketSneak extends Module{
+	public PacketSneak() {
+		super("Packet Sneak", Category.MOVEMENT);
+		setUsage("PacketSneak();");
+		setBlockedState(2);
+	}
+	
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C03PacketPlayer(Action., bp, EnumFacing.NORTH));
+	}
+	
+	public void onDisable() {
+		Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(Action.START_DESTROY_BLOCK, bp, EnumFacing.NORTH));
+	}
+}

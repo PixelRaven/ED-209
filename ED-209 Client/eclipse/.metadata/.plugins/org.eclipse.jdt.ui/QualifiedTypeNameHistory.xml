@@ -19,4 +19,20 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Sprint"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Fly"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
+<fullyQualifiedTypeName name="net.minecraft.util.BlockPos"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Absorption"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AntiAFK"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoWalk"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Spider"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Zoom"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Swim"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Disconnect"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Exit"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Dead"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastPlace"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FullBright"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.House"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Nuker"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.MagicCarpet"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Umbrella"/>
 </qualifiedTypeNameHistroy>
