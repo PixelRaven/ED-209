@@ -14,7 +14,7 @@ public class PacketSneak extends Module{
 	public PacketSneak() {
 		super("Packet Sneak", Category.MOVEMENT);
 		setUsage("PacketSneak();");
-		setBlockedState(2);
+		setBlockedState(1);
 	}
 	
 	public void onUpdate() {

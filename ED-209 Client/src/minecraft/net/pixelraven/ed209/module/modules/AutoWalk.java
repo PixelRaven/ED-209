@@ -11,7 +11,7 @@ public class AutoWalk extends Module{
 	public AutoWalk() {
 		super("Auto Walk", Category.MOVEMENT);
 		setUsage("AutoWalk();");
-		setBlockedState(0);
+		setBlockedState(2);
 	}
 	
 	public void onUpdate() {

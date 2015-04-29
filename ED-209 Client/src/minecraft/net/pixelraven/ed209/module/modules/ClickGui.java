@@ -22,7 +22,6 @@ public class ClickGui extends Module{
 	}
 	
 	public void onToggle() {
-	System.out.println("Toggle Click GUI");
 		if(!(Minecraft.getMinecraft().currentScreen instanceof GuiManagerDisplayScreen))
 			Minecraft.getMinecraft().displayGuiScreen(new GuiManagerDisplayScreen(ED209.guiManager));
 	}

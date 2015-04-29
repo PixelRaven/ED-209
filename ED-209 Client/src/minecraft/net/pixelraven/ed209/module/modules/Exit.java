@@ -10,6 +10,7 @@ public class Exit extends Module{
 		setUseType(1);
 		setUsage("Disconnect();");
 		setBlockedState(4);
+		setBlockedState(3);
 	}
 	
 	public void onUse() {

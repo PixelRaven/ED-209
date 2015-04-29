@@ -10,7 +10,7 @@ public class Derp extends Module{
 	public Derp() {
 		super("Derp", Category.PLAYER);
 		setUsage("Derp();");
-		setBlockedState(3);
+		setBlockedState(2);
 	}
 	
 	public void onUpdate() {

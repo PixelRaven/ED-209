@@ -11,7 +11,7 @@ public class AutoMine extends Module{
 	public AutoMine() {
 		super("Auto Mine", Category.MOVEMENT);
 		setUsage("AutoMine();");
-		setBlockedState(0);
+		setBlockedState(2);
 	}
 	
 	public void onUpdate() {

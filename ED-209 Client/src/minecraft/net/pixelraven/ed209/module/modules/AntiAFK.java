@@ -8,6 +8,8 @@ public class AntiAFK extends Module{
 	public int tick = 0;
 	public AntiAFK() {
 		super("Anti AFK", Category.PLAYER);
+		setUsage("AntiAFK();");
+		setBlockedState(2);
 	}
 	
 	public void onUpdate() {

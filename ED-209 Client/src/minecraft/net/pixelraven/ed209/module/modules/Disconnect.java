@@ -1,6 +1,10 @@
 package net.pixelraven.ed209.module.modules;
 
+import org.darkstorm.minecraft.gui.util.GuiManagerDisplayScreen;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.pixelraven.ed209.ED209;
 import net.pixelraven.ed209.module.Category;
 import net.pixelraven.ed209.module.Module;
 
@@ -9,9 +13,11 @@ public class Disconnect extends Module{
 		super("Disconnect", Category.MISC);
 		setUseType(1);
 		setUsage("Disconnect();");
+		setBlockedState(3);
 	}
 	
 	public void onUse() {
+		Minecraft.getMinecraft().displayGuiScreen(new GuiMainMenu());
 		Minecraft.getMinecraft().stopIntegratedServer();
 	}
 }

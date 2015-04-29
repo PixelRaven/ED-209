@@ -35,27 +35,7 @@ public class UIRenderer {
 	}
 	
 	public static void drawText(String string, int x, int y, int color) {
-		int w = 0;
-		color = (255 << 16) + (255 << 8) + (255); //Default to white
-		for(int i = 0; i < string.length(); i++) {
-			String s = string.substring(i, i+1);
-			if(s.equals("@") && string.length() > i + 15) {
-				String str = string.substring(i, i+15);
-				String col1 = str.substring(2, 5);
-				String col2 = str.substring(7, 10);
-				String col3 = str.substring(12, 15);
-				int colR = Integer.parseInt(col1);
-				int colG = Integer.parseInt(col2);
-				int colB = Integer.parseInt(col3);
-				color = (colR << 16) + (colG << 8) + (colB);
-				
-				//System.out.println("col1: " + col1 + " col2: " + col2 + " col3: " + col3);
-				i += 15;
-				s = string.substring(i, i+1);
-			}
-			Minecraft.getMinecraft().fontRendererObj.drawString(s, x+w, y, color);
-			w += Minecraft.getMinecraft().fontRendererObj.getStringWidth(s);
-		}
+		Minecraft.getMinecraft().fontRendererObj.drawString(string, x, y, color);
 	}
 	
 	public static int textWidth(String string) {
@@ -63,11 +43,11 @@ public class UIRenderer {
 	}
 	
 	private static void renderArrayList() {
-		int yCount = 12;
+		int yCount = 10;
 		for(Module module : ModuleManager.activeModules) {
 			if(module.getToggled()) {
 				drawText(module.getName(), 2, yCount, (255 << 8));
-				yCount += 12;
+				yCount += 10;
 			}
 		}
 	}
