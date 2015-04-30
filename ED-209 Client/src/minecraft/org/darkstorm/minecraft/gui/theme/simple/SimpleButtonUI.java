@@ -5,7 +5,6 @@ import static org.lwjgl.opengl.GL11.*;
 import java.awt.*;
 
 import org.lwjgl.input.Mouse;
-
 import org.darkstorm.minecraft.gui.component.Button;
 import org.darkstorm.minecraft.gui.component.Component;
 import org.darkstorm.minecraft.gui.theme.AbstractComponentUI;
@@ -19,7 +18,8 @@ public class SimpleButtonUI extends AbstractComponentUI<Button> {
 		this.theme = theme;
 
 		foreground = Color.WHITE;
-		background = new Color(128, 128, 128, 128 + 128 / 2);
+		//ORIGINAL: background = new Color(128, 128, 128, 128 + 128 / 2);
+		background = new Color(128, 128, 128, 150);
 	}
 
 	@Override
@@ -60,12 +60,14 @@ public class SimpleButtonUI extends AbstractComponentUI<Button> {
 		glEnable(GL_TEXTURE_2D);
 
 		String text = button.getText();
-		theme.getFontRenderer().drawString(
-				text,
-				area.width / 2 - theme.getFontRenderer().getStringWidth(text)
-						/ 2,
-				area.height / 2 - theme.getFontRenderer().FONT_HEIGHT / 2,
-				RenderUtil.toRGBA(button.getForegroundColor()));
+		//TODO ED-209: Changed to my own text renderer
+//		theme.getFontRenderer().drawString(
+//				text,
+//				area.width / 2 - theme.getFontRenderer().getStringWidth(text)
+//						/ 2,
+//				area.height / 2 - theme.getFontRenderer().FONT_HEIGHT / 2,
+//				RenderUtil.toRGBA(button.getForegroundColor()));
+		net.pixelraven.ed209.ui.UIRenderer.drawText(text, area.width / 2 - theme.getFontRenderer().getStringWidth(text) / 2, area.height / 2 - theme.getFontRenderer().FONT_HEIGHT / 2, RenderUtil.toRGBA(button.getForegroundColor()));
 
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);

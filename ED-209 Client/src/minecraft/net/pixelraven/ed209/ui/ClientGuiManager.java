@@ -24,7 +24,8 @@
  */
 package net.pixelraven.ed209.ui;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,21 +33,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.client.Minecraft;
 
 import org.darkstorm.minecraft.gui.AbstractGuiManager;
-import org.darkstorm.minecraft.gui.component.BoundedRangeComponent.ValueDisplay;
-import org.darkstorm.minecraft.gui.component.*;
 import org.darkstorm.minecraft.gui.component.Button;
 import org.darkstorm.minecraft.gui.component.Component;
 import org.darkstorm.minecraft.gui.component.Frame;
-import org.darkstorm.minecraft.gui.component.basic.*;
+import org.darkstorm.minecraft.gui.component.Slider;
+import org.darkstorm.minecraft.gui.component.basic.BasicButton;
+import org.darkstorm.minecraft.gui.component.basic.BasicFrame;
+import org.darkstorm.minecraft.gui.component.basic.BasicLabel;
+import org.darkstorm.minecraft.gui.component.basic.BasicSlider;
 import org.darkstorm.minecraft.gui.layout.GridLayoutManager;
 import org.darkstorm.minecraft.gui.layout.GridLayoutManager.HorizontalGridConstraint;
-import org.darkstorm.minecraft.gui.listener.*;
+import org.darkstorm.minecraft.gui.listener.ButtonListener;
 import org.darkstorm.minecraft.gui.theme.Theme;
-import org.darkstorm.minecraft.gui.theme.simple.SimpleTheme;
+import org.lwjgl.input.Keyboard;
 
 import net.pixelraven.ed209.ED209;
 import net.pixelraven.ed209.module.Category;
 import net.pixelraven.ed209.module.Module;
+import net.pixelraven.ed209.module.ModuleManager;
 
 /**
  * Minecraft GUI API
@@ -57,9 +61,13 @@ import net.pixelraven.ed209.module.Module;
  * 
  * @author DarkStorm (darkstorm@evilminecraft.net)
  */
-public final class ClientGuiManager extends AbstractGuiManager {
+public final class ClientGuiManager extends AbstractGuiManager {	
 	private class ModuleFrame extends BasicFrame {
 		private ModuleFrame() {
+		}
+
+		private ModuleFrame(String title, Category category) {
+			super(title + " @r000@g255@b000[" + net.pixelraven.ed209.utils.CategoryCountUtils.getCount(category) + "]");
 		}
 
 		private ModuleFrame(String title) {
@@ -72,55 +80,131 @@ public final class ClientGuiManager extends AbstractGuiManager {
 	public ClientGuiManager() {
 		setup = new AtomicBoolean();
 	}
+	
+	public void bindFrame() {
+		ModuleFrame frame;
+		frame = new ModuleFrame("Binds");
+		frame.setTheme(theme);
+		frame.setLayoutManager(new GridLayoutManager(6, 0));
+		frame.setVisible(true);
+		frame.setClosable(false);
+		frame.setMinimized(false);
+		addFrame(frame);
+		
+		for(final Module module : ModuleManager.activeModules) {
+			frame.add(new BasicLabel(module.getName()));
+		
+			Button button = new BasicButton(!module.changeBind ? module.getBind() == -1 ? "NONE" : Keyboard.getKeyName(module.getBind()) : "Confirm") {
+				@Override
+				public void update() {
+					setText(!module.changeBind ? module.getBind() == -1 ? "NONE" : Keyboard.getKeyName(module.getBind()) : "Confirm");
+				}
+			};
+			button.addButtonListener(new ButtonListener() {
+				@Override
+				public void onButtonPress(Button button) {
+					if(button.getText().equals(!module.changeBind ? module.getBind() == -1 ? "NONE" : Keyboard.getKeyName(module.getBind()) : "Confirm")) {
+						module.changeBind();
+						button.setText(!module.changeBind ? module.getBind() == -1 ? "NONE" : Keyboard.getKeyName(module.getBind()) : "Confirm");
+					} else {
+						button.setText(!module.changeBind ? module.getBind() == -1 ? "NONE" : Keyboard.getKeyName(module.getBind()) : "Confirm");
+					}
+				}
+			});
 
+			frame.setWidth(325);
+			frame.setX(391);
+			frame.setY(12);
+			frame.add(button, HorizontalGridConstraint.RIGHT);
+		}
+	}
+	
+	public void keyFrame() {
+		ModuleFrame frame;
+		frame = new ModuleFrame("Colour Key");
+		frame.setTheme(theme);
+		frame.setLayoutManager(new GridLayoutManager(1, 0));
+		frame.setVisible(true);
+		frame.setClosable(false);
+		frame.setMinimized(false);
+		addFrame(frame);
+		
+		BasicLabel label = new BasicLabel("@r000@g255@b000Works on Bukkit with NC+");
+		BasicLabel label2 = new BasicLabel("@r255@g255@b000Works on Bukkit without NC+");
+		BasicLabel label3 = new BasicLabel("@r255@g000@b000Vanilla only");
+		BasicLabel label4 = new BasicLabel("@r050@g050@b200Client side (Works everywhere)");
+		BasicLabel label5 = new BasicLabel("@r255@g255@b255Other");
+		frame.add(label, HorizontalGridConstraint.LEFT);
+		frame.add(label2, HorizontalGridConstraint.LEFT);
+		frame.add(label3, HorizontalGridConstraint.LEFT);
+		frame.add(label4, HorizontalGridConstraint.LEFT);
+		frame.add(label5, HorizontalGridConstraint.LEFT);
+		
+		frame.setWidth(200);
+		frame.setX(395);
+		frame.setY(215);
+	}
+	
 	@Override
 	public void setup() {
 		if(!setup.compareAndSet(false, true))
 			return;
 
-		createTestFrame();
-
-		// Sample module frame setup
-
+		bindFrame();
+		keyFrame();
+		
 		final Map<Category, ModuleFrame> categoryFrames = new HashMap<Category, ModuleFrame>();
-		for(Module module : ED209.ED.moduleManager.activeModules) {
-			//if(!module.isToggleable())
-			//	continue;
+		for(final Module module : net.pixelraven.ed209.ED209.ED.moduleManager.activeModules) {
+			final String moduleCol;
+			switch (module.getBlockedState()) {
+				case 0:
+					moduleCol = "@r255@g000@b000";
+					break;
+				case 1:
+					moduleCol = "@r255@g255@b000";
+					break;
+				case 2:
+					moduleCol = "@r000@g255@b000";
+					break;
+				case 3:
+					moduleCol = "@r000@g000@b255";
+					break;
+				default:
+					moduleCol = "@r255@g255@b255";
+			} 
+
 			ModuleFrame frame = categoryFrames.get(module.getCategory());
 			if(frame == null) {
 				String name = module.getCategory().name().toLowerCase();
 				name = Character.toUpperCase(name.charAt(0))
 						+ name.substring(1);
-				frame = new ModuleFrame(name);
+				frame = new ModuleFrame(name, module.getCategory());
 				frame.setTheme(theme);
 				frame.setLayoutManager(new GridLayoutManager(2, 0));
-				frame.setVisible(true);
+				frame.setVisible(!name.equals("None"));
 				frame.setClosable(false);
-				frame.setMinimized(true);
+				frame.setMinimized(false);
 				addFrame(frame);
 				categoryFrames.put(module.getCategory(), frame);
 			}
 			frame.add(new BasicLabel(module.getName()));
 			final Module updateModule = module;
-			Button button = new BasicButton(module.getEnabled() ? "Disable"
-					: "Enable") {
+			Button button = new BasicButton(moduleCol + (module.getUseType() == 0 ? module.getToggled() ? "Disable" : "Enable" : "Use")) {
 				@Override
 				public void update() {
-					setText(updateModule.getEnabled() ? "Disable" : "Enable");
+					setText(moduleCol + (module.getUseType() == 0 ? module.getToggled() ? "Disable" : "Enable" : "Use"));
 				}
 			};
 			button.addButtonListener(new ButtonListener() {
 				@Override
 				public void onButtonPress(Button button) {
 					updateModule.toggleModule();
-					button.setText(updateModule.getEnabled() ? "Disable"
-							: "Enable");
+					button.setText(moduleCol + (module.getUseType() == 0 ? module.getToggled() ? "Disable" : "Enable" : "Use"));
 				}
 			});
 			frame.add(button, HorizontalGridConstraint.RIGHT);
 		}
 		
-
 		// Optional equal sizing and auto-positioning
 		resizeComponents();
 		Minecraft minecraft = Minecraft.getMinecraft();
@@ -132,74 +216,22 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		int scaleFactor = 0;
 		while(scaleFactor < scale && minecraft.displayWidth / (scaleFactor + 1) >= 320 && minecraft.displayHeight / (scaleFactor + 1) >= 240)
 			scaleFactor++;
+		int i = 0;
 		for(Frame frame : getFrames()) {
-			frame.setX(offsetX);
-			frame.setY(offsetY);
-			offsetX += maxSize.width + 5;
-			if(offsetX + maxSize.width + 5 > minecraft.displayWidth / scaleFactor) {
-				offsetX = 5;
-				offsetY += maxSize.height + 5;
+			if(!frame.getTitle().equals("Binds") && !frame.getTitle().equals("Colour Key")) { //My special frames
+				Frame[] frames = getFrames();
+				if(i > 2) {
+					offsetY = frames[i-3].getChildren().length*9 + 10;
+				}
+				if(i == 3) {
+					offsetX = 5;
+				}
+				i++;
+				frame.setX(offsetX-3);
+				frame.setY(offsetY+7);
+				offsetX += maxSize.width + 5;
 			}
 		}
-	}
-
-	private void createTestFrame() {
-		Theme theme = getTheme();
-		Frame testFrame = new BasicFrame("Frame");
-		testFrame.setTheme(theme);
-
-		testFrame.add(new BasicLabel("TEST LOL"));
-		testFrame.add(new BasicLabel("TEST 23423"));
-		testFrame.add(new BasicLabel("TE123123123ST LOL"));
-		testFrame.add(new BasicLabel("31243 LO3242L432"));
-		BasicButton testButton = new BasicButton("Duplicate this frame!");
-		testButton.addButtonListener(new ButtonListener() {
-
-			@Override
-			public void onButtonPress(Button button) {
-				createTestFrame();
-			}
-		});
-		testFrame.add(new BasicCheckButton("This is a checkbox"));
-		testFrame.add(testButton);
-		ComboBox comboBox = new BasicComboBox("Simple theme", "Other theme", "Other theme 2");
-		comboBox.addComboBoxListener(new ComboBoxListener() {
-
-			@Override
-			public void onComboBoxSelectionChanged(ComboBox comboBox) {
-				Theme theme;
-				switch(comboBox.getSelectedIndex()) {
-				case 0:
-					theme = new SimpleTheme();
-					break;
-				case 1:
-					// Some other theme
-					// break;
-				case 2:
-					// Another theme
-					// break;
-				default:
-					return;
-				}
-				setTheme(theme);
-			}
-		});
-		testFrame.add(comboBox);
-		Slider slider = new BasicSlider("Test");
-		slider.setContentSuffix("things");
-		slider.setValueDisplay(ValueDisplay.INTEGER);
-		testFrame.add(slider);
-		testFrame.add(new BasicProgressBar(50, 0, 100, 1, ValueDisplay.PERCENTAGE));
-
-		testFrame.setX(50);
-		testFrame.setY(50);
-		Dimension defaultDimension = theme.getUIForComponent(testFrame).getDefaultSize(testFrame);
-		testFrame.setWidth(defaultDimension.width);
-		testFrame.setHeight(defaultDimension.height);
-		testFrame.layoutChildren();
-		testFrame.setVisible(true);
-		testFrame.setMinimized(true);
-		addFrame(testFrame);
 	}
 
 	@Override
@@ -230,7 +262,8 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		int maxWidth = 0, maxHeight = 0;
 		for(Frame frame : frames) {
 			Dimension defaultDimension = frame.getTheme().getUIForComponent(frame).getDefaultSize(frame);
-			maxWidth = Math.max(maxWidth, defaultDimension.width);
+			//maxWidth = Math.max(maxWidth, defaultDimension.width);
+			maxWidth = 125;
 			frame.setHeight(defaultDimension.height);
 			if(frame.isMinimized()) {
 				for(Rectangle area : frame.getTheme().getUIForComponent(frame).getInteractableRegions(frame))
@@ -239,7 +272,11 @@ public final class ClientGuiManager extends AbstractGuiManager {
 				maxHeight = Math.max(maxHeight, defaultDimension.height);
 		}
 		for(Frame frame : frames) {
-			frame.setWidth(maxWidth);
+			if(!frame.getTitle().equals("Binds") && !frame.getTitle().equals("Colour Key")) { //My special frames
+				frame.setWidth(maxWidth);
+				frame.setX(5);
+				frame.setY(200);
+			}
 			frame.layoutChildren();
 		}
 		return new Dimension(maxWidth, maxHeight);

@@ -1,12 +1,12 @@
 package org.darkstorm.minecraft.gui.util;
 
 import java.awt.Rectangle;
-import java.io.IOException;
 
 import net.minecraft.client.gui.GuiScreen;
 
 import org.darkstorm.minecraft.gui.GuiManager;
-import org.darkstorm.minecraft.gui.component.*;
+import org.darkstorm.minecraft.gui.component.Component;
+import org.darkstorm.minecraft.gui.component.Frame;
 
 public class GuiManagerDisplayScreen extends GuiScreen {
 	private final GuiManager guiManager;
@@ -16,8 +16,8 @@ public class GuiManagerDisplayScreen extends GuiScreen {
 	}
 
 	@Override
-	protected void mouseClicked(int x, int y, int button) throws IOException {
-		super.mouseClicked(x, y, button); // This line throws IOException which is why this method has to have the 'throws' declaration
+	protected void mouseClicked(int x, int y, int button) {
+		super.mouseClicked(x, y, button);
 		for(Frame frame : guiManager.getFrames()) {
 			if(!frame.isVisible())
 				continue;
@@ -53,8 +53,8 @@ public class GuiManagerDisplayScreen extends GuiScreen {
 	}
 
 	@Override
-	public void mouseReleased(int x, int y, int button) {
-		super.mouseReleased(x, y, button);
+	public void mouseMovedOrUp(int x, int y, int button) {
+		super.mouseMovedOrUp(x, y, button);
 		for(Frame frame : guiManager.getFrames()) {
 			if(!frame.isVisible())
 				continue;

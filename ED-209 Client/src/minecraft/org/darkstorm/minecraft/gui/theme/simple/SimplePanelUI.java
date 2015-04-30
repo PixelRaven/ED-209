@@ -11,6 +11,7 @@ import org.darkstorm.minecraft.gui.theme.AbstractComponentUI;
 import org.darkstorm.minecraft.gui.util.RenderUtil;
 
 public class SimplePanelUI extends AbstractComponentUI<Panel> {
+	@SuppressWarnings("unused")
 	private final SimpleTheme theme;
 
 	SimplePanelUI(SimpleTheme theme) {
@@ -18,7 +19,8 @@ public class SimplePanelUI extends AbstractComponentUI<Panel> {
 		this.theme = theme;
 
 		foreground = Color.WHITE;
-		background = new Color(128, 128, 128, 128);
+		//ORIGINAL background = new Color(128, 128, 128, 128);
+		background = new Color(50, 50, 50, 150);
 	}
 
 	@Override

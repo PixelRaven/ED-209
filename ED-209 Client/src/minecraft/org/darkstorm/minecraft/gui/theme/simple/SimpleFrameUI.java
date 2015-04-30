@@ -18,7 +18,8 @@ public class SimpleFrameUI extends AbstractComponentUI<Frame> {
 		this.theme = theme;
 
 		foreground = Color.WHITE;
-		background = new Color(128, 128, 128, 128);
+		//ORIGINAL background = new Color(128, 128, 128, 128);
+		background = new Color(50, 50, 50, 150);
 	}
 
 	@Override
@@ -112,10 +113,12 @@ public class SimpleFrameUI extends AbstractComponentUI<Frame> {
 			glVertex2d(2, theme.getFontRenderer().FONT_HEIGHT + 4);
 			glVertex2d(area.width - 2, theme.getFontRenderer().FONT_HEIGHT + 4);
 		}
+		//TODO: Changed to my own text renderer
 		glEnd();
 		glEnable(GL_TEXTURE_2D);
-		theme.getFontRenderer().func_175063_a(component.getTitle(), 2,
-				2, RenderUtil.toRGBA(component.getForegroundColor()));
+		//theme.getFontRenderer().drawStringWithShadow(component.getTitle(), 2,
+		//		2, RenderUtil.toRGBA(component.getForegroundColor()));
+		net.pixelraven.ed209.ui.UIRenderer.drawText(component.getTitle(), 2, 2, RenderUtil.toRGBA(component.getForegroundColor()));
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
 		translateComponent(component, true);

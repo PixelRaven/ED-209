@@ -1,8 +1,13 @@
 package org.darkstorm.minecraft.gui.theme.simple;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 
 import org.darkstorm.minecraft.gui.component.Label;
 import org.darkstorm.minecraft.gui.theme.AbstractComponentUI;
@@ -16,7 +21,8 @@ public class SimpleLabelUI extends AbstractComponentUI<Label> {
 		this.theme = theme;
 
 		foreground = Color.WHITE;
-		background = new Color(128, 128, 128, 128);
+		//ORIGINAL background = new Color(128, 128, 128, 128);
+		background = new Color(50, 50, 50, 150);
 	}
 
 	@Override
@@ -48,15 +54,16 @@ public class SimpleLabelUI extends AbstractComponentUI<Label> {
 			y += label.getHeight() / 2 - theme.getFontRenderer().FONT_HEIGHT
 					/ 2;
 		}
+		//TODO: Changed to my own text renderer
 		glEnable(GL_BLEND);
 		glEnable(GL_TEXTURE_2D);
 		glDisable(GL_CULL_FACE);
-		theme.getFontRenderer().drawString(label.getText(), x, y,
-				RenderUtil.toRGBA(label.getForegroundColor()));
-		glEnable(GL_CULL_FACE);
+		//theme.getFontRenderer().drawString(label.getText(), x, y,	RenderUtil.toRGBA(label.getForegroundColor()));
+		net.pixelraven.ed209.ui.UIRenderer.drawText(label.getText(), x, y, RenderUtil.toRGBA(label.getForegroundColor()));		//glEnable(GL_CULL_FACE);
 		glEnable(GL_TEXTURE_2D);
 		glDisable(GL_BLEND);
 		translateComponent(label, true);
+
 	}
 
 	@Override
