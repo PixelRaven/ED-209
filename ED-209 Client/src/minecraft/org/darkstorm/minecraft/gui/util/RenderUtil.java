@@ -42,6 +42,7 @@ import java.awt.Point;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 
 import org.lwjgl.input.Mouse;
 
@@ -50,7 +51,7 @@ public class RenderUtil {
 	public static void scissorBox(int x, int y, int xend, int yend) {
 		int width = xend - x;
 		int height = yend - y;
-		ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft().gameSettings, Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
+		ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft(), Minecraft.getMinecraft().displayWidth, Minecraft.getMinecraft().displayHeight);
 		int factor = sr.getScaleFactor();
 		int bottomY = Minecraft.getMinecraft().currentScreen.height - yend;
 		glScissor(x * factor, bottomY * factor, width * factor, height * factor);
@@ -90,12 +91,13 @@ public class RenderUtil {
 	public static void drawTexturedModalRect(int par1, int par2, int par3, int par4, int par5, int par6) {
 		float var7 = 0.00390625F;
 		float var8 = 0.00390625F;
-		Tessellator var9 = Tessellator.instance;
-		var9.startDrawingQuads();
-		var9.addVertexWithUV((par1 + 0), (par2 + par6), 0, ((par3 + 0) * var7), ((par4 + par6) * var8));
-		var9.addVertexWithUV((par1 + par5), (par2 + par6), 0, ((par3 + par5) * var7), ((par4 + par6) * var8));
-		var9.addVertexWithUV((par1 + par5), (par2 + 0), 0, ((par3 + par5) * var7), ((par4 + 0) * var8));
-		var9.addVertexWithUV((par1 + 0), (par2 + 0), 0, ((par3 + 0) * var7), ((par4 + 0) * var8));
+		Tessellator var9 = Tessellator.getInstance();
+		WorldRenderer var10 = var9.getWorldRenderer();
+		var10.startDrawingQuads();
+		var10.addVertexWithUV((par1 + 0), (par2 + par6), 0, ((par3 + 0) * var7), ((par4 + par6) * var8));
+		var10.addVertexWithUV((par1 + par5), (par2 + par6), 0, ((par3 + par5) * var7), ((par4 + par6) * var8));
+		var10.addVertexWithUV((par1 + par5), (par2 + 0), 0, ((par3 + par5) * var7), ((par4 + 0) * var8));
+		var10.addVertexWithUV((par1 + 0), (par2 + 0), 0, ((par3 + 0) * var7), ((par4 + 0) * var8));
 		var9.draw();
 	}
 
