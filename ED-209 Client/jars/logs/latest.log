@@ -1,27 +1,35 @@
-[22:32:03] [Client thread/INFO]: Setting user: Player912
-[22:32:03] [Client thread/INFO]: (Session ID is token:0:Player912)
-[22:32:06] [Client thread/INFO]: LWJGL Version: 2.9.2
-[22:32:07] [Client thread/INFO]: Reloading ResourceManager: Default
-[22:32:07] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[22:32:07] [Thread-11/INFO]: Initializing LWJGL OpenAL
-[22:32:07] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[22:32:08] [Thread-11/INFO]: OpenAL initialized.
-[22:32:08] [Sound Library Loader/INFO]: Sound engine started
-[22:32:16] [Client thread/INFO]: Created: 512x512 textures-atlas
-[22:32:23] [Server thread/INFO]: Starting integrated minecraft server version 1.8
-[22:32:23] [Server thread/INFO]: Generating keypair
-[22:32:24] [Server thread/INFO]: Preparing start region for level 0
-[22:32:25] [Server thread/INFO]: Preparing spawn area: 20%
-[22:32:26] [Server thread/INFO]: Preparing spawn area: 57%
-[22:32:27] [Server thread/INFO]: Preparing spawn area: 90%
-[22:32:28] [Server thread/INFO]: Player912[local:E:11a60e48] logged in with entity id 349 at (236.89756073925997, 63.0, 233.27379654933767)
-[22:32:28] [Server thread/INFO]: Player912 joined the game
-[22:32:28] [Server thread/INFO]: Changing view distance to 12, from 10
-[22:32:29] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2105ms behind, skipping 42 tick(s)
-[22:32:35] [Server thread/INFO]: Saving and pausing game...
-[22:32:35] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[22:32:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[22:32:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[22:32:44] [Client thread/INFO]: Stopping!
-[22:32:45] [Client thread/INFO]: SoundSystem shutting down...
-[22:32:45] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[00:19:06] [Client thread/INFO]: Setting user: Player906
+[00:19:06] [Client thread/INFO]: (Session ID is token:0:Player906)
+[00:19:08] [Client thread/INFO]: LWJGL Version: 2.9.2
+[00:19:08] [Client thread/INFO]: Reloading ResourceManager: Default
+[00:19:08] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[00:19:09] [Thread-11/INFO]: Initializing LWJGL OpenAL
+[00:19:09] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[00:19:09] [Thread-11/INFO]: OpenAL initialized.
+[00:19:09] [Sound Library Loader/INFO]: Sound engine started
+[00:19:12] [Client thread/INFO]: Created: 512x512 textures-atlas
+[00:19:17] [Server thread/INFO]: Starting integrated minecraft server version 1.8
+[00:19:17] [Server thread/INFO]: Generating keypair
+[00:19:17] [Server thread/INFO]: Preparing start region for level 0
+[00:19:18] [Server thread/INFO]: Preparing spawn area: 67%
+[00:19:19] [Server thread/INFO]: Changing view distance to 12, from 10
+[00:19:19] [Server thread/INFO]: Player906[local:E:2e9fa7e5] logged in with entity id 358 at (259.2236040013641, 62.0, 206.48854202507079)
+[00:19:19] [Server thread/INFO]: Player906 joined the game
+[00:19:21] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2010ms behind, skipping 40 tick(s)
+[00:19:23] [Server thread/INFO]: Saving and pausing game...
+[00:19:23] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:19:24] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:19:24] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:19:33] [Server thread/INFO]: Saving and pausing game...
+[00:19:33] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:19:33] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:19:33] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:19:35] [Client thread/INFO]: Stopping!
+[00:19:36] [Client thread/INFO]: SoundSystem shutting down...
+[00:19:36] [Server thread/INFO]: Stopping server
+[00:19:36] [Server thread/INFO]: Saving players
+[00:19:36] [Server thread/INFO]: Saving worlds
+[00:19:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:19:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:19:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:19:36] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com

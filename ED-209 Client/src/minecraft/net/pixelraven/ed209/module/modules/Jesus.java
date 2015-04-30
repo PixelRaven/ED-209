@@ -12,4 +12,11 @@ public class Jesus extends Module{
 		setUsage("Jesus();");
 		setBlockedState(1);
 	}
+	
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		
+		System.out.println("Jesus hack is toggled.");
+	}
 }
