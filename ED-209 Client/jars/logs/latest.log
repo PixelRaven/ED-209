@@ -1,32 +1,27 @@
-[20:52:22] [Client thread/INFO]: Setting user: Player131
-[20:52:22] [Client thread/INFO]: (Session ID is token:0:Player131)
-[20:52:24] [Client thread/INFO]: LWJGL Version: 2.9.2
-[20:52:24] [Client thread/INFO]: Reloading ResourceManager: Default
-[20:52:25] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[20:52:25] [Thread-11/INFO]: Initializing LWJGL OpenAL
-[20:52:25] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[20:52:25] [Thread-11/INFO]: OpenAL initialized.
-[20:52:25] [Sound Library Loader/INFO]: Sound engine started
-[20:52:28] [Client thread/INFO]: Created: 512x512 textures-atlas
-[20:52:33] [Server thread/INFO]: Starting integrated minecraft server version 1.8
-[20:52:33] [Server thread/INFO]: Generating keypair
-[20:52:34] [Server thread/INFO]: Preparing start region for level 0
-[20:52:35] [Server thread/INFO]: Preparing spawn area: 59%
-[20:52:36] [Server thread/INFO]: Changing view distance to 12, from 10
-[20:52:36] [Server thread/INFO]: Player131[local:E:ee500611] logged in with entity id 340 at (269.82387829122194, 63.0, 372.6535946541959)
-[20:52:36] [Server thread/INFO]: Player131 joined the game
-[20:52:38] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2544ms behind, skipping 50 tick(s)
-[20:52:40] [Server thread/INFO]: Saving and pausing game...
-[20:52:40] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[20:52:40] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[20:52:40] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[20:52:40] [Chunk Batcher 0/WARN]: Needed to grow BufferBuilder buffer: Old size 524288 bytes, new size 2621440 bytes.
-[20:53:37] [Client thread/INFO]: Stopping!
-[20:53:37] [Client thread/INFO]: SoundSystem shutting down...
-[20:53:37] [Server thread/INFO]: Stopping server
-[20:53:37] [Server thread/INFO]: Saving players
-[20:53:37] [Server thread/INFO]: Saving worlds
-[20:53:37] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[20:53:37] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[20:53:37] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[20:53:37] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[22:32:03] [Client thread/INFO]: Setting user: Player912
+[22:32:03] [Client thread/INFO]: (Session ID is token:0:Player912)
+[22:32:06] [Client thread/INFO]: LWJGL Version: 2.9.2
+[22:32:07] [Client thread/INFO]: Reloading ResourceManager: Default
+[22:32:07] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[22:32:07] [Thread-11/INFO]: Initializing LWJGL OpenAL
+[22:32:07] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[22:32:08] [Thread-11/INFO]: OpenAL initialized.
+[22:32:08] [Sound Library Loader/INFO]: Sound engine started
+[22:32:16] [Client thread/INFO]: Created: 512x512 textures-atlas
+[22:32:23] [Server thread/INFO]: Starting integrated minecraft server version 1.8
+[22:32:23] [Server thread/INFO]: Generating keypair
+[22:32:24] [Server thread/INFO]: Preparing start region for level 0
+[22:32:25] [Server thread/INFO]: Preparing spawn area: 20%
+[22:32:26] [Server thread/INFO]: Preparing spawn area: 57%
+[22:32:27] [Server thread/INFO]: Preparing spawn area: 90%
+[22:32:28] [Server thread/INFO]: Player912[local:E:11a60e48] logged in with entity id 349 at (236.89756073925997, 63.0, 233.27379654933767)
+[22:32:28] [Server thread/INFO]: Player912 joined the game
+[22:32:28] [Server thread/INFO]: Changing view distance to 12, from 10
+[22:32:29] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2105ms behind, skipping 42 tick(s)
+[22:32:35] [Server thread/INFO]: Saving and pausing game...
+[22:32:35] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[22:32:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[22:32:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[22:32:44] [Client thread/INFO]: Stopping!
+[22:32:45] [Client thread/INFO]: SoundSystem shutting down...
+[22:32:45] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com

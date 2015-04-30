@@ -118,7 +118,17 @@ public abstract class BlockLiquid extends Block
 
     public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-        return null;
+    	//TODO ED-209: Added if/else for Jesus hack
+    	System.out.println("net.pixelraven.ed209.ED209.ED.moduleManager.JesusModule.getEnabled(): " + net.pixelraven.ed209.ED209.ED.moduleManager.JesusModule.getEnabled());
+    	if(net.pixelraven.ed209.ED209.ED.moduleManager.JesusModule.isToggled) {
+    	    float var4 = 0.125F;
+            return new AxisAlignedBB((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), (double)(pos.getX() + 1), (double)((float)(pos.getY() + 1) - var4), (double)(pos.getZ() + 1));
+        }
+    	else{
+    	    float var4 = 0.125F;
+            return new AxisAlignedBB((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), (double)(pos.getX() + 1), (double)((float)(pos.getY() + 1) - var4), (double)(pos.getZ() + 1));
+        	//return null;
+    	}
     }
 
     /**

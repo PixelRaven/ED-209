@@ -1,0 +1,25 @@
+package net.pixelraven.ed209.module.modules;
+import net.minecraft.client.Minecraft;
+
+import org.lwjgl.input.Keyboard;
+
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class Swim extends Module{
+
+	public Swim() {
+		super("Swim", Category.MOVEMENT);
+		setUsage("Jesus();");
+		setBlockedState(1);
+	}
+
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		if(Minecraft.getMinecraft().thePlayer.isInWater()) {
+			Minecraft.getMinecraft().thePlayer.jump();
+		}
+	}
+	
+}
