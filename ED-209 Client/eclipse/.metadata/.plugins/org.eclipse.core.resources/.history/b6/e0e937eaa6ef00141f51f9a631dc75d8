@@ -1,0 +1,24 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class Triggerbot extends Module{
+	public int tick = 0;
+	public Triggerbot() {
+		super("Triggerbot", Category.PLAYER);
+		setUsage("AntiAFK();");
+		setBlockedState(1);
+	}
+	
+	public void onUpdate() {
+		tick ++;
+		if(!this.getToggled())
+			return;
+		
+		if(tick % 50 == 0) {
+			Minecraft.getMinecraft().thePlayer.jump();
+		}
+	}
+}

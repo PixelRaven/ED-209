@@ -1,35 +1,50 @@
-[00:19:06] [Client thread/INFO]: Setting user: Player906
-[00:19:06] [Client thread/INFO]: (Session ID is token:0:Player906)
-[00:19:08] [Client thread/INFO]: LWJGL Version: 2.9.2
-[00:19:08] [Client thread/INFO]: Reloading ResourceManager: Default
-[00:19:08] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[00:19:09] [Thread-11/INFO]: Initializing LWJGL OpenAL
-[00:19:09] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[00:19:09] [Thread-11/INFO]: OpenAL initialized.
-[00:19:09] [Sound Library Loader/INFO]: Sound engine started
-[00:19:12] [Client thread/INFO]: Created: 512x512 textures-atlas
-[00:19:17] [Server thread/INFO]: Starting integrated minecraft server version 1.8
-[00:19:17] [Server thread/INFO]: Generating keypair
-[00:19:17] [Server thread/INFO]: Preparing start region for level 0
-[00:19:18] [Server thread/INFO]: Preparing spawn area: 67%
-[00:19:19] [Server thread/INFO]: Changing view distance to 12, from 10
-[00:19:19] [Server thread/INFO]: Player906[local:E:2e9fa7e5] logged in with entity id 358 at (259.2236040013641, 62.0, 206.48854202507079)
-[00:19:19] [Server thread/INFO]: Player906 joined the game
-[00:19:21] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2010ms behind, skipping 40 tick(s)
-[00:19:23] [Server thread/INFO]: Saving and pausing game...
-[00:19:23] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[00:19:24] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[00:19:24] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[00:19:33] [Server thread/INFO]: Saving and pausing game...
-[00:19:33] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[00:19:33] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[00:19:33] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[00:19:35] [Client thread/INFO]: Stopping!
-[00:19:36] [Client thread/INFO]: SoundSystem shutting down...
-[00:19:36] [Server thread/INFO]: Stopping server
-[00:19:36] [Server thread/INFO]: Saving players
-[00:19:36] [Server thread/INFO]: Saving worlds
-[00:19:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[00:19:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[00:19:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[00:19:36] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[20:59:48] [Client thread/INFO]: Setting user: Player710
+[20:59:48] [Client thread/INFO]: (Session ID is token:0:Player710)
+[20:59:50] [Client thread/INFO]: LWJGL Version: 2.9.2
+[20:59:50] [Client thread/INFO]: Reloading ResourceManager: Default
+[20:59:51] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[20:59:51] [Thread-11/INFO]: Initializing LWJGL OpenAL
+[20:59:51] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[20:59:51] [Thread-11/INFO]: OpenAL initialized.
+[20:59:51] [Sound Library Loader/INFO]: Sound engine started
+[20:59:55] [Client thread/INFO]: Created: 512x512 textures-atlas
+[21:00:02] [Server thread/INFO]: Starting integrated minecraft server version 1.8
+[21:00:02] [Server thread/INFO]: Generating keypair
+[21:00:02] [Server thread/INFO]: Preparing start region for level 0
+[21:00:03] [Server thread/INFO]: Preparing spawn area: 56%
+[21:00:04] [Server thread/INFO]: Changing view distance to 12, from 10
+[21:00:04] [Server thread/INFO]: Player710[local:E:6cf89398] logged in with entity id 299 at (321.68201153389214, 63.0, 278.3317256131941)
+[21:00:04] [Server thread/INFO]: Player710 joined the game
+[21:00:06] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2113ms behind, skipping 42 tick(s)
+[21:00:08] [Server thread/INFO]: Saving and pausing game...
+[21:00:08] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[21:00:09] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[21:00:09] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[21:00:16] [Server thread/INFO]: Saving and pausing game...
+[21:00:16] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[21:00:16] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[21:00:16] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[21:00:20] [Server thread/ERROR]: Encountered an unexpected exception
+net.minecraft.util.ReportedException: Ticking entity
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:784) ~[bin/:?]
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:678) ~[bin/:?]
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:190) ~[bin/:?]
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:561) [bin/:?]
+	at java.lang.Thread.run(Thread.java:695) [?:1.6.0_65]
+Caused by: java.lang.NullPointerException
+	at net.pixelraven.ed209.module.modules.AutoEat.onUpdate(AutoEat.java:22) ~[bin/:?]
+	at net.minecraft.entity.player.EntityPlayerMP.onUpdate(EntityPlayerMP.java:277) ~[bin/:?]
+	at net.minecraft.world.World.updateEntityWithOptionalForce(World.java:1885) ~[bin/:?]
+	at net.minecraft.world.WorldServer.updateEntityWithOptionalForce(WorldServer.java:737) ~[bin/:?]
+	at net.minecraft.world.World.updateEntity(World.java:1854) ~[bin/:?]
+	at net.minecraft.world.World.updateEntities(World.java:1703) ~[bin/:?]
+	at net.minecraft.world.WorldServer.updateEntities(WorldServer.java:569) ~[bin/:?]
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:778) ~[bin/:?]
+	... 4 more
+[21:00:20] [Server thread/ERROR]: This crash report has been saved to: /Users/Rowan/Documents/Programming/GitHub/ED-209/ED-209 Client/jars/./crash-reports/crash-2015-05-01_21.00.20-server.txt
+[21:00:20] [Server thread/INFO]: Stopping server
+[21:00:20] [Server thread/INFO]: Saving players
+[21:00:20] [Server thread/INFO]: Saving worlds
+[21:00:20] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[21:00:20] [Client Shutdown Thread/INFO]: Stopping server
+[21:00:20] [Client Shutdown Thread/INFO]: Saving players

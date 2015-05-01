@@ -1,0 +1,80 @@
+---- Minecraft Crash Report ----
+// Don't do that.
+
+Time: 5/1/15 9:00 PM
+Description: Ticking entity
+
+java.lang.NullPointerException: Ticking entity
+	at net.pixelraven.ed209.module.modules.AutoEat.onUpdate(AutoEat.java:22)
+	at net.minecraft.entity.player.EntityPlayerMP.onUpdate(EntityPlayerMP.java:277)
+	at net.minecraft.world.World.updateEntityWithOptionalForce(World.java:1885)
+	at net.minecraft.world.WorldServer.updateEntityWithOptionalForce(WorldServer.java:737)
+	at net.minecraft.world.World.updateEntity(World.java:1854)
+	at net.minecraft.world.World.updateEntities(World.java:1703)
+	at net.minecraft.world.WorldServer.updateEntities(WorldServer.java:569)
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:778)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:678)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:190)
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:561)
+	at java.lang.Thread.run(Thread.java:695)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Stacktrace:
+	at net.pixelraven.ed209.module.modules.AutoEat.onUpdate(AutoEat.java:22)
+	at net.minecraft.entity.player.EntityPlayerMP.onUpdate(EntityPlayerMP.java:277)
+	at net.minecraft.world.World.updateEntityWithOptionalForce(World.java:1885)
+	at net.minecraft.world.WorldServer.updateEntityWithOptionalForce(WorldServer.java:737)
+	at net.minecraft.world.World.updateEntity(World.java:1854)
+
+-- Entity being ticked --
+Details:
+	Entity Type: null (net.minecraft.entity.player.EntityPlayerMP)
+	Entity ID: 299
+	Entity Name: Player710
+	Entity's Exact location: 325.79, 63.00, 277.14
+	Entity's Block location: 325.00,63.00,277.00 - World: (325,63,277), Chunk: (at 5,3,5 in 20,17; contains blocks 320,0,272 to 335,255,287), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Entity's Momentum: 0.00, -0.08, 0.00
+	Entity's Rider: ~~ERROR~~ NullPointerException: null
+	Entity's Vehicle: ~~ERROR~~ NullPointerException: null
+Stacktrace:
+	at net.minecraft.world.World.updateEntities(World.java:1703)
+	at net.minecraft.world.WorldServer.updateEntities(WorldServer.java:569)
+
+-- Affected level --
+Details:
+	Level name: mcp world
+	All players: 1 total; [EntityPlayerMP['Player710'/299, l='mcp world', x=325.79, y=63.00, z=277.14]]
+	Chunk stats: ServerChunkCache: 690 Drop: 0
+	Level seed: 3204491004841069596
+	Level generator: ID 00 - default, ver 1. Features enabled: true
+	Level generator options: 
+	Level spawn location: 194.00,64.00,229.00 - World: (194,64,229), Chunk: (at 2,4,5 in 12,14; contains blocks 192,0,224 to 207,255,239), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Level time: 47318 game time, 6349 day time
+	Level dimension: 0
+	Level storage version: 0x04ABD - Anvil
+	Level weather: Rain time: 35085 (now: false), thunder time: 131543 (now: false)
+	Level game mode: Game mode: creative (ID 1). Hardcore: false. Cheats: true
+Stacktrace:
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:778)
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:678)
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:190)
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:561)
+	at java.lang.Thread.run(Thread.java:695)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8
+	Operating System: Mac OS X (x86_64) version 10.10
+	Java Version: 1.6.0_65, Apple Inc.
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode), Apple Inc.
+	Memory: 829481576 bytes (791 MB) / 1065025536 bytes (1015 MB) up to 1065025536 bytes (1015 MB)
+	JVM Flags: 3 total; -Xincgc -Xmx1024M -Xms1024M
+	IntCache: cache: 0, tcache: 35, allocated: 12, tallocated: 94
+	Profiler Position: N/A (disabled)
+	Player Count: 1 / 8; [EntityPlayerMP['Player710'/299, l='mcp world', x=325.79, y=63.00, z=277.14]]
+	Type: Integrated Server (map_client.txt)
+	Is Modded: Very likely; Jar signature invalidated

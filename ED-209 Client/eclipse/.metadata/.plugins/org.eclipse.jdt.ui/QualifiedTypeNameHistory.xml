@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="disconnected.module.Module"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.utils.CategoryCountUtils"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.ClientGuiManager"/>
-<fullyQualifiedTypeName name="net.minecraft.client.gui.FontRenderer"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.ClickGui"/>
-<fullyQualifiedTypeName name="java.lang.System"/>
 <fullyQualifiedTypeName name="org.lwjgl.opengl.GL11"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.ModuleManager"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.Category"/>
@@ -60,4 +54,10 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Regen"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Jesus"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Phase"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Triggerbot"/>
+<fullyQualifiedTypeName name="net.minecraft.entity.player.EntityPlayer"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoEat"/>
+<fullyQualifiedTypeName name="net.minecraft.item.ItemStack"/>
+<fullyQualifiedTypeName name="net.minecraft.item.EnumAction"/>
 </qualifiedTypeNameHistroy>

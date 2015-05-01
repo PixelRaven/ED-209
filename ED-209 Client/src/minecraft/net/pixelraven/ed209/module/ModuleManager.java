@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.minecraft.client.Minecraft;
 import net.pixelraven.ed209.module.modules.Absorption;
 import net.pixelraven.ed209.module.modules.AntiAFK;
+import net.pixelraven.ed209.module.modules.AutoEat;
 import net.pixelraven.ed209.module.modules.AutoMine;
 import net.pixelraven.ed209.module.modules.AutoWalk;
 import net.pixelraven.ed209.module.modules.ClickAimbot;
@@ -24,6 +25,7 @@ import net.pixelraven.ed209.module.modules.Killaura;
 import net.pixelraven.ed209.module.modules.MagicCarpet;
 import net.pixelraven.ed209.module.modules.Nuker;
 import net.pixelraven.ed209.module.modules.PacketSneak;
+import net.pixelraven.ed209.module.modules.Phase;
 import net.pixelraven.ed209.module.modules.Regen;
 import net.pixelraven.ed209.module.modules.Strafe360;
 import net.pixelraven.ed209.module.modules.ToggleSneak;
@@ -31,6 +33,7 @@ import net.pixelraven.ed209.module.modules.Spider;
 import net.pixelraven.ed209.module.modules.Sprint;
 import net.pixelraven.ed209.module.modules.Step;
 import net.pixelraven.ed209.module.modules.Swim;
+import net.pixelraven.ed209.module.modules.Triggerbot;
 import net.pixelraven.ed209.module.modules.Umbrella;
 import net.pixelraven.ed209.module.modules.Zoom;
 
@@ -49,6 +52,7 @@ public class ModuleManager {
 		
 		this.activeModules.add(new Absorption());
 		this.activeModules.add(new AntiAFK());
+		this.activeModules.add(new AutoEat());
 		this.activeModules.add(new AutoMine());
 		this.activeModules.add(new AutoWalk());
 		this.activeModules.add(new ClickAimbot());
@@ -67,6 +71,7 @@ public class ModuleManager {
 		this.activeModules.add(new MagicCarpet());
 		this.activeModules.add(new Nuker());
 		this.activeModules.add(new PacketSneak());
+		this.activeModules.add(new Phase());
 		this.activeModules.add(new Regen());
 		this.activeModules.add(new Spider());
 		this.activeModules.add(new Sprint());
@@ -74,6 +79,7 @@ public class ModuleManager {
 		this.activeModules.add(new Strafe360());
 		this.activeModules.add(new Swim());
 		this.activeModules.add(new ToggleSneak());
+		this.activeModules.add(new Triggerbot());
 		this.activeModules.add(new Umbrella());
 		this.activeModules.add(new Zoom());
 	}
