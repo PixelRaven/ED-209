@@ -13,18 +13,19 @@
 		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="Food" key="selection"/>
+		<item value="pushOutOfBlocks" key="selection"/>
 		<list key="findhistory">
-			<item value="food"/>
-			<item value="eat"/>
-			<item value="public Ax"/>
-			<item value="public ax"/>
-			<item value="Button"/>
-			<item value="getEventKey"/>
-			<item value="&quot;hand&quot;"/>
-			<item value="hand"/>
+			<item value="pushOutOfBlocks"/>
+			<item value="pushOutOf`Blocks"/>
+			<item value="Keyboard.isKeyDown(17) &amp;&amp; mc.inGameHasFocus;"/>
+			<item value="return false"/>
+			<item value="motionX = 0"/>
+			<item value="motion"/>
+			<item value="isEntityInsideOpaqueBlock"/>
+			<item value="tessellator.getWorldRenderer()"/>
 		</list>
 		<list key="replacehistory">
+			<item value="worldRenderer"/>
 		</list>
 	</section>
 </section>

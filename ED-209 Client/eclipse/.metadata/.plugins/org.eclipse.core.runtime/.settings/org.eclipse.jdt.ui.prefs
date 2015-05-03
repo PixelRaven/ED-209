@@ -1,4 +1,4 @@
-content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"><lhs name\="java.lang.Enum"><rhs name\="net.minecraft.network.play.client.C07PacketPlayerDigging$Action"/></lhs><lhs name\="net.minecraft.network.play.client.C07PacketPlayerDigging$Action"><rhs name\="net.minecraft.network.play.client.C07PacketPlayerDigging$Action"/></lhs></history>
+content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"><lhs name\="java.lang.Enum"><rhs name\="net.minecraft.network.play.client.C07PacketPlayerDigging$Action"/><rhs name\="net.minecraft.world.WorldSettings$GameType"/></lhs><lhs name\="net.minecraft.network.play.client.C07PacketPlayerDigging$Action"><rhs name\="net.minecraft.network.play.client.C07PacketPlayerDigging$Action"/></lhs><lhs name\="net.minecraft.world.WorldSettings$GameType"><rhs name\="net.minecraft.world.WorldSettings$GameType"/></lhs></history>
 content_assist_number_of_computers=13
 content_assist_proposals_background=255,255,255
 content_assist_proposals_foreground=0,0,0

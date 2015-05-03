@@ -113,7 +113,8 @@ public abstract class EntityPlayer extends EntityLivingBase
     public double field_71085_bR;
 
     /** Boolean value indicating weather a player is sleeping or not */
-    protected boolean sleeping;
+    //TODO ED-209: Changed to public
+    public boolean sleeping;
 
     /** the current location of the player */
     public BlockPos playerLocation;
@@ -1463,7 +1464,7 @@ public abstract class EntityPlayer extends EntityLivingBase
      */
     public boolean isEntityInsideOpaqueBlock()
     {
-        return !this.sleeping && super.isEntityInsideOpaqueBlock();
+    	return !this.sleeping && super.isEntityInsideOpaqueBlock();
     }
 
     public boolean func_175144_cb()

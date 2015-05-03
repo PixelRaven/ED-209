@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="org.lwjgl.opengl.GL11"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.ModuleManager"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.Category"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Sneak"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Step"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Sprint"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Fly"/>
-<fullyQualifiedTypeName name="net.minecraft.util.BlockPos"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Absorption"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AntiAFK"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoWalk"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Spider"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Zoom"/>
@@ -44,7 +34,6 @@
 <fullyQualifiedTypeName name="java.util.Map"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.layout.GridLayoutManager"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.layout.GridLayoutManager.HorizontalGridConstraint"/>
-<fullyQualifiedTypeName name="net.minecraft.client.renderer.WorldRenderer"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.ClickAimbot"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.ForceField"/>
@@ -53,11 +42,22 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Strafe360"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Regen"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Jesus"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Phase"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Triggerbot"/>
 <fullyQualifiedTypeName name="net.minecraft.entity.player.EntityPlayer"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoEat"/>
 <fullyQualifiedTypeName name="net.minecraft.item.ItemStack"/>
 <fullyQualifiedTypeName name="net.minecraft.item.EnumAction"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Phase"/>
+<fullyQualifiedTypeName name="net.minecraft.world.WorldSettings.GameType"/>
+<fullyQualifiedTypeName name="net.minecraft.client.renderer.WorldRenderer"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoSpawn"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Glide"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Heal"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Spam"/>
+<fullyQualifiedTypeName name="net.minecraft.client.Minecraft"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastWalk"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoSwing"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.MobESP"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
+<fullyQualifiedTypeName name="org.lwjgl.input.Keyboard"/>
 </qualifiedTypeNameHistroy>

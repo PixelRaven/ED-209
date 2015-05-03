@@ -19,12 +19,12 @@ public class AutoEat extends Module{
 		
 		if(Minecraft.getMinecraft().thePlayer.getFoodStats().needFood() && !Minecraft.getMinecraft().thePlayer.isEating()) {
 			for(ItemStack i : Minecraft.getMinecraft().thePlayer.getInventory()) {
-				if(i.) {
-					Minecraft.getMinecraft().thePlayer.setCurrentItemOrArmor(0, i);
-					Minecraft.getMinecraft().thePlayer.setEating(true);
-					break;
-					Minecraft.getMinecraft().thePlayer.isInWater();
-				}
+				//if(i) {
+				//	Minecraft.getMinecraft().thePlayer.setCurrentItemOrArmor(0, i);
+				//	Minecraft.getMinecraft().thePlayer.setEating(true);
+				//	break;
+				//	Minecraft.getMinecraft().thePlayer.isInWater();
+				//}
 			}
 		}
 	}

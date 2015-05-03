@@ -1,5 +1,7 @@
 package net.minecraft.client.entity;
 
+import org.lwjgl.input.Keyboard;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MovingSoundMinecartRiding;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -263,8 +265,11 @@ public class EntityPlayerSP extends AbstractClientPlayer
      */
     public void swingItem()
     {
-        super.swingItem();
-        this.sendQueue.addToSendQueue(new C0APacketAnimation());
+    	//TODO ED-209: Added if
+    	if(!net.pixelraven.ed209.ED209.ED.moduleManager.NoSwingModule.getToggled()) {
+    		super.swingItem();
+        	this.sendQueue.addToSendQueue(new C0APacketAnimation());
+    	}
     }
 
     public void respawnPlayer()
@@ -391,72 +396,9 @@ public class EntityPlayerSP extends AbstractClientPlayer
         this.mc.ingameGUI.getChatGUI().printChatMessage(p_146105_1_);
     }
 
-    protected boolean pushOutOfBlocks(double x, double y, double z)
-    {
-        if (this.noClip)
-        {
-            return false;
-        }
-        else
-        {
-            BlockPos var7 = new BlockPos(x, y, z);
-            double var8 = x - (double)var7.getX();
-            double var10 = z - (double)var7.getZ();
-
-            if (!this.func_175162_d(var7))
-            {
-                byte var12 = -1;
-                double var13 = 9999.0D;
-
-                if (this.func_175162_d(var7.offsetWest()) && var8 < var13)
-                {
-                    var13 = var8;
-                    var12 = 0;
-                }
-
-                if (this.func_175162_d(var7.offsetEast()) && 1.0D - var8 < var13)
-                {
-                    var13 = 1.0D - var8;
-                    var12 = 1;
-                }
-
-                if (this.func_175162_d(var7.offsetNorth()) && var10 < var13)
-                {
-                    var13 = var10;
-                    var12 = 4;
-                }
-
-                if (this.func_175162_d(var7.offsetSouth()) && 1.0D - var10 < var13)
-                {
-                    var13 = 1.0D - var10;
-                    var12 = 5;
-                }
-
-                float var15 = 0.1F;
-
-                if (var12 == 0)
-                {
-                    this.motionX = (double)(-var15);
-                }
-
-                if (var12 == 1)
-                {
-                    this.motionX = (double)var15;
-                }
-
-                if (var12 == 4)
-                {
-                    this.motionZ = (double)(-var15);
-                }
-
-                if (var12 == 5)
-                {
-                    this.motionZ = (double)var15;
-                }
-            }
-
-            return false;
-        }
+    protected boolean pushOutOfBlocks(double x, double y, double z) {
+    	//TODO ED-209: May or may not have deleted tons of code, undo didn't work.
+    	return false;
     }
 
     private boolean func_175162_d(BlockPos p_175162_1_)
