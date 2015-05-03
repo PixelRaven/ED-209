@@ -73,7 +73,7 @@ public class ModuleManager {
 		this.activeModules.add(new Exit());
 		this.activeModules.add(new FastPlace());
 		this.activeModules.add(new FastWalk());
-		this.activeModules.add(new CreativeFly());
+		this.activeModules.add(new Fly());
 		this.activeModules.add(new ForceField());
 		this.activeModules.add(new FullBright());
 		this.activeModules.add(new Glide());
