@@ -1435,7 +1435,8 @@ public class EntityRenderer implements IResourceManagerReloadListener
         GlStateManager.depthMask(false);
         GlStateManager.enableCull();
         this.mc.mcProfiler.endStartSection("weather");
-        this.renderRainSnow(p_175068_2_);
+        if(!net.pixelraven.ed209.ED209.ED.moduleManager.NoSwingModule.getToggled())
+        	this.renderRainSnow(p_175068_2_);
         GlStateManager.depthMask(true);
         var5.func_180449_a(var9, p_175068_2_);
         GlStateManager.disableBlend();

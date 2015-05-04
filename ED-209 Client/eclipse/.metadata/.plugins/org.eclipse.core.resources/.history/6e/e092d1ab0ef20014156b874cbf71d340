@@ -1,0 +1,15 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.server.S38PacketPlayerListItem.Action;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class Dead extends Module{
+	public Dead() {
+		super("No Rain", Category.PLAYER);
+		setUsage("NoRain();");
+		setBlockedState(3);
+	}
+}

@@ -6,8 +6,8 @@ import org.darkstorm.minecraft.gui.theme.simple.SimpleTheme;
 
 public class ED209 {
 	public String CLIENT_NAME = "ED-209";
-	public int CLIENT_VERSION = 26;
-	public String CLIENT_PRETTYVERSION = "0.4.8";
+	public int CLIENT_VERSION = 28;
+	public String CLIENT_PRETTYVERSION = "0.4.10";
 	public ModuleManager moduleManager;
 	public static ClientGuiManager guiManager;
 	public static final ED209 ED = new ED209();

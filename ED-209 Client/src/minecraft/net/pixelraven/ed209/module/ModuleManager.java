@@ -28,6 +28,7 @@ import net.pixelraven.ed209.module.modules.Jesus;
 import net.pixelraven.ed209.module.modules.Killaura;
 import net.pixelraven.ed209.module.modules.MagicCarpet;
 import net.pixelraven.ed209.module.modules.MobESP;
+import net.pixelraven.ed209.module.modules.NoRain;
 import net.pixelraven.ed209.module.modules.NoSwing;
 import net.pixelraven.ed209.module.modules.Nuker;
 import net.pixelraven.ed209.module.modules.PacketSneak;
@@ -48,7 +49,7 @@ public class ModuleManager {
 	public static ArrayList<Module> activeModules = new ArrayList<Module>();
 
 	//public Xray xrayModule;
-	//public static NoRain noRainModule;
+	public static NoRain noRainModule;
 	//public static EntityOverlay entityOverayModule;
 	//public static MobESP MobESPModule;
 	//public static BowAimBot bowAimBotModule;
@@ -83,6 +84,7 @@ public class ModuleManager {
 		this.activeModules.add(new Killaura());
 		this.activeModules.add(new MagicCarpet());
 		this.activeModules.add(new MobESP());
+		this.activeModules.add(this.noRainModule = new NoRain());
 		this.activeModules.add(this.NoSwingModule = new NoSwing());
 		this.activeModules.add(new Nuker());
 		this.activeModules.add(new PacketSneak());
