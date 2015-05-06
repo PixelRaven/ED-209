@@ -1,0 +1,55 @@
+---- Minecraft Crash Report ----
+// You should try our sister game, Minceraft!
+
+Time: 5/7/15 12:38 AM
+Description: Initializing game
+
+java.lang.ExceptionInInitializerError
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:582)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:397)
+	at net.minecraft.client.main.Main.main(Main.java:114)
+	at Start.main(Start.java:11)
+Caused by: java.lang.NullPointerException
+	at net.pixelraven.ed209.ED209.<init>(ED209.java:18)
+	at net.pixelraven.ed209.ED209.<clinit>(ED209.java:23)
+	... 4 more
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Stacktrace:
+	at net.minecraft.client.Minecraft.startGame(Minecraft.java:582)
+
+-- Initialization --
+Details:
+Stacktrace:
+	at net.minecraft.client.Minecraft.run(Minecraft.java:397)
+	at net.minecraft.client.main.Main.main(Main.java:114)
+	at Start.main(Start.java:11)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.8
+	Operating System: Mac OS X (x86_64) version 10.10
+	Java Version: 1.6.0_65, Apple Inc.
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode), Apple Inc.
+	Memory: 979090776 bytes (933 MB) / 1065025536 bytes (1015 MB) up to 1065025536 bytes (1015 MB)
+	JVM Flags: 3 total; -Xincgc -Xmx1024M -Xms1024M
+	IntCache: cache: 0, tcache: 0, allocated: 0, tallocated: 0
+	Launched Version: mcp
+	LWJGL: 2.9.2
+	OpenGL: Intel HD Graphics 5000 OpenGL Engine GL version 2.1 INTEL-10.0.86, Intel Inc.
+	GL Caps: Using GL 1.3 multitexturing.
+Using GL 1.3 texture combiners.
+Using framebuffer objects because ARB_framebuffer_object is supported and separate blending is supported.
+Shaders are available because OpenGL 2.1 is supported.
+VBOs are available because OpenGL 1.5 is supported.
+
+	Using VBOs: No
+	Is Modded: Very likely; Jar signature invalidated
+	Type: Client (map_client.txt)
+	Resource Packs: []
+	Current Language: English (US)
+	Profiler Position: N/A (disabled)
