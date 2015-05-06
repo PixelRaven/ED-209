@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Spider"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Zoom"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Swim"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Disconnect"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Exit"/>
@@ -57,7 +55,9 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastWalk"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoSwing"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.MobESP"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 <fullyQualifiedTypeName name="org.lwjgl.input.Keyboard"/>
 <fullyQualifiedTypeName name="net.minecraft.client.entity.EntityPlayerSP"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoRain"/>
+<fullyQualifiedTypeName name="net.minecraft.client.gui.GuiScreen"/>
 </qualifiedTypeNameHistroy>

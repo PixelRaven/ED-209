@@ -2,12 +2,13 @@ package net.pixelraven.ed209;
 import net.pixelraven.ed209.module.ModuleManager;
 import net.pixelraven.ed209.ui.ClientGuiManager;
 
+import org.darkstorm.minecraft.gui.component.AbstractComponent;
 import org.darkstorm.minecraft.gui.theme.simple.SimpleTheme;
 
 public class ED209 {
 	public String CLIENT_NAME = "ED-209";
-	public int CLIENT_VERSION = 28;
-	public String CLIENT_PRETTYVERSION = "0.4.10";
+	public int CLIENT_VERSION = 31;
+	public String CLIENT_PRETTYVERSION = "0.5.2";
 	public ModuleManager moduleManager;
 	public static ClientGuiManager guiManager;
 	public static final ED209 ED = new ED209();

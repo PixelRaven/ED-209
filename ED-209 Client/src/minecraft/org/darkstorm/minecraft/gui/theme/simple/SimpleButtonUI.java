@@ -61,12 +61,6 @@ public class SimpleButtonUI extends AbstractComponentUI<Button> {
 
 		String text = button.getText();
 		//TODO ED-209: Changed to my own text renderer
-//		theme.getFontRenderer().drawString(
-//				text,
-//				area.width / 2 - theme.getFontRenderer().getStringWidth(text)
-//						/ 2,
-//				area.height / 2 - theme.getFontRenderer().FONT_HEIGHT / 2,
-//				RenderUtil.toRGBA(button.getForegroundColor()));
 		net.pixelraven.ed209.ui.UIRenderer.drawText(text, area.width / 2 - theme.getFontRenderer().getStringWidth(text) / 2, area.height / 2 - theme.getFontRenderer().FONT_HEIGHT / 2, RenderUtil.toRGBA(button.getForegroundColor()));
 
 		glEnable(GL_CULL_FACE);
