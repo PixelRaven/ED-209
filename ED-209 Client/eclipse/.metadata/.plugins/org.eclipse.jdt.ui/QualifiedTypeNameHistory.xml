@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Swim"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Disconnect"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Exit"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Dead"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastPlace"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FullBright"/>
@@ -23,9 +20,7 @@
 <fullyQualifiedTypeName name="net.minecraft.network.PacketBuffer"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoMine"/>
 <fullyQualifiedTypeName name="net.minecraft.client.gui.GuiMainMenu"/>
-<fullyQualifiedTypeName name="java.awt.Color"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ui.UIRenderer"/>
-<fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.AbstractGuiManager"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.Module"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
@@ -60,4 +55,9 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoRain"/>
 <fullyQualifiedTypeName name="net.minecraft.client.gui.GuiScreen"/>
+<fullyQualifiedTypeName name="java.awt.Color"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.ClientGuiManager"/>
+<fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.AbstractGuiManager"/>
+<fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.component.AbstractComponent"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.VersionState"/>
 </qualifiedTypeNameHistroy>
