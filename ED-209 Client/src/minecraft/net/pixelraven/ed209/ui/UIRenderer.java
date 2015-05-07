@@ -12,10 +12,12 @@ import org.darkstorm.minecraft.gui.util.GuiManagerDisplayScreen;
 public class UIRenderer {
 	public static void renderUI() {
 		//ED-209 name and version
-		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("ED-", 2, 2, (128 << 4) + (255 << 4));
-		Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 18, 2, (255 << 16));
-		UIRenderer.drawText("@r255@g255@b255Version " + ED209.ED.CLIENT_FULLVERSION, Minecraft.getMinecraft().displayWidth/2-109, 2, 0);
-		UIRenderer.drawText(ED209.ED.CLIENT_BUILDTYPE, Minecraft.getMinecraft().displayWidth/2-75, 12, 0);
+		if(!ED209.ED.moduleManager.DisplayVanillaModule.getToggled()) {
+			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("ED-", 2, 2, (128 << 4) + (255 << 4));
+			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 18, 2, (255 << 16));
+			UIRenderer.drawText("@r255@g255@b255Version " + ED209.ED.CLIENT_FULLVERSION, Minecraft.getMinecraft().displayWidth/2-109, 2, 0);
+			UIRenderer.drawText(ED209.ED.CLIENT_BUILDTYPE, Minecraft.getMinecraft().displayWidth/2-75, 12, 0);
+		}
 		
 		for(Module module : ModuleManager.activeModules) {
 			module.onPreUpdate();

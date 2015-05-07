@@ -15,6 +15,7 @@ import net.pixelraven.ed209.module.modules.Criticals;
 import net.pixelraven.ed209.module.modules.Dead;
 import net.pixelraven.ed209.module.modules.Derp;
 import net.pixelraven.ed209.module.modules.Disconnect;
+import net.pixelraven.ed209.module.modules.DisplayVanilla;
 import net.pixelraven.ed209.module.modules.Exit;
 import net.pixelraven.ed209.module.modules.FastPlace;
 import net.pixelraven.ed209.module.modules.FastWalk;
@@ -49,6 +50,7 @@ public class ModuleManager {
 	public static ArrayList<Module> activeModules = new ArrayList<Module>();
 
 	//public Xray xrayModule;
+	public static DisplayVanilla DisplayVanillaModule;
 	public static NoRain noRainModule;
 	//public static EntityOverlay entityOverayModule;
 	//public static MobESP MobESPModule;
@@ -71,6 +73,7 @@ public class ModuleManager {
 		this.activeModules.add(new Disconnect());
 		this.activeModules.add(new Dead());
 		this.activeModules.add(new Derp());
+		this.activeModules.add(this.DisplayVanillaModule = new DisplayVanilla());
 		this.activeModules.add(new Exit());
 		this.activeModules.add(new FastPlace());
 		this.activeModules.add(new FastWalk());
