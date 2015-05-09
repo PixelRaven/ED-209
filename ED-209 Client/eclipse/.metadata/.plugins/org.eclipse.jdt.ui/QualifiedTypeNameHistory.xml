@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Dead"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastPlace"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FullBright"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.House"/>
@@ -52,7 +51,6 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.MobESP"/>
 <fullyQualifiedTypeName name="org.lwjgl.input.Keyboard"/>
 <fullyQualifiedTypeName name="net.minecraft.client.entity.EntityPlayerSP"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoRain"/>
 <fullyQualifiedTypeName name="net.minecraft.client.gui.GuiScreen"/>
 <fullyQualifiedTypeName name="java.awt.Color"/>
@@ -60,4 +58,6 @@
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.AbstractGuiManager"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.component.AbstractComponent"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ui.VersionState"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.DisplayVanilla"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 </qualifiedTypeNameHistroy>

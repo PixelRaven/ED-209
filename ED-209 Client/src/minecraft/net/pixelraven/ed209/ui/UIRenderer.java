@@ -8,6 +8,7 @@ import net.pixelraven.ed209.module.ModuleManager;
 
 import org.darkstorm.minecraft.gui.component.Frame;
 import org.darkstorm.minecraft.gui.util.GuiManagerDisplayScreen;
+import org.lwjgl.opengl.Display;
 
 public class UIRenderer {
 	public static void renderUI() {
@@ -17,6 +18,10 @@ public class UIRenderer {
 			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 18, 2, (255 << 16));
 			UIRenderer.drawText("@r255@g255@b255Version " + ED209.ED.CLIENT_FULLVERSION, Minecraft.getMinecraft().displayWidth/2-109, 2, 0);
 			UIRenderer.drawText(ED209.ED.CLIENT_BUILDTYPE, Minecraft.getMinecraft().displayWidth/2-75, 12, 0);
+			Display.setTitle("ED-209 [Minecraft 1.8.X]");
+		}
+		else {
+			Display.setTitle("Minecraft 1.8");
 		}
 		
 		for(Module module : ModuleManager.activeModules) {

@@ -1,15 +1,19 @@
 package net.minecraft.client.gui;
 
 import com.google.common.collect.Lists;
+
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -24,6 +28,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.demo.DemoWorldServer;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldInfo;
+
 import org.apache.commons.io.Charsets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -222,7 +227,11 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback
     {
         this.buttonList.add(new GuiButton(1, this.width / 2 - 100, p_73969_1_, I18n.format("menu.singleplayer", new Object[0])));
         this.buttonList.add(new GuiButton(2, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 1, I18n.format("menu.multiplayer", new Object[0])));
-        this.buttonList.add(this.field_175372_K = new GuiButton(14, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 2, I18n.format("menu.online", new Object[0])));
+        
+        //TODO ED-209: Removed realms button, added ED-209 github and settings button
+        this.buttonList.add(new GuiButton(100, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 2, 98, 20, I18n.format("ED-209 Github", new Object[0])));
+        this.buttonList.add(new GuiButton(101, this.width / 2 + 2, p_73969_1_ + p_73969_2_ * 2, 98, 20, I18n.format("ED-209 Options", new Object[0])));
+        //this.buttonList.add(this.field_175372_K = new GuiButton(14, this.width / 2 - 100, p_73969_1_ + p_73969_2_ * 2, I18n.format("menu.online", new Object[0])));
     }
 
     /**
@@ -243,6 +252,16 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback
 
     protected void actionPerformed(GuiButton button) throws IOException
     {
+    	//TODO ED-209: Github button
+    	if(button.id == 100) {
+    		try {
+    		    Desktop.getDesktop().browse(new URL("https://github.com/PixelRaven/ED-209").toURI());
+    		} 
+    		catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+    	
         if (button.id == 0)
         {
             this.mc.displayGuiScreen(new GuiOptions(this, this.mc.gameSettings));

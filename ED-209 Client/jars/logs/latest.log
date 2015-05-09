@@ -1,21 +1,21 @@
-[00:29:06] [Client thread/INFO]: Setting user: Player86
-[00:29:06] [Client thread/INFO]: (Session ID is token:0:Player86)
-[00:29:08] [Client thread/INFO]: LWJGL Version: 2.9.2
-[00:29:08] [Client thread/INFO]: Reloading ResourceManager: Default
-[00:29:08] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[00:29:09] [Thread-11/INFO]: Initializing LWJGL OpenAL
-[00:29:09] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[00:29:09] [Thread-11/INFO]: OpenAL initialized.
-[00:29:09] [Sound Library Loader/INFO]: Sound engine started
-[00:29:12] [Client thread/INFO]: Created: 512x512 textures-atlas
-[00:29:22] [Server thread/INFO]: Starting integrated minecraft server version 1.8
-[00:29:22] [Server thread/INFO]: Generating keypair
-[00:29:22] [Server thread/INFO]: Preparing start region for level 0
-[00:29:23] [Server thread/INFO]: Preparing spawn area: 71%
-[00:29:24] [Server thread/INFO]: Changing view distance to 12, from 10
-[00:29:24] [Server thread/INFO]: Player86[local:E:4613ce99] logged in with entity id 234 at (264.0376478556977, 77.21909329462707, -112.86776215466963)
-[00:29:24] [Server thread/INFO]: Player86 joined the game
-[00:29:26] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2276ms behind, skipping 45 tick(s)
-[00:29:29] [Client thread/INFO]: Stopping!
-[00:29:29] [Client thread/INFO]: SoundSystem shutting down...
-[00:29:29] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[16:50:07] [Client thread/INFO]: Setting user: Player837
+[16:50:07] [Client thread/INFO]: (Session ID is token:0:Player837)
+[16:50:09] [Client thread/INFO]: LWJGL Version: 2.9.2
+[16:50:09] [Client thread/INFO]: Reloading ResourceManager: Default
+[16:50:10] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[16:50:10] [Thread-11/INFO]: Initializing LWJGL OpenAL
+[16:50:10] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[16:50:10] [Thread-11/INFO]: OpenAL initialized.
+[16:50:10] [Sound Library Loader/INFO]: Sound engine started
+[16:50:14] [Client thread/INFO]: Created: 512x512 textures-atlas
+[16:50:22] [Server thread/INFO]: Starting integrated minecraft server version 1.8
+[16:50:22] [Server thread/INFO]: Generating keypair
+[16:50:22] [Server thread/INFO]: Preparing start region for level 0
+[16:50:23] [Server thread/INFO]: Preparing spawn area: 56%
+[16:50:23] [Server thread/INFO]: Changing view distance to 12, from 10
+[16:50:24] [Server thread/INFO]: Player837[local:E:ebe94cd4] logged in with entity id 236 at (292.66804166665895, 66.0, -195.02608288223803)
+[16:50:24] [Server thread/INFO]: Player837 joined the game
+[16:50:27] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 3137ms behind, skipping 62 tick(s)
+[16:50:30] [Client thread/INFO]: Stopping!
+[16:50:30] [Client thread/INFO]: SoundSystem shutting down...
+[16:50:30] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
