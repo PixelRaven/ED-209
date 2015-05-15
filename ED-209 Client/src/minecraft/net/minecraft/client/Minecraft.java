@@ -233,7 +233,8 @@ public class Minecraft implements IThreadListener, IPlayerUsage
     public Entity pointedEntity;
     public EffectRenderer effectRenderer;
     private final Session session;
-    private boolean isGamePaused;
+    //TODO ED-209: Changed to public
+    public boolean isGamePaused;
 
     /** The font renderer used for displaying and measuring text */
     public FontRenderer fontRendererObj;
@@ -356,6 +357,7 @@ public class Minecraft implements IThreadListener, IPlayerUsage
 
     public Minecraft(GameConfiguration p_i45547_1_)
     {
+    	//TODO ED-209: Set player name
         theMinecraft = this;
         this.mcDataDir = p_i45547_1_.field_178744_c.field_178760_a;
         this.fileAssets = p_i45547_1_.field_178744_c.field_178759_c;

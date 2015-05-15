@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastPlace"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FullBright"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.House"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Nuker"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.MagicCarpet"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Umbrella"/>
 <fullyQualifiedTypeName name="net.minecraft.util.EnumFacing"/>
 <fullyQualifiedTypeName name="net.minecraft.network.play.client.C07PacketPlayerDigging.Action"/>
 <fullyQualifiedTypeName name="net.minecraft.network.play.client.C03PacketPlayer"/>
@@ -59,5 +53,11 @@
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.component.AbstractComponent"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ui.VersionState"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.DisplayVanilla"/>
+<fullyQualifiedTypeName name="org.lwjgl.opengl.Display"/>
+<fullyQualifiedTypeName name="java.awt.Desktop"/>
+<fullyQualifiedTypeName name="java.net.URL"/>
+<fullyQualifiedTypeName name="net.minecraft.network.play.client.C11PacketEnchantItem"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.EnchantItem"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.utils.ModuleColourUtil"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 </qualifiedTypeNameHistroy>

@@ -16,6 +16,7 @@ import net.pixelraven.ed209.module.modules.Dead;
 import net.pixelraven.ed209.module.modules.Derp;
 import net.pixelraven.ed209.module.modules.Disconnect;
 import net.pixelraven.ed209.module.modules.DisplayVanilla;
+import net.pixelraven.ed209.module.modules.NoLoseFocus;
 import net.pixelraven.ed209.module.modules.Exit;
 import net.pixelraven.ed209.module.modules.FastPlace;
 import net.pixelraven.ed209.module.modules.FastWalk;
@@ -87,6 +88,7 @@ public class ModuleManager {
 		this.activeModules.add(new Killaura());
 		this.activeModules.add(new MagicCarpet());
 		this.activeModules.add(new MobESP());
+		this.activeModules.add(new NoLoseFocus());
 		this.activeModules.add(this.noRainModule = new NoRain());
 		this.activeModules.add(this.NoSwingModule = new NoSwing());
 		this.activeModules.add(new Nuker());

@@ -4,6 +4,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.*;
 
+import net.pixelraven.ed209.ED209;
+
 import org.lwjgl.input.Mouse;
 import org.darkstorm.minecraft.gui.component.Button;
 import org.darkstorm.minecraft.gui.component.Component;
@@ -47,7 +49,7 @@ public class SimpleButtonUI extends AbstractComponentUI<Button> {
 			parent = parent.getParent();
 		}
 		if(area.contains(mouse)) {
-			glColor4f(0.0f, 0.0f, 0.0f, Mouse.isButtonDown(0) ? 0.5f : 0.3f);
+			glColor4f(0.0f, ED209.ED.moduleColourUtil.getGreenFromModuleName(button.getText()), ED209.ED.moduleColourUtil.getBlueFromModuleName(button.getText()), Mouse.isButtonDown(0) ? 0.5f : 0.3f);
 			glBegin(GL_QUADS);
 			{
 				glVertex2d(0, 0);

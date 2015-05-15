@@ -2,6 +2,7 @@ package net.pixelraven.ed209;
 import net.pixelraven.ed209.module.ModuleManager;
 import net.pixelraven.ed209.ui.ClientGuiManager;
 import net.pixelraven.ed209.ui.VersionState;
+import net.pixelraven.ed209.utils.ModuleColourUtil;
 
 import org.darkstorm.minecraft.gui.component.AbstractComponent;
 import org.darkstorm.minecraft.gui.theme.simple.SimpleTheme;
@@ -13,14 +14,15 @@ public class ED209 {
 	public final String VERSION_STATEPRETTY = VERSION_STATE.toString().toUpperCase().substring(0, 1);
 	public final String CLIENT_MINECRAFTVERSION = "1.8";
 	public final int CLIENT_PUBLICBUILD = 0;
-	public final String CLIENT_PRETTYVERSION = "0.5.6";
-	public final int CLIENT_VERSION = 35;
+	public final String CLIENT_PRETTYVERSION = "0.5.7";
+	public final int CLIENT_VERSION = 36;
 	public final String CLIENT_FULLVERSION = "@r255@g128@b128" + VERSION_STATEPRETTY + CLIENT_MINECRAFTVERSION + "." + "@r128@g255@b128" + CLIENT_PUBLICBUILD + "." + CLIENT_PRETTYVERSION + "." + CLIENT_VERSION;
 	public final String CLIENT_BUILDTYPE = "@r255@g000@b000Unofficial Build";
 	//public final String CLIENT_BUILDTYPE = "@r000@g255@b000   Official Build";
 	
 	public ModuleManager moduleManager;
 	public static ClientGuiManager guiManager;
+	public static ModuleColourUtil moduleColourUtil = new ModuleColourUtil();
 	public static final ED209 ED = new ED209();
 	private int theProtocol = 4;
 	

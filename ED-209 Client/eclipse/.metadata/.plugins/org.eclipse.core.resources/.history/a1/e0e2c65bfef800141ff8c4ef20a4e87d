@@ -1,0 +1,25 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.play.client.C11PacketEnchantItem;
+import net.minecraft.util.EnumFacing;
+
+import org.lwjgl.input.Keyboard;
+
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class NoLoseFocus extends Module{
+	public NoLoseFocus() {
+		super("Enchant Item", Category.MOVEMENT);
+		setUsage("EnchantItem();");
+		setBlockedState(1);
+		setUseType(1);
+	}
+	
+	public void onUse() {
+		if(!this.getToggled())
+			return;
+		Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C11PacketEnchantItem(0, 0));
+	}
+}
