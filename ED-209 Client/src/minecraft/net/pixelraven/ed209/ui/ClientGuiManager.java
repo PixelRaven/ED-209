@@ -199,14 +199,14 @@ public final class ClientGuiManager extends AbstractGuiManager {
 			Button button = new BasicButton(module.getName()) {
 				@Override
 				public void update() {
-					setBackgroundColor(module.getToggled() ? colourEnabled : background);
+					//setBackgroundColor(module.getToggled() ? colourEnabled : background);
 				}
 			};
 			button.addButtonListener(new ButtonListener() {
 				@Override
 				public void onButtonPress(Button button) {
 					updateModule.toggleModule();
-					button.setBackgroundColor(module.getToggled() ? org.darkstorm.minecraft.gui.component.AbstractComponent.colourEnabled : org.darkstorm.minecraft.gui.component.AbstractComponent.background);
+					//button.setBackgroundColor(module.getToggled() ? org.darkstorm.minecraft.gui.component.AbstractComponent.colourEnabled : org.darkstorm.minecraft.gui.component.AbstractComponent.background);
 				}
 			});
 			frame.add(button, HorizontalGridConstraint.FILL);
