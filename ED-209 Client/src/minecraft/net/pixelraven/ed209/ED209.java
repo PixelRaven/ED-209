@@ -1,6 +1,7 @@
 package net.pixelraven.ed209;
 import net.pixelraven.ed209.module.ModuleManager;
 import net.pixelraven.ed209.ui.ClientGuiManager;
+import net.pixelraven.ed209.ui.ThemeStyle;
 import net.pixelraven.ed209.ui.VersionState;
 import net.pixelraven.ed209.utils.ModuleColourUtil;
 
@@ -14,8 +15,8 @@ public class ED209 {
 	public final String VERSION_STATEPRETTY = VERSION_STATE.toString().toUpperCase().substring(0, 1);
 	public final String CLIENT_MINECRAFTVERSION = "1.8";
 	public final int CLIENT_PUBLICBUILD = 0;
-	public final String CLIENT_PRETTYVERSION = "0.5.8";
-	public final int CLIENT_VERSION = 37;
+	public final String CLIENT_PRETTYVERSION = "0.6.0";
+	public final int CLIENT_VERSION = 39;
 	public final String CLIENT_FULLVERSION = "@r255@g128@b128" + VERSION_STATEPRETTY + CLIENT_MINECRAFTVERSION + "." + "@r128@g255@b128" + CLIENT_PUBLICBUILD + "." + CLIENT_PRETTYVERSION + "." + CLIENT_VERSION;
 	public final String CLIENT_BUILDTYPE = "@r255@g000@b000Unofficial Build";
 	//public final String CLIENT_BUILDTYPE = "@r000@g255@b000   Official Build";
@@ -23,6 +24,7 @@ public class ED209 {
 	public ModuleManager moduleManager;
 	public static ClientGuiManager guiManager;
 	public static ModuleColourUtil moduleColourUtil = new ModuleColourUtil();
+	public static ThemeStyle themeStyle = new ThemeStyle();
 	public static final ED209 ED = new ED209();
 	private int theProtocol = 4;
 	

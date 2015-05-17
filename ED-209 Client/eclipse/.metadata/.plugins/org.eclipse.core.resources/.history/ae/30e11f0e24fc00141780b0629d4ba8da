@@ -1,0 +1,19 @@
+package net.pixelraven.ed209.ui;
+
+import java.awt.Color;
+
+public class ThemeStyle {
+	private float redForeground = 0.0f;
+	private float greenForeground = 1.0f;
+	private float blueForeground = 1.0f;
+	private float redBackground = 0.2f;
+	private float greenBackground = 0.2f;
+	private float blueBackground = 0.2f;
+
+	public Color getBackground() {
+	}
+
+	public Color getForeground() {
+		return new Color(redForeground, greenForeground, blueForeground);
+	}
+}

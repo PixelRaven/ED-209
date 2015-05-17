@@ -116,10 +116,11 @@ public final class ClientGuiManager extends AbstractGuiManager {
 				}
 			});
 
-			frame.setWidth(125);
-			frame.setX(391);
-			frame.setY(12);
 			frame.add(button, HorizontalGridConstraint.RIGHT);
+		
+			frame.setWidth(125);
+			//frame.setX(391);
+			//frame.setY(12);
 		}
 	}
 	
@@ -130,7 +131,8 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		frame.setLayoutManager(new GridLayoutManager(1, 0));
 		frame.setVisible(true);
 		frame.setClosable(false);
-		frame.setMinimized(false);
+		frame.setMinimized(true);
+		frame.setPinnable(false);
 		addFrame(frame);
 		
 		BasicLabel label = new BasicLabel("@r000@g255@b000Works on Bukkit with NC+");
@@ -149,6 +151,30 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		frame.setY(215);
 	}
 	
+	public void themeFrame() {
+		ModuleFrame frame;
+		frame = new ModuleFrame("Theme");
+		frame.setTheme(theme);
+		frame.setLayoutManager(new GridLayoutManager(1, 0));
+		frame.setVisible(true);
+		frame.setClosable(true);
+		frame.setMinimized(true);
+		frame.setPinnable(false);
+		addFrame(frame);
+		
+		BasicSlider sliderRed = new BasicSlider("Red", ED209.ED.themeStyle.getEnabledColour().getRed(), 0, 255, 1);
+		BasicSlider sliderGreen = new BasicSlider("Green", ED209.ED.themeStyle.getEnabledColour().getGreen(), 0, 255, 1);
+		BasicSlider sliderBlue = new BasicSlider("Blue", (double) ED209.ED.themeStyle.getEnabledColour().getBlue(), 0, 255, 1);
+		frame.add(sliderRed, HorizontalGridConstraint.FILL);
+		frame.add(sliderGreen, HorizontalGridConstraint.FILL);
+		frame.add(sliderBlue, HorizontalGridConstraint.FILL);
+		
+		frame.setWidth(200);
+		//frame.setX(395);
+		//frame.setY(215);
+	}
+	
+	
 	@Override
 	public void setup() {
 		if(!setup.compareAndSet(false, true))
@@ -157,6 +183,7 @@ public final class ClientGuiManager extends AbstractGuiManager {
 		//Add console text field
 		GuiTextField consoleTextField;
 		
+		themeFrame();
 		bindFrame();
 		keyFrame();
 		
@@ -189,8 +216,10 @@ public final class ClientGuiManager extends AbstractGuiManager {
 				frame.setTheme(theme);
 				frame.setLayoutManager(new GridLayoutManager(1, 0));
 				frame.setVisible(!name.equals("None"));
-				frame.setClosable(false);
-				frame.setMinimized(false);
+				frame.setClosable(true);
+				frame.setMinimized(true);
+				frame.setPinnable(false);
+				frame.setMinimized(true);
 				addFrame(frame);
 				categoryFrames.put(module.getCategory(), frame);
 			}

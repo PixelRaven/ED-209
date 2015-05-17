@@ -1,30 +1,132 @@
-[08:58:28] [Client thread/INFO]: Setting user: Player964
-[08:58:28] [Client thread/INFO]: (Session ID is token:0:Player964)
-[08:58:30] [Client thread/INFO]: LWJGL Version: 2.9.2
-[08:58:31] [Client thread/INFO]: Reloading ResourceManager: Default
-[08:58:31] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[08:58:31] [Thread-11/INFO]: Initializing LWJGL OpenAL
-[08:58:31] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[08:58:31] [Thread-11/INFO]: OpenAL initialized.
-[08:58:31] [Sound Library Loader/INFO]: Sound engine started
-[08:58:35] [Client thread/INFO]: Created: 512x512 textures-atlas
-[08:58:40] [Server thread/INFO]: Starting integrated minecraft server version 1.8
-[08:58:40] [Server thread/INFO]: Generating keypair
-[08:58:40] [Server thread/INFO]: Preparing start region for level 0
-[08:58:41] [Server thread/INFO]: Preparing spawn area: 74%
-[08:58:41] [Server thread/INFO]: Changing view distance to 12, from 10
-[08:58:42] [Server thread/INFO]: Player964[local:E:1c32e0b3] logged in with entity id 237 at (277.25736074010854, 64.0, -222.64378143514026)
-[08:58:42] [Server thread/INFO]: Player964 joined the game
-[08:58:44] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2277ms behind, skipping 45 tick(s)
-[08:58:46] [Server thread/INFO]: Saving and pausing game...
-[08:58:46] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[08:58:47] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[08:58:47] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[08:58:52] [Server thread/INFO]: Saving and pausing game...
-[08:58:52] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[08:58:53] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[08:58:53] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
-[08:59:16] [Server thread/INFO]: Saving and pausing game...
-[08:59:16] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
-[08:59:17] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
-[08:59:17] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:55:27] [Client thread/INFO]: Setting user: Player145
+[18:55:27] [Client thread/INFO]: (Session ID is token:0:Player145)
+[18:55:29] [Client thread/INFO]: LWJGL Version: 2.9.2
+[18:55:29] [Client thread/INFO]: Reloading ResourceManager: Default
+[18:55:29] [Sound Library Loader/INFO]: Starting up SoundSystem...
+[18:55:30] [Thread-10/INFO]: Initializing LWJGL OpenAL
+[18:55:30] [Thread-10/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
+[18:55:30] [Thread-10/INFO]: OpenAL initialized.
+[18:55:30] [Sound Library Loader/INFO]: Sound engine started
+[18:55:33] [Client thread/INFO]: Created: 512x512 textures-atlas
+[18:55:38] [Server thread/INFO]: Starting integrated minecraft server version 1.8
+[18:55:38] [Server thread/INFO]: Generating keypair
+[18:55:38] [Server thread/INFO]: Preparing start region for level 0
+[18:55:39] [Server thread/INFO]: Preparing spawn area: 95%
+[18:55:39] [Server thread/INFO]: Changing view distance to 12, from 10
+[18:55:39] [Server thread/INFO]: Player145[local:E:7a00b46a] logged in with entity id 237 at (345.14788981104317, 63.72356795967294, -248.16273016652724)
+[18:55:39] [Server thread/INFO]: Player145 joined the game
+[18:55:43] [Server thread/INFO]: Saving and pausing game...
+[18:55:43] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:55:44] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:55:44] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:55:44] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2945ms behind, skipping 58 tick(s)
+[18:56:12] [Server thread/INFO]: Saving and pausing game...
+[18:56:12] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:56:13] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:56:13] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:56:40] [Server thread/INFO]: Saving and pausing game...
+[18:56:40] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:56:40] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:56:40] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:56:49] [Server thread/INFO]: Saving and pausing game...
+[18:56:49] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:56:49] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:56:49] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:56:57] [Server thread/INFO]: Saving and pausing game...
+[18:56:57] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:56:57] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:56:57] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:56:59] [Server thread/INFO]: Saving and pausing game...
+[18:56:59] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:56:59] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:56:59] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:57:02] [Server thread/INFO]: Saving and pausing game...
+[18:57:02] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:57:02] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:57:02] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:57:10] [Server thread/INFO]: Saving and pausing game...
+[18:57:10] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:57:10] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:57:10] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:57:23] [Server thread/INFO]: Player145 has just earned the achievement [Taking Inventory]
+[18:57:23] [Client thread/INFO]: [CHAT] Player145 has just earned the achievement [Taking Inventory]
+[18:57:36] [Server thread/INFO]: Saving and pausing game...
+[18:57:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:57:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:57:36] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:57:39] [Server thread/INFO]: Saving and pausing game...
+[18:57:39] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:57:39] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:57:39] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:57:42] [Server thread/INFO]: <Player145> Hello!
+[18:57:42] [Server thread/INFO]: <Player145> Hello!
+[18:57:42] [Server thread/INFO]: <Player145> Hello!
+[18:57:42] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:42] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:42] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Server thread/INFO]: <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:43] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Server thread/INFO]: <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:57:44] [Client thread/INFO]: [CHAT] <Player145> Hello!
+[18:58:16] [Server thread/INFO]: Saving and pausing game...
+[18:58:16] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:58:17] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[18:58:17] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[18:58:27] [Server thread/ERROR]: Encountered an unexpected exception
+net.minecraft.util.ReportedException: Ticking entity
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:784) ~[bin/:?]
+	at net.minecraft.server.MinecraftServer.tick(MinecraftServer.java:678) ~[bin/:?]
+	at net.minecraft.server.integrated.IntegratedServer.tick(IntegratedServer.java:190) ~[bin/:?]
+	at net.minecraft.server.MinecraftServer.run(MinecraftServer.java:561) [bin/:?]
+	at java.lang.Thread.run(Thread.java:695) [?:1.6.0_65]
+Caused by: java.util.ConcurrentModificationException
+	at java.util.AbstractList$Itr.checkForComodification(AbstractList.java:372) ~[?:1.6.0_65]
+	at java.util.AbstractList$Itr.next(AbstractList.java:343) ~[?:1.6.0_65]
+	at net.pixelraven.ed209.module.modules.ClickAimbot.onUpdate(ClickAimbot.java:23) ~[bin/:?]
+	at net.minecraft.entity.player.EntityPlayerMP.onUpdate(EntityPlayerMP.java:277) ~[bin/:?]
+	at net.minecraft.world.World.updateEntityWithOptionalForce(World.java:1885) ~[bin/:?]
+	at net.minecraft.world.WorldServer.updateEntityWithOptionalForce(WorldServer.java:737) ~[bin/:?]
+	at net.minecraft.world.World.updateEntity(World.java:1854) ~[bin/:?]
+	at net.minecraft.world.World.updateEntities(World.java:1703) ~[bin/:?]
+	at net.minecraft.world.WorldServer.updateEntities(WorldServer.java:569) ~[bin/:?]
+	at net.minecraft.server.MinecraftServer.updateTimeLightAndEntities(MinecraftServer.java:778) ~[bin/:?]
+	... 4 more
+[18:58:27] [Server thread/ERROR]: This crash report has been saved to: /Users/Rowan/Documents/Programming/GitHub/ED-209/ED-209 Client/jars/./crash-reports/crash-2015-05-17_18.58.27-server.txt
+[18:58:27] [Server thread/INFO]: Stopping server
+[18:58:27] [Server thread/INFO]: Saving players
+[18:58:27] [Server thread/INFO]: Saving worlds
+[18:58:27] [Client Shutdown Thread/INFO]: Stopping server
+[18:58:27] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[18:58:27] [Client Shutdown Thread/INFO]: Saving players

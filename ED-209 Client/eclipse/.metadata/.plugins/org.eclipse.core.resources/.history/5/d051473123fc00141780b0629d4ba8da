@@ -1,0 +1,10 @@
+package net.pixelraven.ed209.ui;
+
+public class ThemeStyle {
+	public float redForeground = 0.0f;
+	public float greenForeground = 1.0f;
+	public float blueForeground = 1.0f;
+	public float redBackground = 0.0f;
+	public float greenBackground = 1.0f;
+	public float blueBackground = 1.0f;
+}
