@@ -1,0 +1,27 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.server.S38PacketPlayerListItem.Action;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class TwerkIt extends Module{
+	public int tick = 0;
+	
+	public TwerkIt() {
+		super("Twerk It", Category.PLAYER);
+		setUsage("TwerkIt();");
+		setBlockedState(0);
+	}
+	
+	public void onUpdate() {
+		tick ++;
+		if(Math.floor(tick/5)%2 = 0)
+		Minecraft.getMinecraft().thePlayer.setSneaking(false);
+	}
+
+	public void onDisable() {
+		Minecraft.getMinecraft().thePlayer.setSneaking(false);
+	}
+}

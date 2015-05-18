@@ -16,6 +16,7 @@ import net.pixelraven.ed209.module.modules.Dead;
 import net.pixelraven.ed209.module.modules.Derp;
 import net.pixelraven.ed209.module.modules.Disconnect;
 import net.pixelraven.ed209.module.modules.DisplayVanilla;
+import net.pixelraven.ed209.module.modules.FastLadder;
 import net.pixelraven.ed209.module.modules.NoLoseFocus;
 import net.pixelraven.ed209.module.modules.Exit;
 import net.pixelraven.ed209.module.modules.FastPlace;
@@ -44,6 +45,7 @@ import net.pixelraven.ed209.module.modules.Sprint;
 import net.pixelraven.ed209.module.modules.Step;
 import net.pixelraven.ed209.module.modules.Swim;
 import net.pixelraven.ed209.module.modules.Triggerbot;
+import net.pixelraven.ed209.module.modules.TwerkIt;
 import net.pixelraven.ed209.module.modules.Umbrella;
 import net.pixelraven.ed209.module.modules.Zoom;
 
@@ -76,6 +78,7 @@ public class ModuleManager {
 		this.activeModules.add(new Derp());
 		this.activeModules.add(this.DisplayVanillaModule = new DisplayVanilla());
 		this.activeModules.add(new Exit());
+		this.activeModules.add(new FastLadder());
 		this.activeModules.add(new FastPlace());
 		this.activeModules.add(new FastWalk());
 		this.activeModules.add(new Fly());
@@ -103,6 +106,7 @@ public class ModuleManager {
 		this.activeModules.add(new Swim());
 		this.activeModules.add(new ToggleSneak());
 		this.activeModules.add(new Triggerbot());
+		this.activeModules.add(new TwerkIt());
 		this.activeModules.add(new Umbrella());
 		this.activeModules.add(new Zoom());
 	}
