@@ -1,0 +1,25 @@
+package net.pixelraven.ed209.module.modules;
+
+import org.darkstorm.minecraft.gui.util.GuiManagerDisplayScreen;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.pixelraven.ed209.ED209;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class Disconnect extends Module{
+	public Disconnect() {
+		super("Disconnect", Category.MISC);
+		setUseType(1);
+		setUsage("Disconnect();");
+		setBlockedState(3);
+	}
+	
+	public void onUse() {
+		this.mc.theWorld.sendQuittingDisconnectingPacket();
+        this.mc.loadWorld((WorldClient)null);
+        this.mc.displayGuiScreen(new GuiMainMenu());
+	}
+}

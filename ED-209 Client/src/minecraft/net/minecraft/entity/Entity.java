@@ -852,7 +852,7 @@ public abstract class Entity implements ICommandSender
 
                 if (var60 != Blocks.ladder)
                 {
-                    var64 = 10.0D;
+                    var64 = 0.0D;
                 }
 
                 if (var60 != null && this.onGround)

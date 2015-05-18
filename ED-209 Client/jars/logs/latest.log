@@ -1,21 +1,33 @@
-[12:18:01] [Client thread/INFO]: Setting user: Player565
-[12:18:01] [Client thread/INFO]: (Session ID is token:0:Player565)
-[12:18:03] [Client thread/INFO]: LWJGL Version: 2.9.2
-[12:18:03] [Client thread/INFO]: Reloading ResourceManager: Default
-[12:18:04] [Sound Library Loader/INFO]: Starting up SoundSystem...
-[12:18:04] [Thread-11/INFO]: Initializing LWJGL OpenAL
-[12:18:04] [Thread-11/INFO]: (The LWJGL binding of OpenAL.  For more information, see http://www.lwjgl.org)
-[12:18:04] [Thread-11/INFO]: OpenAL initialized.
-[12:18:04] [Sound Library Loader/INFO]: Sound engine started
-[12:18:09] [Client thread/INFO]: Created: 512x512 textures-atlas
-[12:18:14] [Server thread/INFO]: Starting integrated minecraft server version 1.8
-[12:18:14] [Server thread/INFO]: Generating keypair
-[12:18:14] [Server thread/INFO]: Preparing start region for level 0
-[12:18:15] [Server thread/INFO]: Preparing spawn area: 45%
-[12:18:16] [Server thread/INFO]: Changing view distance to 12, from 10
-[12:18:16] [Server thread/INFO]: Player565[local:E:3d485893] logged in with entity id 237 at (350.42500001192093, 65.8401860680159, -213.65428444012178)
-[12:18:16] [Server thread/INFO]: Player565 joined the game
-[12:18:19] [Server thread/WARN]: Can't keep up! Did the system time change, or is the server overloaded? Running 2866ms behind, skipping 57 tick(s)
-[12:18:27] [Client thread/INFO]: Stopping!
-[12:18:27] [Client thread/INFO]: SoundSystem shutting down...
-[12:18:28] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com
+[00:00:01] [Server thread/INFO]: [Player531: Set own game mode to Survival Mode]
+[00:00:01] [Client thread/INFO]: [CHAT] Your game mode has been updated
+[00:00:02] [Server thread/INFO]: Saving and pausing game...
+[00:00:02] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:00:03] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:00:03] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:00:04] [Server thread/INFO]: Saving and pausing game...
+[00:00:04] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:00:04] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:00:04] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:00:44] [Server thread/INFO]: [Player531: Given Nausea (ID 9) * 0 to Player531 for 99999 seconds]
+[00:00:44] [Client thread/INFO]: [CHAT] Given Nausea (ID 9) * 0 to Player531 for 99999 seconds
+[00:00:50] [Server thread/INFO]: [Player531: Given Mining Fatigue (ID 4) * 0 to Player531 for 99999 seconds]
+[00:00:50] [Client thread/INFO]: [CHAT] Given Mining Fatigue (ID 4) * 0 to Player531 for 99999 seconds
+[00:00:52] [Server thread/INFO]: [Player531: Given Blindness (ID 15) * 0 to Player531 for 99999 seconds]
+[00:00:52] [Client thread/INFO]: [CHAT] Given Blindness (ID 15) * 0 to Player531 for 99999 seconds
+[00:01:12] [Server thread/INFO]: Saving and pausing game...
+[00:01:12] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:01:12] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:01:12] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:02:51] [Server thread/INFO]: Saving and pausing game...
+[00:02:51] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:02:51] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:02:51] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:03:04] [Client thread/INFO]: Stopping!
+[00:03:04] [Client thread/INFO]: SoundSystem shutting down...
+[00:03:04] [Server thread/INFO]: Stopping server
+[00:03:04] [Server thread/INFO]: Saving players
+[00:03:04] [Server thread/INFO]: Saving worlds
+[00:03:04] [Server thread/INFO]: Saving chunks for level 'mcp world'/Overworld
+[00:03:04] [Server thread/INFO]: Saving chunks for level 'mcp world'/Nether
+[00:03:04] [Server thread/INFO]: Saving chunks for level 'mcp world'/The End
+[00:03:04] [Client thread/WARN]: Author: Paul Lamb, www.paulscode.com

@@ -17,8 +17,7 @@ public class FastLadder extends Module{
 	public void onUpdate() {
 		if(!this.getToggled())
 			return;
-		if(Minecraft.getMinecraft().thePlayer.isOnLadder() && Minecraft.getMinecraft().gameSettings.keyBindForward.isPressed())
-			Minecraft.getMinecraft().thePlayer.jump();
+		if(Minecraft.getMinecraft().thePlayer.isOnLadder() && Minecraft.getMinecraft().gameSettings.keyBindForward.isPressed());
 	}
 	
 	public void onDisable() {

@@ -1,0 +1,20 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class NoBlind extends Module{
+	public NoBlind() {
+		super("No Blind", Category.PLAYER);
+		setUsage("NoBlind();");
+		setBlockedState(3);
+	}
+	
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		
+		 Minecraft.getMinecraft().thePlayer.removePotionEffectClient(15);
+	}
+}
