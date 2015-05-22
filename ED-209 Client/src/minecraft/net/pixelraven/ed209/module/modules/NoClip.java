@@ -1,0 +1,18 @@
+package net.pixelraven.ed209.module.modules;
+import net.minecraft.client.Minecraft;
+
+import org.lwjgl.input.Keyboard;
+
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class NoClip extends Module{
+	public NoClip() {
+		super("No Clip", Category.MOVEMENT);
+		setUsage("NoClip();");
+		setBlockedState(2);
+	}
+	
+	public void onUpdate() {
+	}
+}

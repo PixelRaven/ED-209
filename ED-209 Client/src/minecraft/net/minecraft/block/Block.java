@@ -466,7 +466,13 @@ public class Block
 
     public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
     {
-        return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
+    	//TODO ED-209: Added if/else for NoClip hack
+    	if(net.pixelraven.ed209.ED209.ED.moduleManager.NoClipModule.getToggled()) {
+    		return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
+        }
+    	else{
+    	    return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    	}
     }
 
     /**
@@ -486,7 +492,11 @@ public class Block
 
     public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-        return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
+    	//TODO ED-209: Added if for NoClip hack
+    	if(net.pixelraven.ed209.ED209.ED.moduleManager.NoClipModule.getToggled())
+    	    return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
+    	
+    	return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     }
 
     public boolean isOpaqueCube()

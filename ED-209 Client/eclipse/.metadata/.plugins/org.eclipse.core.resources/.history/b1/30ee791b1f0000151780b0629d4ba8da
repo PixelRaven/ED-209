@@ -1,0 +1,27 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+import net.pixelraven.ed209.utils.PlayerVars;
+
+public class FastBow extends Module{
+	float speed = 0.25F;
+	
+	public FastBow() {
+		super("Fast Bow", Category.COMBAT);
+		setUsage("FastBow();");
+		setBlockedState(1);
+	}
+	
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		
+		Minecraft.getMinecraft().gameSettings.keyBindAttack.pressed = true;
+	}
+	
+	public void onDisable() {
+		Minecraft.getMinecraft().gameSettings.keyBindAttack.pressed = false;
+	}
+}

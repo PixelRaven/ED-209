@@ -345,6 +345,15 @@ public class GuiMainMenu extends GuiScreen implements GuiYesNoCallback
         }
     }
 
+    //TODO ED-209: Draw custom background
+    private void drawEDBackground() {
+    	
+    	
+    	
+    	
+    	
+    }
+    
     /**
      * Draws the main menu panorama
      */

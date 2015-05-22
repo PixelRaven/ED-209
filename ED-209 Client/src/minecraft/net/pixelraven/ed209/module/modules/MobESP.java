@@ -51,7 +51,7 @@ public class MobESP extends Module{
         GL11.glEnable(GL11.GL_BLEND);
         worldRenderer.setTranslation((float)(eX - x), (float)(eY - y), (float)(eZ - z));
 		worldRenderer.setTranslation(-0.5F, 0F, -0.5F);
-        //GL11.glLineWidth((float)((50-dist)/7.5));
+        GL11.glLineWidth((float)((50-dist)/7.5));
         //RENDER: draw
         worldRenderer.startDrawing(3);
 		//worldRenderer.setColorRGBA_F((float)(Math.min(50-dist, 50)/50), (float)(Math.min(dist-10, 50)/50), 0.0F, 1.0F);

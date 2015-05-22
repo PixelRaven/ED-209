@@ -1,0 +1,17 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class AutoUpdateSign extends Module{
+	public AutoUpdateSign() {
+		super("Auto Update Sign", Category.BUILDING);
+		setUsage("AutoUpdateSign();");
+		setBlockedState(2);
+	}
+	
+	public void onUpdate() {
+		
+	}
+}

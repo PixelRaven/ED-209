@@ -15,7 +15,7 @@ import net.pixelraven.ed209.module.Module;
 import net.pixelraven.ed209.utils.PlayerVars;
 
 public class Nuker extends Module {
-	double nukerRadius = 4.0D, dist = 10.0D;
+	double nukerRadius = 14.0D, dist = 10.0D;
 	int xPos = -1, yPos = -1, zPos = -1;
 	
 	public Nuker() {

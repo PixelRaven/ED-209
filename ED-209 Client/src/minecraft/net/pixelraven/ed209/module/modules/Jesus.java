@@ -14,9 +14,5 @@ public class Jesus extends Module{
 	}
 	
 	public void onUpdate() {
-		if(!this.getToggled())
-			return;
-		
-		System.out.println("Jesus hack is toggled.");
 	}
 }

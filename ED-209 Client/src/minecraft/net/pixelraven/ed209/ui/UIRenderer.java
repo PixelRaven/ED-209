@@ -15,7 +15,7 @@ public class UIRenderer {
 		//ED-209 name and version
 		if(!ED209.ED.moduleManager.DisplayVanillaModule.getToggled()) {
 			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("ED-", 2, 2, (128 << 4) + (255 << 4));
-			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 18, 2, (255 << 16));
+			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow("209", 20, 2, (255 << 16));
 			UIRenderer.drawText("@r255@g255@b255Version " + ED209.ED.CLIENT_FULLVERSION, Minecraft.getMinecraft().displayWidth/2-109, 2, 0);
 			UIRenderer.drawText(ED209.ED.CLIENT_BUILDTYPE, Minecraft.getMinecraft().displayWidth/2-75, 12, 0);
 			Display.setTitle("ED-209 [Minecraft 1.8.X]");

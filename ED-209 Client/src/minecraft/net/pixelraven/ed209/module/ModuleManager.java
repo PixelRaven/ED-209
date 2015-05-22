@@ -17,7 +17,9 @@ import net.pixelraven.ed209.module.modules.Dead;
 import net.pixelraven.ed209.module.modules.Derp;
 import net.pixelraven.ed209.module.modules.Disconnect;
 import net.pixelraven.ed209.module.modules.DisplayVanilla;
+import net.pixelraven.ed209.module.modules.FastBow;
 import net.pixelraven.ed209.module.modules.FastLadder;
+import net.pixelraven.ed209.module.modules.NoClip;
 import net.pixelraven.ed209.module.modules.NoFall;
 import net.pixelraven.ed209.module.modules.NoPause;
 import net.pixelraven.ed209.module.modules.Exit;
@@ -61,6 +63,7 @@ public class ModuleManager {
 	//public static MobESP MobESPModule;
 	//public static BowAimBot bowAimBotModule;
 	public static Jesus JesusModule;
+	public static NoClip NoClipModule;
 	public static NoSwing NoSwingModule;
 	
 	public ModuleManager() {
@@ -81,6 +84,7 @@ public class ModuleManager {
 		this.activeModules.add(new Derp());
 		this.activeModules.add(this.DisplayVanillaModule = new DisplayVanilla());
 		this.activeModules.add(new Exit());
+		this.activeModules.add(new FastBow());
 		this.activeModules.add(new FastLadder());
 		this.activeModules.add(new FastPlace());
 		this.activeModules.add(new FastWalk());
@@ -94,6 +98,7 @@ public class ModuleManager {
 		this.activeModules.add(new Killaura());
 		this.activeModules.add(new MagicCarpet());
 		this.activeModules.add(new MobESP());
+		this.activeModules.add(this.NoClipModule = new NoClip());
 		this.activeModules.add(new NoFall());
 		this.activeModules.add(new NoPause());
 		this.activeModules.add(this.noRainModule = new NoRain());
