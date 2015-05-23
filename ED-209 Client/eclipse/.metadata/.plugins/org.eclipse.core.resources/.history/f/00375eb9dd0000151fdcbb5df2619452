@@ -1,0 +1,28 @@
+package net.pixelraven.ed209.module.modules;
+import net.minecraft.client.Minecraft;
+
+import org.lwjgl.input.Keyboard;
+
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class VClip extends Module{
+
+	public VClip() {
+		super("VClip", Category.MOVEMENT);
+		setUsage("VClip();");
+		setBlockedState(1);
+	}
+
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		if(Minecraft.getMinecraft().thePlayer.isInWater()) {
+			Minecraft.getMinecraft().gameSettings.keyBindJump.pressed = true;
+		}
+	}
+	
+	public void onDisable() {
+		Minecraft.getMinecraft().gameSettings.keyBindJump.pressed = false;
+	}
+}

@@ -1,21 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="net.minecraft.util.EnumFacing"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.client.C07PacketPlayerDigging.Action"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.client.C03PacketPlayer"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.client.C0BPacketEntityAction.Action"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.client.C0BPacketEntityAction"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.PacketSneak"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.server.S38PacketPlayerListItem.Action"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.client.C03PacketPlayer.C05PacketPlayerLook"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Derp"/>
-<fullyQualifiedTypeName name="net.minecraft.network.play.client.C0APacketAnimation"/>
-<fullyQualifiedTypeName name="net.minecraft.network.PacketBuffer"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoMine"/>
 <fullyQualifiedTypeName name="net.minecraft.client.gui.GuiMainMenu"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ui.UIRenderer"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.module.Module"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.layout.GridLayoutManager"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.layout.GridLayoutManager.HorizontalGridConstraint"/>
@@ -30,7 +17,6 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Triggerbot"/>
 <fullyQualifiedTypeName name="net.minecraft.entity.player.EntityPlayer"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoEat"/>
-<fullyQualifiedTypeName name="net.minecraft.item.ItemStack"/>
 <fullyQualifiedTypeName name="net.minecraft.item.EnumAction"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Phase"/>
 <fullyQualifiedTypeName name="net.minecraft.world.WorldSettings.GameType"/>
@@ -47,7 +33,6 @@
 <fullyQualifiedTypeName name="net.minecraft.client.entity.EntityPlayerSP"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoRain"/>
 <fullyQualifiedTypeName name="net.minecraft.client.gui.GuiScreen"/>
-<fullyQualifiedTypeName name="java.awt.Color"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ui.ClientGuiManager"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.AbstractGuiManager"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.component.AbstractComponent"/>
@@ -59,5 +44,20 @@
 <fullyQualifiedTypeName name="net.minecraft.network.play.client.C11PacketEnchantItem"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.EnchantItem"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.utils.ModuleColourUtil"/>
+<fullyQualifiedTypeName name="org.lwjgl.util.Color"/>
+<fullyQualifiedTypeName name="java.awt.Color"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.ThemeStyle"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.TwerkIt"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastLadder"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoFall"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AntiPotion"/>
+<fullyQualifiedTypeName name="net.minecraft.item.ItemBow"/>
+<fullyQualifiedTypeName name="net.minecraft.item.ItemStack"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastBow"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.Module"/>
+<fullyQualifiedTypeName name="net.minecraft.util.IChatComponent"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoUpdateSign"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoClip"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Submarine"/>
 </qualifiedTypeNameHistroy>

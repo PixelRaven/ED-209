@@ -467,13 +467,15 @@ public class Block
     public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
     {
     	//TODO ED-209: Added if/else for NoClip hack
-    	if(net.pixelraven.ed209.ED209.ED.moduleManager.NoClipModule.getToggled()) {
-    		return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
-        }
-    	else{
+    	if(net.pixelraven.ed209.ED209.ED.moduleManager.NoClipModule.getToggled())
     	    return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
-    	}
-    }
+    
+    	//TODO ED-209: Added if for Submarine hack
+    	if(net.pixelraven.ed209.ED209.ED.moduleManager.SubmarineModule.getToggled())
+    		return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY-1, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY-1, (double)pos.getZ() + this.maxZ);
+        
+    	return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
+     }
 
     /**
      * Add all collision boxes of this Block to the list that intersect with the given mask.
@@ -494,9 +496,13 @@ public class Block
     {
     	//TODO ED-209: Added if for NoClip hack
     	if(net.pixelraven.ed209.ED209.ED.moduleManager.NoClipModule.getToggled())
-    	    return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
-    	
-    	return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    		return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+        
+    	//TODO ED-209: Added if for Submarine hack
+    	if(net.pixelraven.ed209.ED209.ED.moduleManager.SubmarineModule.getToggled())
+        	return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY-1, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY-1, (double)pos.getZ() + this.maxZ);
+    
+    	return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY, (double)pos.getZ() + this.maxZ);
     }
 
     public boolean isOpaqueCube()

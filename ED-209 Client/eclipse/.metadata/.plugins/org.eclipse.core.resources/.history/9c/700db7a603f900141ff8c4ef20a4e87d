@@ -1,8 +1,0 @@
-package net.pixelraven.ed209.utils;
-
-public class ModuleColourUtil {
-	public float getRedFromModuleName(String name) {
-		
-		return
-	}
-}

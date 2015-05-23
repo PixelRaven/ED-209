@@ -18,8 +18,11 @@ public class Swim extends Module{
 		if(!this.getToggled())
 			return;
 		if(Minecraft.getMinecraft().thePlayer.isInWater()) {
-			Minecraft.getMinecraft().thePlayer.jump();
+			Minecraft.getMinecraft().gameSettings.keyBindJump.pressed = true;
 		}
 	}
 	
+	public void onDisable() {
+		Minecraft.getMinecraft().gameSettings.keyBindJump.pressed = false;
+	}
 }

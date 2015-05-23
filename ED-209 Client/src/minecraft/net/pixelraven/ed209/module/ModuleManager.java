@@ -19,6 +19,7 @@ import net.pixelraven.ed209.module.modules.Disconnect;
 import net.pixelraven.ed209.module.modules.DisplayVanilla;
 import net.pixelraven.ed209.module.modules.FastBow;
 import net.pixelraven.ed209.module.modules.FastLadder;
+import net.pixelraven.ed209.module.modules.LadderSpace;
 import net.pixelraven.ed209.module.modules.NoClip;
 import net.pixelraven.ed209.module.modules.NoFall;
 import net.pixelraven.ed209.module.modules.NoPause;
@@ -43,6 +44,7 @@ import net.pixelraven.ed209.module.modules.Fly;
 import net.pixelraven.ed209.module.modules.Regen;
 import net.pixelraven.ed209.module.modules.Spam;
 import net.pixelraven.ed209.module.modules.Strafe360;
+import net.pixelraven.ed209.module.modules.Submarine;
 import net.pixelraven.ed209.module.modules.ToggleSneak;
 import net.pixelraven.ed209.module.modules.Spider;
 import net.pixelraven.ed209.module.modules.Sprint;
@@ -51,6 +53,7 @@ import net.pixelraven.ed209.module.modules.Swim;
 import net.pixelraven.ed209.module.modules.Triggerbot;
 import net.pixelraven.ed209.module.modules.TwerkIt;
 import net.pixelraven.ed209.module.modules.Umbrella;
+import net.pixelraven.ed209.module.modules.VClip;
 import net.pixelraven.ed209.module.modules.Zoom;
 
 public class ModuleManager {
@@ -58,13 +61,16 @@ public class ModuleManager {
 
 	//public Xray xrayModule;
 	public static DisplayVanilla DisplayVanillaModule;
-	public static NoRain noRainModule;
+	public static FastLadder FastLadderModule;
 	//public static EntityOverlay entityOverayModule;
 	//public static MobESP MobESPModule;
 	//public static BowAimBot bowAimBotModule;
 	public static Jesus JesusModule;
+	public static LadderSpace LadderSpaceModule;
 	public static NoClip NoClipModule;
+	public static NoRain noRainModule;
 	public static NoSwing NoSwingModule;
+	public static Submarine SubmarineModule;
 	
 	public ModuleManager() {
 		this.activeModules.add(new ClickGui());
@@ -85,7 +91,7 @@ public class ModuleManager {
 		this.activeModules.add(this.DisplayVanillaModule = new DisplayVanilla());
 		this.activeModules.add(new Exit());
 		this.activeModules.add(new FastBow());
-		this.activeModules.add(new FastLadder());
+		this.activeModules.add(this.FastLadderModule = new FastLadder());
 		this.activeModules.add(new FastPlace());
 		this.activeModules.add(new FastWalk());
 		this.activeModules.add(new Fly());
@@ -96,6 +102,7 @@ public class ModuleManager {
 		this.activeModules.add(new House());
 		this.activeModules.add(this.JesusModule = new Jesus());
 		this.activeModules.add(new Killaura());
+		this.activeModules.add(this.LadderSpaceModule = new LadderSpace());
 		this.activeModules.add(new MagicCarpet());
 		this.activeModules.add(new MobESP());
 		this.activeModules.add(this.NoClipModule = new NoClip());
@@ -111,11 +118,13 @@ public class ModuleManager {
 		this.activeModules.add(new Sprint());
 		this.activeModules.add(new Step());
 		this.activeModules.add(new Strafe360());
+		this.activeModules.add(this.SubmarineModule = new Submarine());
 		this.activeModules.add(new Swim());
 		this.activeModules.add(new ToggleSneak());
 		this.activeModules.add(new Triggerbot());
 		this.activeModules.add(new TwerkIt());
 		this.activeModules.add(new Umbrella());
+		this.activeModules.add(new VClip());
 		this.activeModules.add(new Zoom());
 	}
 }

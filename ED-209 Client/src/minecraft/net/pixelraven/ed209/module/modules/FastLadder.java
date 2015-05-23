@@ -8,19 +8,10 @@ import net.pixelraven.ed209.module.Category;
 import net.pixelraven.ed209.module.Module;
 
 public class FastLadder extends Module{
+	public float speed = 2f;
 	public FastLadder() {
 		super("Fast Ladder", Category.MOVEMENT);
 		setUsage("FastLadder();");
-		setBlockedState(1);
-	}
-	
-	public void onUpdate() {
-		if(!this.getToggled())
-			return;
-		if(Minecraft.getMinecraft().thePlayer.isOnLadder() && Minecraft.getMinecraft().gameSettings.keyBindForward.isPressed());
-	}
-	
-	public void onDisable() {
-		Minecraft.getMinecraft().gameSettings.keyBindSneak.pressed = false;	
+		setBlockedState(2);
 	}
 }

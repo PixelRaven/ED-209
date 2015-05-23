@@ -1,12 +1,14 @@
 package net.minecraft.entity;
 
 import com.google.common.collect.Maps;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -47,6 +49,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.pixelraven.ed209.ED209;
 
 public abstract class EntityLivingBase extends Entity
 {
@@ -1117,10 +1120,13 @@ public abstract class EntityLivingBase extends Entity
      */
     public boolean isOnLadder()
     {
-        int var1 = MathHelper.floor_double(this.posX);
+    	int var1 = MathHelper.floor_double(this.posX);
         int var2 = MathHelper.floor_double(this.getEntityBoundingBox().minY);
         int var3 = MathHelper.floor_double(this.posZ);
         Block var4 = this.worldObj.getBlockState(new BlockPos(var1, var2, var3)).getBlock();
+        //TODO ED-209: Added if for LadderSpace hack
+        if(!(var4 == Blocks.ladder || var4 == Blocks.vine) && ED209.ED.moduleManager.LadderSpaceModule.getToggled())
+        	var4 = this.worldObj.getBlockState(new BlockPos(var1, var2-1, var3)).getBlock();
         return (var4 == Blocks.ladder || var4 == Blocks.vine) && (!(this instanceof EntityPlayer) || !((EntityPlayer)this).func_175149_v());
     }
 
@@ -1651,7 +1657,9 @@ public abstract class EntityLivingBase extends Entity
             else
             {
                 float var3 = 0.91F;
-
+            	//TODO ED-209: Fastladder business
+            	double fastLadderSpeed = ED209.ED.moduleManager.FastLadderModule.getToggled() ? ED209.ED.moduleManager.FastLadderModule.speed : 1;
+            
                 if (this.onGround)
                 {
                     var3 = this.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(this.posX), MathHelper.floor_double(this.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(this.posZ))).getBlock().slipperiness * 0.91F;
@@ -1683,9 +1691,9 @@ public abstract class EntityLivingBase extends Entity
                     this.motionZ = MathHelper.clamp_double(this.motionZ, (double)(-var6), (double)var6);
                     this.fallDistance = 0.0F;
 
-                    if (this.motionY < -0.15D)
+                    if (this.motionY < -0.15*fastLadderSpeed)
                     {
-                        this.motionY = -0.15D;
+                        this.motionY = -0.15*fastLadderSpeed;
                     }
 
                     boolean var7 = this.isSneaking() && this instanceof EntityPlayer;
@@ -1700,14 +1708,14 @@ public abstract class EntityLivingBase extends Entity
 
                 if (this.isCollidedHorizontally && this.isOnLadder())
                 {
-                    this.motionY = 0.2D;
+                    this.motionY = 0.2*fastLadderSpeed;
                 }
 
                 if (this.worldObj.isRemote && (!this.worldObj.isBlockLoaded(new BlockPos((int)this.posX, 0, (int)this.posZ)) || !this.worldObj.getChunkFromBlockCoords(new BlockPos((int)this.posX, 0, (int)this.posZ)).isLoaded()))
                 {
                     if (this.posY > 0.0D)
                     {
-                        this.motionY = -0.1D;
+                        this.motionY = -0.1*fastLadderSpeed;
                     }
                     else
                     {

@@ -1,0 +1,26 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class Criticals extends Module{
+	public Criticals() {
+		super("Criticals", Category.COMBAT);
+	}
+	
+	public void onUpdate() {
+		if(!this.getToggled())
+			return;
+		
+		if(Minecraft.getMinecraft().thePlayer.swingProgress > 0 && Minecraft.getMinecraft().thePlayer.swingProgress < 2 && Minecraft.getMinecraft().thePlayer.isCollidedVertically) {
+			Minecraft.getMinecraft().thePlayer.motionY += 0.3;
+		}
+		
+		if(Minecraft.getMinecraft().thePlayer.swingProgress >= 0.3  && !Minecraft.getMinecraft().thePlayer.isCollidedVertically) {
+			Minecraft.getMinecraft().thePlayer.motionY -= 0.3;
+		}
+		
+		System.out.println(Minecraft.getMinecraft().thePlayer.swingProgress);
+	}
+}

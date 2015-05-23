@@ -13,14 +13,9 @@ public class Criticals extends Module{
 		if(!this.getToggled())
 			return;
 		
-		if(Minecraft.getMinecraft().thePlayer.swingProgress > 0 && Minecraft.getMinecraft().thePlayer.isCollidedVertically) {
-			Minecraft.getMinecraft().thePlayer.motionY += 0.3;
+		if(Minecraft.getMinecraft().thePlayer.swingProgress > 0 && Minecraft.getMinecraft().thePlayer.swingProgress < 2 && Minecraft.getMinecraft().thePlayer.isCollidedVertically) {
+			Minecraft.getMinecraft().thePlayer.setPosition(Minecraft.getMinecraft().thePlayer.posX, Minecraft.getMinecraft().thePlayer.posY+0.5, Minecraft.getMinecraft().thePlayer.posZ);
+			//Minecraft.getMinecraft().thePlayer.motionY -= 0.3;
 		}
-		
-		if(Minecraft.getMinecraft().thePlayer.swingProgress >= 0.3  && !Minecraft.getMinecraft().thePlayer.isCollidedVertically) {
-			Minecraft.getMinecraft().thePlayer.motionY -= 0.3;
-		}
-		
-		System.out.println(Minecraft.getMinecraft().thePlayer.swingProgress);
 	}
 }
