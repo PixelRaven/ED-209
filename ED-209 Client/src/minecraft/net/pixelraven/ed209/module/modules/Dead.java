@@ -14,10 +14,12 @@ public class Dead extends Module{
 	}
 	
 	public void onEnable() {
+		Minecraft.getMinecraft().thePlayer.isDead = true;
 		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C0BPacketEntityAction(Minecraft.getMinecraft().thePlayer, Action.UPDATE_GAME_MODE, 0));
 	}
 
 	public void onDisable() {
+		Minecraft.getMinecraft().thePlayer.isDead = false;
 		//Minecraft.getMinecraft().thePlayer.sendQueue.addToSendQueue(new C0BPacketEntityAction(Minecraft.getMinecraft().thePlayer, Action.START_SNEAKING, 0));
 	}
 }

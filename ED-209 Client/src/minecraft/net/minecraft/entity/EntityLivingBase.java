@@ -399,7 +399,7 @@ public abstract class EntityLivingBase extends Entity
             int var1;
 
             if (!this.worldObj.isRemote && (this.recentlyHit > 0 || this.isPlayer()) && this.func_146066_aG() && this.worldObj.getGameRules().getGameRuleBooleanValue("doMobLoot"))
-            {
+            {	
                 var1 = this.getExperiencePoints(this.attackingPlayer);
 
                 while (var1 > 0)
@@ -432,7 +432,11 @@ public abstract class EntityLivingBase extends Entity
      */
     protected int decreaseAirSupply(int p_70682_1_)
     {
-        int var2 = EnchantmentHelper.func_180319_a(this);
+    	//TODO ED-209: NoDrown setting air supply to 300
+        if(ED209.ED.moduleManager.noDrownModule.getToggled())
+        	return 300;
+        
+    	int var2 = EnchantmentHelper.func_180319_a(this);
         return var2 > 0 && this.rand.nextInt(var2 + 1) > 0 ? p_70682_1_ : p_70682_1_ - 1;
     }
 

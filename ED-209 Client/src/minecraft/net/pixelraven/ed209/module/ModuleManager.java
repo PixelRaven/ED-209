@@ -21,6 +21,7 @@ import net.pixelraven.ed209.module.modules.FastBow;
 import net.pixelraven.ed209.module.modules.FastLadder;
 import net.pixelraven.ed209.module.modules.LadderSpace;
 import net.pixelraven.ed209.module.modules.NoClip;
+import net.pixelraven.ed209.module.modules.NoDrown;
 import net.pixelraven.ed209.module.modules.NoFall;
 import net.pixelraven.ed209.module.modules.NoPause;
 import net.pixelraven.ed209.module.modules.Exit;
@@ -68,6 +69,7 @@ public class ModuleManager {
 	public static Jesus JesusModule;
 	public static LadderSpace LadderSpaceModule;
 	public static NoClip NoClipModule;
+	public static NoDrown noDrownModule;
 	public static NoRain noRainModule;
 	public static NoSwing NoSwingModule;
 	public static Submarine SubmarineModule;
@@ -106,6 +108,7 @@ public class ModuleManager {
 		this.activeModules.add(new MagicCarpet());
 		this.activeModules.add(new MobESP());
 		this.activeModules.add(this.NoClipModule = new NoClip());
+		this.activeModules.add(this.noDrownModule = new NoDrown());
 		this.activeModules.add(new NoFall());
 		this.activeModules.add(new NoPause());
 		this.activeModules.add(this.noRainModule = new NoRain());

@@ -29,20 +29,12 @@ public class BlockLadder extends Block
 
     public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
     {
-    	//TODO ED-209: Added if for LadderSpace hack
-    	if(net.pixelraven.ed209.ED209.ED.moduleManager.LadderSpaceModule.getToggled())
-    	    return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY-1, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY+1, (double)pos.getZ() + this.maxZ);
-
         this.setBlockBoundsBasedOnState(worldIn, pos);
         return super.getSelectedBoundingBox(worldIn, pos);
     }
 
     public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
     {
-    	//TODO ED-209: Added if for LadderSpace hack
-    	if(net.pixelraven.ed209.ED209.ED.moduleManager.LadderSpaceModule.getToggled())
-    	    return new AxisAlignedBB((double)pos.getX() + this.minX, (double)pos.getY() + this.minY-1, (double)pos.getZ() + this.minZ, (double)pos.getX() + this.maxX, (double)pos.getY() + this.maxY+1, (double)pos.getZ() + this.maxZ);
-
         this.setBlockBoundsBasedOnState(worldIn, pos);
         return super.getSelectedBoundingBox(worldIn, pos);
     }

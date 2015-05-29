@@ -1,0 +1,16 @@
+package net.pixelraven.ed209.module.modules;
+
+import net.minecraft.client.Minecraft;
+
+import org.lwjgl.input.Keyboard;
+
+import net.pixelraven.ed209.module.Category;
+import net.pixelraven.ed209.module.Module;
+
+public class NoDrown extends Module{
+	public NoDrown() {
+		super("No Drown", Category.PLAYER);
+		setUsage("NoDrown();");
+		setBlockedState(2);
+	}
+}

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="net.minecraft.client.gui.GuiMainMenu"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.ui.UIRenderer"/>
-<fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.layout.GridLayoutManager"/>
 <fullyQualifiedTypeName name="org.darkstorm.minecraft.gui.layout.GridLayoutManager.HorizontalGridConstraint"/>
@@ -47,7 +44,6 @@
 <fullyQualifiedTypeName name="org.lwjgl.util.Color"/>
 <fullyQualifiedTypeName name="java.awt.Color"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.ui.ThemeStyle"/>
-<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.TwerkIt"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.FastLadder"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoFall"/>
@@ -60,4 +56,8 @@
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.AutoUpdateSign"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoClip"/>
 <fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.Submarine"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.VClip"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.LadderSpace"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.ED209"/>
+<fullyQualifiedTypeName name="net.pixelraven.ed209.module.modules.NoDrown"/>
 </qualifiedTypeNameHistroy>

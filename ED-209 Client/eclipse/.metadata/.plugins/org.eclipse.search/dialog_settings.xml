@@ -3,18 +3,18 @@
 	<section name="">
 		<item value="1000" key="org.eclipse.search.resultpage.limit"/>
 	</section>
-	<section name="">
-		<item value="1000" key="org.eclipse.search.resultpage.limit"/>
-	</section>
 	<section name="org.eclipse.jdt.ui.JavaSearchResultPage">
 		<item value="TRUE" key="org.eclipse.jdt.search.resultpage.limit_enabled"/>
 		<item value="1000" key="org.eclipse.jdt.search.resultpage.limit"/>
 	</section>
+	<section name="">
+		<item value="1000" key="org.eclipse.search.resultpage.limit"/>
+	</section>
 	<section name="DialogBounds_SearchDialog">
 		<item value="530" key="DIALOG_WIDTH"/>
 		<item value="128" key="DIALOG_Y_ORIGIN"/>
-		<item value="797" key="DIALOG_X_ORIGIN"/>
 		<item value="472" key="DIALOG_HEIGHT"/>
+		<item value="797" key="DIALOG_X_ORIGIN"/>
 		<item value="1|.Helvetica Neue DeskInterface|11.0|0|COCOA|1|.HelveticaNeueDeskInterface-Regular" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="Search">
@@ -31,11 +31,11 @@
 			<item value="org.eclipse.pde.internal.ui.search.SearchPage"/>
 		</list>
 	</section>
-	<section name="SearchDialog">
-		<item value="org.eclipse.search.internal.ui.text.TextSearchPage" key="PREVIOUS_PAGE"/>
-	</section>
 	<section name="org.eclipse.search.text.FileSearchResultPage">
 		<item value="1000" key="org.eclipse.search.resultpage.limit"/>
+	</section>
+	<section name="SearchDialog">
+		<item value="org.eclipse.search.internal.ui.text.TextSearchPage" key="PREVIOUS_PAGE"/>
 	</section>
 	<section name="TextSearchPage">
 		<item value="false" key="CASE_SENSITIVE"/>
@@ -45,7 +45,7 @@
 		<item value="12" key="HISTORY_SIZE"/>
 		<section name="HISTORY11">
 			<item value="false" key="isRegExSearch"/>
-			<item value="paused" key="textPattern"/>
+			<item value="noRainModule" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -60,7 +60,7 @@
 		</section>
 		<section name="HISTORY10">
 			<item value="false" key="isRegExSearch"/>
-			<item value="day" key="textPattern"/>
+			<item value="//TODO ED" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -72,7 +72,7 @@
 		</section>
 		<section name="HISTORY9">
 			<item value="false" key="isRegExSearch"/>
-			<item value="noRainModule" key="textPattern"/>
+			<item value="guimainmenu" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -84,7 +84,7 @@
 		</section>
 		<section name="HISTORY8">
 			<item value="false" key="isRegExSearch"/>
-			<item value="//TODO ED" key="textPattern"/>
+			<item value="tooltip" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -96,7 +96,7 @@
 		</section>
 		<section name="HISTORY5">
 			<item value="false" key="isRegExSearch"/>
-			<item value="bow" key="textPattern"/>
+			<item value="getCollisionBoundingBox" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -108,7 +108,7 @@
 		</section>
 		<section name="HISTORY4">
 			<item value="false" key="isRegExSearch"/>
-			<item value="onPlayerStoppedUsing" key="textPattern"/>
+			<item value="jesus" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -120,7 +120,7 @@
 		</section>
 		<section name="HISTORY7">
 			<item value="false" key="isRegExSearch"/>
-			<item value="guimainmenu" key="textPattern"/>
+			<item value="bow" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -132,7 +132,7 @@
 		</section>
 		<section name="HISTORY6">
 			<item value="false" key="isRegExSearch"/>
-			<item value="tooltip" key="textPattern"/>
+			<item value="onPlayerStoppedUsing" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -144,7 +144,7 @@
 		</section>
 		<section name="HISTORY2">
 			<item value="false" key="isRegExSearch"/>
-			<item value="jesus" key="textPattern"/>
+			<item value="Jesus" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -156,7 +156,7 @@
 		</section>
 		<section name="HISTORY3">
 			<item value="false" key="isRegExSearch"/>
-			<item value="getCollisionBoundingBox" key="textPattern"/>
+			<item value="AxisAlignedBB get" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -168,7 +168,7 @@
 		</section>
 		<section name="HISTORY0">
 			<item value="false" key="isRegExSearch"/>
-			<item value="Jesus" key="textPattern"/>
+			<item value="Ladder" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
@@ -180,7 +180,7 @@
 		</section>
 		<section name="HISTORY1">
 			<item value="false" key="isRegExSearch"/>
-			<item value="AxisAlignedBB get" key="textPattern"/>
+			<item value="crit" key="textPattern"/>
 			<item value="0" key="scope"/>
 			<item value="true" key="ignoreCase"/>
 			<item value="false" key="isWholeWord"/>
